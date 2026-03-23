@@ -1,0 +1,79 @@
+{
+  "name": "@micra/terminal-dom",
+  "version": "0.0.0",
+  "bugs": {
+    "url": "https://github.com/micrajs/micra/issues?q=is:issue+is:open+label:%22Project:+terminal-dom%22+label:%22Type:+fix%22"
+  },
+  "license": "MIT",
+  "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/micrajs/micra.git",
+    "directory": "packages/terminal-dom"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "check": "pnpm build -l error && run-p *:check",
+    "clean": "rm -rf node_modules && rm -rf dist",
+    "dependencies:update": "pnpm up -Lir",
+    "dev": "vite build --watch",
+    "docs:generate": "tsx .config/scripts/generate-reference-docs.ts ./src --public-api --md-out ./docs/references --out ./docs/references/types.json --pretty",
+    "format:check": "oxfmt check . --config .prettierrc --no-error-on-unmatched-pattern",
+    "format:fix": "oxfmt . --config .prettierrc --no-error-on-unmatched-pattern",
+    "lint:check": "oxlint -c oxlint.json packages/ examples/ --silent",
+    "performance:check": "echo 'No performance budgets to check'",
+    "prepare": "husky .config/git-hooks",
+    "test:check": "run-p test:unit test:integration test:e2e",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "test:e2e": "playwright test",
+    "test:integration": "vitest run --config=.config/testing/vitest.integration.config.ts --passWithNoTests",
+    "test:unit": "vitest run --config=.config/testing/vitest.unit.config.ts --passWithNoTests",
+    "test:watch:integration": "vitest --config=.config/testing/vitest.integration.config.ts --passWithNoTests",
+    "test:watch:unit": "vitest --config=.config/testing/vitest.unit.config.ts --passWithNoTests",
+    "test:watch": "run-p test:watch:*",
+    "type:check": "tsc --noEmit",
+    "version:bump": "changeset"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.3.5",
+    "@vitest/coverage-v8": "^4.0.18",
+    "changesets": "^1.0.2",
+    "happy-dom": "^20.8.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.2",
+    "npm-run-all": "^4.1.5",
+    "oxc-parser": "^0.119.0",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0",
+    "terser": "^5.46.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.0.18"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,md}": [
+      "oxlint --config oxlint.json --fix",
+      "oxfmt --config .prettierrc --no-error-on-unmatched-pattern"
+    ],
+    "*.{js,jsx,json,css,yaml,yml}": [
+      "oxfmt check --config .prettierrc --no-error-on-unmatched-pattern"
+    ]
+  }
+}
