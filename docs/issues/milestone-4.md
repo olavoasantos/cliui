@@ -86,7 +86,7 @@ Implement the remaining two border styles: `block` and `half-block`. These use U
 
 - M1T22: Painter (border rendering infrastructure)
 
-*Can run in parallel with M4T1 and M4T2.*
+_Can run in parallel with M4T1 and M4T2._
 
 ---
 
@@ -135,7 +135,7 @@ Query the terminal for supported capabilities: color profile (truecolor, 256-col
 
 - M1T26: TerminalManager (manages terminal communication)
 
-*Can run in parallel with M4T1–M4T4.*
+_Can run in parallel with M4T1–M4T4._
 
 ---
 

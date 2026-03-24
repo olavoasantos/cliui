@@ -115,7 +115,7 @@ Implement `flex-wrap: wrap` in `FlexLayout`. When flex items overflow the main a
 - M2T3: Flex alignment (alignment applies per line)
 - M2T4: Flex gap (row-gap applies between lines)
 
-*Can run in parallel with M2T6.*
+_Can run in parallel with M2T6._
 
 ---
 
@@ -138,7 +138,7 @@ Implement explicit sizing properties (`width`, `height`) and constraints (`min-w
 
 - M2T2: Flex sizing (constraints interact with grow/shrink distribution)
 
-*Can run in parallel with M2T5.*
+_Can run in parallel with M2T5._
 
 ---
 

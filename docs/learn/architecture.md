@@ -125,52 +125,52 @@ Reuse the selector matching logic already in `@remote-dom/polyfill`'s `selectors
 
 #### Text Styling
 
-| CSS Property | Terminal Mapping | Values |
-|---|---|---|
-| `color` | ANSI foreground | hex, rgb(), named colors, `inherit` |
-| `background-color` | ANSI background | hex, rgb(), named colors, `inherit` |
-| `font-weight` | Bold | `bold` / `normal` |
-| `font-style` | Italic | `italic` / `normal` |
-| `text-decoration` | Underline / line-through | `underline`, `line-through`, `none` |
-| `text-decoration-style` | Underline style | `solid`, `double`, `dotted`, `dashed`, `wavy` |
-| `text-decoration-color` | Underline color | hex, rgb(), named colors |
-| `text-align` | Horizontal alignment | `left`, `center`, `right` |
-| `vertical-align` | Vertical alignment | `top`, `middle`, `bottom` |
-| `text-overflow` | Truncation | `clip`, `ellipsis` |
-| `white-space` | Wrapping | `normal`, `nowrap`, `pre`, `pre-wrap` |
-| `overflow` | Content clipping | `visible`, `hidden`, `scroll` |
-| `opacity` | Dim/faint | `0`–`1` (below threshold → ANSI faint) |
+| CSS Property            | Terminal Mapping         | Values                                        |
+| ----------------------- | ------------------------ | --------------------------------------------- |
+| `color`                 | ANSI foreground          | hex, rgb(), named colors, `inherit`           |
+| `background-color`      | ANSI background          | hex, rgb(), named colors, `inherit`           |
+| `font-weight`           | Bold                     | `bold` / `normal`                             |
+| `font-style`            | Italic                   | `italic` / `normal`                           |
+| `text-decoration`       | Underline / line-through | `underline`, `line-through`, `none`           |
+| `text-decoration-style` | Underline style          | `solid`, `double`, `dotted`, `dashed`, `wavy` |
+| `text-decoration-color` | Underline color          | hex, rgb(), named colors                      |
+| `text-align`            | Horizontal alignment     | `left`, `center`, `right`                     |
+| `vertical-align`        | Vertical alignment       | `top`, `middle`, `bottom`                     |
+| `text-overflow`         | Truncation               | `clip`, `ellipsis`                            |
+| `white-space`           | Wrapping                 | `normal`, `nowrap`, `pre`, `pre-wrap`         |
+| `overflow`              | Content clipping         | `visible`, `hidden`, `scroll`                 |
+| `opacity`               | Dim/faint                | `0`–`1` (below threshold → ANSI faint)        |
 
 #### Box Model
 
-| CSS Property | Terminal Mapping | Values |
-|---|---|---|
-| `width` / `height` | Cell dimensions | number (cells), `auto`, percentage |
-| `min-width` / `min-height` | Minimum cell dimensions | number, percentage |
-| `max-width` / `max-height` | Maximum cell dimensions | number, percentage |
-| `padding` (shorthand + sides) | Cell padding | number (cells) |
-| `margin` (shorthand + sides) | Cell margin | number (cells), `auto` |
-| `border-style` | Box-drawing characters | `none`, `single`, `rounded`, `double`, `thick`, `block`, `half-block`, `hidden`, `ascii` |
-| `border-color` | Border foreground color | hex, rgb(), named colors |
-| `border-width` | Always 1 cell per side | Ignored (always 1 when border-style is set) |
-| `box-sizing` | Box model mode | `border-box` (default), `content-box` |
+| CSS Property                  | Terminal Mapping        | Values                                                                                   |
+| ----------------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| `width` / `height`            | Cell dimensions         | number (cells), `auto`, percentage                                                       |
+| `min-width` / `min-height`    | Minimum cell dimensions | number, percentage                                                                       |
+| `max-width` / `max-height`    | Maximum cell dimensions | number, percentage                                                                       |
+| `padding` (shorthand + sides) | Cell padding            | number (cells)                                                                           |
+| `margin` (shorthand + sides)  | Cell margin             | number (cells), `auto`                                                                   |
+| `border-style`                | Box-drawing characters  | `none`, `single`, `rounded`, `double`, `thick`, `block`, `half-block`, `hidden`, `ascii` |
+| `border-color`                | Border foreground color | hex, rgb(), named colors                                                                 |
+| `border-width`                | Always 1 cell per side  | Ignored (always 1 when border-style is set)                                              |
+| `box-sizing`                  | Box model mode          | `border-box` (default), `content-box`                                                    |
 
 #### Layout
 
-| CSS Property | Terminal Mapping | Values |
-|---|---|---|
-| `display` | Layout mode | `flex`, `block` (= flex column), `inline`, `none` |
-| `flex-direction` | Axis | `row`, `column`, `row-reverse`, `column-reverse` |
-| `flex-wrap` | Wrapping | `nowrap`, `wrap` |
-| `flex-grow` / `flex-shrink` | Flex sizing | number |
-| `flex-basis` | Initial size | number, `auto`, percentage |
-| `gap` / `row-gap` / `column-gap` | Spacing between children | number (cells) |
-| `justify-content` | Main axis alignment | `flex-start`, `flex-end`, `center`, `space-between`, `space-around`, `space-evenly` |
-| `align-items` | Cross axis alignment | `flex-start`, `flex-end`, `center`, `stretch` |
-| `align-self` | Per-item cross axis | `auto`, `flex-start`, `flex-end`, `center`, `stretch` |
-| `position` | Positioning | `relative` (default), `absolute` |
-| `top` / `left` | Offset for absolute | number (cells) |
-| `z-index` | Layer ordering | number |
+| CSS Property                     | Terminal Mapping         | Values                                                                              |
+| -------------------------------- | ------------------------ | ----------------------------------------------------------------------------------- |
+| `display`                        | Layout mode              | `flex`, `block` (= flex column), `inline`, `none`                                   |
+| `flex-direction`                 | Axis                     | `row`, `column`, `row-reverse`, `column-reverse`                                    |
+| `flex-wrap`                      | Wrapping                 | `nowrap`, `wrap`                                                                    |
+| `flex-grow` / `flex-shrink`      | Flex sizing              | number                                                                              |
+| `flex-basis`                     | Initial size             | number, `auto`, percentage                                                          |
+| `gap` / `row-gap` / `column-gap` | Spacing between children | number (cells)                                                                      |
+| `justify-content`                | Main axis alignment      | `flex-start`, `flex-end`, `center`, `space-between`, `space-around`, `space-evenly` |
+| `align-items`                    | Cross axis alignment     | `flex-start`, `flex-end`, `center`, `stretch`                                       |
+| `align-self`                     | Per-item cross axis      | `auto`, `flex-start`, `flex-end`, `center`, `stretch`                               |
+| `position`                       | Positioning              | `relative` (default), `absolute`                                                    |
+| `top` / `left`                   | Offset for absolute      | number (cells)                                                                      |
+| `z-index`                        | Layer ordering           | number                                                                              |
 
 ### Style Resolution Pipeline
 
@@ -365,17 +365,17 @@ Wrap the entire frame update in synchronized output mode (`CSI ? 2026 h` / `CSI 
 
 ### Input → DOM Events
 
-| Terminal Input | DOM Event | Target |
-|---|---|---|
-| Key press | `KeyboardEvent` (`keydown`) | `document.activeElement` or `document.body` |
-| Key release | `KeyboardEvent` (`keyup`) | `document.activeElement` or `document.body` |
-| Mouse click | `MouseEvent` (`click`) | Hit-tested element from layout tree |
-| Mouse down/up | `MouseEvent` (`mousedown`/`mouseup`) | Hit-tested element |
-| Mouse move | `MouseEvent` (`mousemove`) | Hit-tested element |
-| Mouse wheel | `WheelEvent` (`wheel`) | Hit-tested element |
-| Resize (SIGWINCH) | `Event` (`resize`) | `window` → triggers relayout |
-| Focus/blur | `FocusEvent` | `window` |
-| Paste | `ClipboardEvent` (`paste`) | `document.activeElement` |
+| Terminal Input    | DOM Event                            | Target                                      |
+| ----------------- | ------------------------------------ | ------------------------------------------- |
+| Key press         | `KeyboardEvent` (`keydown`)          | `document.activeElement` or `document.body` |
+| Key release       | `KeyboardEvent` (`keyup`)            | `document.activeElement` or `document.body` |
+| Mouse click       | `MouseEvent` (`click`)               | Hit-tested element from layout tree         |
+| Mouse down/up     | `MouseEvent` (`mousedown`/`mouseup`) | Hit-tested element                          |
+| Mouse move        | `MouseEvent` (`mousemove`)           | Hit-tested element                          |
+| Mouse wheel       | `WheelEvent` (`wheel`)               | Hit-tested element                          |
+| Resize (SIGWINCH) | `Event` (`resize`)                   | `window` → triggers relayout                |
+| Focus/blur        | `FocusEvent`                         | `window`                                    |
+| Paste             | `ClipboardEvent` (`paste`)           | `document.activeElement`                    |
 
 **Hit-testing**: Walk layout boxes in reverse z-order. Find the topmost box whose bounds contain the mouse coordinates. Return its DOM element.
 
@@ -393,7 +393,7 @@ Wrap the entire frame update in synchronized output mode (`CSI ? 2026 h` / `CSI 
 ### Terminal Class
 
 ```ts
-import { Terminal } from '@micra/terminal-dom';
+import {Terminal} from '@micra/terminal-dom';
 
 const terminal = new Terminal({
   altScreen: true,
@@ -456,17 +456,15 @@ doc.body.appendChild(container);
 ### With a Framework (Preact)
 
 ```tsx
-import { Terminal } from '@micra/terminal-dom';
-import { render } from 'preact';
+import {Terminal} from '@micra/terminal-dom';
+import {render} from 'preact';
 
 const terminal = new Terminal();
 
 function App() {
   return (
-    <div style={{ display: 'flex', borderStyle: 'rounded', padding: 1 }}>
-      <span style={{ fontWeight: 'bold', color: '#7c3aed' }}>
-        Hello from Preact!
-      </span>
+    <div style={{display: 'flex', borderStyle: 'rounded', padding: 1}}>
+      <span style={{fontWeight: 'bold', color: '#7c3aed'}}>Hello from Preact!</span>
     </div>
   );
 }

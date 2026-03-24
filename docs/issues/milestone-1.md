@@ -135,7 +135,7 @@ Port the hooks system from the polyfill. The hooks bridge intercepts DOM mutatio
 - M1T1: Base layer classes
 - M1T2: Tree layer classes
 
-*Can run in parallel with M1T6.*
+_Can run in parallel with M1T6._
 
 ---
 
@@ -156,7 +156,7 @@ Port the event class hierarchy from the polyfill: `Event`, `CustomEvent`, `Focus
 
 - M1T1: Base layer classes (`EventTarget` for event dispatch)
 
-*Can run in parallel with M1T5.*
+_Can run in parallel with M1T5._
 
 ---
 
@@ -183,7 +183,7 @@ Port the selector parsing and matching utility from the polyfill. This provides 
 - M1T1: Base layer classes
 - M1T2: Tree layer classes (`Element` for matching)
 
-*Can run in parallel with M1T8.*
+_Can run in parallel with M1T8._
 
 ---
 
@@ -204,7 +204,7 @@ Port the innerHTML parsing and serialization utility from the polyfill. This pro
 - M1T1: Base layer classes
 - M1T2: Tree layer classes
 
-*Can run in parallel with M1T7.*
+_Can run in parallel with M1T7._
 
 ---
 
@@ -257,7 +257,7 @@ Implement `element.className` (string property) and `element.classList` (DOMToke
 
 - M1T2: `Element` class must exist
 
-*Can run in parallel with M1T11.*
+_Can run in parallel with M1T11._
 
 ---
 
@@ -285,7 +285,7 @@ Implement `<style>` element tracking: when a `<style>` element is inserted into 
 - M1T5: Hooks bridge for tracking mutations
 - M1T1–M1T10: All DOM classes must be complete before wiring barrel exports
 
-*Style element tracking can run in parallel with M1T10. Barrel exports run last.*
+_Style element tracking can run in parallel with M1T10. Barrel exports run last._
 
 ---
 
@@ -432,7 +432,7 @@ Before implementing, review the reference codebases (`.ignore/references/string-
 
 - M0T2: Source directory structure (`src/layout/utilities/` must exist)
 
-*Can run in parallel with the style engine group (M1T12–M1T16).*
+_Can run in parallel with the style engine group (M1T12–M1T16)._
 
 ---
 
@@ -527,7 +527,7 @@ Implement the 2D cell grid that represents the terminal screen. Each cell holds 
 
 - M0T2: Source directory structure (`src/renderer/classes/` must exist)
 
-*Can run in parallel with M1T22.*
+_Can run in parallel with M1T22._
 
 ---
 
@@ -556,7 +556,7 @@ Implement the paint phase that takes layout boxes and writes their visual repres
 
 - M0T2: Source directory structure (`src/renderer/classes/` must exist)
 
-*Can run in parallel with M1T21 — both need the Cell type definition, which can be established early. The Renderer orchestrator (M1T25) integrates them.*
+_Can run in parallel with M1T21 — both need the Cell type definition, which can be established early. The Renderer orchestrator (M1T25) integrates them._
 
 ---
 
@@ -649,7 +649,7 @@ Implement terminal mode setup and teardown. On startup, configure the terminal f
 
 - M0T2: Source directory structure (`src/terminal/classes/` must exist)
 
-*Can run in parallel with M1T27.*
+_Can run in parallel with M1T27._
 
 ---
 
@@ -676,7 +676,7 @@ Implement raw byte reading from stdin and parsing of ANSI escape sequences into 
 
 - M0T2: Source directory structure (`src/terminal/classes/` must exist)
 
-*Can run in parallel with M1T26.*
+_Can run in parallel with M1T26._
 
 ---
 
