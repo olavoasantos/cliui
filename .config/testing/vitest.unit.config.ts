@@ -7,15 +7,7 @@ export default mergeConfig(
     test: {
       environment: 'happy-dom',
       include: ['**/*.unit.ts', '**/*.unit.tsx'],
-      exclude: [
-        '**/*.integration.ts',
-        '**/*.integration.tsx',
-        '**/.testing/**',
-        '**/*.e2e.ts',
-        '**/*.e2e.tsx',
-        '**/build/**',
-        '**/node_modules/**',
-      ],
+      exclude: ['**/.testing/**', '**/build/**', '**/node_modules/**'],
       passWithNoTests: true,
       globals: false,
       reporters: ['default'],
@@ -26,6 +18,8 @@ export default mergeConfig(
         include: ['src/**/*.ts', 'src/**/*.tsx'],
         exclude: [
           '**/.testing/**',
+          '**/*.bench.ts',
+          '**/*.bench.tsx',
           '**/*.e2e.ts',
           '**/*.e2e.tsx',
           '**/*.integration.ts',
