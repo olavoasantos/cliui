@@ -58,9 +58,9 @@ Present to the human:
 
 **Gate: Do not proceed until the human approves the plan.**
 
-## Phase 2: Persist the Plan
+## Phase 2: Persist the Milestone Plan
 
-Write the approved plan to `.ignore/plans/milestone-{n}-plan.md`:
+Write the approved milestone plan to `.ignore/plans/milestone-{n}-plan.md` **before starting any implementation**. This is an orchestration document that tracks sequencing and progress — it does not contain per-issue implementation plans. Each issue gets its own plan file via the `implement-issue` workflow.
 
 ```markdown
 # Milestone Plan: Milestone {n} — {Title}
@@ -88,7 +88,7 @@ Write the approved plan to `.ignore/plans/milestone-{n}-plan.md`:
 
 ## Progress Log
 
-[Updated during execution]
+[Updated after each issue completes]
 ```
 
 Use `a`/`b` suffixes (e.g., `2a`, `2b`) for parallel pairs sharing the same sequence slot.
@@ -104,10 +104,10 @@ Ask the human how they want to work:
 
 ### Sequential issues (default)
 
-For each issue, follow the `implement-issue` skill workflow:
+For each issue, follow the `implement-issue` skill workflow. Each issue produces its own plan file (`.ignore/plans/issue-{id}-plan.md`) **before** implementation begins:
 
 1. Understand the issue (read inputs, explore, ask questions if needed)
-2. Plan the implementation
+2. Plan the implementation and persist the plan file
 3. Implement with type-first TDD
 4. Verify against Expected Outcomes
 5. Clean up: `pnpm fix`, `pnpm check`, create changeset, commit

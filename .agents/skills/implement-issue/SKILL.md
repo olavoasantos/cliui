@@ -54,9 +54,11 @@ Draft an implementation plan covering:
 - **Codebase analogs** — existing implementations to use as reference.
 - **Risks or unknowns.**
 
-Present the plan. Incorporate feedback. Once approved, persist to `.ignore/plans/issue-{id}-plan.md`.
+Present the plan. Incorporate feedback.
 
 **Gate: Do not proceed until the human approves the plan.**
+
+Once approved, persist the plan to `.ignore/plans/issue-{id}-plan.md` **before starting implementation**. The plan file must exist on disk before any code is written — it serves as the contract for the work and is updated as steps are completed.
 
 ### Cadence
 
