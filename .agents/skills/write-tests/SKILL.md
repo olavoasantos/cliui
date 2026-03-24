@@ -15,7 +15,7 @@ When writing tests in this project, follow these conventions exactly.
 | Unit        | `*.unit.ts` / `*.unit.tsx`               | Vitest       | Isolated logic, single module        |
 | Integration | `*.integration.ts` / `*.integration.tsx` | Vitest       | Cross-module interaction             |
 | Performance | `*.bench.ts` / `*.bench.tsx`             | Vitest Bench | Execution speed and regression guard |
-| E2E         | `*.e2e.ts` / `*.e2e.tsx`                 | Playwright   | Full application user flows          |
+| E2E         | `*.e2e.ts` / `*.e2e.tsx`                 | Vitest       | Full application user flows          |
 
 ## Test Location
 
