@@ -24,6 +24,7 @@ Phase 1 builds the complete vertical pipeline from DOM to terminal output, scope
 - Keyboard events dispatch to `document.body` in this phase; active element targeting is added in Phase 3 (M3T4).
 - The architecture document (`docs/learn/architecture.md`) is the authoritative reference for the CSS property subset, grammar, layer architecture, and public API.
 - Exclusions per the architecture document: no Shadow DOM, no slots, no form element APIs, no browser globals (`window.location`, `fetch`, etc.), no `getComputedStyle()` global.
+- Performance benchmarks (using vitest bench, set up in M0T3) should be written for hot-path code: grapheme width measurement (M1T17), style computation (M1T15), layout (M1T20), cell buffer diffing (M1T23), and the full render pipeline (M1T25). Bench files use the `*.bench.ts` convention.
 
 ---
 
