@@ -1,15 +1,9 @@
 import {Event} from './Event';
-import type {EventTarget} from './EventTarget';
-
-export interface FocusEventInit {
-  bubbles?: boolean;
-  cancelable?: boolean;
-  composed?: boolean;
-  relatedTarget?: EventTarget | null;
-}
+import type {EventTarget as DOMEventTarget} from './EventTarget';
+import type {FocusEventInit} from '../types/index';
 
 export class FocusEvent extends Event {
-  readonly relatedTarget: EventTarget | null;
+  readonly relatedTarget: DOMEventTarget | null;
 
   constructor(type: string, eventInitDict: FocusEventInit = {}) {
     super(type, eventInitDict);

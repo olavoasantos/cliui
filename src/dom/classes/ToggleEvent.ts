@@ -1,12 +1,5 @@
 import {Event} from './Event';
-
-export interface ToggleEventInit {
-  bubbles?: boolean;
-  cancelable?: boolean;
-  composed?: boolean;
-  oldState?: string;
-  newState?: string;
-}
+import type {ToggleEventInit} from '../types/index';
 
 export class ToggleEvent extends Event {
   readonly oldState: string | undefined;

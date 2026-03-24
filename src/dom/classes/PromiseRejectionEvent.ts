@@ -1,12 +1,5 @@
 import {Event} from './Event';
-
-export interface PromiseRejectionEventInit {
-  bubbles?: boolean;
-  cancelable?: boolean;
-  composed?: boolean;
-  promise: Promise<unknown>;
-  reason?: unknown;
-}
+import type {PromiseRejectionEventInit} from '../types/index';
 
 export class PromiseRejectionEvent extends Event {
   readonly promise: Promise<unknown>;

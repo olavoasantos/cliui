@@ -1,15 +1,5 @@
 import {Event} from './Event';
-
-export interface ErrorEventInit {
-  bubbles?: boolean;
-  cancelable?: boolean;
-  composed?: boolean;
-  message?: string;
-  filename?: string;
-  lineno?: number;
-  colno?: number;
-  error?: unknown;
-}
+import type {ErrorEventInit} from '../types/index';
 
 export class ErrorEvent extends Event {
   readonly message: string | undefined;

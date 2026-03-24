@@ -1,11 +1,5 @@
 import {Event} from './Event';
-
-export interface ClipboardEventInit {
-  bubbles?: boolean;
-  cancelable?: boolean;
-  composed?: boolean;
-  clipboardData?: DataTransfer | null;
-}
+import type {ClipboardEventInit} from '../types/index';
 
 export class ClipboardEvent extends Event {
   readonly clipboardData: DataTransfer | null;

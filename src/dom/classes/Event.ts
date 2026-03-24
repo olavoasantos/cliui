@@ -7,12 +7,7 @@ import {
   CAPTURE_MARKER,
 } from '../constants/index';
 import type {EventTarget} from './EventTarget';
-
-export interface EventInit {
-  bubbles?: boolean;
-  cancelable?: boolean;
-  composed?: boolean;
-}
+import type {EventInit} from '../types/index';
 
 const now = typeof performance === 'undefined' ? Date.now : performance.now.bind(performance);
 
