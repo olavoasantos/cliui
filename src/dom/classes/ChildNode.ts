@@ -12,9 +12,9 @@ export class ChildNode extends Node {
   replaceWith(...nodes: (Node | string)[]) {
     const parent = this.parentNode;
     if (!parent) return;
+    const next = this[NEXT];
     const node = toNode(parent, nodes[0]);
-    const next = node[NEXT];
-    parent.replaceChild(this, node);
+    parent.replaceChild(node, this);
     for (let i = 1; i < nodes.length; i++) {
       parent.insertBefore(toNode(parent, nodes[i]), next);
     }
