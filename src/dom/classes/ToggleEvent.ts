@@ -1,5 +1,5 @@
 import {Event} from './Event';
-import type {ToggleEventInit} from '../types/index';
+import type {ToggleEventInit} from '../types';
 
 export class ToggleEvent extends Event {
   readonly oldState: string | undefined;

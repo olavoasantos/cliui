@@ -1,28 +1,22 @@
-import {
-  NS,
-  NAME,
-  NamespaceURI,
-  NodeType,
-  OWNER_DOCUMENT,
-  HOOKS,
-  IS_CONNECTED,
-} from '../constants/index';
-import type {Window} from './Window';
-import type {Node} from './Node';
-import type {Hooks} from '../types/index';
-import {Event} from './Event';
-import {ParentNode} from './ParentNode';
-import {Element} from './Element';
-import {SVGElement} from './SVGElement';
-import {Text} from './Text';
+import {HOOKS, IS_CONNECTED, NAME, NodeType, OWNER_DOCUMENT} from '../constants';
+import {ParentNodeGuard} from '../guards/ParentNodeGuard';
+import {adoptNode} from '../utilities/adoptNode';
+import {cloneNode} from '../utilities/cloneNode';
+import {createElement} from '../utilities/createElement';
+import {createNode} from '../utilities/createNode';
+import {setupElement} from '../utilities/setupElement';
 import {Comment} from './Comment';
 import {DocumentFragment} from './DocumentFragment';
-import {HTMLTemplateElement} from './HTMLTemplateElement';
-import {HTMLStyleElement} from './HTMLStyleElement';
-import {isParentNode, cloneNode} from '../utilities/shared';
+import {Event} from './Event';
 import {HTMLBodyElement} from './HTMLBodyElement';
 import {HTMLHeadElement} from './HTMLHeadElement';
 import {HTMLHtmlElement} from './HTMLHtmlElement';
+import {ParentNode} from './ParentNode';
+import {Text} from './Text';
+
+import type {Node} from './Node';
+import type {Window} from './Window';
+import type {Hooks, NamespaceURI} from '../types';
 
 export class Document extends ParentNode {
   override nodeType = NodeType.DOCUMENT_NODE;
@@ -82,63 +76,12 @@ export class Document extends ParentNode {
     node.parentNode?.removeChild(node);
     adoptNode(node, this);
 
-    return node;
-  }
-}
-
-export function createNode<T extends Node>(node: T, ownerDocument: Document) {
-  Object.defineProperty(node, OWNER_DOCUMENT, {
-    value: ownerDocument,
-    writable: true,
-    enumerable: false,
-  });
-
-  return node;
-}
-
-export function createElement(ownerDocument: Document, name: string, namespace?: NamespaceURI) {
-  let element: Element;
-  const lowerName = String(name).toLowerCase();
-
-  if (namespace === NamespaceURI.SVG) {
-    element = new SVGElement();
-  } else if (lowerName === 'template') {
-    element = new HTMLTemplateElement();
-  } else if (lowerName === 'style') {
-    element = new HTMLStyleElement();
-  } else {
-    const CustomElement = ownerDocument.defaultView.customElements.get(name);
-    element = CustomElement ? (new CustomElement() as unknown as Element) : new Element();
-  }
-
-  return setupElement(element, ownerDocument, name, namespace);
-}
-
-export function setupElement<T extends Element>(
-  element: T,
-  ownerDocument: Document,
-  name: string,
-  namespace?: NamespaceURI,
-) {
-  createNode(element, ownerDocument);
-
-  Object.defineProperty(element, NAME, {value: name});
-
-  if (namespace) {
-    Object.defineProperty(element, NS, {value: namespace});
-  }
-
-  (ownerDocument[HOOKS] as Partial<Hooks>).createElement?.(element as never, namespace);
-
-  return element;
-}
-
-export function adoptNode(node: Node, document: Document) {
-  node[OWNER_DOCUMENT] = document;
-
-  if (isParentNode(node)) {
-    for (const child of node.childNodes) {
-      adoptNode(child, document);
+    if (ParentNodeGuard(node)) {
+      for (const child of node.childNodes) {
+        adoptNode(child, this);
+      }
     }
+
+    return node;
   }
 }

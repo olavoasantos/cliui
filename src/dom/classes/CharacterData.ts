@@ -1,5 +1,5 @@
-import {DATA, HOOKS} from '../constants/index';
-import type {Hooks} from '../types/index';
+import {DATA, HOOKS} from '../constants';
+import type {Hooks} from '../types';
 import {ChildNode} from './ChildNode';
 
 export class CharacterData extends ChildNode {

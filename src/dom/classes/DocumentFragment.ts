@@ -1,4 +1,4 @@
-import {NAME, OWNER_DOCUMENT, NodeType} from '../constants/index';
+import {NAME, OWNER_DOCUMENT, NodeType} from '../constants';
 import type {Document} from './Document';
 import {ParentNode} from './ParentNode';
 

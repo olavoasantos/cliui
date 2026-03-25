@@ -1,4 +1,4 @@
-import {NS, NamespaceURI} from '../constants/index';
+import {NS, NamespaceURI} from '../constants';
 import {Element} from './Element';
 
 export class SVGElement extends Element {

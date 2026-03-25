@@ -1,5 +1,5 @@
 import {Event} from './Event';
-import type {ErrorEventInit} from '../types/index';
+import type {ErrorEventInit} from '../types';
 
 export class ErrorEvent extends Event {
   readonly message: string | undefined;

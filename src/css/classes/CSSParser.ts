@@ -1,23 +1,13 @@
-import {parseSelector} from '../../dom/utilities/selectors';
+import {parseSelector} from '../../dom/utilities/parseSelector';
 
-import type {CSSDeclaration, CSSRule} from '../types/index';
+import type {CSSDeclaration, CSSRule} from '../types';
 
 /**
  * Hand-written CSS parser that takes CSS text and produces a list of rules.
  * Each rule contains parsed selector ASTs and a list of property declarations.
- *
- * Supports the grammar subset defined in the architecture document:
- * ```
- * stylesheet  -> rule*
- * rule        -> selector-list '{' declaration* '}'
- * selector    -> simple-selector (combinator simple-selector)*
- * declaration -> property ':' value ';'
- * ```
  */
 export class CSSParser {
-  /**
-   * Parses a CSS string into a list of rules.
-   */
+  /** Parses a CSS string into a list of rules. */
   parse(css: string): CSSRule[] {
     const rules: CSSRule[] = [];
     let pos = 0;
@@ -27,19 +17,15 @@ export class CSSParser {
       pos = skipWhitespaceAndComments(css, pos);
       if (pos >= len) break;
 
-      // Find the opening brace for the next rule
       const braceIdx = css.indexOf('{', pos);
       if (braceIdx === -1) break;
 
       const selectorText = css.slice(pos, braceIdx).trim();
       if (!selectorText) {
-        pos = braceIdx + 1;
-        // Skip to closing brace
-        pos = skipBlock(css, pos);
+        pos = skipBlock(css, braceIdx + 1);
         continue;
       }
 
-      // Find the matching closing brace
       const closeIdx = findClosingBrace(css, braceIdx + 1);
       if (closeIdx === -1) break;
 
@@ -58,15 +44,12 @@ export class CSSParser {
   }
 }
 
-/**
- * Parses a comma-separated selector list into an array of parsed selector sequences.
- */
 function parseSelectorList(selectorText: string) {
   const raw = selectorText.split(',');
   const result = [];
 
-  for (const s of raw) {
-    const trimmed = s.trim();
+  for (const selector of raw) {
+    const trimmed = selector.trim();
     if (!trimmed) continue;
     try {
       const parts = parseSelector(trimmed);
@@ -74,16 +57,13 @@ function parseSelectorList(selectorText: string) {
         result.push(parts);
       }
     } catch {
-      // Skip malformed selectors gracefully
+      // Skip malformed selectors gracefully.
     }
   }
 
   return result;
 }
 
-/**
- * Parses a declaration block body into an array of property declarations.
- */
 function parseDeclarations(body: string): CSSDeclaration[] {
   const declarations: CSSDeclaration[] = [];
   const parts = body.split(';');
@@ -94,31 +74,23 @@ function parseDeclarations(body: string): CSSDeclaration[] {
 
     const property = part.slice(0, colonIdx).trim();
     const value = part.slice(colonIdx + 1).trim();
-
-    if (property && value) {
-      declarations.push({property, value});
-    }
+    if (property && value) declarations.push({property, value});
   }
 
   return declarations;
 }
 
-/**
- * Skips whitespace and CSS comments starting at position `pos`.
- */
 function skipWhitespaceAndComments(css: string, pos: number): number {
   const len = css.length;
 
   while (pos < len) {
-    // Skip whitespace
     const ch = css.charCodeAt(pos);
     if (ch === 32 || ch === 9 || ch === 10 || ch === 13) {
       pos++;
       continue;
     }
 
-    // Skip block comments
-    if (ch === 47 /* / */ && pos + 1 < len && css.charCodeAt(pos + 1) === 42 /* * */) {
+    if (ch === 47 && pos + 1 < len && css.charCodeAt(pos + 1) === 42) {
       const endIdx = css.indexOf('*/', pos + 2);
       if (endIdx === -1) return len;
       pos = endIdx + 2;
@@ -131,9 +103,6 @@ function skipWhitespaceAndComments(css: string, pos: number): number {
   return pos;
 }
 
-/**
- * Finds the matching closing brace, accounting for nested braces.
- */
 function findClosingBrace(css: string, pos: number): number {
   let depth = 1;
   const len = css.length;
@@ -141,39 +110,34 @@ function findClosingBrace(css: string, pos: number): number {
   while (pos < len && depth > 0) {
     const ch = css.charCodeAt(pos);
 
-    // Skip comments inside rule body
-    if (ch === 47 /* / */ && pos + 1 < len && css.charCodeAt(pos + 1) === 42 /* * */) {
+    if (ch === 47 && pos + 1 < len && css.charCodeAt(pos + 1) === 42) {
       const endIdx = css.indexOf('*/', pos + 2);
       if (endIdx === -1) return -1;
       pos = endIdx + 2;
       continue;
     }
 
-    // Skip quoted strings
-    if (ch === 34 /* " */ || ch === 39 /* ' */) {
+    if (ch === 34 || ch === 39) {
       pos = skipString(css, pos, ch);
       continue;
     }
 
-    if (ch === 123 /* { */) depth++;
-    if (ch === 125 /* } */) depth--;
+    if (ch === 123) depth++;
+    if (ch === 125) depth--;
     pos++;
   }
 
   return depth === 0 ? pos - 1 : -1;
 }
 
-/**
- * Skips a quoted string.
- */
 function skipString(css: string, pos: number, quote: number): number {
-  pos++; // skip opening quote
+  pos++;
   const len = css.length;
 
   while (pos < len) {
     const ch = css.charCodeAt(pos);
-    if (ch === 92 /* \ */) {
-      pos += 2; // skip escape
+    if (ch === 92) {
+      pos += 2;
       continue;
     }
     if (ch === quote) {
@@ -186,9 +150,6 @@ function skipString(css: string, pos: number, quote: number): number {
   return pos;
 }
 
-/**
- * Skips to the closing brace when we want to discard a block.
- */
 function skipBlock(css: string, pos: number): number {
   const closeIdx = findClosingBrace(css, pos);
   return closeIdx === -1 ? css.length : closeIdx + 1;

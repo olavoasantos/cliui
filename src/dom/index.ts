@@ -1,4 +1,3 @@
-// Classes
 export {Window} from './classes/Window';
 export {Document} from './classes/Document';
 export {Node} from './classes/Node';
@@ -24,7 +23,7 @@ export {ClipboardEvent} from './classes/ClipboardEvent';
 export {ErrorEvent} from './classes/ErrorEvent';
 export {PromiseRejectionEvent} from './classes/PromiseRejectionEvent';
 export {ToggleEvent} from './classes/ToggleEvent';
-export {CSSStyleDeclaration, expandShorthand} from './classes/CSSStyleDeclaration';
+export {CSSStyleDeclaration} from './classes/CSSStyleDeclaration';
 export {DOMTokenList} from './classes/DOMTokenList';
 export {CustomElementRegistryImplementation as CustomElementRegistry} from './classes/CustomElementRegistry';
 export {MutationObserver} from './classes/MutationObserver';
@@ -36,28 +35,41 @@ export {HTMLTemplateElement} from './classes/HTMLTemplateElement';
 export {HTMLStyleElement} from './classes/HTMLStyleElement';
 export {SVGElement} from './classes/SVGElement';
 
-// Utilities
-export {parseSelector, querySelector, querySelectorAll, matches} from './utilities/selectors';
-export {parseHtml, serializeNode, serializeChildren} from './utilities/serialization';
+export {matches} from './utilities/matches';
+export {parseHtml} from './utilities/parseHtml';
+export {parseSelector} from './utilities/parseSelector';
+export {querySelector} from './utilities/querySelector';
+export {querySelectorAll} from './utilities/querySelectorAll';
+export {serializeChildren} from './utilities/serializeChildren';
+export {serializeNode} from './utilities/serializeNode';
+export {expandShorthand} from './utilities/expandShorthand';
 
-// Constants
-export {NodeType, NamespaceURI, EventPhase, HOOKS} from './constants/index';
-
-// Types
-export type {
-  Hooks,
-  EventInit,
-  UIEventInit,
-  KeyboardEventInit,
-  MouseEventInit,
-  WheelEventInit,
-  FocusEventInit,
-  ClipboardEventInit,
-  ErrorEventInit,
-  PromiseRejectionEventInit,
-  ToggleEventInit,
+export {
+  EventPhase,
+  HOOKS,
+  NamespaceURI,
+  NodeType,
   SelectorCombinator,
   SelectorMatcherType,
+} from './constants';
+
+export type {
+  ClipboardEventInit,
+  ErrorEventInit,
+  EventInit,
+  EventPhase as EventPhaseValue,
+  FocusEventInit,
+  Hooks,
+  KeyboardEventInit,
+  MouseEventInit,
+  NamespaceURI as NamespaceURIValue,
+  NodeType as NodeTypeValue,
+  PromiseRejectionEventInit,
+  SelectorCombinator as SelectorCombinatorValue,
   SelectorMatcher,
+  SelectorMatcherType as SelectorMatcherTypeValue,
   SelectorPart,
-} from './types/index';
+  ToggleEventInit,
+  UIEventInit,
+  WheelEventInit,
+} from './types';

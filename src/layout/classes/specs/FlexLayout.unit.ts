@@ -2,8 +2,8 @@ import {describe, it, expect} from 'vitest';
 
 import {Window} from '../../../dom/classes/Window';
 import type {Element} from '../../../dom/classes/Element';
-import type {ComputedStyle} from '../../../css/types/index';
-import type {LayoutBox} from '../../types/index';
+import type {ComputedStyle} from '../../../css/types';
+import type {LayoutBox} from '../../types';
 import {FlexLayout} from '../FlexLayout';
 
 function createEnv() {

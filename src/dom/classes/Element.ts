@@ -1,17 +1,28 @@
-import {NS, ATTRIBUTES, STYLE, CLASS_LIST, NamespaceURI, NodeType} from '../constants/index';
-import {ParentNode} from './ParentNode';
-import {NamedNodeMap} from './NamedNodeMap';
+import {
+  ATTRIBUTES,
+  CLASS_LIST,
+  NS,
+  NamespaceURI as NamespaceValue,
+  NodeType,
+  STYLE,
+} from '../constants';
+import {parseHtml} from '../utilities/parseHtml';
+import {serializeChildren} from '../utilities/serializeChildren';
+import {serializeNode} from '../utilities/serializeNode';
 import {Attr} from './Attr';
 import {CSSStyleDeclaration} from './CSSStyleDeclaration';
+
+import type {NamespaceURI} from '../types';
 import {DOMTokenList} from './DOMTokenList';
-import {serializeNode, serializeChildren, parseHtml} from '../utilities/serialization';
+import {NamedNodeMap} from './NamedNodeMap';
+import {ParentNode} from './ParentNode';
 
 export class Element extends ParentNode {
   static readonly observedAttributes?: string[];
 
   override nodeType = NodeType.ELEMENT_NODE;
 
-  [NS]: NamespaceURI = NamespaceURI.XHTML;
+  [NS]: NamespaceURI = NamespaceValue.XHTML;
   get namespaceURI() {
     return this[NS];
   }
@@ -35,9 +46,7 @@ export class Element extends ParentNode {
     return style;
   }
 
-  /**
-   * Gets or sets the class attribute as a space-separated string.
-   */
+  /** Gets or sets the class attribute as a space-separated string. */
   get className(): string {
     return this.getAttribute('class') ?? '';
   }
@@ -46,9 +55,7 @@ export class Element extends ParentNode {
     this.setAttribute('class', value);
   }
 
-  /**
-   * Returns a DOMTokenList for the class attribute.
-   */
+  /** Returns a DOMTokenList for the class attribute. */
   get classList(): DOMTokenList {
     let list = this[CLASS_LIST];
     if (!list) {
@@ -70,7 +77,7 @@ export class Element extends ParentNode {
   }
 
   getAttributeNames() {
-    return [...this.attributes].map((attr) => attr.name);
+    return [...this.attributes].map((attribute) => attribute.name);
   }
 
   get firstElementChild() {
@@ -82,15 +89,15 @@ export class Element extends ParentNode {
   }
 
   get nextElementSibling() {
-    let sib = this.nextSibling;
-    while (sib && sib.nodeType !== 1) sib = sib.nextSibling;
-    return sib;
+    let sibling = this.nextSibling;
+    while (sibling && sibling.nodeType !== 1) sibling = sibling.nextSibling;
+    return sibling;
   }
 
   get previousElementSibling() {
-    let sib = this.previousSibling;
-    while (sib && sib.nodeType !== 1) sib = sib.previousSibling;
-    return sib;
+    let sibling = this.previousSibling;
+    while (sibling && sibling.nodeType !== 1) sibling = sibling.previousSibling;
+    return sibling;
   }
 
   setAttribute(name: string, value: string) {

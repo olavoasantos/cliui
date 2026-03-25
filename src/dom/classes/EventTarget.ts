@@ -1,16 +1,10 @@
-import {
-  HOOKS,
-  PATH,
-  LISTENERS,
-  OWNER_DOCUMENT,
-  CAPTURE_MARKER,
-  EventPhase,
-} from '../constants/index';
-import {fireEvent} from './Event';
+import {CAPTURE_MARKER, HOOKS, LISTENERS, OWNER_DOCUMENT, PATH, EventPhase} from '../constants';
+import {fireEvent} from '../utilities/fireEvent';
+
 import type {Event} from './Event';
 import type {ChildNode} from './ChildNode';
 import type {Document} from './Document';
-import type {Hooks} from '../types/index';
+import type {Hooks} from '../types';
 
 const ONCE_LISTENERS = Symbol('onceListeners');
 
@@ -112,15 +106,15 @@ export class EventTarget {
     event.srcElement = this;
     event[PATH] = path;
 
-    for (let i = path.length; i--; ) {
-      fireEvent(event, path[i]!, EventPhase.CAPTURING_PHASE);
+    for (let index = path.length; index--; ) {
+      fireEvent(event, path[index]!, EventPhase.CAPTURING_PHASE);
       if (event.cancelBubble) return event.defaultPrevented;
     }
 
     const bubblePath = event.bubbles ? path : path.slice(0, 1);
 
-    for (let i = 0; i < bubblePath.length; i++) {
-      fireEvent(event, bubblePath[i]!, EventPhase.BUBBLING_PHASE);
+    for (let index = 0; index < bubblePath.length; index++) {
+      fireEvent(event, bubblePath[index]!, EventPhase.BUBBLING_PHASE);
       if (event.cancelBubble) return event.defaultPrevented;
     }
 

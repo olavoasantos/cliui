@@ -1,6 +1,6 @@
 import {UIEvent} from './UIEvent';
 import type {EventTarget as DOMEventTarget} from './EventTarget';
-import type {MouseEventInit} from '../types/index';
+import type {MouseEventInit} from '../types';
 
 /**
  * Represents a mouse event dispatched from terminal input.

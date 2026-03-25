@@ -1,5 +1,5 @@
 import {Event} from './Event';
-import type {PromiseRejectionEventInit} from '../types/index';
+import type {PromiseRejectionEventInit} from '../types';
 
 export class PromiseRejectionEvent extends Event {
   readonly promise: Promise<unknown>;

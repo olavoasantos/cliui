@@ -1,7 +1,7 @@
 import {describe, it, expect, beforeEach, vi} from 'vitest';
-import {expandShorthand} from '../CSSStyleDeclaration';
+import {expandShorthand} from '../../utilities/expandShorthand';
 import {Window} from '../Window';
-import {HOOKS} from '../../constants/index';
+import {HOOKS} from '../../constants';
 import type {Document} from '../Document';
 import type {Element} from '../Element';
 

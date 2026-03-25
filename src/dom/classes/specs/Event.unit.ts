@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {Event} from '../Event';
-import {EventPhase} from '../../constants/index';
+import {EventPhase} from '../../constants';
 
 describe('Event', () => {
   it('creates an event with the given type', () => {

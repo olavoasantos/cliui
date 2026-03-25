@@ -1,5 +1,5 @@
 import {MouseEvent} from './MouseEvent';
-import type {WheelEventInit} from '../types/index';
+import type {WheelEventInit} from '../types';
 
 /**
  * Represents a wheel (scroll) event dispatched from terminal input.

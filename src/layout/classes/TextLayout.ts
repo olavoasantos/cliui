@@ -1,6 +1,6 @@
 import {cellWidth} from '../utilities/cellWidth';
 
-import type {TextLine} from '../types/index';
+import type {TextLine} from '../types';
 
 const segmenter = new Intl.Segmenter();
 

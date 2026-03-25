@@ -1,19 +1,22 @@
 import {
   CHILD,
-  NEXT,
-  PREV,
-  PARENT,
-  OWNER_DOCUMENT,
-  NodeType,
   HOOKS,
   IS_CONNECTED,
-} from '../constants/index';
-import type {Hooks} from '../types/index';
-import type {Node} from './Node';
-import {ChildNode, toNode} from './ChildNode';
+  NEXT,
+  NodeType,
+  OWNER_DOCUMENT,
+  PARENT,
+  PREV,
+} from '../constants';
+import {selfAndDescendants} from '../utilities/selfAndDescendants';
+import {querySelector} from '../utilities/querySelector';
+import {querySelectorAll} from '../utilities/querySelectorAll';
+import {toNode} from '../utilities/toNode';
+import {ChildNode} from './ChildNode';
 import {NodeList} from './NodeList';
-import {querySelectorAll, querySelector} from '../utilities/selectors';
-import {selfAndDescendants} from '../utilities/shared';
+
+import type {Hooks} from '../types';
+import type {Node} from './Node';
 
 export class ParentNode extends ChildNode {
   readonly childNodes = new NodeList();
@@ -51,7 +54,7 @@ export class ParentNode extends ChildNode {
   }
 
   removeChild(child: Node) {
-    if (child.parentNode !== this) throw Error(`not a child of this node`);
+    if (child.parentNode !== this) throw Error('not a child of this node');
     const prev = child[PREV];
     const next = child[NEXT];
     if (prev) prev[NEXT] = next;
@@ -59,9 +62,7 @@ export class ParentNode extends ChildNode {
     if (next) next[PREV] = prev;
 
     const childNodes = this.childNodes;
-
     const childNodesIndex = childNodes.indexOf(child);
-
     childNodes.splice(childNodesIndex, 1);
 
     if (child.nodeType === 1) {

@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest';
 import {Window} from '../Window';
 import type {HTMLTemplateElement} from '../HTMLTemplateElement';
-import {NodeType} from '../../constants/index';
+import {NodeType} from '../../constants';
 
 function createEnv() {
   const window = new Window();

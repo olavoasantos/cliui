@@ -1,5 +1,5 @@
 import {Event} from './Event';
-import type {UIEventInit} from '../types/index';
+import type {UIEventInit} from '../types';
 
 /**
  * Base class for user interface events (keyboard, mouse, wheel).

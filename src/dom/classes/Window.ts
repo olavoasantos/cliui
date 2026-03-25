@@ -20,8 +20,8 @@ import {DocumentFragment} from './DocumentFragment';
 import {HTMLTemplateElement} from './HTMLTemplateElement';
 import {CustomElementRegistryImplementation} from './CustomElementRegistry';
 import {MutationObserver} from './MutationObserver';
-import {HOOKS} from '../constants/index';
-import type {Hooks} from '../types/index';
+import {HOOKS} from '../constants';
+import type {Hooks} from '../types';
 
 type OnErrorHandler =
   | ((message: string, filename?: string, lineno?: number, colno?: number, error?: unknown) => void)

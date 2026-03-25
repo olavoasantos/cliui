@@ -1,3 +1,11 @@
+import type {
+  EventPhase as EventPhaseType,
+  NamespaceURI as NamespaceURIType,
+  NodeType as NodeTypeType,
+  SelectorCombinator as SelectorCombinatorType,
+  SelectorMatcherType as SelectorMatcherTypeType,
+} from '../types';
+
 export const NAME = Symbol('name');
 export const VALUE = Symbol('value');
 export const NS = Symbol('ns');
@@ -18,7 +26,20 @@ export const CONTENT = Symbol('content');
 export const HOOKS = Symbol('hooks');
 export const IS_CONNECTED = Symbol('is_connected');
 
-export const NodeType = {
+export const NodeType: Readonly<{
+  NODE: NodeTypeType;
+  ELEMENT_NODE: NodeTypeType;
+  ATTRIBUTE_NODE: NodeTypeType;
+  TEXT_NODE: NodeTypeType;
+  CDATA_SECTION_NODE: NodeTypeType;
+  ENTITY_REFERENCE_NODE: NodeTypeType;
+  ENTITY_NODE: NodeTypeType;
+  PROCESSING_INSTRUCTION_NODE: NodeTypeType;
+  COMMENT_NODE: NodeTypeType;
+  DOCUMENT_NODE: NodeTypeType;
+  DOCUMENT_TYPE_NODE: NodeTypeType;
+  DOCUMENT_FRAGMENT_NODE: NodeTypeType;
+}> = {
   NODE: 0,
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
@@ -31,25 +52,59 @@ export const NodeType = {
   DOCUMENT_NODE: 9,
   DOCUMENT_TYPE_NODE: 10,
   DOCUMENT_FRAGMENT_NODE: 11,
-} as const;
+};
 
-export type NodeType = (typeof NodeType)[keyof typeof NodeType];
-
-export const NamespaceURI = {
+export const NamespaceURI: Readonly<{
+  XHTML: NamespaceURIType;
+  SVG: NamespaceURIType;
+}> = {
   XHTML: 'http://www.w3.org/1999/xhtml',
   SVG: 'http://www.w3.org/2000/svg',
-} as const;
+};
 
-export type NamespaceURI = (typeof NamespaceURI)[keyof typeof NamespaceURI];
-
-export const EventPhase = {
+export const EventPhase: Readonly<{
+  NONE: EventPhaseType;
+  CAPTURING_PHASE: EventPhaseType;
+  AT_TARGET: EventPhaseType;
+  BUBBLING_PHASE: EventPhaseType;
+}> = {
   NONE: 0,
   CAPTURING_PHASE: 1,
   AT_TARGET: 2,
   BUBBLING_PHASE: 3,
-} as const;
+};
 
-export type EventPhase = (typeof EventPhase)[keyof typeof EventPhase];
+export const SelectorCombinator: Readonly<{
+  Descendant: SelectorCombinatorType;
+  Child: SelectorCombinatorType;
+  Sibling: SelectorCombinatorType;
+  Adjacent: SelectorCombinatorType;
+  Inner: SelectorCombinatorType;
+}> = {
+  Descendant: 0,
+  Child: 1,
+  Sibling: 2,
+  Adjacent: 3,
+  Inner: 4,
+};
+
+export const SelectorMatcherType: Readonly<{
+  Unknown: SelectorMatcherTypeType;
+  Element: SelectorMatcherTypeType;
+  Id: SelectorMatcherTypeType;
+  Class: SelectorMatcherTypeType;
+  Attribute: SelectorMatcherTypeType;
+  Pseudo: SelectorMatcherTypeType;
+  Function: SelectorMatcherTypeType;
+}> = {
+  Unknown: 0,
+  Element: 1,
+  Id: 2,
+  Class: 3,
+  Attribute: 4,
+  Pseudo: 5,
+  Function: 6,
+};
 
 export const STYLE = Symbol('style');
 export const CLASS_LIST = Symbol('class_list');

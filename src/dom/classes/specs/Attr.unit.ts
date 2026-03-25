@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest';
 import {Attr} from '../Attr';
 import {Window} from '../Window';
-import {NodeType} from '../../constants/index';
+import {NodeType} from '../../constants';
 
 describe('Attr', () => {
   it('has nodeType ATTRIBUTE_NODE', () => {

@@ -1,4 +1,4 @@
-import {CHILD, NEXT, NodeType} from '../../dom/constants/index';
+import {CHILD, NEXT, NodeType} from '../../dom/constants';
 import {FlexLayout} from './FlexLayout';
 import {TextLayout} from './TextLayout';
 
@@ -6,8 +6,8 @@ import type {Node} from '../../dom/classes/Node';
 import type {Element} from '../../dom/classes/Element';
 import type {CharacterData} from '../../dom/classes/CharacterData';
 import type {StyleEngine} from '../../css/classes/StyleEngine';
-import type {ComputedStyle} from '../../css/types/index';
-import type {LayoutBox} from '../types/index';
+import type {ComputedStyle} from '../../css/types';
+import type {LayoutBox} from '../types';
 
 /**
  * Top-level layout engine that takes a DOM tree and computed styles, runs

@@ -1,7 +1,7 @@
 import {describe, it, expect, beforeEach, vi} from 'vitest';
 import {Window} from '../Window';
 import {HTMLStyleElement} from '../HTMLStyleElement';
-import {HOOKS} from '../../constants/index';
+import {HOOKS} from '../../constants';
 import type {Document} from '../Document';
 
 describe('HTMLStyleElement', () => {

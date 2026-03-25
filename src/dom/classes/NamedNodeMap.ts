@@ -1,6 +1,6 @@
-import {CHILD, OWNER_ELEMENT, NS, NEXT, HOOKS} from '../constants/index';
-import type {NamespaceURI} from '../constants/index';
-import type {Hooks} from '../types/index';
+import {CHILD, OWNER_ELEMENT, NS, NEXT, HOOKS} from '../constants';
+import type {NamespaceURI} from '../types';
+import type {Hooks} from '../types';
 import type {Attr} from './Attr';
 import type {Element} from './Element';
 

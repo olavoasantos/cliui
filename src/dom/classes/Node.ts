@@ -1,29 +1,28 @@
 import {
-  OWNER_DOCUMENT,
-  NAME,
-  PARENT,
   CHILD,
-  PREV,
-  NEXT,
-  NamespaceURI,
-  NodeType,
   HOOKS,
   IS_CONNECTED,
-} from '../constants/index';
+  NAME,
+  NamespaceURI,
+  NEXT,
+  NodeType,
+  OWNER_DOCUMENT,
+  PARENT,
+  PREV,
+} from '../constants';
+import {CharacterDataGuard} from '../guards/CharacterDataGuard';
+import {ParentNodeGuard} from '../guards/ParentNodeGuard';
+import {TextNodeGuard} from '../guards/TextNodeGuard';
+import {cloneNode} from '../utilities/cloneNode';
+import {descendants} from '../utilities/descendants';
+import {EventTarget} from './EventTarget';
+
 import type {Document} from './Document';
 import type {ParentNode} from './ParentNode';
-import type {Hooks} from '../types/index';
-import {EventTarget} from './EventTarget';
-import {
-  isCharacterData,
-  isParentNode,
-  isTextNode,
-  cloneNode,
-  descendants,
-} from '../utilities/shared';
+import type {Hooks, NodeType as NodeTypeValue} from '../types';
 
 export class Node extends EventTarget {
-  nodeType: NodeType = NodeType.NODE;
+  nodeType: NodeTypeValue = NodeType.NODE;
 
   [OWNER_DOCUMENT]!: Document;
   [NAME] = '';
@@ -84,17 +83,17 @@ export class Node extends EventTarget {
   set nextSibling(_readonly: Node | null) {}
 
   get previousElementSibling() {
-    let sib = this[PREV];
-    while (sib && sib.nodeType !== 1) sib = sib[PREV];
-    return sib;
+    let sibling = this[PREV];
+    while (sibling && sibling.nodeType !== 1) sibling = sibling[PREV];
+    return sibling;
   }
 
   set previousElementSibling(_readonly: Node | null) {}
 
   get nextElementSibling() {
-    let sib = this[NEXT];
-    while (sib && sib.nodeType !== 1) sib = sib[NEXT];
-    return sib;
+    let sibling = this[NEXT];
+    while (sibling && sibling.nodeType !== 1) sibling = sibling[NEXT];
+    return sibling;
   }
 
   set nextElementSibling(_readonly: Node | null) {}
@@ -118,20 +117,20 @@ export class Node extends EventTarget {
   set lastChild(_readonly: Node | null) {}
 
   get nodeValue(): string | null {
-    if (isCharacterData(this)) return this.data;
+    if (CharacterDataGuard(this)) return this.data;
     return null;
   }
 
   set nodeValue(data: string | null | undefined) {
-    if (isCharacterData(this)) this.data = data;
+    if (CharacterDataGuard(this)) this.data = data;
   }
 
   get textContent(): string | null {
-    if (isCharacterData(this)) return this.data;
+    if (CharacterDataGuard(this)) return this.data;
     let text = '';
 
     for (const node of descendants(this)) {
-      if (isTextNode(node)) {
+      if (TextNodeGuard(node)) {
         text += node.data;
       }
     }
@@ -140,9 +139,9 @@ export class Node extends EventTarget {
   }
 
   set textContent(data: unknown) {
-    if (isCharacterData(this)) {
+    if (CharacterDataGuard(this)) {
       this.data = data;
-    } else if (isParentNode(this)) {
+    } else if (ParentNodeGuard(this)) {
       let child;
       while ((child = this[CHILD])) {
         this.removeChild(child);

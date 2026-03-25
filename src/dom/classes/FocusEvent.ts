@@ -1,6 +1,6 @@
 import {Event} from './Event';
 import type {EventTarget as DOMEventTarget} from './EventTarget';
-import type {FocusEventInit} from '../types/index';
+import type {FocusEventInit} from '../types';
 
 export class FocusEvent extends Event {
   readonly relatedTarget: DOMEventTarget | null;

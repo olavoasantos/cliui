@@ -4,7 +4,7 @@ import {StyleResolver} from '../StyleResolver';
 import {CSSStyleDeclaration} from '../../../dom/classes/CSSStyleDeclaration';
 
 import type {MatchedDeclaration} from '../SelectorMatcher';
-import type {ComputedStyle} from '../../types/index';
+import type {ComputedStyle} from '../../types';
 
 function makeMatched(
   property: string,

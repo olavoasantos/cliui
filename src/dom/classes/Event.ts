@@ -1,13 +1,7 @@
-import {
-  PATH,
-  IS_TRUSTED,
-  LISTENERS,
-  STOP_IMMEDIATE_PROPAGATION,
-  EventPhase,
-  CAPTURE_MARKER,
-} from '../constants/index';
+import {IS_TRUSTED, PATH, STOP_IMMEDIATE_PROPAGATION, EventPhase} from '../constants';
+
 import type {EventTarget} from './EventTarget';
-import type {EventInit} from '../types/index';
+import type {EventInit, EventPhase as EventPhaseValue} from '../types';
 
 const now = typeof performance === 'undefined' ? Date.now : performance.now.bind(performance);
 
@@ -26,7 +20,7 @@ export class Event {
   composed = false;
   defaultPrevented = false;
   cancelBubble = false;
-  eventPhase: EventPhase = 0;
+  eventPhase: EventPhaseValue = 0;
   data?: unknown;
   [PATH]: EventTarget[] = [];
   [IS_TRUSTED]!: boolean;
@@ -79,38 +73,4 @@ export class Event {
     this.bubbles = Boolean(bubbles);
     this.cancelable = Boolean(cancelable);
   }
-}
-
-export function fireEvent(
-  event: Event,
-  currentTarget: EventTarget,
-  phase: typeof EventPhase.BUBBLING_PHASE | typeof EventPhase.CAPTURING_PHASE,
-): void {
-  const listeners = currentTarget[LISTENERS];
-  const list = listeners?.get(
-    `${event.type}${phase === EventPhase.CAPTURING_PHASE ? CAPTURE_MARKER : ''}`,
-  );
-
-  if (!list) return;
-
-  for (const listener of list) {
-    event.eventPhase = event.target === currentTarget ? EventPhase.AT_TARGET : phase;
-    event.currentTarget = currentTarget;
-
-    try {
-      if (typeof listener === 'object') {
-        listener.handleEvent(event);
-      } else {
-        listener.call(currentTarget, event);
-      }
-    } catch (err) {
-      setTimeout(thrower, 0, err);
-    }
-
-    if (event[STOP_IMMEDIATE_PROPAGATION]) break;
-  }
-}
-
-function thrower(error: unknown) {
-  throw error;
 }

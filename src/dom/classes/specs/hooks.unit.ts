@@ -1,7 +1,7 @@
 import {describe, it, expect, vi} from 'vitest';
 import {Window} from '../Window';
-import {HOOKS} from '../../constants/index';
-import type {Hooks} from '../../types/index';
+import {HOOKS} from '../../constants';
+import type {Hooks} from '../../types';
 
 function createEnv(hooks: Partial<Hooks> = {}) {
   const window = new Window();

@@ -1,6 +1,6 @@
 import type {Element} from '../../dom/classes/Element';
-import type {ComputedStyle} from '../../css/types/index';
-import type {LayoutBox} from '../types/index';
+import type {ComputedStyle} from '../../css/types';
+import type {LayoutBox} from '../types';
 
 /**
  * Parsed box model values extracted from a computed style map.

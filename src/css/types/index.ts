@@ -1,4 +1,4 @@
-import type {SelectorPart} from '../../dom/types/index';
+import type {SelectorPart} from '../../dom/types';
 
 /** A single CSS property declaration (e.g. `color: red`). */
 export interface CSSDeclaration {

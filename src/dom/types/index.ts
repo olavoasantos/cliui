@@ -2,6 +2,12 @@ import type {EventTarget} from '../classes/EventTarget';
 import type {Element} from '../classes/Element';
 import type {Text} from '../classes/Text';
 
+export type NodeType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+
+export type NamespaceURI = 'http://www.w3.org/1999/xhtml' | 'http://www.w3.org/2000/svg';
+
+export type EventPhase = 0 | 1 | 2 | 3;
+
 export interface EventInit {
   bubbles?: boolean;
   cancelable?: boolean;
@@ -72,27 +78,9 @@ export interface ToggleEventInit extends EventInit {
   newState?: string;
 }
 
-export const SelectorCombinator = {
-  Descendant: 0,
-  Child: 1,
-  Sibling: 2,
-  Adjacent: 3,
-  Inner: 4,
-} as const;
+export type SelectorCombinator = 0 | 1 | 2 | 3 | 4;
 
-export type SelectorCombinator = (typeof SelectorCombinator)[keyof typeof SelectorCombinator];
-
-export const SelectorMatcherType = {
-  Unknown: 0,
-  Element: 1,
-  Id: 2,
-  Class: 3,
-  Attribute: 4,
-  Pseudo: 5,
-  Function: 6,
-} as const;
-
-export type SelectorMatcherType = (typeof SelectorMatcherType)[keyof typeof SelectorMatcherType];
+export type SelectorMatcherType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 /** A single matcher condition within a selector part. */
 export interface SelectorMatcher {

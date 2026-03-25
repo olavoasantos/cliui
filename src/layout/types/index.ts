@@ -1,5 +1,5 @@
 import type {Element} from '../../dom/classes/Element';
-import type {ComputedStyle} from '../../css/types/index';
+import type {ComputedStyle} from '../../css/types';
 
 /**
  * Represents a single line of measured text produced by {@link TextLayout}.

@@ -1,4 +1,4 @@
-import {CHILD, NEXT, HOOKS, NodeType} from '../../dom/constants/index';
+import {CHILD, NEXT, HOOKS, NodeType} from '../../dom/constants';
 import {CSSParser} from './CSSParser';
 import {SelectorMatcher} from './SelectorMatcher';
 import {StyleResolver} from './StyleResolver';
@@ -8,8 +8,8 @@ import type {Element} from '../../dom/classes/Element';
 import type {Document} from '../../dom/classes/Document';
 import type {Window} from '../../dom/classes/Window';
 import type {HTMLStyleElement} from '../../dom/classes/HTMLStyleElement';
-import type {Hooks} from '../../dom/types/index';
-import type {CSSRule, ComputedStyle} from '../types/index';
+import type {Hooks} from '../../dom/types';
+import type {CSSRule, ComputedStyle} from '../types';
 
 /** CSS properties that, when changed, require layout recomputation. */
 const LAYOUT_PROPERTIES = new Set([

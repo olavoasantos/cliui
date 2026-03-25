@@ -1,5 +1,5 @@
 import {UIEvent} from './UIEvent';
-import type {KeyboardEventInit} from '../types/index';
+import type {KeyboardEventInit} from '../types';
 
 /**
  * Represents a keyboard event dispatched from terminal input.

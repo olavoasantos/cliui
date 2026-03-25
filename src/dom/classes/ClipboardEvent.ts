@@ -1,5 +1,5 @@
 import {Event} from './Event';
-import type {ClipboardEventInit} from '../types/index';
+import type {ClipboardEventInit} from '../types';
 
 export class ClipboardEvent extends Event {
   readonly clipboardData: DataTransfer | null;

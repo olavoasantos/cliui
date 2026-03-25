@@ -1,10 +1,9 @@
-import {expandShorthand} from '../../dom/classes/CSSStyleDeclaration';
+import {expandShorthand} from '../../dom/utilities/expandShorthand';
 
 import type {CSSStyleDeclaration} from '../../dom/classes/CSSStyleDeclaration';
 import type {MatchedDeclaration} from './SelectorMatcher';
-import type {ComputedStyle} from '../types/index';
+import type {ComputedStyle} from '../types';
 
-/** CSS properties that inherit from parent elements when not explicitly set. */
 const INHERITABLE_PROPERTIES = new Set([
   'color',
   'font-weight',
@@ -17,7 +16,6 @@ const INHERITABLE_PROPERTIES = new Set([
   'opacity',
 ]);
 
-/** Default initial values for inheritable properties. */
 const INITIAL_VALUES: Record<string, string> = {
   color: '',
   'font-weight': 'normal',
@@ -30,19 +28,8 @@ const INITIAL_VALUES: Record<string, string> = {
   opacity: '1',
 };
 
-/**
- * Resolves the cascade for an element: merges matched declarations with
- * inline styles, resolves inheritance for inheritable properties, and
- * expands shorthand properties. Produces a ComputedStyle map.
- */
+/** Resolves the CSS cascade for an element into a computed style map. */
 export class StyleResolver {
-  /**
-   * Resolves the computed style for an element.
-   *
-   * @param matchedDeclarations - Declarations from stylesheet rules, sorted by specificity (ascending).
-   * @param inlineStyle - The element's inline style (element.style).
-   * @param parentStyle - The parent element's computed style (for inheritance).
-   */
   resolve(
     matchedDeclarations: MatchedDeclaration[],
     inlineStyle: CSSStyleDeclaration | null,
@@ -50,36 +37,24 @@ export class StyleResolver {
   ): ComputedStyle {
     const style: ComputedStyle = new Map();
 
-    // 1. Apply matched declarations in specificity order (lowest first, so higher overwrites).
     for (const {declaration} of matchedDeclarations) {
       applyDeclaration(style, declaration.property, declaration.value);
     }
 
-    // 2. Apply inline styles (highest priority — overwrites everything).
     if (inlineStyle) {
-      const len = inlineStyle.length;
-      for (let i = 0; i < len; i++) {
-        const prop = inlineStyle.item(i);
-        const value = inlineStyle.getPropertyValue(prop);
-        if (value) {
-          applyDeclaration(style, prop, value);
-        }
+      for (let index = 0; index < inlineStyle.length; index++) {
+        const property = inlineStyle.item(index);
+        const value = inlineStyle.getPropertyValue(property);
+        if (value) applyDeclaration(style, property, value);
       }
     }
 
-    // 3. Resolve inheritance for inheritable properties not explicitly set.
-    for (const prop of INHERITABLE_PROPERTIES) {
-      if (!style.has(prop)) {
-        if (parentStyle?.has(prop)) {
-          style.set(prop, parentStyle.get(prop)!);
-        } else if (INITIAL_VALUES[prop] !== undefined) {
-          style.set(prop, INITIAL_VALUES[prop]!);
-        }
-      } else if (style.get(prop) === 'inherit') {
-        if (parentStyle?.has(prop)) {
-          style.set(prop, parentStyle.get(prop)!);
-        } else if (INITIAL_VALUES[prop] !== undefined) {
-          style.set(prop, INITIAL_VALUES[prop]!);
+    for (const property of INHERITABLE_PROPERTIES) {
+      if (!style.has(property) || style.get(property) === 'inherit') {
+        if (parentStyle?.has(property)) {
+          style.set(property, parentStyle.get(property)!);
+        } else if (INITIAL_VALUES[property] !== undefined) {
+          style.set(property, INITIAL_VALUES[property]!);
         }
       }
     }
@@ -88,16 +63,14 @@ export class StyleResolver {
   }
 }
 
-/**
- * Applies a single declaration to the style map, expanding shorthands as needed.
- */
 function applyDeclaration(style: ComputedStyle, property: string, value: string): void {
   const expanded = expandShorthand(property, value);
   if (expanded) {
-    for (const [k, v] of Object.entries(expanded)) {
-      style.set(k, v);
+    for (const [key, expandedValue] of Object.entries(expanded)) {
+      style.set(key, expandedValue);
     }
-  } else {
-    style.set(property, value);
+    return;
   }
+
+  style.set(property, value);
 }

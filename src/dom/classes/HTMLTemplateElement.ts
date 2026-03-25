@@ -1,7 +1,9 @@
-import {CONTENT} from '../constants/index';
-import type {DocumentFragment} from './DocumentFragment';
+import {CONTENT} from '../constants';
+import {parseHtml} from '../utilities/parseHtml';
+import {serializeChildren} from '../utilities/serializeChildren';
 import {Element} from './Element';
-import {parseHtml, serializeChildren} from '../utilities/serialization';
+
+import type {DocumentFragment} from './DocumentFragment';
 
 export class HTMLTemplateElement extends Element {
   [CONTENT]?: DocumentFragment;

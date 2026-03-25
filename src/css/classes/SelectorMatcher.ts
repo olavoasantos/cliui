@@ -1,9 +1,9 @@
-import {matches} from '../../dom/utilities/selectors';
-import {SelectorMatcherType} from '../../dom/types/index';
+import {SelectorCombinator, SelectorMatcherType} from '../../dom/constants';
+import {matches} from '../../dom/utilities/matches';
 
 import type {Element} from '../../dom/classes/Element';
-import type {SelectorPart} from '../../dom/types/index';
-import type {CSSDeclaration, CSSRule} from '../types/index';
+import type {SelectorPart} from '../../dom/types';
+import type {CSSDeclaration, CSSRule} from '../types';
 
 /** A matched declaration with its origin specificity and source order. */
 export interface MatchedDeclaration {
@@ -12,20 +12,8 @@ export interface MatchedDeclaration {
   order: number;
 }
 
-/**
- * Matches CSS rules against DOM elements and returns declarations sorted by specificity.
- *
- * Given a rule list and an element, iterates all rules, determines which
- * selectors match the element, calculates specificity scores, and returns
- * all matching declarations sorted by specificity (highest first within
- * equal specificity, later rules win).
- */
+/** Matches CSS rules against DOM elements and returns declarations sorted by specificity. */
 export class SelectorMatcher {
-  /**
-   * Returns all matching declarations for an element, sorted by specificity.
-   * Lower-priority declarations come first so that later entries overwrite earlier ones
-   * when building a style map.
-   */
   match(rules: CSSRule[], element: Element): MatchedDeclaration[] {
     const matched: MatchedDeclaration[] = [];
     let order = 0;
@@ -35,29 +23,23 @@ export class SelectorMatcher {
 
       for (const selectorParts of rule.selectors) {
         if (matchesParts(element, selectorParts)) {
-          const spec = computeSpecificity(selectorParts);
-          if (!highestSpecificity || compareSpecificity(spec, highestSpecificity) > 0) {
-            highestSpecificity = spec;
+          const specificity = computeSpecificity(selectorParts);
+          if (!highestSpecificity || compareSpecificity(specificity, highestSpecificity) > 0) {
+            highestSpecificity = specificity;
           }
         }
       }
 
-      if (highestSpecificity) {
-        for (const declaration of rule.declarations) {
-          matched.push({
-            declaration,
-            specificity: highestSpecificity,
-            order: order++,
-          });
-        }
+      if (!highestSpecificity) continue;
+
+      for (const declaration of rule.declarations) {
+        matched.push({declaration, specificity: highestSpecificity, order: order++});
       }
     }
 
-    // Sort: lower specificity first, then by source order.
-    // This way, higher specificity and later source order overwrite earlier entries.
     matched.sort((a, b) => {
-      const cmp = compareSpecificity(a.specificity, b.specificity);
-      if (cmp !== 0) return cmp;
+      const comparison = compareSpecificity(a.specificity, b.specificity);
+      if (comparison !== 0) return comparison;
       return a.order - b.order;
     });
 
@@ -65,26 +47,16 @@ export class SelectorMatcher {
   }
 }
 
-/**
- * Tests whether an element matches a parsed selector (array of SelectorParts).
- * Reconstructs the selector string and delegates to the DOM `matches()` utility.
- */
 function matchesParts(element: Element, parts: SelectorPart[]): boolean {
-  const selectorStr = serializeParts(parts);
-  if (!selectorStr) return false;
+  const selector = serializeParts(parts);
+  if (!selector) return false;
   try {
-    return matches(element, selectorStr);
+    return matches(element, selector);
   } catch {
     return false;
   }
 }
 
-/**
- * Computes the specificity of a parsed selector as a [a, b, c] tuple:
- * - a: count of ID selectors
- * - b: count of class selectors, attribute selectors, and pseudo-classes
- * - c: count of element selectors and pseudo-elements
- */
 function computeSpecificity(parts: SelectorPart[]): [number, number, number] {
   let a = 0;
   let b = 0;
@@ -105,14 +77,8 @@ function computeSpecificity(parts: SelectorPart[]): [number, number, number] {
           c++;
           break;
         case SelectorMatcherType.Function:
-          // :not() and :has() — the specificity of their argument counts
-          if (matcher.value) {
-            // Parse the inner selector and add its specificity
-            // For simplicity, treat :not/.has argument as contributing to b
-            b++;
-          }
+          if (matcher.value) b++;
           break;
-        // Unknown (*) contributes 0
       }
     }
   }
@@ -120,83 +86,57 @@ function computeSpecificity(parts: SelectorPart[]): [number, number, number] {
   return [a, b, c];
 }
 
-/**
- * Compares two specificity tuples. Returns positive if a > b, negative if a < b, 0 if equal.
- */
 function compareSpecificity(a: [number, number, number], b: [number, number, number]): number {
   if (a[0] !== b[0]) return a[0] - b[0];
   if (a[1] !== b[1]) return a[1] - b[1];
   return a[2] - b[2];
 }
 
-/**
- * Serializes parsed selector parts back into a selector string.
- * This is needed because the DOM `matches()` utility takes a string.
- */
 function serializeParts(parts: SelectorPart[]): string {
-  const segments: string[] = [];
+  const segments = parts.map((part) =>
+    part.matchers
+      .map((matcher) => {
+        switch (matcher.type) {
+          case SelectorMatcherType.Unknown:
+            return '*';
+          case SelectorMatcherType.Element:
+            return matcher.name;
+          case SelectorMatcherType.Id:
+            return `#${matcher.name}`;
+          case SelectorMatcherType.Class:
+            return `.${matcher.name}`;
+          case SelectorMatcherType.Attribute:
+            return matcher.value != null
+              ? `[${matcher.name}="${matcher.value}"]`
+              : `[${matcher.name}]`;
+          case SelectorMatcherType.Pseudo:
+            return `:${matcher.name}`;
+          case SelectorMatcherType.Function:
+            return `:${matcher.name}(${matcher.value ?? ''})`;
+        }
+      })
+      .join(''),
+  );
 
-  for (const part of parts) {
-    let segment = '';
-
-    for (const matcher of part.matchers) {
-      switch (matcher.type) {
-        case SelectorMatcherType.Unknown:
-          segment += '*';
-          break;
-        case SelectorMatcherType.Element:
-          segment += matcher.name;
-          break;
-        case SelectorMatcherType.Id:
-          segment += `#${matcher.name}`;
-          break;
-        case SelectorMatcherType.Class:
-          segment += `.${matcher.name}`;
-          break;
-        case SelectorMatcherType.Attribute:
-          segment +=
-            matcher.value != null ? `[${matcher.name}="${matcher.value}"]` : `[${matcher.name}]`;
-          break;
-        case SelectorMatcherType.Pseudo:
-          segment += `:${matcher.name}`;
-          break;
-        case SelectorMatcherType.Function:
-          segment += `:${matcher.name}(${matcher.value ?? ''})`;
-          break;
-      }
-    }
-
-    segments.push(segment);
-  }
-
-  // Rebuild with combinators between segments.
-  // parseSelector stores the combinator on the part that *precedes* the next part.
-  // parts[0].combinator applies between parts[0] and parts[1], etc.
-  // The last part always has combinator Inner (compound/same element).
   if (segments.length === 0) return '';
 
   let result = segments[0]!;
-  for (let i = 0; i < parts.length - 1; i++) {
-    const comb = parts[i]!.combinator;
-    let combStr: string;
-    switch (comb) {
-      case 0: // Descendant
-        combStr = ' ';
+  for (let index = 0; index < parts.length - 1; index++) {
+    switch (parts[index]!.combinator) {
+      case SelectorCombinator.Descendant:
+        result += ' ';
         break;
-      case 1: // Child
-        combStr = ' > ';
+      case SelectorCombinator.Child:
+        result += ' > ';
         break;
-      case 2: // Sibling
-        combStr = ' ~ ';
+      case SelectorCombinator.Sibling:
+        result += ' ~ ';
         break;
-      case 3: // Adjacent
-        combStr = ' + ';
-        break;
-      default: // Inner (compound — no separator)
-        combStr = '';
+      case SelectorCombinator.Adjacent:
+        result += ' + ';
         break;
     }
-    result += combStr + segments[i + 1]!;
+    result += segments[index + 1]!;
   }
 
   return result;

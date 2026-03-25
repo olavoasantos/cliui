@@ -1,5 +1,5 @@
-import {NEXT} from '../constants/index';
-import type {ParentNode} from './ParentNode';
+import {NEXT} from '../constants';
+import {toNode} from '../utilities/toNode';
 import {Node} from './Node';
 
 export class ChildNode extends Node {
@@ -15,8 +15,8 @@ export class ChildNode extends Node {
     const next = this[NEXT];
     const node = toNode(parent, nodes[0]);
     parent.replaceChild(node, this);
-    for (let i = 1; i < nodes.length; i++) {
-      parent.insertBefore(toNode(parent, nodes[i]), next);
+    for (let index = 1; index < nodes.length; index++) {
+      parent.insertBefore(toNode(parent, nodes[index]), next);
     }
   }
 
@@ -36,10 +36,4 @@ export class ChildNode extends Node {
       parent.insertBefore(toNode(parent, node), next);
     }
   }
-}
-
-export function toNode(parent: ParentNode, node: Node | unknown) {
-  if (node instanceof Node) return node;
-  const ownerDocument = parent.ownerDocument;
-  return ownerDocument.createTextNode(String(node));
 }
