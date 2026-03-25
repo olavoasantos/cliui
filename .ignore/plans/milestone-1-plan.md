@@ -82,6 +82,12 @@
 | ----- | ----- | ----- | ------------ | ------------- | ------ |
 | 1 | M1T25 | Renderer orchestrator | M1T22, M1T23, M1T24 (done) | — | Complete |
 
+### Batch 9: M1T26 (Terminal Mode Management)
+
+| Order | Issue | Title | Dependencies | Parallel With | Status |
+| ----- | ----- | ----- | ------------ | ------------- | ------ |
+| 1 | M1T26 | Terminal mode management | M0T2 (done) | M1T27 | Complete |
+
 ## Progress Log
 
 - Batch 1 (M1T1–M1T5): Complete. 228 unit tests passing.
@@ -120,3 +126,8 @@
   - Renderer now supports incremental re-rendering, multiple root layout boxes, and buffer resizing while preserving a correct diff baseline
   - Added mapped renderer unit and integration tests for first-frame output, no-op frames, incremental updates, resize behavior, and full styled layout-box rendering
   - Structural compliance audit passed cleanly; orchestration remains isolated to `src/renderer/classes/Renderer.ts` with direct exports from `src/renderer/index.ts`
+- Batch 9 (M1T26): Complete. 617 unit tests and 1 integration test passing.
+  - Added `TerminalManager` for terminal startup/shutdown sequencing, raw mode toggling, alternate-screen management, cursor visibility, focus reporting, bracketed paste, and optional mouse reporting mode 1006
+  - Added explicit terminal-layer public types for input/output stream contracts and manager configuration
+  - Added mapped unit tests covering startup order, optional feature flags, reverse-order shutdown, idempotency, and graceful handling of non-raw-capable inputs
+  - Structural compliance audit passed cleanly; terminal mode concerns remain isolated to `src/terminal/classes/TerminalManager.ts`, `src/terminal/types/index.ts`, and mapped tests
