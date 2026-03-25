@@ -51,4 +51,6 @@ export const EventPhase = {
 
 export type EventPhase = (typeof EventPhase)[keyof typeof EventPhase];
 
+export const STYLE = Symbol('style');
+
 export const CAPTURE_MARKER = '@';

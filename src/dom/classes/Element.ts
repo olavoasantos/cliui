@@ -1,7 +1,8 @@
-import {NS, ATTRIBUTES, NamespaceURI, NodeType} from '../constants/index';
+import {NS, ATTRIBUTES, STYLE, NamespaceURI, NodeType} from '../constants/index';
 import {ParentNode} from './ParentNode';
 import {NamedNodeMap} from './NamedNodeMap';
 import {Attr} from './Attr';
+import {CSSStyleDeclaration} from './CSSStyleDeclaration';
 import {serializeNode, serializeChildren, parseHtml} from '../utilities/serialization';
 
 export class Element extends ParentNode {
@@ -19,8 +20,18 @@ export class Element extends ParentNode {
   }
 
   [ATTRIBUTES]!: NamedNodeMap;
+  [STYLE]!: CSSStyleDeclaration;
 
   [anyProperty: string]: unknown;
+
+  get style(): CSSStyleDeclaration {
+    let style = this[STYLE];
+    if (!style) {
+      style = new CSSStyleDeclaration(this);
+      this[STYLE] = style;
+    }
+    return style;
+  }
 
   attributeChangedCallback?(name: string, oldValue: string | null, newValue: string | null): void;
 
