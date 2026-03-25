@@ -16,6 +16,17 @@ export interface TextLine {
 }
 
 /**
+ * Options controlling text measurement behavior.
+ */
+export interface TextLayoutOptions {
+  /** White-space handling mode. */
+  whiteSpace?: 'normal' | 'nowrap' | 'pre' | 'pre-wrap';
+
+  /** Overflow behavior for unwrapped text. */
+  textOverflow?: 'clip' | 'ellipsis';
+}
+
+/**
  * Represents a positioned box in the layout tree.
  *
  * Each layout box corresponds to a DOM element and contains the computed

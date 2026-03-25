@@ -111,6 +111,34 @@ describe('LayoutEngine', () => {
       expect(box.children[1]!.y).toBe(3);
       expect(box.height).toBe(6);
     });
+
+    it('lays out children horizontally when flex-direction is row', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const c1 = document.createElement('div');
+      const c2 = document.createElement('div');
+
+      c1.setAttribute('id', 'first');
+      c2.setAttribute('id', 'second');
+      body.appendChild(c1);
+      body.appendChild(c2);
+
+      addStyle(
+        document,
+        'body { flex-direction: row; } #first { width: 4; height: 2; } #second { width: 6; height: 3; }',
+      );
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 80, 24);
+
+      expect(box.children.length).toBe(2);
+      expect(box.children[0]!.x).toBe(0);
+      expect(box.children[1]!.x).toBe(4);
+      expect(box.children[0]!.y).toBe(0);
+      expect(box.children[1]!.y).toBe(0);
+      expect(box.height).toBe(3);
+    });
   });
 
   describe('text content wrapping', () => {
@@ -195,6 +223,47 @@ describe('LayoutEngine', () => {
     });
   });
 
+  describe('explicit sizing and constraints', () => {
+    it('resolves percentage height relative to the parent content area', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const child = document.createElement('div');
+
+      body.appendChild(child);
+
+      addStyle(document, 'body { height: 20; } div { height: 50%; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 80, 24);
+      const childBox = box.children[0]!;
+
+      expect(childBox.height).toBe(10);
+      expect(childBox.contentHeight).toBe(10);
+    });
+
+    it('applies min and max constraints to resolved dimensions', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const first = document.createElement('div');
+      const second = document.createElement('div');
+
+      first.setAttribute('id', 'first');
+      second.setAttribute('id', 'second');
+      body.appendChild(first);
+      body.appendChild(second);
+
+      addStyle(document, '#first { width: 4; min-width: 6; } #second { width: 12; max-width: 8; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 80, 24);
+
+      expect(box.children[0]!.width).toBe(6);
+      expect(box.children[1]!.width).toBe(8);
+    });
+  });
+
   describe('incremental re-layout', () => {
     it('reuses cached layout boxes for clean subtrees', () => {
       const {document, styleEngine} = createEnv();
@@ -231,6 +300,68 @@ describe('LayoutEngine', () => {
       // Second child should be re-laid out with new height
       expect(box2.children[1]!.height).toBe(7);
       expect(box2.children[1]).not.toBe(secondChild1);
+    });
+  });
+
+  describe('display behaviors', () => {
+    it('treats display: inline as a wrapped row layout', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const inline = document.createElement('div');
+      const first = document.createElement('span');
+      const second = document.createElement('span');
+      const third = document.createElement('span');
+
+      first.setAttribute('id', 'first');
+      second.setAttribute('id', 'second');
+      third.setAttribute('id', 'third');
+      inline.appendChild(first);
+      inline.appendChild(second);
+      inline.appendChild(third);
+      body.appendChild(inline);
+
+      addStyle(
+        document,
+        'div { display: inline; width: 9; } #first, #second, #third { width: 4; height: 1; }',
+      );
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 80, 24);
+      const inlineBox = box.children[0]!;
+
+      expect(inlineBox.children[0]!.x).toBe(0);
+      expect(inlineBox.children[1]!.x).toBe(4);
+      expect(inlineBox.children[2]!.x).toBe(0);
+      expect(inlineBox.children[2]!.y).toBe(1);
+    });
+
+    it('reflows when display toggles from none to inline', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const toggle = document.createElement('div');
+      const child = document.createElement('span');
+
+      toggle.appendChild(child);
+      body.appendChild(toggle);
+
+      addStyle(document, 'div { width: 4; height: 1; } span { width: 2; height: 1; }');
+      toggle.style.display = 'none';
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const hiddenBox = engine.layout(body, 80, 24);
+
+      expect(hiddenBox.children).toEqual([]);
+
+      toggle.style.display = 'inline';
+      styleEngine.recomputeDirty();
+
+      const visibleBox = engine.layout(body, 80, 24);
+
+      expect(visibleBox.children.length).toBe(1);
+      expect(visibleBox.children[0]!.children.length).toBe(1);
+      expect(visibleBox.children[0]!.children[0]!.x).toBe(0);
     });
   });
 

@@ -177,6 +177,41 @@ describe('TextLayout', () => {
     });
   });
 
+  describe('additional white-space modes', () => {
+    it('keeps text on one line for nowrap', () => {
+      const lines = layout.measure('hello world', 5, {whiteSpace: 'nowrap'});
+
+      expect(lines).toEqual([{text: 'hello', width: 5}]);
+    });
+
+    it('adds an ellipsis for nowrap overflow when requested', () => {
+      const lines = layout.measure('hello world', 5, {
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+      });
+
+      expect(lines).toEqual([{text: 'hell…', width: 5}]);
+    });
+
+    it('preserves spaces and newlines for pre', () => {
+      const lines = layout.measure('a  b\n c', 10, {whiteSpace: 'pre'});
+
+      expect(lines).toEqual([
+        {text: 'a  b', width: 4},
+        {text: ' c', width: 2},
+      ]);
+    });
+
+    it('preserves spaces while wrapping for pre-wrap', () => {
+      const lines = layout.measure('a  b c', 4, {whiteSpace: 'pre-wrap'});
+
+      expect(lines).toEqual([
+        {text: 'a  b', width: 4},
+        {text: ' c', width: 2},
+      ]);
+    });
+  });
+
   describe('edge cases', () => {
     it('handles a single character', () => {
       const lines = layout.measure('x', 80);

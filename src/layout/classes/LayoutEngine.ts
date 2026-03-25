@@ -7,7 +7,7 @@ import type {Element} from '../../dom/classes/Element';
 import type {CharacterData} from '../../dom/classes/CharacterData';
 import type {StyleEngine} from '../../css/classes/StyleEngine';
 import type {ComputedStyle} from '../../css/types';
-import type {LayoutBox} from '../types';
+import type {LayoutBox, TextLayoutOptions} from '../types';
 
 /**
  * Top-level layout engine that takes a DOM tree and computed styles, runs
@@ -116,7 +116,9 @@ export class LayoutEngine {
     }
 
     // Resolve percentage values in the computed style relative to parent
-    const resolvedStyle = this.resolvePercentages(computedStyle, availableWidth, availableHeight);
+    const resolvedStyle = this.normalizeDisplay(
+      this.resolvePercentages(computedStyle, availableWidth, availableHeight),
+    );
 
     // Collect text lines and child elements
     const textLines: string[] = [];
@@ -124,14 +126,24 @@ export class LayoutEngine {
 
     this.collectChildren(element, childElements, textLines);
 
-    // Determine content width for text measurement (need to pre-compute)
+    // Determine content dimensions for text measurement and percentage resolution
     const contentWidth = this.estimateContentWidth(resolvedStyle, availableWidth);
+    const contentHeight = this.estimateContentHeight(resolvedStyle, availableHeight);
 
     // Measure text if present
     const measuredTextLines: string[] = [];
 
+    const textOptions: TextLayoutOptions = {
+      whiteSpace:
+        (resolvedStyle.get('white-space') as TextLayoutOptions['whiteSpace'] | undefined) ??
+        'normal',
+      textOverflow:
+        (resolvedStyle.get('text-overflow') as TextLayoutOptions['textOverflow'] | undefined) ??
+        'clip',
+    };
+
     for (const text of textLines) {
-      const measured = this.textLayout.measure(text, contentWidth);
+      const measured = this.textLayout.measure(text, contentWidth, textOptions);
 
       for (const line of measured) {
         if (line.text.length > 0 || measured.length === 1) {
@@ -153,7 +165,7 @@ export class LayoutEngine {
       const childBox = this.layoutElement(
         child,
         contentWidth,
-        availableHeight,
+        contentHeight,
         0,
         0,
         incremental,
@@ -235,6 +247,63 @@ export class LayoutEngine {
     const outerWidth = availableWidth - horizontalMargin;
 
     return Math.max(0, outerWidth - horizontalBorderPadding);
+  }
+
+  /**
+   * Estimates the content height for an element before full layout, used for
+   * child percentage resolution. Accounts for explicit height, padding,
+   * margin, and border.
+   */
+  private estimateContentHeight(computedStyle: ComputedStyle, availableHeight: number): number {
+    const boxSizing = computedStyle.get('box-sizing') ?? 'border-box';
+    const explicitHeight = this.parseDimension(computedStyle.get('height'));
+
+    const borderStyle = computedStyle.get('border-style');
+    const hasBorder = borderStyle !== undefined && borderStyle !== 'none' && borderStyle !== '';
+    const borderWidth = hasBorder ? 1 : 0;
+
+    const paddingTop = this.parseCellValue(computedStyle.get('padding-top'));
+    const paddingBottom = this.parseCellValue(computedStyle.get('padding-bottom'));
+    const marginTop = this.parseCellValue(computedStyle.get('margin-top'));
+    const marginBottom = this.parseCellValue(computedStyle.get('margin-bottom'));
+
+    const verticalBorderPadding = borderWidth + paddingTop + paddingBottom + borderWidth;
+    const verticalMargin = marginTop + marginBottom;
+
+    if (explicitHeight !== null) {
+      if (boxSizing === 'border-box') {
+        return Math.max(0, explicitHeight - verticalBorderPadding);
+      }
+
+      return explicitHeight;
+    }
+
+    const outerHeight = availableHeight - verticalMargin;
+
+    return Math.max(0, outerHeight - verticalBorderPadding);
+  }
+
+  /**
+   * Normalizes display shorthands used by the architecture.
+   */
+  private normalizeDisplay(computedStyle: ComputedStyle): ComputedStyle {
+    const display = computedStyle.get('display');
+
+    if (display !== 'inline') {
+      return computedStyle;
+    }
+
+    const normalized = new Map(computedStyle);
+
+    if (!normalized.has('flex-direction')) {
+      normalized.set('flex-direction', 'row');
+    }
+
+    if (!normalized.has('flex-wrap')) {
+      normalized.set('flex-wrap', 'wrap');
+    }
+
+    return normalized;
   }
 
   /**

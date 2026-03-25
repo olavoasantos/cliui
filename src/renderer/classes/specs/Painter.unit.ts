@@ -223,6 +223,98 @@ describe('Painter', () => {
     });
   });
 
+  describe('text alignment', () => {
+    it('centers text horizontally when text-align is center', () => {
+      const buffer = new CellBuffer(10, 4);
+      const box = createBox({
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 8,
+        contentHeight: 1,
+        textLines: ['hi'],
+        computedStyle: style({'text-align': 'center'}),
+      });
+
+      painter.paint(box, buffer);
+
+      expect(buffer.get(4, 1)?.char).toBe('h');
+      expect(buffer.get(5, 1)?.char).toBe('i');
+    });
+
+    it('bottom-aligns text vertically when vertical-align is bottom', () => {
+      const buffer = new CellBuffer(8, 6);
+      const box = createBox({
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 4,
+        contentHeight: 3,
+        textLines: ['hi'],
+        computedStyle: style({'vertical-align': 'bottom'}),
+      });
+
+      painter.paint(box, buffer);
+
+      expect(buffer.get(1, 3)?.char).toBe('h');
+      expect(buffer.get(2, 3)?.char).toBe('i');
+    });
+  });
+
+  describe('overflow clipping', () => {
+    it('clips text to the content area when overflow is hidden', () => {
+      const buffer = new CellBuffer(8, 4);
+      const box = createBox({
+        x: 0,
+        y: 0,
+        width: 6,
+        height: 3,
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 2,
+        contentHeight: 1,
+        textLines: ['hello'],
+        computedStyle: style({overflow: 'hidden'}),
+      });
+
+      painter.paint(box, buffer);
+
+      expect(buffer.get(1, 1)?.char).toBe('h');
+      expect(buffer.get(2, 1)?.char).toBe('e');
+      expect(buffer.get(3, 1)?.char).toBe(' ');
+    });
+
+    it('intersects nested overflow clipping regions', () => {
+      const buffer = new CellBuffer(8, 5);
+      const child = createBox({
+        x: 1,
+        y: 1,
+        width: 4,
+        height: 2,
+        contentX: 2,
+        contentY: 1,
+        contentWidth: 3,
+        contentHeight: 1,
+        textLines: ['xyz'],
+        computedStyle: style({overflow: 'hidden'}),
+      });
+      const parent = createBox({
+        x: 0,
+        y: 0,
+        width: 3,
+        height: 3,
+        contentX: 0,
+        contentY: 0,
+        contentWidth: 2,
+        contentHeight: 2,
+        computedStyle: style({overflow: 'hidden'}),
+        children: [child],
+      });
+
+      painter.paint(parent, buffer);
+
+      expect(buffer.get(2, 1)?.char).toBe(' ');
+    });
+  });
+
   describe('paint order', () => {
     it('paints children after their parent so they can overwrite cells', () => {
       const buffer = new CellBuffer(8, 4);

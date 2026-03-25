@@ -1,41 +1,53 @@
 import {cellWidth} from '../utilities/cellWidth';
 
-import type {TextLine} from '../types';
+import type {TextLayoutOptions, TextLine} from '../types';
 
 const segmenter = new Intl.Segmenter();
 
 /**
  * Measures text and performs word wrapping for terminal layout.
  *
- * Splits text into lines that fit within a given available width, measuring
- * each grapheme cluster using {@link cellWidth}. Currently implements
- * `white-space: normal` semantics — consecutive whitespace is collapsed and
- * text wraps at word boundaries. Additional `white-space` modes (`nowrap`,
- * `pre`, `pre-wrap`) are deferred to Phase 2.
+ * Supports the milestone text layout modes: `white-space: normal`, `nowrap`,
+ * `pre`, and `pre-wrap`, plus `text-overflow: clip | ellipsis` for unwrapped
+ * content.
  */
 export class TextLayout {
   /**
    * Measures the given text and wraps it to fit within `availableWidth`.
    *
-   * Words are split at whitespace boundaries. When a single word is wider
-   * than `availableWidth`, it is broken at grapheme boundaries to fit.
-   * Consecutive whitespace is collapsed to a single space (matching
-   * `white-space: normal` behavior).
-   *
    * @param text - The text content to measure and wrap.
    * @param availableWidth - The maximum terminal cell width per line. Must be
    *   at least 1.
-   * @returns An array of {@link TextLine} objects, one per wrapped line.
+   * @param options - Text layout options derived from computed style.
+   * @returns An array of {@link TextLine} objects, one per measured line.
    */
-  measure(text: string, availableWidth: number): TextLine[] {
+  measure(text: string, availableWidth: number, options: TextLayoutOptions = {}): TextLine[] {
     if (text.length === 0) {
       return [{text: '', width: 0}];
     }
 
     const effectiveWidth = Math.max(1, Math.floor(availableWidth));
+    const whiteSpace = options.whiteSpace ?? 'normal';
+    const textOverflow = options.textOverflow ?? 'clip';
 
-    // Collapse whitespace (white-space: normal semantics)
-    const collapsed = text.replace(/\s+/g, ' ').trim();
+    switch (whiteSpace) {
+      case 'nowrap':
+        return [this.truncateIfNeeded(this.collapseWhitespace(text), effectiveWidth, textOverflow)];
+      case 'pre':
+        return this.measurePre(text, effectiveWidth, textOverflow);
+      case 'pre-wrap':
+        return this.measurePreWrap(text, effectiveWidth);
+      case 'normal':
+      default:
+        return this.measureNormal(text, effectiveWidth);
+    }
+  }
+
+  /**
+   * Measures `white-space: normal` text.
+   */
+  private measureNormal(text: string, availableWidth: number): TextLine[] {
+    const collapsed = this.collapseWhitespace(text);
 
     if (collapsed.length === 0) {
       return [{text: '', width: 0}];
@@ -50,53 +62,153 @@ export class TextLayout {
     for (const word of words) {
       const wordWidth = cellWidth(word);
 
-      // Word fits on the current line (with a space separator if needed)
       if (currentText.length === 0) {
-        // First word on the line
-        if (wordWidth <= effectiveWidth) {
+        if (wordWidth <= availableWidth) {
           currentText = word;
           currentWidth = wordWidth;
         } else {
-          // Word is wider than available width — break by grapheme
-          this.breakWord(word, effectiveWidth, lines, (t, w) => {
-            currentText = t;
-            currentWidth = w;
+          this.breakWord(word, availableWidth, lines, (nextText, nextWidth) => {
+            currentText = nextText;
+            currentWidth = nextWidth;
           });
         }
       } else {
-        // Not the first word — need a space before it
-        const spaceWidth = 1;
-        const projectedWidth = currentWidth + spaceWidth + wordWidth;
+        const projectedWidth = currentWidth + 1 + wordWidth;
 
-        if (projectedWidth <= effectiveWidth) {
+        if (projectedWidth <= availableWidth) {
           currentText += ' ' + word;
           currentWidth = projectedWidth;
         } else {
-          // Flush the current line and start a new one
           lines.push({text: currentText, width: currentWidth});
           currentText = '';
           currentWidth = 0;
 
-          if (wordWidth <= effectiveWidth) {
+          if (wordWidth <= availableWidth) {
             currentText = word;
             currentWidth = wordWidth;
           } else {
-            // Word wider than available width — break by grapheme
-            this.breakWord(word, effectiveWidth, lines, (t, w) => {
-              currentText = t;
-              currentWidth = w;
+            this.breakWord(word, availableWidth, lines, (nextText, nextWidth) => {
+              currentText = nextText;
+              currentWidth = nextWidth;
             });
           }
         }
       }
     }
 
-    // Flush the last line
     if (currentText.length > 0 || lines.length === 0) {
       lines.push({text: currentText, width: currentWidth});
     }
 
     return lines;
+  }
+
+  /**
+   * Measures `white-space: pre` text.
+   */
+  private measurePre(
+    text: string,
+    availableWidth: number,
+    textOverflow: 'clip' | 'ellipsis',
+  ): TextLine[] {
+    const lines = text
+      .split('\n')
+      .map((line) => this.truncateIfNeeded(line, availableWidth, textOverflow));
+
+    return lines.length > 0 ? lines : [{text: '', width: 0}];
+  }
+
+  /**
+   * Measures `white-space: pre-wrap` text.
+   */
+  private measurePreWrap(text: string, availableWidth: number): TextLine[] {
+    const logicalLines = text.split('\n');
+    const measuredLines: TextLine[] = [];
+
+    for (const logicalLine of logicalLines) {
+      if (logicalLine.length === 0) {
+        measuredLines.push({text: '', width: 0});
+        continue;
+      }
+
+      let currentText = '';
+      let currentWidth = 0;
+
+      for (const {segment} of segmenter.segment(logicalLine)) {
+        const graphemeWidth = cellWidth(segment);
+
+        if (currentWidth + graphemeWidth > availableWidth && currentText.length > 0) {
+          measuredLines.push({text: currentText, width: currentWidth});
+          currentText = '';
+          currentWidth = 0;
+        }
+
+        currentText += segment;
+        currentWidth += graphemeWidth;
+      }
+
+      measuredLines.push({text: currentText, width: currentWidth});
+    }
+
+    return measuredLines.length > 0 ? measuredLines : [{text: '', width: 0}];
+  }
+
+  /**
+   * Truncates a line when `text-overflow: ellipsis` applies.
+   */
+  private truncateIfNeeded(
+    text: string,
+    availableWidth: number,
+    textOverflow: 'clip' | 'ellipsis',
+  ): TextLine {
+    const width = cellWidth(text);
+
+    if (width <= availableWidth || textOverflow === 'clip') {
+      return this.clipToWidth(text, availableWidth);
+    }
+
+    if (availableWidth <= 0) {
+      return {text: '', width: 0};
+    }
+
+    if (availableWidth === 1) {
+      return {text: '…', width: 1};
+    }
+
+    const clipped = this.clipToWidth(text, availableWidth - 1);
+
+    return {
+      text: clipped.text + '…',
+      width: clipped.width + 1,
+    };
+  }
+
+  /**
+   * Clips text to a maximum width without adding an ellipsis.
+   */
+  private clipToWidth(text: string, availableWidth: number): TextLine {
+    let clippedText = '';
+    let clippedWidth = 0;
+
+    for (const {segment} of segmenter.segment(text)) {
+      const graphemeWidth = cellWidth(segment);
+
+      if (clippedWidth + graphemeWidth > availableWidth) {
+        break;
+      }
+
+      clippedText += segment;
+      clippedWidth += graphemeWidth;
+    }
+
+    return {text: clippedText, width: clippedWidth};
+  }
+
+  /**
+   * Collapses whitespace according to `white-space: normal|nowrap` semantics.
+   */
+  private collapseWhitespace(text: string): string {
+    return text.replace(/\s+/g, ' ').trim();
   }
 
   /**
@@ -125,8 +237,6 @@ export class TextLayout {
       lineWidth += graphemeWidth;
     }
 
-    // The remaining fragment becomes the current line (not flushed yet,
-    // because more words might fit after it)
     setCurrent(lineText, lineWidth);
   }
 }

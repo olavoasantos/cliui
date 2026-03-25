@@ -24,10 +24,8 @@ const NAMED_COLORS: Record<string, RGBColor> = {
 /**
  * Paints layout boxes into a renderer cell buffer.
  *
- * The painter performs the visual phase of rendering for Phase 1: it fills
- * backgrounds, draws one-cell borders, and writes text with styling
- * attributes into the content area. Children are painted after their parent,
- * so later descendants can visually overwrite earlier cells.
+ * Supports text alignment, vertical alignment, and nested `overflow: hidden`
+ * clipping in addition to the Phase 1 background, border, and text painting.
  */
 export class Painter {
   /**
@@ -40,29 +38,36 @@ export class Painter {
     const list = Array.isArray(boxes) ? boxes : [boxes];
 
     for (const box of list) {
-      this.paintBox(box, buffer);
+      this.paintBox(box, buffer, null);
     }
   }
 
-  private paintBox(box: LayoutBox, buffer: CellBuffer): void {
+  private paintBox(box: LayoutBox, buffer: CellBuffer, clipRect: ClipRect | null): void {
     const metrics = this.getMetrics(box);
     const textCell = this.createStyledCell(box.computedStyle);
 
-    this.paintBackground(metrics, textCell, buffer);
-    this.paintBorder(metrics, box.computedStyle, textCell, buffer);
-    this.paintText(box, textCell, buffer);
+    this.paintBackground(metrics, textCell, buffer, clipRect);
+    this.paintBorder(metrics, box.computedStyle, textCell, buffer, clipRect);
+    this.paintText(box, textCell, buffer, clipRect);
+
+    const childClipRect = this.createChildClipRect(box, clipRect);
 
     for (const child of box.children) {
-      this.paintBox(child, buffer);
+      this.paintBox(child, buffer, childClipRect);
     }
   }
 
-  private paintBackground(metrics: BoxMetrics, textCell: Cell, buffer: CellBuffer): void {
+  private paintBackground(
+    metrics: BoxMetrics,
+    textCell: Cell,
+    buffer: CellBuffer,
+    clipRect: ClipRect | null,
+  ): void {
     for (let y = metrics.outerY; y < metrics.outerY + metrics.outerHeight; y += 1) {
       for (let x = metrics.outerX; x < metrics.outerX + metrics.outerWidth; x += 1) {
         const existing = buffer.get(x, y);
 
-        if (existing === undefined) {
+        if (existing === undefined || !this.isWithinClipRect(x, y, clipRect)) {
           continue;
         }
 
@@ -79,6 +84,7 @@ export class Painter {
     computedStyle: ComputedStyle,
     textCell: Cell,
     buffer: CellBuffer,
+    clipRect: ClipRect | null,
   ): void {
     if (!metrics.hasBorder || metrics.outerWidth <= 0 || metrics.outerHeight <= 0) {
       return;
@@ -95,49 +101,75 @@ export class Painter {
     const maxX = metrics.outerX + metrics.outerWidth - 1;
     const maxY = metrics.outerY + metrics.outerHeight - 1;
 
-    this.writeCell(buffer, metrics.outerX, metrics.outerY, {
-      ...borderCell,
-      char: characters.topLeft,
-    });
-    this.writeCell(buffer, maxX, metrics.outerY, {
-      ...borderCell,
-      char: characters.topRight,
-    });
-    this.writeCell(buffer, metrics.outerX, maxY, {
-      ...borderCell,
-      char: characters.bottomLeft,
-    });
-    this.writeCell(buffer, maxX, maxY, {
-      ...borderCell,
-      char: characters.bottomRight,
-    });
+    this.writeCell(
+      buffer,
+      metrics.outerX,
+      metrics.outerY,
+      {...borderCell, char: characters.topLeft},
+      clipRect,
+    );
+    this.writeCell(
+      buffer,
+      maxX,
+      metrics.outerY,
+      {...borderCell, char: characters.topRight},
+      clipRect,
+    );
+    this.writeCell(
+      buffer,
+      metrics.outerX,
+      maxY,
+      {...borderCell, char: characters.bottomLeft},
+      clipRect,
+    );
+    this.writeCell(buffer, maxX, maxY, {...borderCell, char: characters.bottomRight}, clipRect);
 
     for (let x = metrics.outerX + 1; x < maxX; x += 1) {
-      this.writeCell(buffer, x, metrics.outerY, {...borderCell, char: characters.horizontal});
-      this.writeCell(buffer, x, maxY, {...borderCell, char: characters.horizontal});
+      this.writeCell(
+        buffer,
+        x,
+        metrics.outerY,
+        {...borderCell, char: characters.horizontal},
+        clipRect,
+      );
+      this.writeCell(buffer, x, maxY, {...borderCell, char: characters.horizontal}, clipRect);
     }
 
     for (let y = metrics.outerY + 1; y < maxY; y += 1) {
-      this.writeCell(buffer, metrics.outerX, y, {...borderCell, char: characters.vertical});
-      this.writeCell(buffer, maxX, y, {...borderCell, char: characters.vertical});
+      this.writeCell(
+        buffer,
+        metrics.outerX,
+        y,
+        {...borderCell, char: characters.vertical},
+        clipRect,
+      );
+      this.writeCell(buffer, maxX, y, {...borderCell, char: characters.vertical}, clipRect);
     }
   }
 
-  private paintText(box: LayoutBox, textCell: Cell, buffer: CellBuffer): void {
+  private paintText(
+    box: LayoutBox,
+    textCell: Cell,
+    buffer: CellBuffer,
+    clipRect: ClipRect | null,
+  ): void {
     if (box.textLines === undefined || box.textLines.length === 0) {
       return;
     }
 
+    const startY = this.resolveTextStartY(box);
+
     for (let row = 0; row < box.textLines.length; row += 1) {
-      const y = box.contentY + row;
+      const y = startY + row;
 
       if (y >= box.contentY + box.contentHeight) {
         break;
       }
 
-      let x = box.contentX;
+      const line = box.textLines[row]!;
+      let x = this.resolveTextStartX(box, line);
 
-      for (const {segment} of segmenter.segment(box.textLines[row]!)) {
+      for (const {segment} of segmenter.segment(line)) {
         const width = Math.max(0, cellWidth(segment));
 
         if (width === 0) {
@@ -148,20 +180,14 @@ export class Painter {
           break;
         }
 
-        this.writeCell(buffer, x, y, {
-          ...textCell,
-          char: segment,
-        });
+        this.writeCell(buffer, x, y, {...textCell, char: segment}, clipRect);
 
         for (let offset = 1; offset < width; offset += 1) {
           if (x + offset >= box.contentX + box.contentWidth) {
             break;
           }
 
-          this.writeCell(buffer, x + offset, y, {
-            ...textCell,
-            char: ' ',
-          });
+          this.writeCell(buffer, x + offset, y, {...textCell, char: ' '}, clipRect);
         }
 
         x += width;
@@ -254,12 +280,94 @@ export class Painter {
     return Math.min(255, Math.max(0, value));
   }
 
-  private writeCell(buffer: CellBuffer, x: number, y: number, cell: Cell): void {
-    if (buffer.get(x, y) === undefined) {
+  private writeCell(
+    buffer: CellBuffer,
+    x: number,
+    y: number,
+    cell: Cell,
+    clipRect: ClipRect | null,
+  ): void {
+    if (buffer.get(x, y) === undefined || !this.isWithinClipRect(x, y, clipRect)) {
       return;
     }
 
     buffer.set(x, y, cell);
+  }
+
+  private resolveTextStartX(box: LayoutBox, line: string): number {
+    const textAlign = box.computedStyle.get('text-align') ?? 'left';
+    const lineWidth = cellWidth(line);
+    const freeSpace = Math.max(0, box.contentWidth - lineWidth);
+
+    switch (textAlign) {
+      case 'center':
+        return box.contentX + Math.floor(freeSpace / 2);
+      case 'right':
+        return box.contentX + freeSpace;
+      case 'left':
+      default:
+        return box.contentX;
+    }
+  }
+
+  private resolveTextStartY(box: LayoutBox): number {
+    const verticalAlign = box.computedStyle.get('vertical-align') ?? 'top';
+    const textHeight = box.textLines?.length ?? 0;
+    const freeSpace = Math.max(0, box.contentHeight - textHeight);
+
+    switch (verticalAlign) {
+      case 'middle':
+        return box.contentY + Math.floor(freeSpace / 2);
+      case 'bottom':
+        return box.contentY + freeSpace;
+      case 'top':
+      default:
+        return box.contentY;
+    }
+  }
+
+  private createChildClipRect(box: LayoutBox, clipRect: ClipRect | null): ClipRect | null {
+    if (box.computedStyle.get('overflow') !== 'hidden') {
+      return clipRect;
+    }
+
+    return this.intersectClipRects(clipRect, {
+      x: box.contentX,
+      y: box.contentY,
+      width: box.contentWidth,
+      height: box.contentHeight,
+    });
+  }
+
+  private intersectClipRects(a: ClipRect | null, b: ClipRect): ClipRect {
+    if (a === null) {
+      return b;
+    }
+
+    const x = Math.max(a.x, b.x);
+    const y = Math.max(a.y, b.y);
+    const maxX = Math.min(a.x + a.width, b.x + b.width);
+    const maxY = Math.min(a.y + a.height, b.y + b.height);
+
+    return {
+      x,
+      y,
+      width: Math.max(0, maxX - x),
+      height: Math.max(0, maxY - y),
+    };
+  }
+
+  private isWithinClipRect(x: number, y: number, clipRect: ClipRect | null): boolean {
+    if (clipRect === null) {
+      return true;
+    }
+
+    return (
+      x >= clipRect.x &&
+      y >= clipRect.y &&
+      x < clipRect.x + clipRect.width &&
+      y < clipRect.y + clipRect.height
+    );
   }
 
   private getMetrics(box: LayoutBox): BoxMetrics {
@@ -305,4 +413,11 @@ interface BoxMetrics {
   outerWidth: number;
   outerHeight: number;
   hasBorder: boolean;
+}
+
+interface ClipRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
