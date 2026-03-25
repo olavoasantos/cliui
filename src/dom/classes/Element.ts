@@ -1,8 +1,9 @@
-import {NS, ATTRIBUTES, STYLE, NamespaceURI, NodeType} from '../constants/index';
+import {NS, ATTRIBUTES, STYLE, CLASS_LIST, NamespaceURI, NodeType} from '../constants/index';
 import {ParentNode} from './ParentNode';
 import {NamedNodeMap} from './NamedNodeMap';
 import {Attr} from './Attr';
 import {CSSStyleDeclaration} from './CSSStyleDeclaration';
+import {DOMTokenList} from './DOMTokenList';
 import {serializeNode, serializeChildren, parseHtml} from '../utilities/serialization';
 
 export class Element extends ParentNode {
@@ -21,6 +22,7 @@ export class Element extends ParentNode {
 
   [ATTRIBUTES]!: NamedNodeMap;
   [STYLE]!: CSSStyleDeclaration;
+  [CLASS_LIST]!: DOMTokenList;
 
   [anyProperty: string]: unknown;
 
@@ -31,6 +33,29 @@ export class Element extends ParentNode {
       this[STYLE] = style;
     }
     return style;
+  }
+
+  /**
+   * Gets or sets the class attribute as a space-separated string.
+   */
+  get className(): string {
+    return this.getAttribute('class') ?? '';
+  }
+
+  set className(value: string) {
+    this.setAttribute('class', value);
+  }
+
+  /**
+   * Returns a DOMTokenList for the class attribute.
+   */
+  get classList(): DOMTokenList {
+    let list = this[CLASS_LIST];
+    if (!list) {
+      list = new DOMTokenList(this, 'class');
+      this[CLASS_LIST] = list;
+    }
+    return list;
   }
 
   attributeChangedCallback?(name: string, oldValue: string | null, newValue: string | null): void;
