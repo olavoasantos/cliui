@@ -332,4 +332,331 @@ describe('StyleEngine', () => {
       expect(titleStyle.get('color')).toBe('#7c3aed');
     });
   });
+
+  describe('dirty tracking', () => {
+    describe('markStyleDirty', () => {
+      it('adds an element to the style-dirty set', () => {
+        const {document, engine} = createEnv();
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        engine.markStyleDirty(div);
+
+        expect(engine.getDirtyElements().has(div)).toBe(true);
+      });
+
+      it('does not duplicate elements in the dirty set', () => {
+        const {document, engine} = createEnv();
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+
+        engine.clearDirty();
+        engine.markStyleDirty(div);
+        engine.markStyleDirty(div);
+
+        expect(engine.getDirtyElements().size).toBe(1);
+      });
+    });
+
+    describe('markAllDirty', () => {
+      it('marks every element in the tree as style-dirty', () => {
+        const {document, engine} = createEnv();
+        const parent = document.createElement('div');
+        const child = document.createElement('span');
+        parent.appendChild(child);
+        document.body.appendChild(parent);
+
+        engine.markAllDirty();
+
+        const dirty = engine.getDirtyElements();
+        expect(dirty.has(document.body)).toBe(true);
+        expect(dirty.has(parent)).toBe(true);
+        expect(dirty.has(child)).toBe(true);
+      });
+    });
+
+    describe('clearDirty', () => {
+      it('clears both style-dirty and layout-dirty sets', () => {
+        const {document, engine} = createEnv();
+        const div = document.createElement('div');
+        div.style.display = 'flex';
+        document.body.appendChild(div);
+
+        engine.computeAll();
+        engine.markStyleDirty(div);
+        div.style.display = 'block';
+        engine.recomputeDirty();
+
+        expect(engine.getLayoutDirtyElements().size).toBeGreaterThan(0);
+
+        engine.clearDirty();
+
+        expect(engine.getDirtyElements().size).toBe(0);
+        expect(engine.getLayoutDirtyElements().size).toBe(0);
+      });
+    });
+  });
+
+  describe('recomputeDirty', () => {
+    it('recomputes only dirty elements', () => {
+      const {document, engine} = createEnv();
+      const style = document.createElement('style');
+      style.textContent = '.a { color: red; } .b { color: green; }';
+      document.head.appendChild(style);
+
+      const divA = document.createElement('div');
+      divA.setAttribute('class', 'a');
+      const divB = document.createElement('div');
+      divB.setAttribute('class', 'b');
+      document.body.appendChild(divA);
+      document.body.appendChild(divB);
+
+      // Initial computation
+      engine.computeAll();
+      const originalStyleB = engine.getComputedStyle(divB);
+
+      // Change divA's inline style, then clear all dirty marks and
+      // manually mark only divA so we can verify scoped recomputation
+      divA.style.color = 'purple';
+      engine.clearDirty();
+      engine.markStyleDirty(divA);
+      engine.recomputeDirty();
+
+      // divA should have updated style (inline overrides stylesheet)
+      expect(engine.getComputedStyle(divA).get('color')).toBe('purple');
+      // divB should still return the cached style (same reference)
+      expect(engine.getComputedStyle(divB)).toBe(originalStyleB);
+    });
+
+    it('clears style-dirty set after recomputation', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      engine.markStyleDirty(div);
+      engine.recomputeDirty();
+
+      expect(engine.getDirtyElements().size).toBe(0);
+    });
+
+    it('recomputes children of dirty elements for inheritance', () => {
+      const {document, engine} = createEnv();
+      const parent = document.createElement('div');
+      parent.style.color = 'red';
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      engine.computeAll();
+      expect(engine.getComputedStyle(child).get('color')).toBe('red');
+
+      // Change parent color - only mark parent dirty
+      parent.style.color = 'blue';
+      engine.markStyleDirty(parent);
+      engine.recomputeDirty();
+
+      expect(engine.getComputedStyle(child).get('color')).toBe('blue');
+    });
+  });
+
+  describe('layout-dirty flags', () => {
+    it('marks elements layout-dirty when layout properties change', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      div.style.display = 'flex';
+      document.body.appendChild(div);
+
+      engine.computeAll();
+
+      div.style.display = 'block';
+      engine.markStyleDirty(div);
+      engine.recomputeDirty();
+
+      expect(engine.getLayoutDirtyElements().has(div)).toBe(true);
+    });
+
+    it('does not mark layout-dirty when only non-layout properties change', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      div.style.color = 'red';
+      document.body.appendChild(div);
+
+      engine.computeAll();
+
+      div.style.color = 'blue';
+      engine.markStyleDirty(div);
+      engine.recomputeDirty();
+
+      expect(engine.getLayoutDirtyElements().has(div)).toBe(false);
+    });
+
+    it('marks layout-dirty when padding changes', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      div.style.padding = '1';
+      document.body.appendChild(div);
+
+      engine.computeAll();
+
+      div.style.padding = '2';
+      engine.markStyleDirty(div);
+      engine.recomputeDirty();
+
+      expect(engine.getLayoutDirtyElements().has(div)).toBe(true);
+    });
+
+    it('marks children layout-dirty when inherited layout values change', () => {
+      const {document, engine} = createEnv();
+      const parent = document.createElement('div');
+      parent.style.textAlign = 'left';
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      engine.computeAll();
+
+      parent.style.textAlign = 'center';
+      engine.markStyleDirty(parent);
+      engine.recomputeDirty();
+
+      expect(engine.getLayoutDirtyElements().has(child)).toBe(true);
+    });
+
+    it('clears layout-dirty on each recomputeDirty call', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      div.style.display = 'flex';
+      document.body.appendChild(div);
+
+      engine.computeAll();
+
+      div.style.display = 'block';
+      engine.markStyleDirty(div);
+      engine.recomputeDirty();
+      expect(engine.getLayoutDirtyElements().has(div)).toBe(true);
+
+      // Second recompute with no new dirty elements
+      engine.recomputeDirty();
+      expect(engine.getLayoutDirtyElements().size).toBe(0);
+    });
+
+    it('marks newly computed elements as layout-dirty', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      div.style.display = 'flex';
+      document.body.appendChild(div);
+
+      // Mark dirty without prior cache - should be layout-dirty
+      engine.markStyleDirty(div);
+      engine.recomputeDirty();
+
+      expect(engine.getLayoutDirtyElements().has(div)).toBe(true);
+    });
+  });
+
+  describe('hooks bridge integration', () => {
+    it('marks element style-dirty on setAttribute', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      engine.clearDirty();
+      div.setAttribute('class', 'foo');
+
+      expect(engine.getDirtyElements().has(div)).toBe(true);
+    });
+
+    it('marks element and descendants dirty on class change', () => {
+      const {document, engine} = createEnv();
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      engine.clearDirty();
+      parent.setAttribute('class', 'container');
+
+      expect(engine.getDirtyElements().has(parent)).toBe(true);
+      expect(engine.getDirtyElements().has(child)).toBe(true);
+    });
+
+    it('marks element dirty on removeAttribute', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      div.setAttribute('id', 'main');
+      document.body.appendChild(div);
+
+      engine.clearDirty();
+      div.removeAttribute('id');
+
+      expect(engine.getDirtyElements().has(div)).toBe(true);
+    });
+
+    it('marks inserted element and parent dirty on insertChild', () => {
+      const {document, engine} = createEnv();
+      const parent = document.createElement('div');
+      document.body.appendChild(parent);
+
+      engine.clearDirty();
+      const child = document.createElement('span');
+      parent.appendChild(child);
+
+      expect(engine.getDirtyElements().has(child)).toBe(true);
+      expect(engine.getDirtyElements().has(parent)).toBe(true);
+    });
+
+    it('marks parent and remaining children dirty on removeChild', () => {
+      const {document, engine} = createEnv();
+      const parent = document.createElement('div');
+      const child1 = document.createElement('span');
+      const child2 = document.createElement('span');
+      parent.appendChild(child1);
+      parent.appendChild(child2);
+      document.body.appendChild(parent);
+
+      engine.clearDirty();
+      parent.removeChild(child1);
+
+      expect(engine.getDirtyElements().has(parent)).toBe(true);
+      expect(engine.getDirtyElements().has(child2)).toBe(true);
+    });
+
+    it('marks element dirty on attribute change for selector matching', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      engine.clearDirty();
+      div.setAttribute('data-active', 'true');
+
+      expect(engine.getDirtyElements().has(div)).toBe(true);
+    });
+  });
+
+  describe('detach', () => {
+    it('clears dirty sets on detach', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      engine.markStyleDirty(div);
+      engine.detach();
+
+      expect(engine.getDirtyElements().size).toBe(0);
+      expect(engine.getLayoutDirtyElements().size).toBe(0);
+    });
+
+    it('stops receiving hook notifications after detach', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      engine.detach();
+      engine.clearDirty();
+
+      div.setAttribute('class', 'foo');
+
+      expect(engine.getDirtyElements().size).toBe(0);
+    });
+  });
 });
