@@ -55,6 +55,13 @@ Present to the human:
 2. **Parallel pairs** — which issues are tagged for parallel execution
 3. **External dependency status** — what is already complete, what is missing
 4. **Risks** — complex integration points, large issues, potential blockers
+5. **Pattern-compliance risks** — where milestone items are likely to introduce structural drift, such as:
+   - helpers/constants/types being colocated in class files
+   - multiple utilities being grouped in one file
+   - guard predicates being created as utilities instead of guards
+   - tests being grouped instead of mapped 1:1 to production files
+   - types being derived from runtime implementation objects instead of authored explicitly
+   - unnecessary barrels or trailing `/index` imports
 
 **Gate: Do not proceed until the human approves the plan.**
 
@@ -86,6 +93,10 @@ Write the approved milestone plan to `.ignore/plans/milestone-{n}-plan.md` **bef
 
 [Identified risks and mitigation]
 
+## Pattern-Compliance Risks
+
+[Places where milestone work is likely to drift from repository structure and how to avoid it]
+
 ## Progress Log
 
 [Updated after each issue completes]
@@ -110,7 +121,8 @@ For each issue, follow the `implement-issue` skill workflow. Each issue produces
 2. Plan the implementation and persist the plan file
 3. Implement with type-first TDD
 4. Verify against Expected Outcomes
-5. Clean up: `pnpm fix`, `pnpm check`, create changeset, commit
+5. Perform a structural compliance audit before considering the issue complete
+6. Clean up: `pnpm fix`, `pnpm check`, create changeset, commit
 
 ### Parallel issues (tagged pairs only)
 
@@ -122,30 +134,50 @@ When reaching issues tagged with `_Can run in parallel_`:
    - The project conventions (`CLAUDE.md`)
    - The design document
    - Instructions to follow the `implement-issue` workflow autonomously
+   - Instructions to perform a structural compliance audit before reporting completion
    - Instructions to commit their work on their worktree branch
 3. **Review results.** When agents complete, review each result:
    - Does the implementation satisfy the Expected Outcomes?
    - Does `pnpm check` pass?
+   - Does the code follow repository structure conventions?
    - Are there conflicts between the branches?
 4. **Merge to main.** For each approved result:
    - Merge the branch into the main working branch
    - If merge conflicts arise, resolve them
    - Run `pnpm check` after each merge to verify integration
+   - Re-run the structural compliance audit after the merge, not just in the worktree branch
 5. **Clean up.** After successful merge, the worktree branch is no longer needed. Delete the branch to keep the repository clean.
+
+### Structural compliance audit
+
+After each issue or merged parallel group, explicitly verify:
+
+- one concern per file
+- class files contain only the class export
+- utility files contain one utility export
+- guard predicates live in guard files, not utilities
+- constants and types live in their proper layers
+- tests are split per production file
+- imports avoid trailing `/index`
+- unnecessary barrel files were not introduced
+
+Do not mark an issue complete in the milestone plan until this audit passes.
 
 ### Between issues
 
 After completing each issue (or parallel group):
 
 1. Update the milestone plan: mark the issue complete in the execution sequence, add a note to the Progress Log
-2. If cadence is issue-by-issue, pause for approval
-3. If autonomous, continue unless a blocker or checkpoint is reached
+2. Record whether the structural compliance audit passed cleanly or required fixes
+3. If cadence is issue-by-issue, pause for approval
+4. If autonomous, continue unless a blocker or checkpoint is reached
 
 ### Handling failures
 
 - **Issue fails in a parallel group:** The other issue is not affected. Report the failure, merge the successful one, and decide with the human whether to retry or skip the failed issue.
 - **Merge conflict:** Resolve manually. If the conflict is substantial, it means the parallel tag was optimistic — note this for the human.
 - **Integration failure:** If `pnpm check` fails after merging, investigate which merge introduced the failure. Roll back that merge and fix before proceeding.
+- **Structural compliance failure:** Do not proceed to the next issue until the file structure, test mapping, and import conventions are corrected.
 - **Sequential issue fails:** Follow the error handling tiers from the `implement-issue` skill. Do not skip to the next issue without resolving or getting human approval.
 
 ## Phase 4: Completion
@@ -153,13 +185,15 @@ After completing each issue (or parallel group):
 After all issues are complete:
 
 1. **Final quality gate.** Run `pnpm check` and compare against the pre-flight baseline.
-2. **Milestone review.** Present a summary:
+2. **Final structural audit.** Review the final milestone diff for repository-pattern compliance across all touched files.
+3. **Milestone review.** Present a summary:
    - Per-issue status (complete, partial, skipped)
    - Total changesets created
    - Any TODO comments added for out-of-scope discoveries
    - Any convention suggestions that arose
    - Quality gate comparison (before vs. after)
-3. **Update the milestone plan.** Mark as complete with a final summary in the Progress Log.
+   - Structural compliance outcomes (clean, required cleanup, remaining concerns)
+4. **Update the milestone plan.** Mark as complete with a final summary in the Progress Log.
 
 ## Resuming an Interrupted Session
 

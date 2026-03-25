@@ -53,6 +53,13 @@ Draft an implementation plan covering:
 - **Testing approach** — unit, integration, performance benchmarks as appropriate.
 - **Codebase analogs** — existing implementations to use as reference.
 - **Risks or unknowns.**
+- **Pattern compliance review** for each planned file:
+  - is it a class, utility, guard, constant, or type?
+  - does each concern live in its own file?
+  - are TypeScript types authored explicitly instead of inferred from runtime implementations?
+  - are guard-like predicates placed in guard files instead of utility files?
+  - will tests map 1:1 to source files?
+  - can imports avoid trailing `/index` and unnecessary barrels?
 
 Present the plan. Incorporate feedback.
 
@@ -77,6 +84,12 @@ Ask how the human wants to work:
 3. **Execute.** Follow the type-first TDD progression adapted to the task.
 4. **Verify.** After each meaningful change, run relevant tests, type checker, and linter. Fix issues immediately.
 5. **Update the plan.** Mark steps complete in `.ignore/plans/issue-{id}-plan.md`.
+6. **Audit structure.** Before moving on, confirm you did not:
+   - place helpers/constants/types in a class file
+   - place multiple utilities in one file
+   - place type guards in utility files
+   - derive types from runtime implementation objects where explicit TS types should exist
+   - add trailing `/index` imports or unnecessary barrel usage
 
 ### Hard rules
 
@@ -101,8 +114,16 @@ If you find yourself layering fix on fix — stop. Roll back to the last known-g
 
 1. **Expected Outcomes checklist.** Re-read the issue's Expected Outcomes from disk. Verify each one individually against the actual code.
 2. **Anti-fake check.** Are there mocks/stubs that should not exist? Is every piece of logic actually implemented? Do tests verify real behavior?
-3. **Full quality gate.** Run `pnpm check`. Compare against your pre-flight baseline — you must not have broken anything.
-4. **Diff review.** Review your full diff for accidentally modified files, debug logging, commented-out code, or development artifacts.
+3. **Pattern compliance check.** Review the resulting code for structural compliance:
+   - one concern per file
+   - class files contain only the class export
+   - utility files contain one utility export
+   - guard predicates live in guard files
+   - constants and types live in their proper layers
+   - tests are split per production file
+   - imports avoid trailing `/index`
+4. **Full quality gate.** Run `pnpm check`. Compare against your pre-flight baseline — you must not have broken anything.
+5. **Diff review.** Review your full diff for accidentally modified files, debug logging, commented-out code, development artifacts, or barrel files that should not exist.
 
 ## Phase 5: Clean Up
 

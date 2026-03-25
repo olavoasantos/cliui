@@ -46,6 +46,16 @@ src/services/
 - Error classes only need tests if they implement custom methods.
 - Performance-critical code paths (layout, rendering, diffing, parsing) should have benchmarks.
 
+## Mapping Rules
+
+- **One production file under test per test file.**
+- Utility tests must map 1:1 with utility source files:
+  - `parseSelector.ts` → `specs/parseSelector.unit.ts`
+  - `serializeNode.ts` → `specs/serializeNode.unit.ts`
+- Class tests must map 1:1 with class source files.
+- Do not create grouped utility spec files such as `selectors.unit.ts` or `serialization.unit.ts` when the production code is split across multiple utility files.
+- Shared setup is allowed, but the assertions in a test file should focus on one production module.
+
 ## Test Utilities
 
 Use the `testing/` directory within modules for shared mocks, factories, and test utilities.
@@ -104,5 +114,6 @@ describe('MyClass', () => {
 
 1. Identify the correct test type (unit, integration, performance, or e2e)
 2. Create the test file in the correct `specs/` folder with the correct suffix
-3. Use shared test utilities from `src/testing/` where appropriate
-4. Run `pnpm run check` to verify tests pass
+3. Verify the test file maps to exactly one production file
+4. Use shared test utilities from `src/testing/` where appropriate
+5. Run `pnpm run check` to verify tests pass
