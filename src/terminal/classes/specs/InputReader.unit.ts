@@ -19,6 +19,8 @@ function createReadableInput() {
       listeners.get(event)?.delete(listener as (chunk: Buffer) => void);
       return this;
     },
+    resume: vi.fn(),
+    pause: vi.fn(),
   };
 
   return {
@@ -109,6 +111,8 @@ describe('InputReader', () => {
     reader.stop();
     emit('b');
 
+    expect(input.resume).toHaveBeenCalledOnce();
+    expect(input.pause).toHaveBeenCalledOnce();
     expect(listener.mock.calls).toEqual([
       [{type: 'key', key: 'a', code: 'KeyA', ctrl: false, alt: false, shift: false}],
       [{type: 'key', key: 'F5', code: 'F5', ctrl: false, alt: false, shift: false}],

@@ -50,6 +50,16 @@ export interface TerminalReadableInput extends TerminalInput {
    * @returns The stream for chaining when supported.
    */
   off?(event: 'data', listener: (chunk: Buffer | string) => void): TerminalReadableInput;
+
+  /**
+   * Resumes the readable stream when supported.
+   */
+  resume?(): void;
+
+  /**
+   * Pauses the readable stream when supported.
+   */
+  pause?(): void;
 }
 
 /**

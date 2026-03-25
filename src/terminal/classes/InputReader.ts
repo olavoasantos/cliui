@@ -77,6 +77,7 @@ export class InputReader {
 
     this.listener = listener;
     this.input.on?.('data', this.boundDataListener);
+    this.input.resume?.();
   }
 
   /**
@@ -88,6 +89,7 @@ export class InputReader {
     }
 
     this.input.off?.('data', this.boundDataListener);
+    this.input.pause?.();
     this.listener = undefined;
   }
 
