@@ -1,1 +1,63 @@
-export {};
+// Classes
+export {Window} from './classes/Window';
+export {Document} from './classes/Document';
+export {Node} from './classes/Node';
+export {Element} from './classes/Element';
+export {ParentNode} from './classes/ParentNode';
+export {ChildNode} from './classes/ChildNode';
+export {CharacterData} from './classes/CharacterData';
+export {Text} from './classes/Text';
+export {Comment} from './classes/Comment';
+export {DocumentFragment} from './classes/DocumentFragment';
+export {Attr} from './classes/Attr';
+export {NamedNodeMap} from './classes/NamedNodeMap';
+export {NodeList} from './classes/NodeList';
+export {EventTarget} from './classes/EventTarget';
+export {Event} from './classes/Event';
+export {CustomEvent} from './classes/CustomEvent';
+export {UIEvent} from './classes/UIEvent';
+export {KeyboardEvent} from './classes/KeyboardEvent';
+export {MouseEvent} from './classes/MouseEvent';
+export {WheelEvent} from './classes/WheelEvent';
+export {FocusEvent} from './classes/FocusEvent';
+export {ClipboardEvent} from './classes/ClipboardEvent';
+export {ErrorEvent} from './classes/ErrorEvent';
+export {PromiseRejectionEvent} from './classes/PromiseRejectionEvent';
+export {ToggleEvent} from './classes/ToggleEvent';
+export {CSSStyleDeclaration, expandShorthand} from './classes/CSSStyleDeclaration';
+export {DOMTokenList} from './classes/DOMTokenList';
+export {CustomElementRegistryImplementation as CustomElementRegistry} from './classes/CustomElementRegistry';
+export {MutationObserver} from './classes/MutationObserver';
+export {HTMLElement} from './classes/HTMLElement';
+export {HTMLBodyElement} from './classes/HTMLBodyElement';
+export {HTMLHeadElement} from './classes/HTMLHeadElement';
+export {HTMLHtmlElement} from './classes/HTMLHtmlElement';
+export {HTMLTemplateElement} from './classes/HTMLTemplateElement';
+export {HTMLStyleElement} from './classes/HTMLStyleElement';
+export {SVGElement} from './classes/SVGElement';
+
+// Utilities
+export {parseSelector, querySelector, querySelectorAll, matches} from './utilities/selectors';
+export {parseHtml, serializeNode, serializeChildren} from './utilities/serialization';
+
+// Constants
+export {NodeType, NamespaceURI, EventPhase, HOOKS} from './constants/index';
+
+// Types
+export type {
+  Hooks,
+  EventInit,
+  UIEventInit,
+  KeyboardEventInit,
+  MouseEventInit,
+  WheelEventInit,
+  FocusEventInit,
+  ClipboardEventInit,
+  ErrorEventInit,
+  PromiseRejectionEventInit,
+  ToggleEventInit,
+  SelectorCombinator,
+  SelectorMatcherType,
+  SelectorMatcher,
+  SelectorPart,
+} from './types/index';

@@ -18,6 +18,7 @@ import {Text} from './Text';
 import {Comment} from './Comment';
 import {DocumentFragment} from './DocumentFragment';
 import {HTMLTemplateElement} from './HTMLTemplateElement';
+import {HTMLStyleElement} from './HTMLStyleElement';
 import {isParentNode, cloneNode} from '../utilities/shared';
 import {HTMLBodyElement} from './HTMLBodyElement';
 import {HTMLHeadElement} from './HTMLHeadElement';
@@ -103,6 +104,8 @@ export function createElement(ownerDocument: Document, name: string, namespace?:
     element = new SVGElement();
   } else if (lowerName === 'template') {
     element = new HTMLTemplateElement();
+  } else if (lowerName === 'style') {
+    element = new HTMLStyleElement();
   } else {
     const CustomElement = ownerDocument.defaultView.customElements.get(name);
     element = CustomElement ? (new CustomElement() as unknown as Element) : new Element();
