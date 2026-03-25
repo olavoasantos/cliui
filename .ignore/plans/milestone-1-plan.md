@@ -100,6 +100,12 @@
 | ----- | ----- | ----- | ------------ | ------------- | ------ |
 | 1 | M1T28 | Keyboard event dispatcher | M1T3, M1T6, M1T27 (done) | — | Complete |
 
+### Batch 12: M1T29 (Terminal Class and Render Loop)
+
+| Order | Issue | Title | Dependencies | Parallel With | Status |
+| ----- | ----- | ----- | ------------ | ------------- | ------ |
+| 1 | M1T29 | Terminal class and render loop | M1T3, M1T15, M1T16, M1T20, M1T25, M1T26, M1T28 (done) | — | Complete |
+
 ## Progress Log
 
 - Batch 1 (M1T1–M1T5): Complete. 228 unit tests passing.
@@ -153,3 +159,10 @@
   - Key events now dispatch as synthetic `keydown` followed by `keyup`, while paste events dispatch as `paste` with clipboard text access
   - Added mapped unit tests for modifier/property mapping, dispatch ordering, and paste event targeting
   - Structural compliance audit passed cleanly; dispatch concerns remain isolated to `src/terminal/classes/EventDispatcher.ts` and mapped tests
+- Batch 12 (M1T29): Complete. 628 unit tests and 2 integration tests passing.
+  - Added the public `Terminal` class to wire DOM creation, style computation, layout, rendering, terminal mode lifecycle, input reading, and DOM event dispatch
+  - `run()` now starts terminal mode management, attaches raw input parsing to DOM dispatch, performs an initial frame render, and begins the background frame loop; `exit()` tears everything down cleanly
+  - Added public root exports for `Terminal`, core DOM classes, terminal I/O types, and terminal constructor options
+  - Added integration coverage for end-to-end DOM-to-ANSI output and cleanup behavior
+  - Structural compliance audit passed cleanly; public entry-point concerns remain isolated to `src/classes/Terminal.ts`, `src/types/index.ts`, and mapped integration tests
+- Milestone 1 complete. Final quality gate: `pnpm check` passes with 628 unit tests and 2 integration tests. Structural compliance remained clean across renderer and terminal layers, with no unnecessary barrels or deep nesting introduced.

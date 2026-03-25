@@ -2,6 +2,12 @@
  * Minimal writable stream contract used by terminal infrastructure.
  */
 export interface TerminalOutput {
+  /** Current terminal width in columns, when known. */
+  columns?: number;
+
+  /** Current terminal height in rows, when known. */
+  rows?: number;
+
   /**
    * Writes terminal control bytes or text to the output stream.
    *
