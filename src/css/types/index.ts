@@ -12,3 +12,6 @@ export interface CSSRule {
   selectors: SelectorPart[][];
   declarations: CSSDeclaration[];
 }
+
+/** A map of resolved CSS property names to their computed string values. */
+export type ComputedStyle = Map<string, string>;
