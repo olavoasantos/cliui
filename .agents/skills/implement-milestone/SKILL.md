@@ -123,6 +123,7 @@ For each issue, follow the `implement-issue` skill workflow. Each issue produces
 4. Verify against Expected Outcomes
 5. Perform a structural compliance audit before considering the issue complete
 6. Clean up: `pnpm fix`, `pnpm check`, create changeset, commit
+7. Commit boundary: the issue must be committed before implementation begins on the next issue. Do not batch multiple issues into a single commit unless the human explicitly approves it.
 
 ### Parallel issues (tagged pairs only)
 
@@ -169,8 +170,9 @@ After completing each issue (or parallel group):
 
 1. Update the milestone plan: mark the issue complete in the execution sequence, add a note to the Progress Log
 2. Record whether the structural compliance audit passed cleanly or required fixes
-3. If cadence is issue-by-issue, pause for approval
-4. If autonomous, continue unless a blocker or checkpoint is reached
+3. Ensure the completed issue has been committed before proceeding. Do not carry uncommitted issue work forward into the next issue unless the human explicitly approves that batching.
+4. If cadence is issue-by-issue, pause for approval
+5. If autonomous, continue unless a blocker or checkpoint is reached
 
 ### Handling failures
 

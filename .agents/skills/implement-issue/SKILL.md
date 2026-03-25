@@ -132,7 +132,7 @@ After the human approves the implementation:
 1. **Fix lint and formatting.** Run `pnpm fix` to auto-fix lint and formatting issues.
 2. **Final quality gate.** Run `pnpm check` one last time.
 3. **Create a changeset.** Run `pnpm version:bump` or create a changeset file describing the changes.
-4. **Commit.** Use the `commit` skill. One commit per issue unless the work naturally splits into meaningful atomic commits.
+4. **Commit.** Use the `commit` skill. Each issue must be committed before starting the next issue. Do not batch multiple issues into a single commit unless the human explicitly approves it. If one issue naturally splits into multiple meaningful atomic commits, keep all of those commits within that single issue boundary before moving on.
 5. **Update the plan.** Mark the plan as complete with a final summary in the Progress Log.
 6. **Convention updates.** If convention additions to `CLAUDE.md` were approved during the session, apply them now.
 
