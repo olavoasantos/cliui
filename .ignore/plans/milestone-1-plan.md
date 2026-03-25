@@ -88,6 +88,12 @@
 | ----- | ----- | ----- | ------------ | ------------- | ------ |
 | 1 | M1T26 | Terminal mode management | M0T2 (done) | M1T27 | Complete |
 
+### Batch 10: M1T27 (Keyboard Input Reader)
+
+| Order | Issue | Title | Dependencies | Parallel With | Status |
+| ----- | ----- | ----- | ------------ | ------------- | ------ |
+| 1 | M1T27 | Keyboard input reader | M0T2 (done) | M1T26 | Complete |
+
 ## Progress Log
 
 - Batch 1 (M1T1–M1T5): Complete. 228 unit tests passing.
@@ -131,3 +137,8 @@
   - Added explicit terminal-layer public types for input/output stream contracts and manager configuration
   - Added mapped unit tests covering startup order, optional feature flags, reverse-order shutdown, idempotency, and graceful handling of non-raw-capable inputs
   - Structural compliance audit passed cleanly; terminal mode concerns remain isolated to `src/terminal/classes/TerminalManager.ts`, `src/terminal/types/index.ts`, and mapped tests
+- Batch 10 (M1T27): Complete. 625 unit tests and 1 integration test passing.
+  - Added `InputReader` for buffered raw-byte parsing from readable terminal streams into structured key and paste events
+  - Parser now handles printable characters, control keys, arrow/navigation keys, F1–F12, modifier decoding for CSI sequences, Alt-prefixed keys, and bracketed paste buffering
+  - Added terminal-layer parsed input event types and mapped unit tests for direct parsing, stream subscription lifecycle, partial escape-sequence buffering, and bracketed paste handling
+  - Structural compliance audit passed cleanly; input parsing concerns remain isolated to `src/terminal/classes/InputReader.ts`, `src/terminal/types/index.ts`, and mapped tests

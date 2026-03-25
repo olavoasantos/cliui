@@ -24,6 +24,68 @@ export interface TerminalInput {
 }
 
 /**
+ * Minimal readable terminal input stream contract used by terminal infrastructure.
+ */
+export interface TerminalReadableInput extends TerminalInput {
+  /**
+   * Registers a listener for input chunks.
+   *
+   * @param event - Stream event name.
+   * @param listener - Callback invoked for each chunk.
+   * @returns The stream for chaining when supported.
+   */
+  on?(event: 'data', listener: (chunk: Buffer | string) => void): TerminalReadableInput;
+
+  /**
+   * Removes a previously registered listener.
+   *
+   * @param event - Stream event name.
+   * @param listener - Previously registered callback.
+   * @returns The stream for chaining when supported.
+   */
+  off?(event: 'data', listener: (chunk: Buffer | string) => void): TerminalReadableInput;
+}
+
+/**
+ * Parsed key event emitted from terminal input.
+ */
+export interface TerminalKeyEvent {
+  /** Discriminator for key events. */
+  type: 'key';
+
+  /** DOM-like key value. */
+  key: string;
+
+  /** DOM-like code value. */
+  code: string;
+
+  /** Whether the Control modifier is active. */
+  ctrl: boolean;
+
+  /** Whether the Alt modifier is active. */
+  alt: boolean;
+
+  /** Whether the Shift modifier is active. */
+  shift: boolean;
+}
+
+/**
+ * Parsed paste event emitted from bracketed paste mode.
+ */
+export interface TerminalPasteEvent {
+  /** Discriminator for paste events. */
+  type: 'paste';
+
+  /** Raw pasted text content. */
+  text: string;
+}
+
+/**
+ * Union of parsed terminal input events.
+ */
+export type TerminalInputEvent = TerminalKeyEvent | TerminalPasteEvent;
+
+/**
  * Configuration for terminal mode lifecycle management.
  */
 export interface TerminalManagerOptions {
