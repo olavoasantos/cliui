@@ -1,25 +1,14 @@
 import {cellWidth} from '../../layout/utilities/cellWidth';
 import {BORDER_CHARACTERS} from '../constants/borders';
+import {NAMED_COLORS} from '../constants/namedColors';
+import {PAINTER_SEGMENTER} from '../constants/segmenter';
 import type {Cell, RGBColor, UnderlineStyle} from '../types';
 import {CellBuffer} from './CellBuffer';
 
 import type {LayoutBox} from '../../layout/types';
 import type {ComputedStyle} from '../../css/types';
-
-const segmenter = new Intl.Segmenter();
-const NAMED_COLORS: Record<string, RGBColor> = {
-  black: {r: 0, g: 0, b: 0},
-  white: {r: 255, g: 255, b: 255},
-  red: {r: 255, g: 0, b: 0},
-  green: {r: 0, g: 128, b: 0},
-  blue: {r: 0, g: 0, b: 255},
-  yellow: {r: 255, g: 255, b: 0},
-  magenta: {r: 255, g: 0, b: 255},
-  cyan: {r: 0, g: 255, b: 255},
-  gray: {r: 128, g: 128, b: 128},
-  grey: {r: 128, g: 128, b: 128},
-  purple: {r: 128, g: 0, b: 128},
-};
+import type {BoxMetrics} from '../types/BoxMetrics';
+import type {ClipRect} from '../types/ClipRect';
 
 /**
  * Paints layout boxes into a renderer cell buffer.
@@ -169,7 +158,7 @@ export class Painter {
       const line = box.textLines[row]!;
       let x = this.resolveTextStartX(box, line);
 
-      for (const {segment} of segmenter.segment(line)) {
+      for (const {segment} of PAINTER_SEGMENTER.segment(line)) {
         const width = Math.max(0, cellWidth(segment));
 
         if (width === 0) {
@@ -405,19 +394,4 @@ export class Painter {
 
     return Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
   }
-}
-
-interface BoxMetrics {
-  outerX: number;
-  outerY: number;
-  outerWidth: number;
-  outerHeight: number;
-  hasBorder: boolean;
-}
-
-interface ClipRect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 }

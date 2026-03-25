@@ -1,26 +1,13 @@
-import {HOOKS} from '../constants';
 import {LONGHAND_PROPERTIES, SHORTHAND_PROPERTIES} from '../constants/cssProperties';
 import {camelToKebab} from '../utilities/camelToKebab';
 import {expandShorthand} from '../utilities/expandShorthand';
+import {
+  getCSSStyleDeclarationStore,
+  setCSSStyleDeclarationStore,
+} from '../utilities/getCSSStyleDeclarationStore';
+import {notifyCSSStyleDeclaration} from '../utilities/notifyCSSStyleDeclaration';
 
 import type {Element} from './Element';
-import type {Hooks} from '../types';
-
-const store = new WeakMap<
-  CSSStyleDeclaration,
-  {properties: Map<string, string>; element: Element | null}
->();
-
-function getStore(declaration: CSSStyleDeclaration) {
-  return store.get(declaration)!;
-}
-
-function notify(declaration: CSSStyleDeclaration) {
-  const state = getStore(declaration);
-  if (!state.element) return;
-  const hooks = (state.element as unknown as {[HOOKS]: Partial<Hooks>})[HOOKS];
-  hooks?.setAttribute?.(state.element, 'style', declaration.cssText);
-}
 
 /**
  * A CSSStyleDeclaration-like object that stores CSS property values
@@ -30,7 +17,7 @@ export class CSSStyleDeclaration {
   [property: string]: unknown;
 
   constructor(element?: Element) {
-    store.set(this, {properties: new Map(), element: element ?? null});
+    setCSSStyleDeclarationStore(this, {properties: new Map(), element: element ?? null});
 
     return new Proxy(this, {
       get(target, property) {
@@ -64,24 +51,24 @@ export class CSSStyleDeclaration {
 
   /** Returns the number of explicitly set properties. */
   get length(): number {
-    return getStore(this).properties.size;
+    return getCSSStyleDeclarationStore(this).properties.size;
   }
 
   /** Gets and sets the text of the style declaration. */
   get cssText(): string {
     const parts: string[] = [];
-    for (const [key, value] of getStore(this).properties) {
+    for (const [key, value] of getCSSStyleDeclarationStore(this).properties) {
       parts.push(`${key}: ${value}`);
     }
     return parts.join('; ');
   }
 
   set cssText(value: string) {
-    const state = getStore(this);
+    const state = getCSSStyleDeclarationStore(this);
     state.properties.clear();
 
     if (!value) {
-      notify(this);
+      notifyCSSStyleDeclaration(this);
       return;
     }
 
@@ -97,25 +84,25 @@ export class CSSStyleDeclaration {
       }
     }
 
-    notify(this);
+    notifyCSSStyleDeclaration(this);
   }
 
   /** Returns the property name at the given index. */
   item(index: number): string {
-    const keys = Array.from(getStore(this).properties.keys());
+    const keys = Array.from(getCSSStyleDeclarationStore(this).properties.keys());
     return keys[index] ?? '';
   }
 
   /** Returns the value of a CSS property. */
   getPropertyValue(property: string): string {
     const kebabProperty = camelToKebab(property);
-    return getStore(this).properties.get(kebabProperty) ?? '';
+    return getCSSStyleDeclarationStore(this).properties.get(kebabProperty) ?? '';
   }
 
   /** Sets a CSS property value, expanding shorthands as needed. */
   setProperty(property: string, value: string, batch = false): void {
     const kebabProperty = camelToKebab(property);
-    const state = getStore(this);
+    const state = getCSSStyleDeclarationStore(this);
 
     if (value === '' || value == null) {
       this.removeProperty(kebabProperty);
@@ -131,13 +118,13 @@ export class CSSStyleDeclaration {
       state.properties.set(kebabProperty, value);
     }
 
-    if (!batch) notify(this);
+    if (!batch) notifyCSSStyleDeclaration(this);
   }
 
   /** Removes a CSS property. */
   removeProperty(property: string): string {
     const kebabProperty = camelToKebab(property);
-    const state = getStore(this);
+    const state = getCSSStyleDeclarationStore(this);
     const shorthandLonghands = expandShorthand(kebabProperty, 'dummy');
 
     if (shorthandLonghands) {
@@ -147,13 +134,13 @@ export class CSSStyleDeclaration {
         if (value) oldValue = value;
         state.properties.delete(key);
       }
-      notify(this);
+      notifyCSSStyleDeclaration(this);
       return oldValue;
     }
 
     const oldValue = state.properties.get(kebabProperty) ?? '';
     state.properties.delete(kebabProperty);
-    notify(this);
+    notifyCSSStyleDeclaration(this);
     return oldValue;
   }
 }

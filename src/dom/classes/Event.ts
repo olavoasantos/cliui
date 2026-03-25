@@ -1,9 +1,8 @@
 import {IS_TRUSTED, PATH, STOP_IMMEDIATE_PROPAGATION, EventPhase} from '../constants';
+import {getEventTimeStamp} from '../utilities/getEventTimeStamp';
 
 import type {EventTarget} from './EventTarget';
 import type {EventInit, EventPhase as EventPhaseValue} from '../types';
-
-const now = typeof performance === 'undefined' ? Date.now : performance.now.bind(performance);
 
 export class Event {
   static NONE = EventPhase.NONE;
@@ -11,7 +10,7 @@ export class Event {
   static AT_TARGET = EventPhase.AT_TARGET;
   static BUBBLING_PHASE = EventPhase.BUBBLING_PHASE;
 
-  timeStamp = now();
+  timeStamp = getEventTimeStamp();
   target: EventTarget | null = null;
   currentTarget: EventTarget | null = null;
   srcElement: EventTarget | null = null;

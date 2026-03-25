@@ -21,11 +21,9 @@ import {HTMLTemplateElement} from './HTMLTemplateElement';
 import {CustomElementRegistryImplementation} from './CustomElementRegistry';
 import {MutationObserver} from './MutationObserver';
 import {HOOKS} from '../constants';
-import type {Hooks} from '../types';
 
-type OnErrorHandler =
-  | ((message: string, filename?: string, lineno?: number, colno?: number, error?: unknown) => void)
-  | null;
+import type {Hooks} from '../types';
+import type {OnErrorHandler} from '../types/OnErrorHandler';
 
 export class Window extends EventTarget {
   [HOOKS]: Partial<Hooks> = {};

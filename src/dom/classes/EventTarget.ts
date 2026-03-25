@@ -1,12 +1,12 @@
 import {CAPTURE_MARKER, HOOKS, LISTENERS, OWNER_DOCUMENT, PATH, EventPhase} from '../constants';
+import {ONCE_LISTENERS} from '../constants/eventTarget';
 import {fireEvent} from '../utilities/fireEvent';
+import {removeEventTargetListener} from '../utilities/removeEventTargetListener';
 
 import type {Event} from './Event';
 import type {ChildNode} from './ChildNode';
 import type {Document} from './Document';
 import type {Hooks} from '../types';
-
-const ONCE_LISTENERS = Symbol('onceListeners');
 
 export class EventTarget {
   [LISTENERS]: Map<string, Set<EventListenerOrEventListenerObject>> | undefined = undefined;
@@ -73,7 +73,7 @@ export class EventTarget {
     signal?.addEventListener(
       'abort',
       () => {
-        removeEventListener.call(this, type, listener, options);
+        removeEventTargetListener(this, type, listener, options);
       },
       {once: true},
     );
@@ -92,7 +92,7 @@ export class EventTarget {
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | EventListenerOptions,
   ) {
-    return removeEventListener.call(this, type, listener, options);
+    removeEventTargetListener(this, type, listener, options);
   }
 
   dispatchEvent(event: Event) {
@@ -119,34 +119,5 @@ export class EventTarget {
     }
 
     return event.defaultPrevented;
-  }
-}
-
-function removeEventListener(
-  this: EventTarget,
-  type: string,
-  listener: EventListenerOrEventListenerObject | null,
-  options?: boolean | EventListenerOptions,
-) {
-  if (listener == null) return;
-
-  const onceListeners = this[ONCE_LISTENERS];
-  const normalizedListener = onceListeners?.get(listener) ?? listener;
-
-  onceListeners?.delete(listener);
-
-  const capture =
-    options === true ||
-    (options != null && typeof options === 'object' && options.capture === true);
-  const key = `${type}${capture ? CAPTURE_MARKER : ''}`;
-  const list = this[LISTENERS]?.get(key);
-
-  if (list) {
-    const deleted = list.delete(normalizedListener);
-    if (deleted) {
-      (
-        this[OWNER_DOCUMENT]?.defaultView[HOOKS] as Partial<Hooks> | undefined
-      )?.removeEventListener?.(this as never, type, listener, options);
-    }
   }
 }

@@ -1,28 +1,7 @@
+import {getDomTokenListTokens} from '../utilities/getDomTokenListTokens';
+import {setDomTokenListTokens} from '../utilities/setDomTokenListTokens';
+
 import type {Element} from './Element';
-
-const SPLIT_RE = /[\t\f\n\r ]+/;
-
-/**
- * Returns the deduplicated token list from the attribute value.
- */
-function getTokens(list: DOMTokenList): string[] {
-  const value = list.ownerElement.getAttribute(list.attributeName) ?? '';
-  if (!value.trim()) return [];
-  const items: string[] = [];
-  for (const item of value.trim().split(SPLIT_RE)) {
-    if (!items.includes(item)) {
-      items.push(item);
-    }
-  }
-  return items;
-}
-
-/**
- * Sets the attribute on the owner element from the token array.
- */
-function setTokens(list: DOMTokenList, tokens: string[]): void {
-  list.ownerElement.setAttribute(list.attributeName, tokens.join(' '));
-}
 
 /**
  * A DOMTokenList-like object backed by an element attribute.
@@ -41,7 +20,7 @@ export class DOMTokenList {
    * Returns the number of tokens.
    */
   get length(): number {
-    return getTokens(this).length;
+    return getDomTokenListTokens(this).length;
   }
 
   /**
@@ -59,29 +38,31 @@ export class DOMTokenList {
    * Returns the token at the given index, or null.
    */
   item(index: number): string | null {
-    return getTokens(this)[index] ?? null;
+    return getDomTokenListTokens(this)[index] ?? null;
   }
 
   /**
    * Returns true if the list contains the given token.
    */
   contains(token: string): boolean {
-    return getTokens(this).includes(token);
+    return getDomTokenListTokens(this).includes(token);
   }
 
   /**
    * Adds one or more tokens to the list.
    */
   add(...tokens: string[]): void {
-    const list = getTokens(this);
+    const list = getDomTokenListTokens(this);
     const existing = new Set(list);
+
     for (const token of tokens) {
       if (!existing.has(token)) {
         existing.add(token);
         list.push(token);
       }
     }
-    setTokens(this, list);
+
+    setDomTokenListTokens(this, list);
   }
 
   /**
@@ -89,9 +70,9 @@ export class DOMTokenList {
    */
   remove(...tokens: string[]): void {
     const toRemove = new Set(tokens);
-    setTokens(
+    setDomTokenListTokens(
       this,
-      getTokens(this).filter((t) => !toRemove.has(t)),
+      getDomTokenListTokens(this).filter((tokenValue) => !toRemove.has(tokenValue)),
     );
   }
 
@@ -112,11 +93,15 @@ export class DOMTokenList {
    * Replaces a token with another. Returns true if the old token was found.
    */
   replace(oldToken: string, newToken: string): boolean {
-    const list = getTokens(this);
+    const list = getDomTokenListTokens(this);
     const index = list.indexOf(oldToken);
-    if (index === -1) return false;
+
+    if (index === -1) {
+      return false;
+    }
+
     list[index] = newToken;
-    setTokens(this, list);
+    setDomTokenListTokens(this, list);
     return true;
   }
 
@@ -124,7 +109,7 @@ export class DOMTokenList {
    * Returns an iterator over the tokens.
    */
   [Symbol.iterator](): ArrayIterator<string> {
-    return getTokens(this).values();
+    return getDomTokenListTokens(this).values();
   }
 
   /**

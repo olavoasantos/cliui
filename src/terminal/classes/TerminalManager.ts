@@ -1,16 +1,17 @@
-import type {TerminalInput, TerminalManagerOptions, TerminalOutput} from '../types';
+import {
+  DISABLE_ALT_SCREEN,
+  DISABLE_BRACKETED_PASTE,
+  DISABLE_FOCUS_EVENTS,
+  DISABLE_MOUSE_SGR,
+  ENABLE_ALT_SCREEN,
+  ENABLE_BRACKETED_PASTE,
+  ENABLE_FOCUS_EVENTS,
+  ENABLE_MOUSE_SGR,
+  HIDE_CURSOR,
+  SHOW_CURSOR,
+} from '../constants/controlSequences';
 
-const ESC = '\u001B';
-const ENABLE_ALT_SCREEN = `${ESC}[?1049h`;
-const DISABLE_ALT_SCREEN = `${ESC}[?1049l`;
-const HIDE_CURSOR = `${ESC}[?25l`;
-const SHOW_CURSOR = `${ESC}[?25h`;
-const ENABLE_MOUSE_SGR = `${ESC}[?1006h`;
-const DISABLE_MOUSE_SGR = `${ESC}[?1006l`;
-const ENABLE_FOCUS_EVENTS = `${ESC}[?1004h`;
-const DISABLE_FOCUS_EVENTS = `${ESC}[?1004l`;
-const ENABLE_BRACKETED_PASTE = `${ESC}[?2004h`;
-const DISABLE_BRACKETED_PASTE = `${ESC}[?2004l`;
+import type {TerminalInput, TerminalManagerOptions, TerminalOutput} from '../types';
 
 /**
  * Manages terminal mode transitions required for interactive TUI rendering.

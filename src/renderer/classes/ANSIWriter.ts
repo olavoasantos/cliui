@@ -1,21 +1,7 @@
+import {BEL, CSI, OSC} from '../constants/controlSequences';
+
 import type {Cell, ChangedRegion, RGBColor, UnderlineStyle} from '../types';
-
-const ESC = '\u001B';
-const CSI = `${ESC}[`;
-const OSC = `${ESC}]`;
-const BEL = '\u0007';
-
-interface StyleState {
-  fg: RGBColor | null;
-  bg: RGBColor | null;
-  bold: boolean;
-  italic: boolean;
-  underline: UnderlineStyle;
-  underlineColor: RGBColor | null;
-  strikethrough: boolean;
-  faint: boolean;
-  hyperlink: string | null;
-}
+import type {StyleState} from '../types/StyleState';
 
 /**
  * Serializes changed cell regions into ANSI terminal escape sequences.

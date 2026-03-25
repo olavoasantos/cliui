@@ -1,32 +1,10 @@
-import {expandShorthand} from '../../dom/utilities/expandShorthand';
+import {INITIAL_VALUES} from '../constants/initialValues';
+import {INHERITABLE_PROPERTIES} from '../constants/inheritableProperties';
+import {applyDeclaration} from '../utilities/applyDeclaration';
 
 import type {CSSStyleDeclaration} from '../../dom/classes/CSSStyleDeclaration';
-import type {MatchedDeclaration} from './SelectorMatcher';
 import type {ComputedStyle} from '../types';
-
-const INHERITABLE_PROPERTIES = new Set([
-  'color',
-  'font-weight',
-  'font-style',
-  'text-decoration',
-  'text-decoration-style',
-  'text-decoration-color',
-  'text-align',
-  'white-space',
-  'opacity',
-]);
-
-const INITIAL_VALUES: Record<string, string> = {
-  color: '',
-  'font-weight': 'normal',
-  'font-style': 'normal',
-  'text-decoration': 'none',
-  'text-decoration-style': 'solid',
-  'text-decoration-color': '',
-  'text-align': 'left',
-  'white-space': 'normal',
-  opacity: '1',
-};
+import type {MatchedDeclaration} from '../types/MatchedDeclaration';
 
 /** Resolves the CSS cascade for an element into a computed style map. */
 export class StyleResolver {
@@ -61,16 +39,4 @@ export class StyleResolver {
 
     return style;
   }
-}
-
-function applyDeclaration(style: ComputedStyle, property: string, value: string): void {
-  const expanded = expandShorthand(property, value);
-  if (expanded) {
-    for (const [key, expandedValue] of Object.entries(expanded)) {
-      style.set(key, expandedValue);
-    }
-    return;
-  }
-
-  style.set(property, value);
 }

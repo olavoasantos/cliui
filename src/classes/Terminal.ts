@@ -1,3 +1,4 @@
+import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../constants/terminal';
 import {StyleEngine} from '../css';
 import {Window} from '../dom';
 import {LayoutEngine} from '../layout';
@@ -7,10 +8,6 @@ import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
 import type {Document} from '../dom';
 import type {TerminalOptions} from '../types';
 import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
-
-const DEFAULT_COLUMNS = 80;
-const DEFAULT_ROWS = 24;
-const DEFAULT_FPS = 60;
 
 /**
  * Public entry point that wires the DOM, style, layout, renderer, and terminal

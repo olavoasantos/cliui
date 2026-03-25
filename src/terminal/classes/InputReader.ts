@@ -1,40 +1,8 @@
-import type {TerminalInputEvent, TerminalKeyEvent, TerminalReadableInput} from '../types';
+import {BRACKETED_PASTE_END, BRACKETED_PASTE_START} from '../constants/controlSequences';
+import {ESCAPE} from '../constants/escape';
+import {CSI_FINAL_KEYS, CSI_TILDE_KEYS, SS3_FUNCTION_KEYS} from '../constants/keyMappings';
 
-const ESC = '\u001B';
-const BRACKETED_PASTE_START = `${ESC}[200~`;
-const BRACKETED_PASTE_END = `${ESC}[201~`;
-const SS3_FUNCTION_KEYS: Record<string, string> = {
-  P: 'F1',
-  Q: 'F2',
-  R: 'F3',
-  S: 'F4',
-};
-const CSI_TILDE_KEYS: Record<string, string> = {
-  '1': 'Home',
-  '2': 'Insert',
-  '3': 'Delete',
-  '4': 'End',
-  '5': 'PageUp',
-  '6': 'PageDown',
-  '7': 'Home',
-  '8': 'End',
-  '15': 'F5',
-  '17': 'F6',
-  '18': 'F7',
-  '19': 'F8',
-  '20': 'F9',
-  '21': 'F10',
-  '23': 'F11',
-  '24': 'F12',
-};
-const CSI_FINAL_KEYS: Record<string, string> = {
-  A: 'ArrowUp',
-  B: 'ArrowDown',
-  C: 'ArrowRight',
-  D: 'ArrowLeft',
-  F: 'End',
-  H: 'Home',
-};
+import type {TerminalInputEvent, TerminalKeyEvent, TerminalReadableInput} from '../types';
 
 /**
  * Reads raw terminal bytes and parses them into structured input events.
@@ -147,7 +115,7 @@ export class InputReader {
   private readNextEvent(): TerminalInputEvent | null {
     const first = this.pending[0]!;
 
-    if (first !== ESC) {
+    if (first !== ESCAPE) {
       this.pending = this.pending.slice(1);
       return this.parseSimpleKey(first);
     }

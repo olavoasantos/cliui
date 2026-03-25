@@ -1,8 +1,7 @@
+import {TEXT_LAYOUT_SEGMENTER} from '../constants/segmenter';
 import {cellWidth} from '../utilities/cellWidth';
 
 import type {TextLayoutOptions, TextLine} from '../types';
-
-const segmenter = new Intl.Segmenter();
 
 /**
  * Measures text and performs word wrapping for terminal layout.
@@ -134,7 +133,7 @@ export class TextLayout {
       let currentText = '';
       let currentWidth = 0;
 
-      for (const {segment} of segmenter.segment(logicalLine)) {
+      for (const {segment} of TEXT_LAYOUT_SEGMENTER.segment(logicalLine)) {
         const graphemeWidth = cellWidth(segment);
 
         if (currentWidth + graphemeWidth > availableWidth && currentText.length > 0) {
@@ -190,7 +189,7 @@ export class TextLayout {
     let clippedText = '';
     let clippedWidth = 0;
 
-    for (const {segment} of segmenter.segment(text)) {
+    for (const {segment} of TEXT_LAYOUT_SEGMENTER.segment(text)) {
       const graphemeWidth = cellWidth(segment);
 
       if (clippedWidth + graphemeWidth > availableWidth) {
@@ -224,7 +223,7 @@ export class TextLayout {
     let lineText = '';
     let lineWidth = 0;
 
-    for (const {segment} of segmenter.segment(word)) {
+    for (const {segment} of TEXT_LAYOUT_SEGMENTER.segment(word)) {
       const graphemeWidth = cellWidth(segment);
 
       if (lineWidth + graphemeWidth > availableWidth && lineText.length > 0) {

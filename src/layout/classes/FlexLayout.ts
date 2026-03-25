@@ -1,32 +1,8 @@
 import type {Element} from '../../dom/classes/Element';
 import type {ComputedStyle} from '../../css/types';
 import type {LayoutBox} from '../types';
-
-/**
- * Parsed box model values extracted from a computed style map.
- */
-interface BoxModel {
-  paddingTop: number;
-  paddingRight: number;
-  paddingBottom: number;
-  paddingLeft: number;
-  marginTop: number;
-  marginRight: number;
-  marginBottom: number;
-  marginLeft: number;
-  borderTop: number;
-  borderRight: number;
-  borderBottom: number;
-  borderLeft: number;
-}
-
-/**
- * A flex line produced during wrapping.
- */
-interface FlexLine {
-  children: LayoutBox[];
-  crossSize: number;
-}
+import type {BoxModel} from '../types/BoxModel';
+import type {FlexLine} from '../types/FlexLine';
 
 /**
  * Computes flexbox layout for terminal UI elements.

@@ -1,4 +1,6 @@
 import {CHILD, OWNER_ELEMENT, NS, NEXT, HOOKS} from '../constants';
+import {updateElementAttribute} from '../utilities/updateElementAttribute';
+
 import type {NamespaceURI} from '../types';
 import type {Hooks} from '../types';
 import type {Attr} from './Attr';
@@ -126,26 +128,4 @@ export class NamedNodeMap {
       attr = attr[NEXT];
     }
   }
-}
-
-function updateElementAttribute(
-  element: Element,
-  name: string,
-  oldValue: string | null,
-  newValue: string | null,
-) {
-  const {observedAttributes} = element.constructor as typeof import('./Element').Element;
-  const {attributeChangedCallback} = element as Element & {
-    attributeChangedCallback?(name: string, oldValue: string | null, newValue: string | null): void;
-  };
-
-  if (
-    attributeChangedCallback == null ||
-    observedAttributes == null ||
-    !observedAttributes.includes(name)
-  ) {
-    return;
-  }
-
-  return attributeChangedCallback.call(element, name, oldValue, newValue);
 }

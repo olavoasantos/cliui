@@ -1,0 +1,11 @@
+export const INITIAL_VALUES: Record<string, string> = {
+  color: '',
+  'font-weight': 'normal',
+  'font-style': 'normal',
+  'text-decoration': 'none',
+  'text-decoration-style': 'solid',
+  'text-decoration-color': '',
+  'text-align': 'left',
+  'white-space': 'normal',
+  opacity: '1',
+};

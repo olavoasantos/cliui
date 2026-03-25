@@ -1,6 +1,10 @@
-import {parseSelector} from '../../dom/utilities/parseSelector';
+import {findClosingBrace} from '../utilities/findClosingBrace';
+import {parseDeclarations} from '../utilities/parseDeclarations';
+import {parseSelectorList} from '../utilities/parseSelectorList';
+import {skipBlock} from '../utilities/skipBlock';
+import {skipWhitespaceAndComments} from '../utilities/skipWhitespaceAndComments';
 
-import type {CSSDeclaration, CSSRule} from '../types';
+import type {CSSRule} from '../types';
 
 /**
  * Hand-written CSS parser that takes CSS text and produces a list of rules.
@@ -42,115 +46,4 @@ export class CSSParser {
 
     return rules;
   }
-}
-
-function parseSelectorList(selectorText: string) {
-  const raw = selectorText.split(',');
-  const result = [];
-
-  for (const selector of raw) {
-    const trimmed = selector.trim();
-    if (!trimmed) continue;
-    try {
-      const parts = parseSelector(trimmed);
-      if (parts.length > 0 && parts[0]!.matchers.length > 0) {
-        result.push(parts);
-      }
-    } catch {
-      // Skip malformed selectors gracefully.
-    }
-  }
-
-  return result;
-}
-
-function parseDeclarations(body: string): CSSDeclaration[] {
-  const declarations: CSSDeclaration[] = [];
-  const parts = body.split(';');
-
-  for (const part of parts) {
-    const colonIdx = part.indexOf(':');
-    if (colonIdx === -1) continue;
-
-    const property = part.slice(0, colonIdx).trim();
-    const value = part.slice(colonIdx + 1).trim();
-    if (property && value) declarations.push({property, value});
-  }
-
-  return declarations;
-}
-
-function skipWhitespaceAndComments(css: string, pos: number): number {
-  const len = css.length;
-
-  while (pos < len) {
-    const ch = css.charCodeAt(pos);
-    if (ch === 32 || ch === 9 || ch === 10 || ch === 13) {
-      pos++;
-      continue;
-    }
-
-    if (ch === 47 && pos + 1 < len && css.charCodeAt(pos + 1) === 42) {
-      const endIdx = css.indexOf('*/', pos + 2);
-      if (endIdx === -1) return len;
-      pos = endIdx + 2;
-      continue;
-    }
-
-    break;
-  }
-
-  return pos;
-}
-
-function findClosingBrace(css: string, pos: number): number {
-  let depth = 1;
-  const len = css.length;
-
-  while (pos < len && depth > 0) {
-    const ch = css.charCodeAt(pos);
-
-    if (ch === 47 && pos + 1 < len && css.charCodeAt(pos + 1) === 42) {
-      const endIdx = css.indexOf('*/', pos + 2);
-      if (endIdx === -1) return -1;
-      pos = endIdx + 2;
-      continue;
-    }
-
-    if (ch === 34 || ch === 39) {
-      pos = skipString(css, pos, ch);
-      continue;
-    }
-
-    if (ch === 123) depth++;
-    if (ch === 125) depth--;
-    pos++;
-  }
-
-  return depth === 0 ? pos - 1 : -1;
-}
-
-function skipString(css: string, pos: number, quote: number): number {
-  pos++;
-  const len = css.length;
-
-  while (pos < len) {
-    const ch = css.charCodeAt(pos);
-    if (ch === 92) {
-      pos += 2;
-      continue;
-    }
-    if (ch === quote) {
-      pos++;
-      break;
-    }
-    pos++;
-  }
-
-  return pos;
-}
-
-function skipBlock(css: string, pos: number): number {
-  const closeIdx = findClosingBrace(css, pos);
-  return closeIdx === -1 ? css.length : closeIdx + 1;
 }

@@ -1,4 +1,7 @@
-import {CHILD, NEXT, HOOKS, NodeType} from '../../dom/constants';
+import {CHILD, HOOKS, NEXT, NodeType} from '../../dom/constants';
+import {collectStyleElements} from '../utilities/collectStyleElements';
+import {hasLayoutChange} from '../utilities/hasLayoutChange';
+import {walkElements} from '../utilities/walkElements';
 import {CSSParser} from './CSSParser';
 import {SelectorMatcher} from './SelectorMatcher';
 import {StyleResolver} from './StyleResolver';
@@ -10,46 +13,6 @@ import type {Window} from '../../dom/classes/Window';
 import type {HTMLStyleElement} from '../../dom/classes/HTMLStyleElement';
 import type {Hooks} from '../../dom/types';
 import type {CSSRule, ComputedStyle} from '../types';
-
-/** CSS properties that, when changed, require layout recomputation. */
-const LAYOUT_PROPERTIES = new Set([
-  'display',
-  'width',
-  'height',
-  'min-width',
-  'min-height',
-  'max-width',
-  'max-height',
-  'padding-top',
-  'padding-right',
-  'padding-bottom',
-  'padding-left',
-  'margin-top',
-  'margin-right',
-  'margin-bottom',
-  'margin-left',
-  'border-width',
-  'border-style',
-  'box-sizing',
-  'flex-direction',
-  'flex-wrap',
-  'flex-grow',
-  'flex-shrink',
-  'flex-basis',
-  'row-gap',
-  'column-gap',
-  'justify-content',
-  'align-items',
-  'align-self',
-  'position',
-  'top',
-  'left',
-  'overflow',
-  'text-overflow',
-  'white-space',
-  'text-align',
-  'vertical-align',
-]);
 
 /**
  * Orchestrates the full style computation pipeline:
@@ -384,82 +347,5 @@ export class StyleEngine {
       hooks.removeChild = this.previousHooks.removeChild;
       this.previousHooks = null;
     }
-  }
-}
-
-/**
- * Compares old and new computed styles to determine if any layout-affecting
- * property has changed.
- */
-function hasLayoutChange(oldStyle: ComputedStyle | null, newStyle: ComputedStyle): boolean {
-  if (!oldStyle) return true;
-
-  for (const prop of LAYOUT_PROPERTIES) {
-    const oldVal = oldStyle.get(prop);
-    const newVal = newStyle.get(prop);
-    if (oldVal !== newVal) return true;
-  }
-
-  return false;
-}
-
-/**
- * Walks all element descendants of a given element, invoking the callback on each.
- */
-function walkElements(element: Element, callback: (el: Element) => void): void {
-  let child = (element as unknown as {[CHILD]: Node | undefined})[CHILD];
-  while (child) {
-    if (child.nodeType === NodeType.ELEMENT_NODE) {
-      const el = child as unknown as Element;
-      callback(el);
-      walkElements(el, callback);
-    }
-    child = (child as unknown as {[NEXT]: Node | undefined})[NEXT];
-  }
-}
-
-/**
- * Collects all `<style>` elements from the document.
- */
-function collectStyleElements(document: Document): Element[] {
-  const elements: Element[] = [];
-  const head = document.head;
-  if (!head) return elements;
-
-  let child = (head as unknown as {[CHILD]: Node | undefined})[CHILD];
-  while (child) {
-    if (child.nodeType === NodeType.ELEMENT_NODE) {
-      const el = child as unknown as Element;
-      if (el.localName === 'style') {
-        elements.push(el);
-      }
-    }
-    child = (child as unknown as {[NEXT]: Node | undefined})[NEXT];
-  }
-
-  // Also check body for <style> elements (less common but valid)
-  const body = document.body;
-  if (body) {
-    walkAndCollectStyle(body, elements);
-  }
-
-  return elements;
-}
-
-/**
- * Recursively walks a subtree collecting `<style>` elements.
- */
-function walkAndCollectStyle(element: Element, elements: Element[]): void {
-  let child = (element as unknown as {[CHILD]: Node | undefined})[CHILD];
-  while (child) {
-    if (child.nodeType === NodeType.ELEMENT_NODE) {
-      const el = child as unknown as Element;
-      if (el.localName === 'style') {
-        elements.push(el);
-      } else {
-        walkAndCollectStyle(el, elements);
-      }
-    }
-    child = (child as unknown as {[NEXT]: Node | undefined})[NEXT];
   }
 }
