@@ -1,3 +1,4 @@
+export {ANSIWriter} from './classes/ANSIWriter';
 export {CellBuffer} from './classes/CellBuffer';
 export {Differ} from './classes/Differ';
 export {Painter} from './classes/Painter';
