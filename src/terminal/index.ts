@@ -1,3 +1,4 @@
+export {EventDispatcher} from './classes/EventDispatcher';
 export {InputReader} from './classes/InputReader';
 export {TerminalManager} from './classes/TerminalManager';
 

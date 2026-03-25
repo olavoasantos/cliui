@@ -94,6 +94,12 @@
 | ----- | ----- | ----- | ------------ | ------------- | ------ |
 | 1 | M1T27 | Keyboard input reader | M0T2 (done) | M1T26 | Complete |
 
+### Batch 11: M1T28 (Keyboard Event Dispatcher)
+
+| Order | Issue | Title | Dependencies | Parallel With | Status |
+| ----- | ----- | ----- | ------------ | ------------- | ------ |
+| 1 | M1T28 | Keyboard event dispatcher | M1T3, M1T6, M1T27 (done) | — | Complete |
+
 ## Progress Log
 
 - Batch 1 (M1T1–M1T5): Complete. 228 unit tests passing.
@@ -142,3 +148,8 @@
   - Parser now handles printable characters, control keys, arrow/navigation keys, F1–F12, modifier decoding for CSI sequences, Alt-prefixed keys, and bracketed paste buffering
   - Added terminal-layer parsed input event types and mapped unit tests for direct parsing, stream subscription lifecycle, partial escape-sequence buffering, and bracketed paste handling
   - Structural compliance audit passed cleanly; input parsing concerns remain isolated to `src/terminal/classes/InputReader.ts`, `src/terminal/types/index.ts`, and mapped tests
+- Batch 11 (M1T28): Complete. 628 unit tests and 1 integration test passing.
+  - Added `EventDispatcher` to bridge parsed terminal input events into DOM `KeyboardEvent` and `ClipboardEvent` dispatch on `document.body`
+  - Key events now dispatch as synthetic `keydown` followed by `keyup`, while paste events dispatch as `paste` with clipboard text access
+  - Added mapped unit tests for modifier/property mapping, dispatch ordering, and paste event targeting
+  - Structural compliance audit passed cleanly; dispatch concerns remain isolated to `src/terminal/classes/EventDispatcher.ts` and mapped tests
