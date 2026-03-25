@@ -1,4 +1,5 @@
 export {FlexLayout} from './classes/FlexLayout';
+export {LayoutEngine} from './classes/LayoutEngine';
 export {TextLayout} from './classes/TextLayout';
 export {cellWidth} from './utilities/cellWidth';
 
