@@ -51,3 +51,17 @@ export interface Cell {
   /** Hyperlink target carried by this cell. */
   hyperlink: string | null;
 }
+
+/**
+ * A consecutive horizontal run of changed cells on a single row.
+ */
+export interface ChangedRegion {
+  /** Start column of the changed run. */
+  x: number;
+
+  /** Row containing the changed run. */
+  y: number;
+
+  /** Cells from left to right within the changed run. */
+  cells: Cell[];
+}
