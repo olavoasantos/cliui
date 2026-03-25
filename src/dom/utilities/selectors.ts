@@ -1,42 +1,11 @@
 import {CHILD, NEXT, PARENT, PREV} from '../constants/index';
+import {SelectorCombinator, SelectorMatcherType} from '../types/index';
 import {isElementNode} from './shared';
 
 import type {Node} from '../classes/Node';
 import type {Element} from '../classes/Element';
 import type {ParentNode} from '../classes/ParentNode';
-
-const Combinator = {
-  Descendant: 0,
-  Child: 1,
-  Sibling: 2,
-  Adjacent: 3,
-  Inner: 4,
-} as const;
-
-type Combinator = (typeof Combinator)[keyof typeof Combinator];
-
-const MatcherType = {
-  Unknown: 0,
-  Element: 1,
-  Id: 2,
-  Class: 3,
-  Attribute: 4,
-  Pseudo: 5,
-  Function: 6,
-} as const;
-
-type MatcherType = (typeof MatcherType)[keyof typeof MatcherType];
-
-interface Part {
-  combinator: Combinator;
-  matchers: Matcher[];
-}
-
-interface Matcher {
-  type: MatcherType;
-  name: string;
-  value?: string;
-}
+import type {SelectorMatcher, SelectorPart} from '../types/index';
 
 const ELEMENT_SELECTOR_TEST = /[a-z]/;
 
@@ -67,34 +36,37 @@ export function querySelectorAll(within: ParentNode, selector: string) {
   return results;
 }
 
+/**
+ * Parses a CSS selector string into a structured AST of selector parts.
+ */
 export function parseSelector(selector: string) {
-  let part: Part = {combinator: Combinator.Inner, matchers: []};
+  let part: SelectorPart = {combinator: SelectorCombinator.Inner, matchers: []};
   const parts = [part];
   const tokenizer =
     /\s*?([>\s+~]?)\s*?(?:(?:\[\s*([^\]=]+)(?:=(['"])(.*?)\3)?\s*\])|([#.]?)([^\s#.[>:+~]+)|:(\w+)(?:\((.*?)\))?)/gi;
   let token;
   while ((token = tokenizer.exec(selector))) {
     if (token[1]) {
-      if (token[1] === '>') part.combinator = Combinator.Child;
-      else if (token[1] === '+') part.combinator = Combinator.Adjacent;
-      else if (token[1] === '~') part.combinator = Combinator.Sibling;
-      else part.combinator = Combinator.Descendant;
-      part = {combinator: Combinator.Inner, matchers: []};
+      if (token[1] === '>') part.combinator = SelectorCombinator.Child;
+      else if (token[1] === '+') part.combinator = SelectorCombinator.Adjacent;
+      else if (token[1] === '~') part.combinator = SelectorCombinator.Sibling;
+      else part.combinator = SelectorCombinator.Descendant;
+      part = {combinator: SelectorCombinator.Inner, matchers: []};
       parts.push(part);
     }
 
-    let type: MatcherType = MatcherType.Unknown;
+    let type: SelectorMatcherType = SelectorMatcherType.Unknown;
     if (token[2]) {
-      type = MatcherType.Attribute;
+      type = SelectorMatcherType.Attribute;
     } else if (token[5]) {
-      type = token[5] === '#' ? MatcherType.Id : MatcherType.Class;
+      type = token[5] === '#' ? SelectorMatcherType.Id : SelectorMatcherType.Class;
     } else if (token[7]) {
-      type = token[8] == null ? MatcherType.Pseudo : MatcherType.Function;
+      type = token[8] == null ? SelectorMatcherType.Pseudo : SelectorMatcherType.Function;
     } else if (token[6]) {
       if (token[6] === '*') {
-        type = MatcherType.Unknown;
+        type = SelectorMatcherType.Unknown;
       } else if (ELEMENT_SELECTOR_TEST.test(token[6])) {
-        type = MatcherType.Element;
+        type = SelectorMatcherType.Element;
       }
     }
     part.matchers.push({
@@ -106,9 +78,12 @@ export function parseSelector(selector: string) {
   return parts;
 }
 
-function matchesSelector(element: Element, selector: string) {
+/**
+ * Tests whether an element matches a given CSS selector string.
+ */
+export function matches(element: Element, selector: string) {
   const parsed = parseSelector(selector);
-  let part: Part | undefined;
+  let part: SelectorPart | undefined;
   while ((part = parsed.pop())) {
     if (!matchesSelectorPart(element, part)) return false;
   }
@@ -117,7 +92,7 @@ function matchesSelector(element: Element, selector: string) {
 
 function walkNodesForSelector(
   node: Node,
-  parts: Part[],
+  parts: SelectorPart[],
   callback: (node: Element) => boolean | void,
 ) {
   if (isElementNode(node)) {
@@ -136,19 +111,21 @@ function walkNodesForSelector(
   return true;
 }
 
-function matchesSelectorRecursive(element: Element, parts: Part[]): boolean {
+function matchesSelectorRecursive(element: Element, parts: SelectorPart[]): boolean {
   const {combinator, matchers} = parts[parts.length - 1]!;
-  if (combinator === Combinator.Inner) {
+  if (combinator === SelectorCombinator.Inner) {
     if (!matchesSelectorMatcher(element, matchers)) return false;
     const pp = parts.slice(0, -1);
     return pp.length === 0 || matchesSelectorRecursive(element, pp);
   }
   const link =
-    combinator === Combinator.Child || combinator === Combinator.Descendant ? PARENT : PREV;
+    combinator === SelectorCombinator.Child || combinator === SelectorCombinator.Descendant
+      ? PARENT
+      : PREV;
   let ref = element[link];
   if (!ref) return false;
 
-  if (combinator === Combinator.Descendant || combinator === Combinator.Sibling) {
+  if (combinator === SelectorCombinator.Descendant || combinator === SelectorCombinator.Sibling) {
     while (ref) {
       if (isElementNode(ref) && matchesSelectorMatcher(ref, matchers)) {
         const pp = parts.slice(0, -1);
@@ -159,7 +136,7 @@ function matchesSelectorRecursive(element: Element, parts: Part[]): boolean {
     }
     return false;
   } else {
-    if (combinator === Combinator.Adjacent && !isElementNode(ref)) {
+    if (combinator === SelectorCombinator.Adjacent && !isElementNode(ref)) {
       while (ref && !isElementNode(ref)) {
         ref = ref[link];
       }
@@ -174,16 +151,18 @@ function matchesSelectorRecursive(element: Element, parts: Part[]): boolean {
   }
 }
 
-function matchesSelectorPart(element: Element, {combinator, matchers}: Part) {
-  if (combinator === Combinator.Inner) {
+function matchesSelectorPart(element: Element, {combinator, matchers}: SelectorPart) {
+  if (combinator === SelectorCombinator.Inner) {
     return matchesSelectorMatcher(element, matchers);
   }
   const link =
-    combinator === Combinator.Child || combinator === Combinator.Descendant ? PARENT : PREV;
+    combinator === SelectorCombinator.Child || combinator === SelectorCombinator.Descendant
+      ? PARENT
+      : PREV;
   let ref = element[link];
   if (!ref) return false;
 
-  if (combinator === Combinator.Adjacent && !isElementNode(ref)) {
+  if (combinator === SelectorCombinator.Adjacent && !isElementNode(ref)) {
     while (ref && !isElementNode(ref)) {
       ref = ref[link];
     }
@@ -194,7 +173,7 @@ function matchesSelectorPart(element: Element, {combinator, matchers}: Part) {
     return false;
   }
 
-  if (combinator === Combinator.Descendant || combinator === Combinator.Sibling) {
+  if (combinator === SelectorCombinator.Descendant || combinator === SelectorCombinator.Sibling) {
     while ((ref = ref[link])) {
       if (isElementNode(ref) && matchesSelectorMatcher(ref, matchers)) return true;
     }
@@ -202,7 +181,10 @@ function matchesSelectorPart(element: Element, {combinator, matchers}: Part) {
   return true;
 }
 
-function matchesSelectorMatcher(element: Element | null, matcher: Matcher | Matcher[]): boolean {
+function matchesSelectorMatcher(
+  element: Element | null,
+  matcher: SelectorMatcher | SelectorMatcher[],
+): boolean {
   if (!element) return false;
   if (Array.isArray(matcher)) {
     for (const single of matcher) {
@@ -212,27 +194,27 @@ function matchesSelectorMatcher(element: Element | null, matcher: Matcher | Matc
   }
   const {type, name, value} = matcher;
   switch (type) {
-    case MatcherType.Unknown:
+    case SelectorMatcherType.Unknown:
       return name === '*';
-    case MatcherType.Element:
+    case SelectorMatcherType.Element:
       return element.localName === name;
-    case MatcherType.Id:
+    case SelectorMatcherType.Id:
       return element.getAttribute('id') === name;
-    case MatcherType.Class: {
+    case SelectorMatcherType.Class: {
       const classAttr = element.getAttribute('class');
       if (!classAttr) return false;
       return classAttr.split(/\s+/).includes(name);
     }
-    case MatcherType.Attribute:
+    case SelectorMatcherType.Attribute:
       return value == null ? element.hasAttribute(name) : element.getAttribute(name) === value;
-    case MatcherType.Pseudo:
+    case SelectorMatcherType.Pseudo:
       throw Error(`Pseudo :${name} not implemented`);
-    case MatcherType.Function:
+    case SelectorMatcherType.Function:
       switch (name) {
         case 'has':
-          return matchesSelector(element, value || '');
+          return matches(element, value || '');
         case 'not':
-          return !matchesSelector(element, value || '');
+          return !matches(element, value || '');
         default:
           throw Error(`Function :${name}(${value}) not implemented`);
       }

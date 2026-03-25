@@ -72,6 +72,41 @@ export interface ToggleEventInit extends EventInit {
   newState?: string;
 }
 
+export const SelectorCombinator = {
+  Descendant: 0,
+  Child: 1,
+  Sibling: 2,
+  Adjacent: 3,
+  Inner: 4,
+} as const;
+
+export type SelectorCombinator = (typeof SelectorCombinator)[keyof typeof SelectorCombinator];
+
+export const SelectorMatcherType = {
+  Unknown: 0,
+  Element: 1,
+  Id: 2,
+  Class: 3,
+  Attribute: 4,
+  Pseudo: 5,
+  Function: 6,
+} as const;
+
+export type SelectorMatcherType = (typeof SelectorMatcherType)[keyof typeof SelectorMatcherType];
+
+/** A single matcher condition within a selector part. */
+export interface SelectorMatcher {
+  type: SelectorMatcherType;
+  name: string;
+  value?: string;
+}
+
+/** A segment of a parsed selector, combining a combinator with its matchers. */
+export interface SelectorPart {
+  combinator: SelectorCombinator;
+  matchers: SelectorMatcher[];
+}
+
 export interface Hooks {
   createElement(element: Element, ns?: string | null): void;
   setAttribute(element: Element, name: string, value: string, ns?: string | null): void;
