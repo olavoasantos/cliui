@@ -253,7 +253,7 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 
 ### `src/dom/classes/Document.ts`
 
-- Status: unit exists; integration exists; bench missing
+- Status: unit exists; integration exists; bench exists
 - Coverage: lines 93.61%, branches 73.68%, functions 100.00%
 - Actions:
   - [ ] raise branch coverage by exercising fallback, guard, and error paths
@@ -268,7 +268,7 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 
 ### `src/dom/classes/Element.ts`
 
-- Status: unit exists; integration exists; bench missing
+- Status: unit exists; integration exists; bench exists
 - Coverage: lines 89.58%, branches 87.50%, functions 87.50%
 - Actions:
   - [x] raise line coverage with missing happy-path and edge-case scenarios
@@ -364,7 +364,7 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 
 ### `src/dom/classes/MutationObserver.ts`
 
-- Status: unit exists; integration exists; bench missing
+- Status: unit exists; integration exists; bench exists
 - Coverage: lines 87.50%, branches 72.13%, functions 95.00%
 - Actions:
   - [x] raise line coverage with missing happy-path and edge-case scenarios
