@@ -109,4 +109,34 @@ describe('ANSIWriter', () => {
 
     expect(output).toBe('\u001B[1;1HA');
   });
+
+  it('emits 256-color sequences when the color profile is ansi256', () => {
+    writer.setColorProfile('ansi256');
+
+    const output = writer.write([
+      region(0, 0, [createCell({char: 'A', fg: {r: 255, g: 0, b: 0}, bg: {r: 0, g: 0, b: 255}})]),
+    ]);
+
+    expect(output).toBe('\u001B[1;1H\u001B[38;5;196;48;5;21mA');
+  });
+
+  it('emits 16-color sequences when the color profile is ansi16', () => {
+    writer.setColorProfile('ansi16');
+
+    const output = writer.write([
+      region(0, 0, [createCell({char: 'A', fg: {r: 255, g: 0, b: 0}, bg: {r: 0, g: 0, b: 255}})]),
+    ]);
+
+    expect(output).toBe('\u001B[1;1H\u001B[91;104mA');
+  });
+
+  it('omits color output entirely when the color profile is none', () => {
+    writer.setColorProfile('none');
+
+    const output = writer.write([
+      region(0, 0, [createCell({char: 'A', fg: {r: 255, g: 0, b: 0}, bold: true})]),
+    ]);
+
+    expect(output).toBe('\u001B[1;1H\u001B[1mA');
+  });
 });

@@ -1,4 +1,5 @@
 import type {LayoutBox} from '../../layout/types';
+import type {TerminalColorProfile} from '../../terminal/types';
 import {ANSIWriter} from './ANSIWriter';
 import {CellBuffer} from './CellBuffer';
 import {Differ} from './Differ';
@@ -78,6 +79,15 @@ export class Renderer {
    */
   setSynchronizedOutputEnabled(enabled: boolean): void {
     this.ansiWriter.setSynchronizedOutputEnabled(enabled);
+  }
+
+  /**
+   * Sets the active color profile for ANSI color encoding.
+   *
+   * @param profile - The detected terminal color capability.
+   */
+  setColorProfile(profile: TerminalColorProfile): void {
+    this.ansiWriter.setColorProfile(profile);
   }
 
   /**

@@ -5,6 +5,7 @@ const DISABLE_SYNCHRONIZED_OUTPUT = `${CSI}?2026l`;
 
 import type {Cell, ChangedRegion, RGBColor, UnderlineStyle} from '../types';
 import type {StyleState} from '../types/StyleState';
+import type {TerminalColorProfile} from '../../terminal/types';
 
 /**
  * Serializes changed cell regions into ANSI terminal escape sequences.
@@ -15,6 +16,7 @@ import type {StyleState} from '../types/StyleState';
  */
 export class ANSIWriter {
   private synchronizedOutputEnabled = false;
+  private colorProfile: TerminalColorProfile = 'truecolor';
 
   /**
    * Enables or disables synchronized output wrapping.
@@ -23,6 +25,15 @@ export class ANSIWriter {
    */
   setSynchronizedOutputEnabled(enabled: boolean): void {
     this.synchronizedOutputEnabled = enabled;
+  }
+
+  /**
+   * Sets the active terminal color profile used for SGR color encoding.
+   *
+   * @param profile - The detected terminal color capability.
+   */
+  setColorProfile(profile: TerminalColorProfile): void {
+    this.colorProfile = profile;
   }
 
   /**
@@ -92,11 +103,14 @@ export class ANSIWriter {
       }
     }
 
-    if (!this.areColorsEqual(previous.underlineColor, current.underlineColor)) {
-      if (current.underlineColor === null) {
+    const previousUnderlineColor = this.resolveColorForProfile(previous.underlineColor);
+    const currentUnderlineColor = this.resolveColorForProfile(current.underlineColor);
+
+    if (!this.areColorsEqual(previousUnderlineColor, currentUnderlineColor)) {
+      if (currentUnderlineColor === null) {
         codes.push('59');
       } else {
-        codes.push(this.getColorCode('58', current.underlineColor));
+        codes.push(this.getColorCode('58', currentUnderlineColor));
       }
     }
 
@@ -104,19 +118,25 @@ export class ANSIWriter {
       codes.push(current.strikethrough ? '9' : '29');
     }
 
-    if (!this.areColorsEqual(previous.fg, current.fg)) {
-      if (current.fg === null) {
+    const previousForeground = this.resolveColorForProfile(previous.fg);
+    const currentForeground = this.resolveColorForProfile(current.fg);
+
+    if (!this.areColorsEqual(previousForeground, currentForeground)) {
+      if (currentForeground === null) {
         codes.push('39');
       } else {
-        codes.push(this.getColorCode('38', current.fg));
+        codes.push(this.getColorCode('38', currentForeground));
       }
     }
 
-    if (!this.areColorsEqual(previous.bg, current.bg)) {
-      if (current.bg === null) {
+    const previousBackground = this.resolveColorForProfile(previous.bg);
+    const currentBackground = this.resolveColorForProfile(current.bg);
+
+    if (!this.areColorsEqual(previousBackground, currentBackground)) {
+      if (currentBackground === null) {
         codes.push('49');
       } else {
-        codes.push(this.getColorCode('48', current.bg));
+        codes.push(this.getColorCode('48', currentBackground));
       }
     }
 
@@ -140,7 +160,70 @@ export class ANSIWriter {
   }
 
   private getColorCode(prefix: '38' | '48' | '58', color: RGBColor): string {
-    return `${prefix};2;${color.r};${color.g};${color.b}`;
+    switch (this.colorProfile) {
+      case 'none':
+        return prefix === '58' ? '59' : prefix === '38' ? '39' : '49';
+      case 'ansi16':
+        return String(this.getAnsi16Code(prefix, color));
+      case 'ansi256':
+        return `${prefix};5;${this.getAnsi256Index(color)}`;
+      case 'truecolor':
+      default:
+        return `${prefix};2;${color.r};${color.g};${color.b}`;
+    }
+  }
+
+  private getAnsi256Index(color: RGBColor): number {
+    const channels = [color.r, color.g, color.b].map((channel) => Math.round((channel / 255) * 5));
+
+    return 16 + 36 * channels[0]! + 6 * channels[1]! + channels[2]!;
+  }
+
+  private getAnsi16Code(prefix: '38' | '48' | '58', color: RGBColor): number {
+    if (prefix === '58') {
+      return 59;
+    }
+
+    const palette = [
+      {code: prefix === '38' ? 30 : 40, color: {r: 0, g: 0, b: 0}},
+      {code: prefix === '38' ? 31 : 41, color: {r: 128, g: 0, b: 0}},
+      {code: prefix === '38' ? 32 : 42, color: {r: 0, g: 128, b: 0}},
+      {code: prefix === '38' ? 33 : 43, color: {r: 128, g: 128, b: 0}},
+      {code: prefix === '38' ? 34 : 44, color: {r: 0, g: 0, b: 128}},
+      {code: prefix === '38' ? 35 : 45, color: {r: 128, g: 0, b: 128}},
+      {code: prefix === '38' ? 36 : 46, color: {r: 0, g: 128, b: 128}},
+      {code: prefix === '38' ? 37 : 47, color: {r: 192, g: 192, b: 192}},
+      {code: prefix === '38' ? 90 : 100, color: {r: 128, g: 128, b: 128}},
+      {code: prefix === '38' ? 91 : 101, color: {r: 255, g: 0, b: 0}},
+      {code: prefix === '38' ? 92 : 102, color: {r: 0, g: 255, b: 0}},
+      {code: prefix === '38' ? 93 : 103, color: {r: 255, g: 255, b: 0}},
+      {code: prefix === '38' ? 94 : 104, color: {r: 0, g: 0, b: 255}},
+      {code: prefix === '38' ? 95 : 105, color: {r: 255, g: 0, b: 255}},
+      {code: prefix === '38' ? 96 : 106, color: {r: 0, g: 255, b: 255}},
+      {code: prefix === '38' ? 97 : 107, color: {r: 255, g: 255, b: 255}},
+    ];
+
+    let closest = palette[0]!;
+    let closestDistance = Number.POSITIVE_INFINITY;
+
+    for (const candidate of palette) {
+      const distance = this.getColorDistance(color, candidate.color);
+
+      if (distance < closestDistance) {
+        closest = candidate;
+        closestDistance = distance;
+      }
+    }
+
+    return closest.code;
+  }
+
+  private getColorDistance(left: RGBColor, right: RGBColor): number {
+    return (left.r - right.r) ** 2 + (left.g - right.g) ** 2 + (left.b - right.b) ** 2;
+  }
+
+  private resolveColorForProfile(color: RGBColor | null): RGBColor | null {
+    return this.colorProfile === 'none' ? null : color;
   }
 
   private serializeHyperlink(previous: string | null, current: string | null): string {
