@@ -1,17 +1,62 @@
-import {describe, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 
+import {HOOKS, NAME, NS, NamespaceURI} from '../../constants';
+import {Element} from '../../classes/Element';
 import {Window} from '../../classes/Window';
-
-function createEnv() {
-  const window = new Window();
-  return {window, document: window.document};
-}
+import {setupElement} from '../setupElement';
 
 describe('setupElement', () => {
-  it.todo('associates the element with the owner document');
-  it.todo('sets the NAME property on the element');
-  it.todo('sets the NS property when a namespace is provided');
-  it.todo('does not set the NS property when no namespace is given');
-  it.todo('calls the createElement hook if it exists');
-  it.todo('returns the same element instance');
+  it('associates the element with the owner document', () => {
+    const window = new Window();
+    const element = new Element();
+
+    setupElement(element, window.document, 'div');
+
+    expect(element.ownerDocument).toBe(window.document);
+  });
+
+  it('sets the NAME property on the element', () => {
+    const window = new Window();
+    const element = new Element();
+
+    setupElement(element, window.document, 'article');
+
+    expect(element[NAME]).toBe('article');
+  });
+
+  it('sets the NS property when a namespace is provided', () => {
+    const window = new Window();
+    const element = new Element();
+
+    setupElement(element, window.document, 'svg', NamespaceURI.SVG);
+
+    expect(element[NS]).toBe(NamespaceURI.SVG);
+  });
+
+  it('does not set the NS property when no namespace is given', () => {
+    const window = new Window();
+    const element = new Element();
+
+    setupElement(element, window.document, 'div');
+
+    expect(element[NS]).toBe(NamespaceURI.XHTML);
+  });
+
+  it('calls the createElement hook if it exists', () => {
+    const window = new Window();
+    const createElementHook = vi.fn();
+    window[HOOKS] = {createElement: createElementHook};
+    const element = new Element();
+
+    setupElement(element, window.document, 'div', NamespaceURI.XHTML);
+
+    expect(createElementHook).toHaveBeenCalledWith(element, NamespaceURI.XHTML);
+  });
+
+  it('returns the same element instance', () => {
+    const window = new Window();
+    const element = new Element();
+
+    expect(setupElement(element, window.document, 'div')).toBe(element);
+  });
 });

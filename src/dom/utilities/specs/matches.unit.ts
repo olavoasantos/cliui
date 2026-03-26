@@ -48,4 +48,83 @@ describe('matches', () => {
     expect(matches(element, 'div.active#main')).toBe(true);
     expect(matches(element, 'span.active#main')).toBe(false);
   });
+
+  it('matches child combinators', () => {
+    const parent = document.createElement('section');
+    const child = document.createElement('p');
+    parent.append(child);
+
+    expect(matches(child, 'section > p')).toBe(true);
+  });
+
+  it('matches descendant combinators', () => {
+    const ancestor = document.createElement('section');
+    const wrapper = document.createElement('div');
+    const child = document.createElement('p');
+    ancestor.append(wrapper);
+    wrapper.append(child);
+
+    expect(matches(child, 'section p')).toBe(true);
+  });
+
+  it('matches adjacent combinators across non-element siblings', () => {
+    const parent = document.createElement('div');
+    const title = document.createElement('h1');
+    const spacer = document.createTextNode(' ');
+    const paragraph = document.createElement('p');
+    parent.append(title, spacer, paragraph);
+
+    expect(matches(paragraph, 'h1 + p')).toBe(true);
+  });
+
+  it('matches sibling combinators', () => {
+    const parent = document.createElement('div');
+    const title = document.createElement('h1');
+    const middle = document.createElement('span');
+    const paragraph = document.createElement('p');
+    parent.append(title, middle, paragraph);
+
+    expect(matches(paragraph, 'h1 ~ p')).toBe(true);
+  });
+
+  it('supports the universal selector', () => {
+    const element = document.createElement('div');
+
+    expect(matches(element, '*')).toBe(true);
+  });
+
+  it('supports :has() selectors', () => {
+    const element = document.createElement('div');
+
+    expect(matches(element, 'div:has(div)')).toBe(true);
+    expect(matches(element, 'div:has(span)')).toBe(false);
+  });
+
+  it('supports :not() selectors', () => {
+    const element = document.createElement('div');
+    element.setAttribute('class', 'active');
+
+    expect(matches(element, 'div:not(.disabled)')).toBe(true);
+    expect(matches(element, 'div:not(.active)')).toBe(false);
+  });
+
+  it('throws for unsupported pseudo selectors', () => {
+    const element = document.createElement('div');
+
+    expect(() => matches(element, 'div:hover')).toThrow('Pseudo :hover not implemented');
+  });
+
+  it('throws for unsupported selector functions', () => {
+    const element = document.createElement('div');
+
+    expect(() => matches(element, 'div:where(.active)')).toThrow(
+      'Function :where(.active) not implemented',
+    );
+  });
+
+  it('returns false when a combinator cannot resolve an element relationship', () => {
+    const detached = document.createElement('p');
+
+    expect(matches(detached, 'section > p')).toBe(false);
+  });
 });

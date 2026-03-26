@@ -1,5 +1,6 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 
+import {Node} from '../../classes/Node';
 import {Window} from '../../classes/Window';
 import {serializeNode} from '../serializeNode';
 
@@ -21,6 +22,20 @@ describe('serializeNode', () => {
     const element = document.createElement('div');
     element.setAttribute('class', 'box');
     expect(serializeNode(element)).toBe('<div class="box"></div>');
+  });
+
+  it('escapes special characters in attribute values', () => {
+    const element = document.createElement('div');
+    element.setAttribute('title', 'Tom & "Jerry"');
+
+    expect(serializeNode(element)).toBe('<div title="Tom &amp; &quot;Jerry&quot;"></div>');
+  });
+
+  it('serializes boolean-style empty attributes without a value assignment', () => {
+    const element = document.createElement('input');
+    element.setAttribute('disabled', '');
+
+    expect(serializeNode(element)).toBe('<input disabled></input>');
   });
 
   it('serializes a text node', () => {
@@ -45,5 +60,18 @@ describe('serializeNode', () => {
     element.appendChild(child);
 
     expect(serializeNode(element)).toBe('<div><span>Hi</span></div>');
+  });
+
+  it('returns an empty string for document fragments', () => {
+    const fragment = document.createDocumentFragment();
+    fragment.append(document.createElement('span'));
+
+    expect(serializeNode(fragment)).toBe('');
+  });
+
+  it('returns an empty string for unknown node types', () => {
+    const node = new Node();
+
+    expect(serializeNode(node)).toBe('');
   });
 });

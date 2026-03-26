@@ -514,191 +514,191 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 50.00%, functions 100.00%
 - Actions:
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover already-adopted nodes and ownerDocument propagation through subtrees
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover already-adopted nodes and ownerDocument propagation through subtrees
 
 ### `src/dom/utilities/camelToKebab.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/cloneNode.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 56.52%, branches 60.00%, functions 100.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover shallow/deep cloning for text, comment, element, fragment, and fallback custom node paths
-  - [ ] cover cloning into an alternate owner document and preserving namespaced attributes
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover shallow/deep cloning for text, comment, element, fragment, and fallback custom node paths
+  - [x] cover cloning into an alternate owner document and preserving namespaced attributes
 
 ### `src/dom/utilities/createElement.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/createNode.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/descendants.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/expandShorthand.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 89.47%, branches 89.47%, functions 100.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] cover 1/2/3/4-token shorthand expansion and malformed values
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] cover 1/2/3/4-token shorthand expansion and malformed values
 
 ### `src/dom/utilities/fireEvent.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 84.61%, branches 100.00%, functions 50.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] exercise currently uncovered methods and constructor paths
-  - [ ] cover all invocation forms and canceled-dispatch return behavior
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] exercise currently uncovered methods and constructor paths
+  - [x] cover all invocation forms and canceled-dispatch return behavior
 
 ### `src/dom/utilities/getCSSStyleDeclarationStore.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/getDomTokenListTokens.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/getEventTimeStamp.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 50.00%, functions 100.00%
 - Actions:
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover native timestamp and fallback timestamp generation paths
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover native timestamp and fallback timestamp generation paths
 
 ### `src/dom/utilities/matches.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 76.92%, branches 69.23%, functions 100.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover child, descendant, adjacent, and sibling combinators
-  - [ ] cover attribute selectors plus `:has()` / `:not()` and unsupported pseudo/function failures
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover child, descendant, adjacent, and sibling combinators
+  - [x] cover attribute selectors plus `:has()` / `:not()` and unsupported pseudo/function failures
 
 ### `src/dom/utilities/notifyCSSStyleDeclaration.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/parseHtml.ts`
 
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 100.00%, branches 72.72%, functions 100.00%
 - Actions:
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover malformed markup recovery and mixed text/comment/template/style parsing cases
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover malformed markup recovery and mixed text/comment/template/style parsing cases
 
 ### `src/dom/utilities/parseSelector.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 93.33%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/querySelector.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 75.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover no-match behavior and first-match ordering semantics
+  - [x] add an integration spec if this file coordinates behavior with other modules
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover no-match behavior and first-match ordering semantics
 
 ### `src/dom/utilities/querySelectorAll.ts`
 
-- Status: unit exists; integration missing; bench exists
+- Status: unit exists; integration exists; bench exists
 - Coverage: lines 100.00%, branches 90.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/utilities/removeEventTargetListener.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 85.71%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/selfAndDescendants.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/serializeChildren.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/serializeNode.ts`
 
-- Status: unit exists; integration missing; bench exists
+- Status: unit exists; integration exists; bench exists
 - Coverage: lines 95.00%, branches 66.66%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover fragment, comment, empty-element, and escaping edge cases
+  - [x] add an integration spec if this file coordinates behavior with other modules
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover fragment, comment, empty-element, and escaping edge cases
 
 ### `src/dom/utilities/setDomTokenListTokens.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/setupElement.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/toNode.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/utilities/updateElementAttribute.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ## src/layout/classes
 

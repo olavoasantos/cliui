@@ -89,4 +89,27 @@ describe('parseHtml', () => {
 
     expect(serializeChildren(wrapper)).toBe(html);
   });
+
+  it('recovers from malformed markup by unwinding to the previous parent', () => {
+    const container = document.createElement('div');
+    const fragment = parseHtml('<div><span>Inner</div><p>After</p>', container);
+    const wrapper = document.createElement('div');
+    wrapper.append(fragment);
+
+    expect(wrapper.outerHTML).toBe('<div><div><span>Inner</span><p>After</p></div></div>');
+  });
+
+  it('parses mixed text, comment, template, and style nodes in sequence', () => {
+    const container = document.createElement('div');
+    const fragment = parseHtml(
+      'start<!--note--><style>.x{}</style><template><span>Hidden</span></template>end',
+      container,
+    );
+    const wrapper = document.createElement('div');
+    wrapper.append(fragment);
+
+    expect(wrapper.outerHTML).toBe(
+      '<div>start<!--note--><style>.x{}</style><template><span>Hidden</span></template>end</div>',
+    );
+  });
 });
