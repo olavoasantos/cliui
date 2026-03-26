@@ -197,6 +197,10 @@ export class InputReader {
       return this.createKeyEvent(key, key, this.parseModifier(parameters[1]));
     }
 
+    if (final === 'Z') {
+      return this.createKeyEvent('Tab', 'Tab', {shift: true});
+    }
+
     const key = CSI_FINAL_KEYS[final];
 
     if (key === undefined) {

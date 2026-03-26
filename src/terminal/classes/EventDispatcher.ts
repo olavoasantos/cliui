@@ -118,20 +118,32 @@ export class EventDispatcher {
         this.activeMousePress = {target, button: event.button};
         target.dispatchEvent(this.createMouseDomEvent('mousedown', event));
         return;
-      case 'release':
-        target.dispatchEvent(this.createMouseDomEvent('mouseup', event));
+      case 'release': {
+        const releasedButton =
+          event.button === 'none' && this.activeMousePress !== null
+            ? this.activeMousePress.button
+            : event.button;
+        const normalizedReleaseEvent =
+          releasedButton === event.button ? event : {...event, button: releasedButton};
+
+        target.dispatchEvent(this.createMouseDomEvent('mouseup', normalizedReleaseEvent));
 
         if (
           this.activeMousePress !== null &&
           this.activeMousePress.target === target &&
-          this.activeMousePress.button === event.button &&
-          this.isClickableButton(event.button)
+          this.isClickableButton(this.activeMousePress.button)
         ) {
-          target.dispatchEvent(this.createMouseDomEvent('click', event));
+          target.dispatchEvent(
+            this.createMouseDomEvent('click', {
+              ...normalizedReleaseEvent,
+              button: this.activeMousePress.button,
+            }),
+          );
         }
 
         this.activeMousePress = null;
         return;
+      }
       case 'motion':
         target.dispatchEvent(this.createMouseDomEvent('mousemove', event));
         return;

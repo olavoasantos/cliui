@@ -268,7 +268,7 @@ describe('EventDispatcher', () => {
     dispatcher.dispatch({
       type: 'mouse',
       eventType: 'release',
-      button: 'left',
+      button: 'none',
       column: 2,
       row: 2,
       ctrl: true,

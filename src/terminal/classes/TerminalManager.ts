@@ -2,10 +2,12 @@ import {
   DISABLE_ALT_SCREEN,
   DISABLE_BRACKETED_PASTE,
   DISABLE_FOCUS_EVENTS,
+  DISABLE_MOUSE_BUTTON_EVENTS,
   DISABLE_MOUSE_SGR,
   ENABLE_ALT_SCREEN,
   ENABLE_BRACKETED_PASTE,
   ENABLE_FOCUS_EVENTS,
+  ENABLE_MOUSE_BUTTON_EVENTS,
   ENABLE_MOUSE_SGR,
   HIDE_CURSOR,
   SHOW_CURSOR,
@@ -56,6 +58,7 @@ export class TerminalManager {
     this.write(HIDE_CURSOR);
 
     if (this.mouse) {
+      this.write(ENABLE_MOUSE_BUTTON_EVENTS);
       this.write(ENABLE_MOUSE_SGR);
     }
 
@@ -77,6 +80,7 @@ export class TerminalManager {
 
     if (this.mouse) {
       this.write(DISABLE_MOUSE_SGR);
+      this.write(DISABLE_MOUSE_BUTTON_EVENTS);
     }
 
     this.write(SHOW_CURSOR);

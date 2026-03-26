@@ -83,6 +83,8 @@ export class Renderer {
   resize(cols: number, rows: number): void {
     this.currentBuffer.resize(cols, rows);
     this.previousBuffer.resize(cols, rows);
+    this.currentBuffer.clear();
+    this.previousBuffer.clear();
   }
 
   private swapBuffers(): void {

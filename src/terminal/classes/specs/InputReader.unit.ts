@@ -56,11 +56,12 @@ describe('InputReader', () => {
   it('parses arrow and navigation escape sequences with modifiers', () => {
     const reader = new InputReader({});
 
-    expect(reader.parse('\u001B[A\u001B[1;5C\u001B[3~\u001B[5~')).toEqual([
+    expect(reader.parse('\u001B[A\u001B[1;5C\u001B[3~\u001B[5~\u001B[Z')).toEqual([
       {type: 'key', key: 'ArrowUp', code: 'ArrowUp', ctrl: false, alt: false, shift: false},
       {type: 'key', key: 'ArrowRight', code: 'ArrowRight', ctrl: true, alt: false, shift: false},
       {type: 'key', key: 'Delete', code: 'Delete', ctrl: false, alt: false, shift: false},
       {type: 'key', key: 'PageUp', code: 'PageUp', ctrl: false, alt: false, shift: false},
+      {type: 'key', key: 'Tab', code: 'Tab', ctrl: false, alt: false, shift: true},
     ]);
   });
 

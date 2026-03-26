@@ -10,6 +10,7 @@
     "@micra/terminal-dom": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
     "tsx": "^4.19.0"
   }
 }

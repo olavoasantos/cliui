@@ -103,7 +103,7 @@ describe('Renderer', () => {
 
     expect(renderer.cols).toBe(4);
     expect(renderer.rows).toBe(1);
-    expect(output).toBe('\u001B[1;3HCD');
+    expect(output).toBe('\u001B[1;1HABCD');
   });
 
   it('accepts multiple root boxes and renders them in order', () => {

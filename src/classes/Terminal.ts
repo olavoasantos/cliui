@@ -130,6 +130,7 @@ export class Terminal {
       this.renderer.resize(columns, rows);
       this.layoutEngine.clearCache();
       this.styleEngine.markAllDirty();
+      this.output.write('\u001B[2J\u001B[H');
     }
 
     if (this.styleEngine.getDirtyElements().size > 0) {
