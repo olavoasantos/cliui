@@ -39,7 +39,7 @@
     "fix": "run-s *:fix",
     "prepare": "husky .config/git-hooks",
     "test:check": "run-p test:unit test:integration test:e2e test:performance",
-    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "test:coverage": "vitest run --config=.config/testing/vitest.coverage.config.ts --passWithNoTests --coverage",
     "test:e2e": "vitest run --config=.config/testing/vitest.e2e.config.ts --passWithNoTests",
     "test:integration:coverage": "vitest run --config=.config/testing/vitest.integration.config.ts --passWithNoTests --coverage",
     "test:integration:watch": "vitest --config=.config/testing/vitest.integration.config.ts --passWithNoTests",
