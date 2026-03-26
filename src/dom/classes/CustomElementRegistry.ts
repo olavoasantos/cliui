@@ -1,11 +1,26 @@
+import {IS_CONNECTED, NodeType} from '../constants';
+import {selfAndDescendants} from '../utilities/selfAndDescendants';
+
+import type {Element} from './Element';
 import type {Node} from './Node';
+import type {Window} from './Window';
 
 export class CustomElementRegistryImplementation {
   private registry = new Map<string, CustomElementConstructor>();
   private listenersByName = new Map<string, ((Constructor: CustomElementConstructor) => void)[]>();
+  private owner: Window | null = null;
+
+  /** @internal Sets the owning window so define() can auto-upgrade existing elements. */
+  setOwner(window: Window) {
+    this.owner = window;
+  }
 
   define(name: string, Constructor: CustomElementConstructor, _options?: ElementDefinitionOptions) {
     this.registry.set(name, Constructor);
+
+    if (this.owner) {
+      this.upgrade(this.owner.document);
+    }
 
     const listeners = this.listenersByName.get(name);
 
@@ -47,7 +62,20 @@ export class CustomElementRegistryImplementation {
     });
   }
 
-  upgrade(_root: Node) {
-    // TODO: implement in Phase 5
+  upgrade(root: Node) {
+    for (const node of selfAndDescendants(root)) {
+      if (node.nodeType !== NodeType.ELEMENT_NODE) continue;
+
+      const element = node as Element;
+      const Constructor = this.registry.get(element.localName);
+
+      if (Constructor == null || element instanceof Constructor) continue;
+
+      Object.setPrototypeOf(element, Constructor.prototype);
+
+      if (element[IS_CONNECTED]) {
+        (element as unknown as {connectedCallback?(): void}).connectedCallback?.();
+      }
+    }
   }
 }
