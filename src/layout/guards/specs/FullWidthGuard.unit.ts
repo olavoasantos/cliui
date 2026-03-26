@@ -1,7 +1,5 @@
 import {describe, it} from 'vitest';
 
-import {FullWidthGuard} from '../FullWidthGuard';
-
 describe('FullWidthGuard', () => {
   it.todo('returns true for fullwidth Latin letters');
   it.todo('returns true for fullwidth digits');

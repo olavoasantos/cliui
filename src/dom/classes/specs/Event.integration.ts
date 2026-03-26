@@ -10,15 +10,17 @@ describe('Event integration', () => {
     const child = document.createElement('span');
     parent.appendChild(child);
     document.body.appendChild(parent);
-    let captured: Event | null = null;
+    const captured: Event[] = [];
 
     parent.addEventListener('ping', (event) => {
-      captured = event as Event;
+      captured.push(event as Event);
     });
     child.dispatchEvent(new Event('ping', {bubbles: true}));
 
-    expect(captured?.target).toBe(child);
-    expect(captured?.currentTarget).toBe(parent);
-    expect(captured?.composedPath()).toContain(document.body);
+    expect(captured).toHaveLength(1);
+    const seen = captured[0]!;
+    expect(seen.target).toBe(child);
+    expect(seen.currentTarget).toBe(parent);
+    expect(seen.composedPath()).toContain(document.body);
   });
 });

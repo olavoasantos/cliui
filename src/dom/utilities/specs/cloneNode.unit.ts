@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 
-import {OWNER_DOCUMENT} from '../../constants';
+import {NamespaceURI, OWNER_DOCUMENT} from '../../constants';
 import {Node} from '../../classes/Node';
 import {Window} from '../../classes/Window';
 import {cloneNode} from '../cloneNode';
@@ -44,11 +44,11 @@ describe('cloneNode', () => {
       const document = new Window().document;
       const element = document.createElement('article');
       element.setAttribute('id', 'post');
-      element.setAttributeNS('urn:test', 'data-flag', 'yes');
+      element.setAttributeNS(NamespaceURI.SVG, 'data-flag', 'yes');
       const clone = cloneNode(element) as typeof element;
 
       expect(clone.getAttribute('id')).toBe('post');
-      expect(clone.getAttributeNS('urn:test', 'data-flag')).toBe('yes');
+      expect(clone.getAttributeNS(NamespaceURI.SVG, 'data-flag')).toBe('yes');
     });
 
     it('recursively clones children when deep is true', () => {
@@ -77,7 +77,7 @@ describe('cloneNode', () => {
     it('creates a new fragment', () => {
       const document = new Window().document;
       const fragment = document.createDocumentFragment();
-      const clone = cloneNode(fragment);
+      const clone = cloneNode(fragment) as typeof fragment;
 
       expect(clone).not.toBe(fragment);
       expect(clone.childNodes).toHaveLength(0);
@@ -89,7 +89,7 @@ describe('cloneNode', () => {
       const child = document.createElement('span');
       child.append('hello');
       fragment.append(child);
-      const clone = cloneNode(fragment, true);
+      const clone = cloneNode(fragment, true) as typeof fragment;
 
       expect(clone.childNodes).toHaveLength(1);
       expect(clone.firstChild?.textContent).toBe('hello');
@@ -99,7 +99,7 @@ describe('cloneNode', () => {
       const document = new Window().document;
       const fragment = document.createDocumentFragment();
       fragment.append(document.createElement('span'));
-      const clone = cloneNode(fragment, false);
+      const clone = cloneNode(fragment, false) as typeof fragment;
 
       expect(clone.childNodes).toHaveLength(0);
     });
@@ -110,13 +110,13 @@ describe('cloneNode', () => {
       const sourceWindow = new Window();
       const targetWindow = new Window();
       const element = sourceWindow.document.createElement('article');
-      element.setAttributeNS('urn:test', 'data-flag', 'yes');
+      element.setAttributeNS(NamespaceURI.SVG, 'data-flag', 'yes');
       element.append(sourceWindow.document.createTextNode('hello'));
       const clone = cloneNode(element, true, targetWindow.document) as typeof element;
 
       expect(clone.ownerDocument).toBe(targetWindow.document);
       expect(clone.firstChild?.ownerDocument).toBe(targetWindow.document);
-      expect(clone.getAttributeNS('urn:test', 'data-flag')).toBe('yes');
+      expect(clone.getAttributeNS(NamespaceURI.SVG, 'data-flag')).toBe('yes');
     });
 
     it('uses the node own ownerDocument when document is omitted', () => {

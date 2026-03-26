@@ -295,63 +295,62 @@ export class StyleEngine {
     const hooks = window[HOOKS] as Partial<Hooks>;
     this.previousHooks = {...hooks};
 
-    const engine = this;
     const prevSetAttribute = hooks.setAttribute;
     const prevRemoveAttribute = hooks.removeAttribute;
     const prevSetText = hooks.setText;
     const prevInsertChild = hooks.insertChild;
     const prevRemoveChild = hooks.removeChild;
 
-    hooks.setAttribute = function setAttribute(element, name, value, ns) {
+    hooks.setAttribute = (element, name, value, ns) => {
       prevSetAttribute?.(element, name, value, ns);
       if (name === 'class' || name === 'id' || name === 'style') {
-        engine.markStyleDirty(element);
+        this.markStyleDirty(element);
         // Class/id changes can affect selectors that match descendants
-        walkElements(element, (child) => engine.markStyleDirty(child));
+        walkElements(element, (child) => this.markStyleDirty(child));
       } else {
         // Attribute selectors may match on any attribute
-        engine.markStyleDirty(element);
+        this.markStyleDirty(element);
       }
     };
 
-    hooks.removeAttribute = function removeAttribute(element, name, ns) {
+    hooks.removeAttribute = (element, name, ns) => {
       prevRemoveAttribute?.(element, name, ns);
       if (name === 'class' || name === 'id' || name === 'style') {
-        engine.markStyleDirty(element);
-        walkElements(element, (child) => engine.markStyleDirty(child));
+        this.markStyleDirty(element);
+        walkElements(element, (child) => this.markStyleDirty(child));
       } else {
-        engine.markStyleDirty(element);
+        this.markStyleDirty(element);
       }
     };
 
-    hooks.setText = function setText(text, data, oldValue) {
+    hooks.setText = (text, data, oldValue) => {
       prevSetText?.(text, data, oldValue);
 
       const parent = text.parentElement;
 
       if (parent !== null && parent.nodeType === NodeType.ELEMENT_NODE) {
-        engine.layoutDirty.add(parent as unknown as Element);
+        this.layoutDirty.add(parent as unknown as Element);
       }
     };
 
-    hooks.insertChild = function insertChild(parent, node, index) {
+    hooks.insertChild = (parent, node, index) => {
       prevInsertChild?.(parent, node, index);
       if (node.nodeType === NodeType.ELEMENT_NODE) {
         const el = node as unknown as Element;
-        engine.markStyleDirty(el);
-        walkElements(el, (child) => engine.markStyleDirty(child));
+        this.markStyleDirty(el);
+        walkElements(el, (child) => this.markStyleDirty(child));
       }
       // Structural changes can affect sibling selectors and layout
-      engine.markStyleDirty(parent);
-      engine.layoutDirty.add(parent);
+      this.markStyleDirty(parent);
+      this.layoutDirty.add(parent);
     };
 
-    hooks.removeChild = function removeChild(parent, node, index) {
+    hooks.removeChild = (parent, node, index) => {
       prevRemoveChild?.(parent, node, index);
       // Structural changes can affect sibling selectors on remaining children
-      engine.markStyleDirty(parent);
-      engine.layoutDirty.add(parent);
-      walkElements(parent, (child) => engine.markStyleDirty(child));
+      this.markStyleDirty(parent);
+      this.layoutDirty.add(parent);
+      walkElements(parent, (child) => this.markStyleDirty(child));
     };
   }
 

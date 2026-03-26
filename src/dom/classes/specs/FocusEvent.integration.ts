@@ -11,14 +11,15 @@ describe('FocusEvent integration', () => {
     first.setAttribute('tabindex', '0');
     second.setAttribute('tabindex', '0');
     document.body.append(first, second);
-    let seen: FocusEvent | null = null;
+    const seen: FocusEvent[] = [];
 
     second.addEventListener('focus', (event) => {
-      seen = event as FocusEvent;
+      seen.push(event as FocusEvent);
     });
     document.setActiveElement(first);
     document.setActiveElement(second);
 
-    expect(seen?.relatedTarget).toBe(first);
+    expect(seen).toHaveLength(1);
+    expect(seen[0]!.relatedTarget).toBe(first);
   });
 });

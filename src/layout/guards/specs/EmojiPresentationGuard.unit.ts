@@ -1,7 +1,5 @@
 import {describe, it} from 'vitest';
 
-import {EmojiPresentationGuard} from '../EmojiPresentationGuard';
-
 describe('EmojiPresentationGuard', () => {
   it.todo('returns true for emoji with VS16 presentation selector');
   it.todo('returns true for ZWJ sequences with multiple pictographics');

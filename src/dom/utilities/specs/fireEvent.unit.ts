@@ -35,7 +35,7 @@ describe('fireEvent', () => {
     const event = new Event('click');
     event.target = target;
 
-    target.addEventListener('click', function listener() {
+    target.addEventListener('click', function listener(this: EventTarget) {
       receivedThis.push(this);
     });
 

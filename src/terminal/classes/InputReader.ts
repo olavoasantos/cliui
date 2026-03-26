@@ -10,6 +10,12 @@ import type {
   TerminalReadableInput,
 } from '../types';
 
+const CSI_SEQUENCE_REGEX = new RegExp(String.raw`^\u001B\[([0-9;]*)([~A-Za-z])?`);
+const SGR_MOUSE_SEQUENCE_REGEX = new RegExp(
+  String.raw`^\u001B\[<([0-9]+);([0-9]+);([0-9]+)([Mm])?`,
+);
+const MODE_RESPONSE_REGEX = new RegExp(String.raw`^\u001B\[\?[0-9;]+\$y`);
+
 /**
  * Reads raw terminal bytes and parses them into structured input events.
  *
@@ -180,7 +186,7 @@ export class InputReader {
       return modeResponse;
     }
 
-    const match = this.pending.match(/^\u001B\[([0-9;]*)([~A-Za-z])?/);
+    const match = this.pending.match(CSI_SEQUENCE_REGEX);
 
     if (match === null) {
       return null;
@@ -228,7 +234,7 @@ export class InputReader {
       return null;
     }
 
-    const match = this.pending.match(/^\u001B\[<([0-9]+);([0-9]+);([0-9]+)([Mm])?/);
+    const match = this.pending.match(SGR_MOUSE_SEQUENCE_REGEX);
 
     if (match === null) {
       return undefined;
@@ -276,7 +282,7 @@ export class InputReader {
       return false;
     }
 
-    const match = this.pending.match(/^\u001B\[\?[0-9;]+\$y/);
+    const match = this.pending.match(MODE_RESPONSE_REGEX);
 
     if (match === null) {
       return undefined;

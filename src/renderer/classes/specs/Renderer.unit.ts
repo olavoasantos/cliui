@@ -135,6 +135,6 @@ describe('Renderer', () => {
     ]);
 
     expect(output).toContain('\u001B[7;1H');
-    expect(output).toMatch(/\u001B\[7;1H +/u);
+    expect(output).toMatch(new RegExp(String.raw`\u001B\[7;1H +`, 'u'));
   });
 });

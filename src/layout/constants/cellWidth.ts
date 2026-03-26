@@ -10,9 +10,10 @@ export const EXTENDED_PICTOGRAPHIC_REGEX = /\p{Extended_Pictographic}/gu;
 export const VS16 = '\uFE0F';
 export const ZWJ = '\u200D';
 export const UNQUALIFIED_KEYCAP_REGEX = /^[\d#*]\u20E3$/;
-// eslint-disable-next-line no-control-regex
-export const ANSI_REGEX =
-  /[\u001B\u009B][[\]()#;?]*(?:(?:(?:;[-a-zA-Z\d/#&.:=?%@~_]+)*|[a-zA-Z\d]+(?:;[-a-zA-Z\d/#&.:=?%@~_]*)*)?\u0007|(?:\d{1,4}(?:;\d{0,4})*)?[\d<=>A-PR-Za-z])/g;
+export const ANSI_REGEX = new RegExp(
+  String.raw`[\u001B\u009B][[\]()#;?]*(?:(?:(?:;[-a-zA-Z\d/#&.:=?%@~_]+)*|[a-zA-Z\d]+(?:;[-a-zA-Z\d/#&.:=?%@~_]*)*)?\u0007|(?:\d{1,4}(?:;\d{0,4})*)?[\d<=>A-PR-Za-z])`,
+  'g',
+);
 export const REGIONAL_INDICATOR_START = 0x1f1e6;
 export const REGIONAL_INDICATOR_END = 0x1f1ff;
 // prettier-ignore

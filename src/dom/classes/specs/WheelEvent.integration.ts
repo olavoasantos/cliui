@@ -6,14 +6,16 @@ import {Window} from '../Window';
 describe('WheelEvent integration', () => {
   it('dispatches through DOM listeners with wheel delta metadata intact', () => {
     const target = new Window().document.createElement('div');
-    let seen: WheelEvent | null = null;
+    const seen: WheelEvent[] = [];
 
     target.addEventListener('wheel', (event) => {
-      seen = event as WheelEvent;
+      seen.push(event as WheelEvent);
     });
     target.dispatchEvent(new WheelEvent('wheel', {deltaY: -120, ctrlKey: true}));
 
-    expect(seen?.deltaY).toBe(-120);
-    expect(seen?.getModifierState('Control')).toBe(true);
+    expect(seen).toHaveLength(1);
+    const event = seen[0]!;
+    expect(event.deltaY).toBe(-120);
+    expect(event.getModifierState('Control')).toBe(true);
   });
 });

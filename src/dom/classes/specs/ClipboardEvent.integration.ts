@@ -8,14 +8,16 @@ describe('ClipboardEvent integration', () => {
     const document = new Window().document;
     const target = document.createElement('div');
     const clipboardData = {getData: () => 'hello'} as unknown as DataTransfer;
-    let received: ClipboardEvent | null = null;
+    const received: ClipboardEvent[] = [];
 
     target.addEventListener('paste', (event) => {
-      received = event as ClipboardEvent;
+      received.push(event as ClipboardEvent);
     });
     target.dispatchEvent(new ClipboardEvent('paste', {clipboardData}));
 
-    expect(received?.clipboardData).toBe(clipboardData);
-    expect(received?.target).toBe(target);
+    expect(received).toHaveLength(1);
+    const seen = received[0]!;
+    expect(seen.clipboardData).toBe(clipboardData);
+    expect(seen.target).toBe(target);
   });
 });

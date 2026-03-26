@@ -8,14 +8,16 @@ describe('MouseEvent integration', () => {
     const document = new Window().document;
     const target = document.createElement('button');
     const relatedTarget = document.createElement('div');
-    let seen: MouseEvent | null = null;
+    const seen: MouseEvent[] = [];
 
     target.addEventListener('click', (event) => {
-      seen = event as MouseEvent;
+      seen.push(event as MouseEvent);
     });
     target.dispatchEvent(new MouseEvent('click', {clientX: 4, clientY: 7, relatedTarget}));
 
-    expect(seen?.clientX).toBe(4);
-    expect(seen?.relatedTarget).toBe(relatedTarget);
+    expect(seen).toHaveLength(1);
+    const event = seen[0]!;
+    expect(event.clientX).toBe(4);
+    expect(event.relatedTarget).toBe(relatedTarget);
   });
 });
