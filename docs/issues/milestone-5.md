@@ -404,3 +404,35 @@ Implement a `<ui-codeblock>` custom element for displaying preformatted code and
 - M4T3: Overflow scroll
 
 ---
+
+### M5T17: Text selection for ui-input and ui-textarea
+
+**Summary**
+
+Add text selection support to `<ui-input>` (and later `<ui-textarea>`). Users should be able to select text with Shift+Arrow, Shift+Home/End, Shift+Alt+Arrow (word selection), and Ctrl+A (select all). Selected text should render with a visible highlight, and standard clipboard operations (copy, cut) should work on the selection.
+
+**Expected Outcomes**
+
+- Shift+ArrowLeft/Right extends or contracts the selection by one grapheme
+- Shift+Home/End extends the selection to the start or end of the line
+- Shift+Alt+Arrow (or Shift+Alt+B/F) extends the selection by word
+- Ctrl+A or Cmd+A selects all text in the input
+- Selected text renders with a visible indicator (inverted colors or distinct background)
+- Cut removes the selected text and dispatches an `input` event
+- Copy places the selected text on the clipboard (if clipboard access is available)
+- Typing while text is selected replaces the selection
+- Backspace/Delete with an active selection removes the selected text
+- Clicking repositions the cursor and clears the selection
+- Unit and integration tests cover selection creation, expansion, rendering, and clipboard operations
+
+**Technical Constraints**
+
+- Selection rendering requires per-character styling within the input's rendered text; this may require renderer-level support for inline style overrides or a dedicated selection rendering path in the Painter
+- Clipboard write access may not be available in all terminal environments; degrade gracefully
+
+**Dependencies**
+
+- M5T5: Built-in text input component (the base component to extend)
+- M5T12: Built-in textarea component (extend selection to multi-line when available)
+
+---
