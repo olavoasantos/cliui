@@ -704,27 +704,27 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 
 ### `src/layout/classes/FlexLayout.ts`
 
-- Status: unit exists; integration missing; bench exists
+- Status: unit exists; integration exists; bench exists
 - Coverage: lines 91.86%, branches 88.33%, functions 94.28%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/layout/classes/LayoutEngine.ts`
 
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 86.14%, branches 73.78%, functions 84.21%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover incremental cache reuse, dirty subtree invalidation, and cached box localization
-  - [ ] cover `display: none`, percentage resolution, auto sizing, scroll clamping, and absolute positioning
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover incremental cache reuse, dirty subtree invalidation, and cached box localization
+  - [x] cover `display: none`, percentage resolution, auto sizing, scroll clamping, and absolute positioning
 
 ### `src/layout/classes/TextLayout.ts`
 
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 95.69%, branches 86.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ## src/layout/guards
 
