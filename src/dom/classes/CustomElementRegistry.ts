@@ -1,4 +1,5 @@
 import {IS_CONNECTED, NodeType} from '../constants';
+import type {CustomElementConstructor} from '../types';
 import {ensureCustomElementStyles} from '../utilities/ensureCustomElementStyles';
 import {selfAndDescendants} from '../utilities/selfAndDescendants';
 

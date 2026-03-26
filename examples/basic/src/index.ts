@@ -14,7 +14,7 @@ const terminal = new Terminal({
 
 const {document, window} = terminal;
 
-window.customElements.define(UiSpinner.tagName, UiSpinner as unknown as CustomElementConstructor);
+window.customElements.define(UiSpinner.tagName, UiSpinner);
 
 const style = document.createElement('style');
 style.textContent = `

@@ -2,6 +2,7 @@ import type {EventTarget} from '../classes/EventTarget';
 import type {Element} from '../classes/Element';
 import type {Node} from '../classes/Node';
 import type {Text} from '../classes/Text';
+import type {HTMLElement} from '../classes/HTMLElement';
 
 export type NodeType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
@@ -148,4 +149,8 @@ export interface Hooks {
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | EventListenerOptions,
   ): void;
+}
+
+export interface CustomElementConstructor {
+  new (): HTMLElement;
 }
