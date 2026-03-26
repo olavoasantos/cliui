@@ -254,4 +254,33 @@ describe('TerminalManager', () => {
       vi.useRealTimers();
     }
   });
+
+  it('ignores mismatched mode responses and keeps probing until each requested mode settles', async () => {
+    const output = createOutput();
+    const input = createReadableInput();
+    const manager = new TerminalManager({
+      input: input.stream,
+      output: {
+        ...output.stream,
+        getColorDepth: () => 2,
+      },
+      altScreen: false,
+      mouse: false,
+    });
+
+    const detection = manager.detectCapabilities();
+
+    input.emit('\u001B[?2027;0$y');
+    input.emit('\u001B[?2026;0$y');
+    input.emit('\u001B[?2027;3$y');
+
+    await detection;
+
+    expect(manager.getCapabilities()).toEqual({
+      colorProfile: 'none',
+      synchronizedOutput: false,
+      unicodeWidth: false,
+    });
+    expect(input.stream.off).toHaveBeenCalledTimes(2);
+  });
 });

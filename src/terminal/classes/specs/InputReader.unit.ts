@@ -228,6 +228,71 @@ describe('InputReader', () => {
     ]);
   });
 
+  it('buffers incomplete CSI sequences and decodes combined modifiers when they complete', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[1;8')).toEqual([]);
+    expect(reader.parse('D')).toEqual([
+      {type: 'key', key: 'ArrowLeft', code: 'ArrowLeft', ctrl: true, alt: true, shift: true},
+    ]);
+  });
+
+  it('falls back to Escape for unsupported CSI and SS3 sequences and resumes parsing later bytes', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[999~\u001BOX')).toEqual([
+      {type: 'key', key: 'Escape', code: 'Escape', ctrl: false, alt: false, shift: false},
+      {type: 'key', key: 'Escape', code: 'Escape', ctrl: false, alt: false, shift: false},
+    ]);
+  });
+
+  it('buffers bracketed paste and trailing focus input across chunk boundaries', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[200~line 1')).toEqual([]);
+    expect(reader.parse('\nline 2\u001B[201~\u001B[')).toEqual([
+      {type: 'paste', text: 'line 1\nline 2'},
+    ]);
+    expect(reader.parse('O')).toEqual([{type: 'focus', focus: 'out'}]);
+  });
+
+  it('parses mouse release, wheel, and extra-button sequences with modifiers', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[<31;7;9m\u001B[<73;2;3M\u001B[<130;5;6M')).toEqual([
+      {
+        type: 'mouse',
+        eventType: 'release',
+        button: 'none',
+        column: 6,
+        row: 8,
+        ctrl: true,
+        alt: true,
+        shift: true,
+      },
+      {
+        type: 'mouse',
+        eventType: 'wheel',
+        button: 'wheel-down',
+        column: 1,
+        row: 2,
+        ctrl: false,
+        alt: true,
+        shift: false,
+      },
+      {
+        type: 'mouse',
+        eventType: 'press',
+        button: 'button10',
+        column: 4,
+        row: 5,
+        ctrl: false,
+        alt: false,
+        shift: false,
+      },
+    ]);
+  });
+
   it('reads data events from a stream and stops reading after stop()', () => {
     const {input, emit} = createReadableInput();
     const listener = vi.fn<(event: TerminalInputEvent) => void>();

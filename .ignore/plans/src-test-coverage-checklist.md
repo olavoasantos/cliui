@@ -854,15 +854,15 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 
 ### `src/terminal/classes/EventDispatcher.ts`
 
-- Status: unit exists; integration exists; bench missing
+- Status: unit exists; integration exists; bench exists
 - Coverage: lines 80.18%, branches 60.41%, functions 100.00%
 - Actions:
-  - [ ] add a performance benchmark if this file is part of a hot path
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover hit testing by z-index and document order
-  - [ ] cover mouse press/release/click normalization, wheel scrolling, focus events, and `dispatchAll()`
-  - [ ] cover active-element targeting for keyboard and paste events
+  - [x] add a performance benchmark if this file is part of a hot path
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover hit testing by z-index and document order
+  - [x] cover mouse press/release/click normalization, wheel scrolling, focus events, and `dispatchAll()`
+  - [x] cover active-element targeting for keyboard and paste events
 
 ### `src/terminal/classes/InputReader.ts`
 
@@ -870,14 +870,14 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Coverage: lines 87.02%, branches 77.37%, functions 100.00%
 - Actions:
   - [x] add a performance benchmark if this file is part of a hot path
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover incomplete CSI buffering, SS3 fallback, focus sequences, mode responses, and bracketed paste across chunks
-  - [ ] cover mouse motion/release/wheel decoding plus alt/ctrl/shift modifier parsing
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover incomplete CSI buffering, SS3 fallback, focus sequences, mode responses, and bracketed paste across chunks
+  - [x] cover mouse motion/release/wheel decoding plus alt/ctrl/shift modifier parsing
 
 ### `src/terminal/classes/TerminalManager.ts`
 
 - Status: unit exists; integration exists; bench missing
 - Coverage: lines 95.94%, branches 83.78%, functions 100.00%
 - Actions:
-  - [ ] cover repeated start/stop calls and capability negotiation edge cases
+  - [x] cover repeated start/stop calls and capability negotiation edge cases

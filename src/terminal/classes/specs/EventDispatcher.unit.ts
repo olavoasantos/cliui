@@ -573,4 +573,142 @@ describe('EventDispatcher', () => {
 
     expect(events).toEqual(['focus', 'blur']);
   });
+
+  it('falls back to document.body for mouse events when no layout root is available', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const events: MouseEvent[] = [];
+
+    document.body.addEventListener('mousemove', (event) => {
+      events.push(event as MouseEvent);
+    });
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'motion',
+      button: 'none',
+      column: 7,
+      row: 4,
+      ctrl: false,
+      alt: true,
+      shift: false,
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]?.target).toBe(document.body);
+    expect(events[0]?.buttons).toBe(0);
+    expect(events[0]?.altKey).toBe(true);
+  });
+
+  it('normalizes release buttons without dispatching click events for non-clickable buttons', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const region = document.createElement('div');
+    const events: string[] = [];
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 8,
+        height: 4,
+        children: [
+          createBox(document, {
+            element: region,
+            x: 0,
+            y: 0,
+            width: 8,
+            height: 4,
+          }),
+        ],
+      }),
+    );
+
+    region.addEventListener('mousedown', (event) => {
+      events.push(`${(event as MouseEvent).type}:${(event as MouseEvent).button}`);
+    });
+    region.addEventListener('mouseup', (event) => {
+      events.push(`${(event as MouseEvent).type}:${(event as MouseEvent).button}`);
+    });
+    region.addEventListener('click', () => {
+      events.push('click');
+    });
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'press',
+      button: 'forward',
+      column: 1,
+      row: 1,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'release',
+      button: 'none',
+      column: 1,
+      row: 1,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+
+    expect(events).toEqual(['mousedown:4', 'mouseup:4']);
+  });
+
+  it('maps horizontal wheel input and preserves existing element scroll state', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const region = document.createElement('div') as typeof document.body & {scrollTop?: number};
+    const listener = vi.fn<(event: WheelEvent) => void>();
+
+    region.scrollTop = 2;
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 12,
+        height: 6,
+        children: [
+          createBox(document, {
+            element: region,
+            x: 0,
+            y: 0,
+            width: 12,
+            height: 4,
+            contentWidth: 12,
+            contentHeight: 4,
+            computedStyle: style({overflow: 'scroll'}),
+            scrollOffsetY: 1,
+            scrollHeight: 9,
+          }),
+        ],
+      }),
+    );
+
+    region.addEventListener('wheel', (event) => {
+      listener(event as unknown as WheelEvent);
+    });
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'wheel',
+      button: 'wheel-right',
+      column: 2,
+      row: 1,
+      ctrl: true,
+      alt: false,
+      shift: true,
+    });
+
+    expect(listener).toHaveBeenCalledOnce();
+    expect(listener.mock.calls[0]?.[0]?.deltaX).toBe(1);
+    expect(listener.mock.calls[0]?.[0]?.deltaY).toBe(0);
+    expect(region.scrollTop).toBe(2);
+  });
 });
