@@ -14,7 +14,7 @@ export default mergeConfig(
       coverage: {
         provider: 'v8',
         reporter: 'json-summary',
-        reportsDirectory: '.testing/coverage',
+        reportsDirectory: '.testing/coverage/integration',
         include: ['src/**/*.ts', 'src/**/*.tsx'],
         exclude: [
           '**/.testing/**',
