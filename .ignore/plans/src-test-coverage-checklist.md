@@ -15,14 +15,14 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration exists; bench missing
 - Coverage: lines 0.00%, branches 0.00%, functions 0.00%
 - Actions:
-  - [ ] replace todo-only specs with executable assertions
+  - [x] replace todo-only specs with executable assertions
   - [ ] add a performance benchmark if this file is part of a hot path
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] exercise currently uncovered methods and constructor paths
-  - [ ] implement constructor tests for default streams, FPS normalization, and dimension fallback logic
-  - [ ] test `run()` idempotence, initial render, resize handling, and capability-driven renderer configuration
-  - [ ] test `exit()` cleanup for timers, input listeners, and terminal restoration
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] exercise currently uncovered methods and constructor paths
+  - [x] implement constructor tests for default streams, FPS normalization, and dimension fallback logic
+  - [x] test `run()` idempotence, initial render, resize handling, and capability-driven renderer configuration
+  - [x] test `exit()` cleanup for timers, input listeners, and terminal restoration
 
 ## src/css/classes
 
