@@ -2,7 +2,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '../Terminal';
 
-import type {TerminalColorProfile} from '../../terminal/types';
+import type {TerminalColorProfile, TerminalReadableInput} from '../../terminal/types';
 
 type RendererInternals = {
   cols: number;
@@ -30,29 +30,32 @@ function createOutput(options: {colorDepth?: number} = {}) {
   };
 }
 
-function createInput() {
+function createInput(): {stream: TerminalReadableInput; emit(chunk: Buffer | string): void} {
   const listeners = new Set<(chunk: Buffer | string) => void>();
+  let stream!: TerminalReadableInput;
+
+  stream = {
+    setRawMode: vi.fn(),
+    on: vi.fn((event: 'data', listener: (chunk: Buffer | string) => void): TerminalReadableInput => {
+      if (event === 'data') {
+        listeners.add(listener);
+      }
+
+      return stream;
+    }),
+    off: vi.fn((event: 'data', listener: (chunk: Buffer | string) => void): TerminalReadableInput => {
+      if (event === 'data') {
+        listeners.delete(listener);
+      }
+
+      return stream;
+    }),
+    resume: vi.fn(),
+    pause: vi.fn(),
+  };
 
   return {
-    stream: {
-      setRawMode: vi.fn(),
-      on: vi.fn((event: 'data', listener: (chunk: Buffer | string) => void) => {
-        if (event === 'data') {
-          listeners.add(listener);
-        }
-
-        return undefined;
-      }),
-      off: vi.fn((event: 'data', listener: (chunk: Buffer | string) => void) => {
-        if (event === 'data') {
-          listeners.delete(listener);
-        }
-
-        return undefined;
-      }),
-      resume: vi.fn(),
-      pause: vi.fn(),
-    },
+    stream,
     emit(chunk: Buffer | string) {
       for (const listener of listeners) {
         listener(chunk);

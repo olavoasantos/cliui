@@ -33,31 +33,31 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 100.00%, branches 91.66%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/classes/SelectorMatcher.ts`
 
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 100.00%, branches 90.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/classes/StyleEngine.ts`
 
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 93.79%, branches 68.96%, functions 96.77%
 - Actions:
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover hook wiring and unwiring through `attach()` and `detach()`
-  - [ ] cover stylesheet invalidation, dirty subtree recomputation, and inherited child updates
-  - [ ] verify layout-dirty behavior for layout-affecting vs non-layout-affecting style changes
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover hook wiring and unwiring through `attach()` and `detach()`
+  - [x] cover stylesheet invalidation, dirty subtree recomputation, and inherited child updates
+  - [x] verify layout-dirty behavior for layout-affecting vs non-layout-affecting style changes
 
 ### `src/css/classes/StyleResolver.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 83.33%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ## src/css/utilities
 

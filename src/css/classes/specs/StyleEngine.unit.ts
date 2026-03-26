@@ -1,7 +1,10 @@
-import {describe, it, expect} from 'vitest';
+import {describe, it, expect, vi} from 'vitest';
 
+import {HOOKS} from '../../../dom/constants';
 import {StyleEngine} from '../StyleEngine';
 import {Window} from '../../../dom/classes/Window';
+
+import type {Hooks} from '../../../dom/types';
 
 function createEnv() {
   const window = new Window();
@@ -554,7 +557,73 @@ describe('StyleEngine', () => {
     });
   });
 
-  describe('hooks bridge integration', () => {
+  describe('attach and hooks bridge integration', () => {
+    it('wires hooks while preserving any previously registered hook handlers', () => {
+      const window = new Window();
+      const previousSetAttribute = vi.fn<Hooks['setAttribute']>();
+      const previousRemoveAttribute = vi.fn<Hooks['removeAttribute']>();
+      const previousInsertChild = vi.fn<Hooks['insertChild']>();
+      const previousRemoveChild = vi.fn<Hooks['removeChild']>();
+      const previousSetText = vi.fn<Hooks['setText']>();
+      const hooks = window[HOOKS] as Partial<Hooks>;
+
+      hooks.setAttribute = previousSetAttribute;
+      hooks.removeAttribute = previousRemoveAttribute;
+      hooks.insertChild = previousInsertChild;
+      hooks.removeChild = previousRemoveChild;
+      hooks.setText = previousSetText;
+
+      const engine = new StyleEngine();
+      engine.attach(window.document);
+
+      const parent = window.document.createElement('div');
+      const child = window.document.createElement('span');
+      const text = window.document.createTextNode('hello');
+
+      window.document.body.appendChild(parent);
+      engine.clearDirty();
+      parent.setAttribute('class', 'shell');
+      parent.appendChild(child);
+      child.appendChild(text);
+      text.data = 'updated';
+      parent.removeChild(child);
+      parent.removeAttribute('class');
+
+      expect(previousSetAttribute).toHaveBeenCalled();
+      expect(previousInsertChild).toHaveBeenCalled();
+      expect(previousSetText).toHaveBeenCalled();
+      expect(previousRemoveChild).toHaveBeenCalled();
+      expect(previousRemoveAttribute).toHaveBeenCalled();
+      expect(engine.getDirtyElements().has(parent)).toBe(true);
+      expect(engine.getLayoutDirtyElements().has(parent)).toBe(true);
+    });
+
+    it('restores previous hook handlers on detach', () => {
+      const window = new Window();
+      const hooks = window[HOOKS] as Partial<Hooks>;
+      const originalSetAttribute = vi.fn<Hooks['setAttribute']>();
+      const originalRemoveAttribute = vi.fn<Hooks['removeAttribute']>();
+      const originalInsertChild = vi.fn<Hooks['insertChild']>();
+      const originalRemoveChild = vi.fn<Hooks['removeChild']>();
+      const originalSetText = vi.fn<Hooks['setText']>();
+
+      hooks.setAttribute = originalSetAttribute;
+      hooks.removeAttribute = originalRemoveAttribute;
+      hooks.insertChild = originalInsertChild;
+      hooks.removeChild = originalRemoveChild;
+      hooks.setText = originalSetText;
+
+      const engine = new StyleEngine();
+      engine.attach(window.document);
+      engine.detach();
+
+      expect(hooks.setAttribute).toBe(originalSetAttribute);
+      expect(hooks.removeAttribute).toBe(originalRemoveAttribute);
+      expect(hooks.insertChild).toBe(originalInsertChild);
+      expect(hooks.removeChild).toBe(originalRemoveChild);
+      expect(hooks.setText).toBe(originalSetText);
+    });
+
     it('marks element style-dirty on setAttribute', () => {
       const {document, engine} = createEnv();
       const div = document.createElement('div');
