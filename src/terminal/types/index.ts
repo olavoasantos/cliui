@@ -9,6 +9,11 @@ export interface TerminalOutput {
   rows?: number;
 
   /**
+   * Returns the terminal color depth in bits when the stream can report it.
+   */
+  getColorDepth?(): number;
+
+  /**
    * Writes terminal control bytes or text to the output stream.
    *
    * @param chunk - Escape sequences or content to write.
@@ -27,6 +32,16 @@ export interface TerminalInput {
    * @param enabled - Whether raw mode should be active.
    */
   setRawMode?(enabled: boolean): void;
+
+  /**
+   * Registers a listener for terminal response chunks when supported.
+   */
+  on?(event: 'data', listener: (chunk: Buffer | string) => void): TerminalInput | void;
+
+  /**
+   * Removes a previously registered terminal response listener when supported.
+   */
+  off?(event: 'data', listener: (chunk: Buffer | string) => void): TerminalInput | void;
 }
 
 /**
@@ -166,6 +181,25 @@ export type TerminalInputEvent =
   | TerminalMouseEvent
   | TerminalFocusEvent
   | TerminalPasteEvent;
+
+/**
+ * Supported terminal color capability levels.
+ */
+export type TerminalColorProfile = 'truecolor' | 'ansi256' | 'ansi16' | 'none';
+
+/**
+ * Detected terminal capabilities used by the rendering pipeline.
+ */
+export interface TerminalCapabilities {
+  /** The detected terminal color profile. */
+  colorProfile: TerminalColorProfile;
+
+  /** Whether synchronized output mode 2026 is supported. */
+  synchronizedOutput: boolean;
+
+  /** Whether unicode width mode 2027 is supported. */
+  unicodeWidth: boolean;
+}
 
 /**
  * Configuration for terminal mode lifecycle management.

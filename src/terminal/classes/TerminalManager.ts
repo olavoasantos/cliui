@@ -13,7 +13,16 @@ import {
   SHOW_CURSOR,
 } from '../constants/controlSequences';
 
-import type {TerminalInput, TerminalManagerOptions, TerminalOutput} from '../types';
+import type {
+  TerminalCapabilities,
+  TerminalColorProfile,
+  TerminalInput,
+  TerminalManagerOptions,
+  TerminalOutput,
+} from '../types';
+
+const ESC = '\u001B';
+const SUPPORTED_MODE_RESPONSE = new RegExp(`${ESC}\\[\\?(2026|2027);([0-4])\\$y`);
 
 /**
  * Manages terminal mode transitions required for interactive TUI rendering.
@@ -28,6 +37,11 @@ export class TerminalManager {
   private altScreen: boolean;
   private mouse: boolean;
   private active = false;
+  private capabilities: TerminalCapabilities = {
+    colorProfile: 'none',
+    synchronizedOutput: false,
+    unicodeWidth: false,
+  };
 
   /**
    * Creates a new terminal mode manager.
@@ -68,6 +82,35 @@ export class TerminalManager {
   }
 
   /**
+   * Detects terminal rendering capabilities and stores them for later access.
+   *
+   * @param timeoutMs - Maximum time to wait for each capability response.
+   * @returns The detected capability snapshot.
+   */
+  async detectCapabilities(timeoutMs = 50): Promise<TerminalCapabilities> {
+    const colorProfile = this.detectColorProfile();
+    const [synchronizedOutput, unicodeWidth] = await Promise.all([
+      this.queryModeSupport(2026, timeoutMs),
+      this.queryModeSupport(2027, timeoutMs),
+    ]);
+
+    this.capabilities = {
+      colorProfile,
+      synchronizedOutput,
+      unicodeWidth,
+    };
+
+    return this.getCapabilities();
+  }
+
+  /**
+   * Returns the latest detected terminal capabilities.
+   */
+  getCapabilities(): TerminalCapabilities {
+    return {...this.capabilities};
+  }
+
+  /**
    * Restores terminal modes if they are currently active.
    */
   stop(): void {
@@ -91,6 +134,74 @@ export class TerminalManager {
 
     this.setRawMode(false);
     this.active = false;
+  }
+
+  private detectColorProfile(): TerminalColorProfile {
+    const depth = this.output.getColorDepth?.();
+
+    if (depth === undefined) {
+      return 'none';
+    }
+
+    if (depth >= 24) {
+      return 'truecolor';
+    }
+
+    if (depth >= 8) {
+      return 'ansi256';
+    }
+
+    if (depth >= 4) {
+      return 'ansi16';
+    }
+
+    return 'none';
+  }
+
+  private async queryModeSupport(mode: 2026 | 2027, timeoutMs: number): Promise<boolean> {
+    if (this.input.on === undefined || this.input.off === undefined) {
+      return false;
+    }
+
+    return await new Promise<boolean>((resolve) => {
+      let settled = false;
+      let buffer = '';
+      const timer = setTimeout(
+        () => {
+          finish(false);
+        },
+        Math.max(0, timeoutMs),
+      );
+      const finish = (supported: boolean): void => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        clearTimeout(timer);
+        this.input.off?.('data', onData);
+        resolve(supported);
+      };
+      const onData = (chunk: Buffer | string): void => {
+        buffer += typeof chunk === 'string' ? chunk : chunk.toString('utf8');
+
+        const match = buffer.match(SUPPORTED_MODE_RESPONSE);
+
+        if (match === null) {
+          return;
+        }
+
+        if (match[1] !== String(mode)) {
+          buffer = buffer.slice(match.index! + match[0].length);
+          return;
+        }
+
+        finish(match[2] !== '0');
+      };
+
+      this.input.on?.('data', onData);
+      this.write(`${ESC}[?${mode}$p`);
+    });
   }
 
   private setRawMode(enabled: boolean): void {

@@ -24,6 +24,35 @@ function createInput() {
   };
 }
 
+function createReadableInput() {
+  const listeners = new Set<(chunk: Buffer | string) => void>();
+
+  return {
+    stream: {
+      setRawMode: vi.fn(),
+      on: vi.fn((event: 'data', listener: (chunk: Buffer | string) => void) => {
+        if (event === 'data') {
+          listeners.add(listener);
+        }
+
+        return undefined;
+      }),
+      off: vi.fn((event: 'data', listener: (chunk: Buffer | string) => void) => {
+        if (event === 'data') {
+          listeners.delete(listener);
+        }
+
+        return undefined;
+      }),
+    },
+    emit(chunk: Buffer | string) {
+      for (const listener of listeners) {
+        listener(chunk);
+      }
+    },
+  };
+}
+
 describe('TerminalManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -121,5 +150,108 @@ describe('TerminalManager', () => {
     expect(output.read()).toBe(
       '\u001B[?25l\u001B[?1004h\u001B[?2004h\u001B[?2004l\u001B[?1004l\u001B[?25h',
     );
+  });
+
+  it('maps terminal color depth to a stored color profile', async () => {
+    const output = createOutput();
+    const input = createInput();
+    const manager = new TerminalManager({
+      input,
+      output: {
+        ...output.stream,
+        getColorDepth: () => 24,
+      },
+      altScreen: false,
+      mouse: false,
+    });
+
+    await manager.detectCapabilities();
+
+    expect(manager.getCapabilities()).toEqual({
+      colorProfile: 'truecolor',
+      synchronizedOutput: false,
+      unicodeWidth: false,
+    });
+  });
+
+  it('detects synchronized output and unicode width support from terminal mode responses', async () => {
+    const output = createOutput();
+    const input = createReadableInput();
+    const manager = new TerminalManager({
+      input: input.stream,
+      output: {
+        ...output.stream,
+        getColorDepth: () => 8,
+      },
+      altScreen: false,
+      mouse: false,
+    });
+
+    const detection = manager.detectCapabilities();
+
+    input.emit('\u001B[?2026;1$y');
+    input.emit('\u001B[?2027;2$y');
+
+    await detection;
+
+    expect(output.read()).toContain('\u001B[?2026$p');
+    expect(output.read()).toContain('\u001B[?2027$p');
+    expect(manager.getCapabilities()).toEqual({
+      colorProfile: 'ansi256',
+      synchronizedOutput: true,
+      unicodeWidth: true,
+    });
+  });
+
+  it('degrades gracefully when capability probes cannot receive responses', async () => {
+    const output = createOutput();
+    const manager = new TerminalManager({
+      input: createInput(),
+      output: {
+        ...output.stream,
+        getColorDepth: () => 4,
+      },
+      altScreen: false,
+      mouse: false,
+    });
+
+    await manager.detectCapabilities();
+
+    expect(manager.getCapabilities()).toEqual({
+      colorProfile: 'ansi16',
+      synchronizedOutput: false,
+      unicodeWidth: false,
+    });
+  });
+
+  it('times out unsupported mode probes without hanging startup', async () => {
+    vi.useFakeTimers();
+
+    try {
+      const output = createOutput();
+      const input = createReadableInput();
+      const manager = new TerminalManager({
+        input: input.stream,
+        output: {
+          ...output.stream,
+          getColorDepth: () => 1,
+        },
+        altScreen: false,
+        mouse: false,
+      });
+
+      const detection = manager.detectCapabilities(5);
+
+      await vi.advanceTimersByTimeAsync(5);
+      await detection;
+
+      expect(manager.getCapabilities()).toEqual({
+        colorProfile: 'none',
+        synchronizedOutput: false,
+        unicodeWidth: false,
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
