@@ -14,15 +14,21 @@ export interface BorderCharacters {
   /** Bottom-right corner character. */
   bottomRight: string;
 
-  /** Horizontal edge character. */
-  horizontal: string;
+  /** Top edge character. */
+  top: string;
 
-  /** Vertical edge character. */
-  vertical: string;
+  /** Bottom edge character. */
+  bottom: string;
+
+  /** Left edge character. */
+  left: string;
+
+  /** Right edge character. */
+  right: string;
 }
 
 /**
- * Phase 1 border character mappings derived from Lip Gloss border sets.
+ * Built-in border character mappings derived from Lip Gloss border sets.
  */
 export const BORDER_CHARACTERS: Record<string, BorderCharacters> = {
   single: {
@@ -30,47 +36,79 @@ export const BORDER_CHARACTERS: Record<string, BorderCharacters> = {
     topRight: '┐',
     bottomLeft: '└',
     bottomRight: '┘',
-    horizontal: '─',
-    vertical: '│',
+    top: '─',
+    bottom: '─',
+    left: '│',
+    right: '│',
   },
   rounded: {
     topLeft: '╭',
     topRight: '╮',
     bottomLeft: '╰',
     bottomRight: '╯',
-    horizontal: '─',
-    vertical: '│',
+    top: '─',
+    bottom: '─',
+    left: '│',
+    right: '│',
   },
   double: {
     topLeft: '╔',
     topRight: '╗',
     bottomLeft: '╚',
     bottomRight: '╝',
-    horizontal: '═',
-    vertical: '║',
+    top: '═',
+    bottom: '═',
+    left: '║',
+    right: '║',
   },
   thick: {
     topLeft: '┏',
     topRight: '┓',
     bottomLeft: '┗',
     bottomRight: '┛',
-    horizontal: '━',
-    vertical: '┃',
+    top: '━',
+    bottom: '━',
+    left: '┃',
+    right: '┃',
+  },
+  block: {
+    topLeft: '█',
+    topRight: '█',
+    bottomLeft: '█',
+    bottomRight: '█',
+    top: '█',
+    bottom: '█',
+    left: '█',
+    right: '█',
+  },
+  'half-block': {
+    topLeft: '▛',
+    topRight: '▜',
+    bottomLeft: '▙',
+    bottomRight: '▟',
+    top: '▀',
+    bottom: '▄',
+    left: '▌',
+    right: '▐',
   },
   ascii: {
     topLeft: '+',
     topRight: '+',
     bottomLeft: '+',
     bottomRight: '+',
-    horizontal: '-',
-    vertical: '|',
+    top: '-',
+    bottom: '-',
+    left: '|',
+    right: '|',
   },
   hidden: {
     topLeft: ' ',
     topRight: ' ',
     bottomLeft: ' ',
     bottomRight: ' ',
-    horizontal: ' ',
-    vertical: ' ',
+    top: ' ',
+    bottom: ' ',
+    left: ' ',
+    right: ' ',
   },
 };

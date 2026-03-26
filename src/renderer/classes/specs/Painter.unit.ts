@@ -140,6 +140,52 @@ describe('Painter', () => {
       }
     });
 
+    it('draws block borders with full block characters', () => {
+      const buffer = new CellBuffer(6, 4);
+      const box = createBox({
+        width: 4,
+        height: 3,
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 2,
+        contentHeight: 1,
+        computedStyle: style({'border-style': 'block'}),
+      });
+
+      painter.paint(box, buffer);
+
+      expect(buffer.get(0, 0)?.char).toBe('█');
+      expect(buffer.get(1, 0)?.char).toBe('█');
+      expect(buffer.get(0, 1)?.char).toBe('█');
+      expect(buffer.get(3, 1)?.char).toBe('█');
+      expect(buffer.get(1, 2)?.char).toBe('█');
+      expect(buffer.get(3, 2)?.char).toBe('█');
+    });
+
+    it('draws half-block borders with directional edge and corner glyphs', () => {
+      const buffer = new CellBuffer(6, 4);
+      const box = createBox({
+        width: 4,
+        height: 3,
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 2,
+        contentHeight: 1,
+        computedStyle: style({'border-style': 'half-block'}),
+      });
+
+      painter.paint(box, buffer);
+
+      expect(buffer.get(0, 0)?.char).toBe('▛');
+      expect(buffer.get(1, 0)?.char).toBe('▀');
+      expect(buffer.get(3, 0)?.char).toBe('▜');
+      expect(buffer.get(0, 1)?.char).toBe('▌');
+      expect(buffer.get(3, 1)?.char).toBe('▐');
+      expect(buffer.get(0, 2)?.char).toBe('▙');
+      expect(buffer.get(1, 2)?.char).toBe('▄');
+      expect(buffer.get(3, 2)?.char).toBe('▟');
+    });
+
     it('uses spaces for hidden borders while preserving border occupancy', () => {
       const buffer = new CellBuffer(6, 4);
       const box = createBox({

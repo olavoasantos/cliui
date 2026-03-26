@@ -114,25 +114,13 @@ export class Painter {
     this.writeCell(buffer, maxX, maxY, {...borderCell, char: characters.bottomRight}, clipRect);
 
     for (let x = metrics.outerX + 1; x < maxX; x += 1) {
-      this.writeCell(
-        buffer,
-        x,
-        metrics.outerY,
-        {...borderCell, char: characters.horizontal},
-        clipRect,
-      );
-      this.writeCell(buffer, x, maxY, {...borderCell, char: characters.horizontal}, clipRect);
+      this.writeCell(buffer, x, metrics.outerY, {...borderCell, char: characters.top}, clipRect);
+      this.writeCell(buffer, x, maxY, {...borderCell, char: characters.bottom}, clipRect);
     }
 
     for (let y = metrics.outerY + 1; y < maxY; y += 1) {
-      this.writeCell(
-        buffer,
-        metrics.outerX,
-        y,
-        {...borderCell, char: characters.vertical},
-        clipRect,
-      );
-      this.writeCell(buffer, maxX, y, {...borderCell, char: characters.vertical}, clipRect);
+      this.writeCell(buffer, metrics.outerX, y, {...borderCell, char: characters.left}, clipRect);
+      this.writeCell(buffer, maxX, y, {...borderCell, char: characters.right}, clipRect);
     }
   }
 
