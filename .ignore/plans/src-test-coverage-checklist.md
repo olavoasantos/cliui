@@ -467,45 +467,45 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/guards/CommentNodeGuard.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/guards/DocumentFragmentNodeGuard.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 0.00%, branches 100.00%, functions 0.00%
 - Actions:
-  - [ ] replace todo-only specs with executable assertions
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] exercise currently uncovered methods and constructor paths
-  - [ ] replace todo-only tests with executable positive and negative guard assertions
+  - [x] replace todo-only specs with executable assertions
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] exercise currently uncovered methods and constructor paths
+  - [x] replace todo-only tests with executable positive and negative guard assertions
 
 ### `src/dom/guards/ElementNodeGuard.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/guards/ParentNodeGuard.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/dom/guards/TextNodeGuard.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ## src/dom/utilities
 
