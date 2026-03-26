@@ -866,10 +866,10 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 
 ### `src/terminal/classes/InputReader.ts`
 
-- Status: unit exists; integration exists; bench missing
+- Status: unit exists; integration exists; bench exists
 - Coverage: lines 87.02%, branches 77.37%, functions 100.00%
 - Actions:
-  - [ ] add a performance benchmark if this file is part of a hot path
+  - [x] add a performance benchmark if this file is part of a hot path
   - [ ] raise line coverage with missing happy-path and edge-case scenarios
   - [ ] raise branch coverage by exercising fallback, guard, and error paths
   - [ ] cover incomplete CSI buffering, SS3 fallback, focus sequences, mode responses, and bracketed paste across chunks
