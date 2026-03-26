@@ -294,7 +294,14 @@ export class Painter {
     cell: Cell,
     clipRect: ClipRect | null,
   ): void {
-    if (buffer.get(x, y) === undefined || !this.isWithinClipRect(x, y, clipRect)) {
+    const existing = buffer.get(x, y);
+
+    if (existing === undefined || !this.isWithinClipRect(x, y, clipRect)) {
+      return;
+    }
+
+    if (cell.bg === null && existing.bg !== null) {
+      buffer.set(x, y, {...cell, bg: existing.bg});
       return;
     }
 
