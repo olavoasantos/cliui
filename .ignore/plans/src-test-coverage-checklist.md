@@ -733,37 +733,37 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 70.00%, branches 72.00%, functions 100.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover negative, boundary, and ambiguous emoji presentation code point cases
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover negative, boundary, and ambiguous emoji presentation code point cases
 
 ### `src/layout/guards/FullWidthGuard.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/layout/guards/FullWidthOrWideGuard.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/layout/guards/WideGuard.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/layout/guards/ZeroWidthClusterGuard.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ## src/layout/utilities
 
