@@ -286,6 +286,115 @@ describe('UiInput', () => {
     expect(input.getAttribute('value')).toBeNull();
   });
 
+  it('deletes word backward with Alt+Backspace', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'h');
+    typeKey(input, 'e');
+    typeKey(input, 'l');
+    typeKey(input, 'l');
+    typeKey(input, 'o');
+    typeKey(input, ' ');
+    typeKey(input, 'w');
+    typeKey(input, 'o');
+    typeKey(input, 'r');
+    typeKey(input, 'l');
+    typeKey(input, 'd');
+    typeKey(input, 'Backspace', {altKey: true});
+
+    expect(input.getAttribute('value')).toBe('hello ');
+  });
+
+  it('deletes word forward with Alt+Delete', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'h');
+    typeKey(input, 'e');
+    typeKey(input, 'l');
+    typeKey(input, 'l');
+    typeKey(input, 'o');
+    typeKey(input, ' ');
+    typeKey(input, 'w');
+    typeKey(input, 'o');
+    typeKey(input, 'r');
+    typeKey(input, 'l');
+    typeKey(input, 'd');
+    typeKey(input, 'Home');
+    typeKey(input, 'Delete', {altKey: true});
+
+    expect(input.getAttribute('value')).toBe('world');
+  });
+
+  it('deletes to line start with Ctrl+U', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'a');
+    typeKey(input, 'b');
+    typeKey(input, 'c');
+    typeKey(input, 'u', {ctrlKey: true});
+
+    expect(input.getAttribute('value')).toBe('');
+  });
+
+  it('deletes to line end with Ctrl+K', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'a');
+    typeKey(input, 'b');
+    typeKey(input, 'c');
+    typeKey(input, 'Home');
+    typeKey(input, 'k', {ctrlKey: true});
+
+    expect(input.getAttribute('value')).toBe('');
+  });
+
+  it('blurs on Escape', () => {
+    const {window, input} = createInput();
+    const events: Event[] = [];
+
+    input.addEventListener('change', ((event: Event) => {
+      events.push(event);
+    }) as EventListener);
+
+    window.document.setActiveElement(input);
+    typeKey(input, 'a');
+    typeKey(input, 'Escape');
+
+    expect(events).toHaveLength(1);
+    expect(window.document.activeElement).not.toBe(input);
+  });
+
+  it('focuses on mousedown', () => {
+    const {window, input} = createInput();
+    const other = window.document.createElement('div');
+    window.document.body.appendChild(other);
+
+    window.document.setActiveElement(other);
+
+    input.dispatchEvent(new Event('mousedown'));
+
+    expect(window.document.activeElement).toBe(input);
+  });
+
+  it('moves cursor by word with Alt+Arrow', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'h');
+    typeKey(input, 'i');
+    typeKey(input, ' ');
+    typeKey(input, 'y');
+    typeKey(input, 'o');
+    typeKey(input, 'ArrowLeft', {altKey: true});
+    typeKey(input, 'x');
+
+    expect(input.getAttribute('value')).toBe('hi xyo');
+  });
+
   it('toggles cursor blink via onTerminalFrame', () => {
     const {input} = createInput(undefined, {width: '5'});
 

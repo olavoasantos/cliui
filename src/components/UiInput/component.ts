@@ -50,6 +50,7 @@ export class UiInput extends HTMLElement implements TerminalFrameAware {
   private readonly boundPaste = this.handlePaste.bind(this) as EventListener;
   private readonly boundFocus = this.handleFocus.bind(this) as EventListener;
   private readonly boundBlur = this.handleBlur.bind(this) as EventListener;
+  private readonly boundMouseDown = this.handleMouseDown.bind(this) as EventListener;
 
   connectedCallback(): void {
     this.syncValueFromAttribute();
@@ -57,6 +58,7 @@ export class UiInput extends HTMLElement implements TerminalFrameAware {
     this.addEventListener('paste', this.boundPaste);
     this.addEventListener('focus', this.boundFocus);
     this.addEventListener('blur', this.boundBlur);
+    this.addEventListener('mousedown', this.boundMouseDown);
     this.render();
   }
 
@@ -65,6 +67,7 @@ export class UiInput extends HTMLElement implements TerminalFrameAware {
     this.removeEventListener('paste', this.boundPaste);
     this.removeEventListener('focus', this.boundFocus);
     this.removeEventListener('blur', this.boundBlur);
+    this.removeEventListener('mousedown', this.boundMouseDown);
   }
 
   override attributeChangedCallback(
@@ -136,10 +139,50 @@ export class UiInput extends HTMLElement implements TerminalFrameAware {
       case 'End':
         this.moveCursorToEnd();
         break;
+      case 'Escape':
+        this.blurSelf();
+        break;
     }
   }
 
   private handleEditableKeyDown(event: KeyboardEvent): void {
+    const keyEvent = event as unknown as {altKey: boolean; ctrlKey: boolean; metaKey: boolean};
+
+    if (event.key === 'Escape') {
+      this.blurSelf();
+      return;
+    }
+
+    if (event.key === 'Backspace' && keyEvent.altKey) {
+      this.deleteWordBackward();
+      return;
+    }
+
+    if (event.key === 'Delete' && keyEvent.altKey) {
+      this.deleteWordForward();
+      return;
+    }
+
+    if (event.key === 'u' && keyEvent.ctrlKey) {
+      this.deleteToLineStart();
+      return;
+    }
+
+    if (event.key === 'k' && keyEvent.ctrlKey) {
+      this.deleteToLineEnd();
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' && keyEvent.altKey) {
+      this.moveCursorWordLeft();
+      return;
+    }
+
+    if (event.key === 'ArrowRight' && keyEvent.altKey) {
+      this.moveCursorWordRight();
+      return;
+    }
+
     switch (event.key) {
       case 'ArrowLeft':
         this.moveCursorLeft();
@@ -163,7 +206,7 @@ export class UiInput extends HTMLElement implements TerminalFrameAware {
         break;
     }
 
-    if (event.key.length === 1 && !event.ctrlKey && !event.altKey && !event.metaKey) {
+    if (event.key.length === 1 && !keyEvent.ctrlKey && !keyEvent.altKey && !keyEvent.metaKey) {
       this.insertText(event.key);
     }
   }
@@ -290,6 +333,144 @@ export class UiInput extends HTMLElement implements TerminalFrameAware {
     this.handleOverflow();
     this.resetBlink();
     this.render();
+  }
+
+  private moveCursorWordLeft(): void {
+    if (this.cursorPosition === 0) {
+      return;
+    }
+
+    let index = this.cursorPosition - 1;
+
+    while (index > 0 && this.isWhitespace(this.graphemes[index]!)) {
+      index -= 1;
+    }
+
+    while (index > 0 && !this.isWhitespace(this.graphemes[index - 1]!)) {
+      index -= 1;
+    }
+
+    this.cursorPosition = index;
+    this.handleOverflow();
+    this.resetBlink();
+    this.render();
+  }
+
+  private moveCursorWordRight(): void {
+    if (this.cursorPosition >= this.graphemes.length) {
+      return;
+    }
+
+    let index = this.cursorPosition;
+
+    while (index < this.graphemes.length && !this.isWhitespace(this.graphemes[index]!)) {
+      index += 1;
+    }
+
+    while (index < this.graphemes.length && this.isWhitespace(this.graphemes[index]!)) {
+      index += 1;
+    }
+
+    this.cursorPosition = index;
+    this.handleOverflow();
+    this.resetBlink();
+    this.render();
+  }
+
+  private deleteWordBackward(): void {
+    if (this.cursorPosition === 0) {
+      return;
+    }
+
+    const oldPos = this.cursorPosition;
+    let index = this.cursorPosition - 1;
+
+    while (index > 0 && this.isWhitespace(this.graphemes[index]!)) {
+      index -= 1;
+    }
+
+    while (index > 0 && !this.isWhitespace(this.graphemes[index - 1]!)) {
+      index -= 1;
+    }
+
+    this.graphemes.splice(index, oldPos - index);
+    this.cursorPosition = index;
+    this.syncAttributeFromValue();
+    this.handleOverflow();
+    this.resetBlink();
+    this.render();
+    this.dispatchInputEvent(null, 'deleteWordBackward');
+  }
+
+  private deleteWordForward(): void {
+    if (this.cursorPosition >= this.graphemes.length) {
+      return;
+    }
+
+    let index = this.cursorPosition;
+
+    while (index < this.graphemes.length && !this.isWhitespace(this.graphemes[index]!)) {
+      index += 1;
+    }
+
+    while (index < this.graphemes.length && this.isWhitespace(this.graphemes[index]!)) {
+      index += 1;
+    }
+
+    this.graphemes.splice(this.cursorPosition, index - this.cursorPosition);
+    this.syncAttributeFromValue();
+    this.handleOverflow();
+    this.resetBlink();
+    this.render();
+    this.dispatchInputEvent(null, 'deleteWordForward');
+  }
+
+  private deleteToLineStart(): void {
+    if (this.cursorPosition === 0) {
+      return;
+    }
+
+    this.graphemes.splice(0, this.cursorPosition);
+    this.cursorPosition = 0;
+    this.scrollOffset = 0;
+    this.syncAttributeFromValue();
+    this.handleOverflow();
+    this.resetBlink();
+    this.render();
+    this.dispatchInputEvent(null, 'deleteSoftLineBackward');
+  }
+
+  private deleteToLineEnd(): void {
+    if (this.cursorPosition >= this.graphemes.length) {
+      return;
+    }
+
+    this.graphemes.splice(this.cursorPosition);
+    this.syncAttributeFromValue();
+    this.handleOverflow();
+    this.resetBlink();
+    this.render();
+    this.dispatchInputEvent(null, 'deleteSoftLineForward');
+  }
+
+  private handleMouseDown(event: Event): void {
+    if (this.isDisabled()) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const doc = this.ownerDocument as import('../../dom').Document;
+    doc.setActiveElement(this);
+  }
+
+  private blurSelf(): void {
+    const doc = this.ownerDocument as import('../../dom').Document;
+    doc.setActiveElement(null);
+  }
+
+  private isWhitespace(grapheme: string): boolean {
+    return /^\s$/.test(grapheme);
   }
 
   private resetBlink(): void {

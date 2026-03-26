@@ -6,22 +6,32 @@ Run from the repository root:
 pnpm --dir examples/basic start
 ```
 
-This example is now a focused `ui-progress` playground for manually testing the built-in progress component.
+This example is a focused `ui-input` playground for manually testing the built-in text input component.
 
 ## What to test
 
-### Animated progress
+### Text editing
 
-- the `Deploy` and `Sync` bars should animate smoothly as their `value` attributes change
-- the bar fill should move gradually rather than jump immediately
-- the numeric percentage should track the animated visible value
+- type characters into the `Name` and `Email` fields
+- backspace and delete should remove characters
+- Home/End should jump the cursor
+- left/right arrow keys should move the cursor
 
-### Default block rendering
+### Tab navigation
 
-- the `Queue` and `Index` bars use the default block preset
-- filled and empty segments should look visually closer in height than before
-- labels and percentages should render inline with each bar
+- Tab cycles focus between the four input fields
+- the focused field should show a blinking block cursor
+
+### Constraints
+
+- the `Code` field has a 6-character maximum
+- the `Readonly` field allows cursor movement but not editing
+
+### Events
+
+- the status bar updates on every keystroke (`input` event)
+- tabbing away from `Name` after editing shows a commit message (`change` event)
 
 ### Exit
 
-- press `q` or `Ctrl+C` to quit
+- press `Ctrl+C` to quit
