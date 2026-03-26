@@ -7,8 +7,8 @@ Phase 5 builds on top of the complete rendering pipeline (Phases 1–4) to enabl
 **Key context:**
 
 - `CustomElementRegistry` was ported in M1T4 as part of the DOM fork. This milestone wires it to the terminal DOM's lifecycle callbacks.
-- The built-in components (spinner, progress bar, text input) are implemented as custom elements, demonstrating and exercising the custom element system.
-- S57 (built-in component design spike) produces component specifications that inform T58–T60. The spike deliverable may include additional follow-up tasks not currently in the roadmap.
+- The built-in components are implemented as custom elements. Spinner, progress, and input are the initial proof-of-concept set, and the spike also defines the broader roster needed to make the framework usable by the end of the milestone.
+- S57 (built-in component design spike) produces component specifications, naming guidance, and follow-up tasks. The first implementation wave informs T58–T60, and the spike may add additional built-in component tasks after T65.
 - S61 (framework adapter spike) determines what adapter code, if any, is needed for Preact, Solid, and Vue. The design intent is that frameworks work out of the box via DOM mutations — adapters may be minimal or unnecessary.
 - CSS custom properties (`--var` / `var()`) follow standard CSS behavior: declared on elements, inherited down the tree, resolved during style computation.
 - The architecture document (`docs/learn/architecture.md`) defines the public API patterns, custom element lifecycle, and the CSS property subset (including custom properties in Phase 5).
@@ -42,24 +42,29 @@ Wire `CustomElementRegistry` (ported in M1T4) to the terminal DOM's lifecycle. C
 
 **Summary**
 
-Define the API, behavior, and visual design for the three built-in terminal components: spinner, progress bar, and text input. These will be implemented as custom elements. Study the reference implementations to understand proven patterns and determine the appropriate API surface for each component in the context of a DOM-based terminal UI.
+Define the naming strategy, API, behavior, and visual design for the built-in component library. Spinner, progress, and input are the initial proof-of-concept components, but the spike should also define the broader roster needed to make the framework usable by the end of the milestone. Built-ins are implemented as custom elements and should use the `ui-*` prefix rather than `terminal-*` or overloaded native HTML tag names.
 
 **Expected Outcomes**
 
-- Component specification for each built-in component (spinner, progress bar, text input) covering: element name, attributes, events dispatched, default visual appearance, and configuration options
+- Component specification for each proof-of-concept built-in component (`ui-spinner`, `ui-progress`, `ui-input`) covering: element name, attributes, events dispatched, default visual appearance, and configuration options
+- Recommended naming strategy for built-in components (`ui-*`) and guidance on when to use HTML-inspired semantics without overloading native tag names
 - Recommended approach for animation timing (spinner frame cycling, progress bar animation)
 - Recommended approach for text input cursor management and editing behavior
-- List of follow-up implementation tasks (may refine or extend M5T3–M5T5)
+- Prioritized broader built-in component roster for milestone usability, including at minimum: `ui-button`, `ui-textarea`, `ui-select`, `ui-details`, `ui-table`, and `ui-codeblock`
+- List of follow-up implementation tasks, including additional built-in component tasks after M5T10
 
 **Decision Criteria**
 
 - APIs should feel natural in a DOM context (attributes for configuration, events for state changes, CSS for styling)
 - Components should be composable with the rest of the terminal DOM (work within flex layout, respect styling)
+- Built-ins should feel familiar to web developers while remaining clearly framework-owned custom elements
 - Animation patterns should integrate with the existing frame loop rather than introducing independent timers where possible
+- Prioritization should favor components that unlock practical app-building workflows rather than visual demos alone
 
 **Technical Constraints**
 
 - Reference: `.ignore/references/bubbles/spinner/` (frame-based animation, ~200 LOC), `.ignore/references/bubbles/progress/` (animated bar with color blending, ~300 LOC), `.ignore/references/bubbles/textinput/` (cursor, Unicode width, paste handling)
+- Use the Charm ecosystem as a capability benchmark, but not as a strict one-to-one cloning requirement
 
 **Dependencies**
 
@@ -71,11 +76,11 @@ Define the API, behavior, and visual design for the three built-in terminal comp
 
 **Summary**
 
-Implement a `<terminal-spinner>` custom element with configurable animation frames and interval. The spinner cycles through a set of characters at a given interval to indicate ongoing activity.
+Implement a `<ui-spinner>` custom element with configurable animation frames and interval. The spinner cycles through a set of characters at a given interval to indicate ongoing activity.
 
 **Expected Outcomes**
 
-- `<terminal-spinner>` is a registered custom element
+- `<ui-spinner>` is a registered custom element
 - Supports configurable frame sets (e.g., dot, jump, pulse patterns)
 - Supports configurable animation interval
 - Animation integrates with the terminal's frame loop
@@ -96,11 +101,11 @@ Implement a `<terminal-spinner>` custom element with configurable animation fram
 
 **Summary**
 
-Implement a `<terminal-progress>` custom element with configurable value, maximum, and visual style. The progress bar renders a filled/unfilled bar representing completion state, with optional smooth animation when the value changes.
+Implement a `<ui-progress>` custom element with configurable value, maximum, and visual style. The progress bar renders a filled/unfilled bar representing completion state, with optional smooth animation when the value changes.
 
 **Expected Outcomes**
 
-- `<terminal-progress>` is a registered custom element
+- `<ui-progress>` is a registered custom element
 - Supports configurable `value` and `max` attributes
 - Renders a visual bar proportional to `value / max`
 - Supports smooth animation when `value` changes (spring-based or similar easing)
@@ -122,11 +127,11 @@ Implement a `<terminal-progress>` custom element with configurable value, maximu
 
 **Summary**
 
-Implement a `<terminal-input>` custom element with cursor management, text editing, and event dispatch. The text input accepts keyboard input, manages a cursor position, handles editing operations (insert, delete, backspace, cursor movement), and dispatches `input` and `change` events.
+Implement a `<ui-input>` custom element with cursor management, text editing, and event dispatch. The text input accepts keyboard input, manages a cursor position, handles editing operations (insert, delete, backspace, cursor movement), and dispatches `input` and `change` events.
 
 **Expected Outcomes**
 
-- `<terminal-input>` is a registered custom element
+- `<ui-input>` is a registered custom element
 - Manages cursor position within the input text
 - Handles keyboard events for: character insertion, backspace, delete, left/right cursor movement, Home/End
 - Handles paste events (inserting pasted text at cursor position)
@@ -262,5 +267,140 @@ Implement CSS custom properties (`--var` declaration and `var()` resolution) in 
 - M1T12: CSS parser (needs to parse `--var` declarations and `var()` functions)
 - M1T14: Style resolver (handles inheritance and resolution)
 - M1T15: Style engine orchestrator (coordinates computation)
+
+---
+
+### M5T11: Built-in button component
+
+**Summary**
+
+Implement a `<ui-button>` custom element for mouse and keyboard activation. The button should behave as the basic action primitive for forms, dialogs, and menus.
+
+**Expected Outcomes**
+
+- `<ui-button>` is a registered custom element
+- Supports disabled and variant-style states
+- Dispatches `click` on activation via keyboard and mouse
+- Integrates with focus management and styling
+- Unit and integration tests cover activation behavior and disabled handling
+
+**Dependencies**
+
+- M5S2: Built-in component design spike
+- M5T1: Custom element lifecycle
+- M3T4: Focus management
+
+---
+
+### M5T12: Built-in textarea component
+
+**Summary**
+
+Implement a `<ui-textarea>` custom element for multi-line text editing. It should support cursor movement, insertion and deletion across lines, paste handling, and viewport scrolling within the element.
+
+**Expected Outcomes**
+
+- `<ui-textarea>` is a registered custom element
+- Supports multi-line editing, paste, and scrolling
+- Handles wide characters correctly for cursor positioning and display
+- Dispatches `input` and `change` events
+- Integration tests cover editing, navigation, and scrolling behavior
+
+**Dependencies**
+
+- M5S2: Built-in component design spike
+- M5T1: Custom element lifecycle
+- M3T4: Focus management
+- M1T17: Grapheme width utility
+- M4T3: Overflow scroll
+
+---
+
+### M5T13: Built-in select component
+
+**Summary**
+
+Implement a `<ui-select>` custom element for choosing one value from a list of options. The component should support keyboard navigation, expanded/collapsed presentation, and selected-value updates.
+
+**Expected Outcomes**
+
+- `<ui-select>` is a registered custom element
+- Supports option lists and selected value state
+- Supports keyboard navigation and activation
+- Dispatches `input` and `change` events when the selection changes
+- Integration tests cover navigation, expansion, and selection behavior
+
+**Dependencies**
+
+- M5S2: Built-in component design spike
+- M5T1: Custom element lifecycle
+- M3T4: Focus management
+
+---
+
+### M5T14: Built-in details component
+
+**Summary**
+
+Implement a `<ui-details>` custom element for expandable and collapsible disclosure sections. The component should support an HTML-inspired summary/content structure and toggle state changes.
+
+**Expected Outcomes**
+
+- `<ui-details>` is a registered custom element
+- Supports expanded and collapsed states
+- Supports keyboard and mouse toggling
+- Dispatches a `toggle` event when its state changes
+- Unit and integration tests cover structure, state transitions, and event dispatch
+
+**Dependencies**
+
+- M5S2: Built-in component design spike
+- M5T1: Custom element lifecycle
+- M3T4: Focus management
+
+---
+
+### M5T15: Built-in table component
+
+**Summary**
+
+Implement a `<ui-table>` custom element for structured tabular data display. The first version should prioritize correct rendering, sizing, and styling, with richer behaviors phased in later.
+
+**Expected Outcomes**
+
+- `<ui-table>` is a registered custom element
+- Supports rendering header and body rows from child content or structured data attributes
+- Aligns columns consistently across rows
+- Composes with existing layout and styling systems
+- Unit and integration tests cover rendering and alignment behavior
+
+**Dependencies**
+
+- M5S2: Built-in component design spike
+- M5T1: Custom element lifecycle
+- M2T6: Explicit sizing and constraints
+
+---
+
+### M5T16: Built-in code block component
+
+**Summary**
+
+Implement a `<ui-codeblock>` custom element for displaying preformatted code and terminal-friendly source snippets. The first version should support plain rendering, line wrapping or clipping strategy, and optional line numbers, with syntax highlighting designed as a later enhancement.
+
+**Expected Outcomes**
+
+- `<ui-codeblock>` is a registered custom element
+- Supports preformatted code rendering with preserved whitespace
+- Supports optional line numbers
+- Handles long-line overflow predictably
+- Unit and integration tests cover formatting and overflow behavior
+
+**Dependencies**
+
+- M5S2: Built-in component design spike
+- M5T1: Custom element lifecycle
+- M2T7: Text alignment and wrapping modes
+- M4T3: Overflow scroll
 
 ---

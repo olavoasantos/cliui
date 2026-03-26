@@ -218,13 +218,13 @@ T55. Color profile adaptation: Implement color downscaling — map 24-bit RGB to
 
 T56. Custom element registration: The `CustomElementRegistry` ported in T6 provides the registration mechanism but lacks integration with the terminal DOM's lifecycle. Wire it so that custom elements receive `connectedCallback` when inserted into the document tree, `disconnectedCallback` when removed, and `attributeChangedCallback` when observed attributes change. Verify with integration tests.
 
-S57. Built-in component design spike: Define the API, behavior, and visual design for built-in terminal components (spinner, progress bar, text input) implemented as custom elements. Study `.ignore/references/bubbles/spinner/` (~200 LOC, frame-based animation), `.ignore/references/bubbles/progress/` (~300 LOC, animated bar with color blending), and `.ignore/references/bubbles/textinput/` (cursor management, Unicode width, paste handling) for proven component patterns. Deliverable: component specifications and follow-up implementation tasks.
+S57. Built-in component design spike: Define the naming strategy, API, behavior, and visual design for the built-in component library. Spinner, progress, and input are the initial proof-of-concept set, but the spike should also define the broader roster needed to make the framework usable by the end of the milestone. Built-ins should use the `ui-*` prefix rather than `terminal-*` or overloaded native HTML tag names. Study `.ignore/references/bubbles/spinner/` (~200 LOC, frame-based animation), `.ignore/references/bubbles/progress/` (~300 LOC, animated bar with color blending), and `.ignore/references/bubbles/textinput/` (cursor management, Unicode width, paste handling) for proven component patterns. Deliverable: component specifications, naming guidance, prioritized roster, and follow-up implementation tasks.
 
-T58. Built-in spinner component: Implement a `<terminal-spinner>` custom element with configurable animation frames and interval. See `.ignore/references/bubbles/spinner/` for frame sets (Dot, Jump, Pulse, etc.) and FPS timing patterns. Verify with unit tests asserting frame cycling.
+T58. Built-in spinner component: Implement a `<ui-spinner>` custom element with configurable animation frames and interval. See `.ignore/references/bubbles/spinner/` for frame sets (Dot, Jump, Pulse, etc.) and FPS timing patterns. Verify with unit tests asserting frame cycling.
 
-T59. Built-in progress bar component: Implement a `<terminal-progress>` custom element with configurable value, max, and visual style. See `.ignore/references/bubbles/progress/` for gradient fill rendering and color blending, and `.ignore/references/harmonica/spring.go` for smooth animation via spring physics. Verify with unit tests.
+T59. Built-in progress bar component: Implement a `<ui-progress>` custom element with configurable value, max, and visual style. See `.ignore/references/bubbles/progress/` for gradient fill rendering and color blending, and `.ignore/references/harmonica/spring.go` for smooth animation via spring physics. Verify with unit tests.
 
-T60. Built-in text input component: Implement a `<terminal-input>` custom element with cursor management, text editing, and `input`/`change` event dispatch. See `.ignore/references/bubbles/textinput/` for cursor positioning, Unicode full-width character handling, paste buffering, and in-place scrolling, and `.ignore/references/huh/field_input.go` for validation and placeholder patterns. Verify with integration tests covering typing, backspace, and cursor movement.
+T60. Built-in text input component: Implement a `<ui-input>` custom element with cursor management, text editing, and `input`/`change` event dispatch. See `.ignore/references/bubbles/textinput/` for cursor positioning, Unicode full-width character handling, paste buffering, and in-place scrolling, and `.ignore/references/huh/field_input.go` for validation and placeholder patterns. Verify with integration tests covering typing, backspace, and cursor movement.
 
 S61. Framework adapter spike: Investigate integration patterns for Preact, Solid, and Vue — determine what adapter code (if any) is needed for each framework to work with the terminal DOM. Deliverable: decision document per framework and follow-up tasks.
 
@@ -235,6 +235,8 @@ T63. Custom border style definitions: Allow users to define custom border charac
 T64. Color gradients on borders: Implement gradient color interpolation along border edges. See `.ignore/references/lipgloss/blending.go` for color interpolation algorithms. Verify with unit tests asserting per-cell border color in the cell buffer.
 
 T65. CSS custom properties: Implement `--var` declaration and `var()` resolution in the style engine. Verify with unit tests covering declaration, usage, fallback values, and inheritance.
+
+Post-T65 follow-up tasks from S57 should prioritize `ui-button`, `ui-textarea`, `ui-select`, `ui-details`, `ui-table`, and `ui-codeblock` so the framework ends the milestone with a usable built-in component set beyond the initial proof of concept.
 
 ### Phase 6: Documentation
 

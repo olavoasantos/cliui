@@ -8,6 +8,7 @@ import {
   PARENT,
   PREV,
 } from '../constants';
+import {ensureCustomElementStyles} from '../utilities/ensureCustomElementStyles';
 import {selfAndDescendants} from '../utilities/selfAndDescendants';
 import {querySelector} from '../utilities/querySelector';
 import {querySelectorAll} from '../utilities/querySelectorAll';
@@ -172,6 +173,11 @@ export class ParentNode extends ChildNode {
     if (this[IS_CONNECTED]) {
       for (const node of selfAndDescendants(child)) {
         node[IS_CONNECTED] = true;
+
+        if (node.nodeType === NodeType.ELEMENT_NODE) {
+          ensureCustomElementStyles(node as never);
+        }
+
         (node as unknown as {connectedCallback?(): void}).connectedCallback?.();
       }
     }

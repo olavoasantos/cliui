@@ -1,4 +1,5 @@
 import {Terminal} from '@micra/terminal-dom';
+import {UiSpinner} from '@micra/terminal-dom/components';
 
 process.stdin.setRawMode?.(true);
 process.stdin.resume();
@@ -12,6 +13,8 @@ const terminal = new Terminal({
 });
 
 const {document, window} = terminal;
+
+window.customElements.define(UiSpinner.tagName, UiSpinner as unknown as CustomElementConstructor);
 
 const style = document.createElement('style');
 style.textContent = `
@@ -68,6 +71,24 @@ style.textContent = `
   .feature-title {
     color: #fca5a5;
     font-weight: bold;
+  }
+
+  .spinner-row {
+    display: flex;
+    gap: 1;
+  }
+
+  .spinner-panel {
+    padding: 0 1;
+    border-style: rounded;
+    border-color: #475569;
+    color: #e2e8f0;
+  }
+
+  .spinner-demo {
+    display: flex;
+    gap: 2;
+    color: #dbeafe;
   }
 
   .main {
@@ -181,6 +202,33 @@ halfBlockBorder.textContent = 'half-block';
 borderRow.appendChild(blockBorder);
 borderRow.appendChild(halfBlockBorder);
 
+const spinnerRow = document.createElement('div');
+spinnerRow.className = 'spinner-row';
+
+const spinnerPanel = document.createElement('div');
+spinnerPanel.className = 'spinner-panel';
+
+const spinnerTitle = document.createElement('div');
+spinnerTitle.className = 'feature-title';
+spinnerTitle.textContent = 'built-in custom elements';
+
+const spinnerDemo = document.createElement('div');
+spinnerDemo.className = 'spinner-demo';
+
+const defaultSpinner = document.createElement('ui-spinner');
+defaultSpinner.setAttribute('label', 'Loading dashboard');
+
+const pulseSpinner = document.createElement('ui-spinner');
+pulseSpinner.setAttribute('variant', 'pulse');
+pulseSpinner.setAttribute('interval', '120');
+pulseSpinner.setAttribute('label', 'Syncing');
+
+spinnerDemo.appendChild(defaultSpinner);
+spinnerDemo.appendChild(pulseSpinner);
+spinnerPanel.appendChild(spinnerTitle);
+spinnerPanel.appendChild(spinnerDemo);
+spinnerRow.appendChild(spinnerPanel);
+
 const mainRow = document.createElement('div');
 mainRow.className = 'main';
 
@@ -255,6 +303,7 @@ app.appendChild(title);
 app.appendChild(hint);
 app.appendChild(capabilities);
 app.appendChild(borderRow);
+app.appendChild(spinnerRow);
 app.appendChild(mainRow);
 app.appendChild(focusLine);
 app.appendChild(activityLine);

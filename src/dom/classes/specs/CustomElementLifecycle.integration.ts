@@ -91,6 +91,27 @@ describe('Custom element lifecycle', () => {
       document.body.appendChild(container);
       expect(connected).toHaveBeenCalledOnce();
     });
+
+    it('installs component-owned styles into the light DOM when a custom element connects', () => {
+      const {window, document} = createEnv();
+
+      class MyElement extends Element {
+        static readonly tagName = 'my-element';
+        static readonly styles = 'my-element { color: red; }';
+      }
+
+      window.customElements.define('my-element', MyElement as unknown as CustomElementConstructor);
+
+      const firstElement = document.createElement('my-element');
+      const secondElement = document.createElement('my-element');
+      document.body.appendChild(firstElement);
+      document.body.appendChild(secondElement);
+
+      expect(
+        document.head.querySelectorAll('[data-custom-element-styles="my-element"]'),
+      ).toHaveLength(1);
+      expect(document.head.querySelector('style')?.textContent).toBe('my-element { color: red; }');
+    });
   });
 
   describe('disconnectedCallback', () => {
@@ -354,6 +375,29 @@ describe('Custom element lifecycle', () => {
 
       expect(el).toBeInstanceOf(LateElement);
       expect(connected).toHaveBeenCalledOnce();
+    });
+
+    it('installs component-owned styles when a connected element is upgraded after define()', () => {
+      const {window, document} = createEnv();
+      const el = document.createElement('late-element');
+      document.body.appendChild(el);
+
+      class LateElement extends Element {
+        static readonly tagName = 'late-element';
+        static readonly styles = 'late-element { color: blue; }';
+      }
+
+      window.customElements.define(
+        'late-element',
+        LateElement as unknown as CustomElementConstructor,
+      );
+
+      expect(
+        document.head.querySelectorAll('[data-custom-element-styles="late-element"]'),
+      ).toHaveLength(1);
+      expect(document.head.querySelector('style')?.textContent).toBe(
+        'late-element { color: blue; }',
+      );
     });
 
     it('does not call connectedCallback on manual upgrade if element is not connected', () => {

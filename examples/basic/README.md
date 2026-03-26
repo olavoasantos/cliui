@@ -22,6 +22,12 @@ This example is a compact milestone 4 dashboard meant to fit in common terminal 
 - the red / green / blue / pink swatches exercise terminal color adaptation
 - the `block` and `half-block` tiles exercise the two new built-in border styles
 
+### Built-in custom elements
+
+- the spinner row now uses explicitly registered `<ui-spinner>` elements
+- both spinners should animate without owning their own timers
+- one spinner uses the default variant and one uses `pulse` with a custom interval
+
 ### Absolute positioning + z-index
 
 - click the overlapping `low`, `mid`, and `top` cards

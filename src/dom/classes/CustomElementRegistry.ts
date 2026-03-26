@@ -1,4 +1,5 @@
 import {IS_CONNECTED, NodeType} from '../constants';
+import {ensureCustomElementStyles} from '../utilities/ensureCustomElementStyles';
 import {selfAndDescendants} from '../utilities/selfAndDescendants';
 
 import type {Element} from './Element';
@@ -74,6 +75,7 @@ export class CustomElementRegistryImplementation {
       Object.setPrototypeOf(element, Constructor.prototype);
 
       if (element[IS_CONNECTED]) {
+        ensureCustomElementStyles(element);
         (element as unknown as {connectedCallback?(): void}).connectedCallback?.();
       }
     }

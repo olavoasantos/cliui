@@ -1,11 +1,13 @@
 import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../constants/terminal';
 import {StyleEngine} from '../css';
 import {Event, Window} from '../dom';
+import {selfAndDescendants} from '../dom/utilities/selfAndDescendants';
 import {LayoutEngine} from '../layout';
 import {Renderer} from '../renderer';
 import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
 
 import type {Document} from '../dom';
+import type {TerminalFrameAware} from '../types/TerminalFrameAware';
 import type {TerminalOptions} from '../types';
 import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
 
@@ -134,6 +136,8 @@ export class Terminal {
     const columns = this.getColumns();
     const rows = this.getRows();
 
+    this.advanceFrameAwareNodes(Date.now());
+
     if (columns !== this.renderer.cols || rows !== this.renderer.rows) {
       this.renderer.resize(columns, rows);
       this.layoutEngine.clearCache();
@@ -155,6 +159,12 @@ export class Terminal {
 
     if (output.length > 0) {
       this.output.write(output);
+    }
+  }
+
+  private advanceFrameAwareNodes(timestamp: number): void {
+    for (const node of selfAndDescendants(this.document.body)) {
+      (node as Partial<TerminalFrameAware>).onTerminalFrame?.(timestamp);
     }
   }
 

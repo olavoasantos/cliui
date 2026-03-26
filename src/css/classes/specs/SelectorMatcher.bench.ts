@@ -6,7 +6,10 @@ import {SelectorMatcher} from '../SelectorMatcher';
 
 import type {Element} from '../../../dom/classes/Element';
 
-function createDeepTreeScenario(depth: number): {rules: ReturnType<CSSParser['parse']>; target: Element} {
+function createDeepTreeScenario(depth: number): {
+  rules: ReturnType<CSSParser['parse']>;
+  target: Element;
+} {
   const document = new Window().document;
   const parser = new CSSParser();
   let current = document.body as unknown as Element;
@@ -33,7 +36,10 @@ function createDeepTreeScenario(depth: number): {rules: ReturnType<CSSParser['pa
   };
 }
 
-function createWideTreeScenario(rowCount: number, columnsPerRow: number): {
+function createWideTreeScenario(
+  rowCount: number,
+  columnsPerRow: number,
+): {
   rules: ReturnType<CSSParser['parse']>;
   target: Element;
 } {

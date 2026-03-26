@@ -2,7 +2,14 @@ import {bench, describe} from 'vitest';
 
 import {Window} from '../Window';
 
-function createMutationScenario(elementCount: number): {elements: Array<Window['document']['body'] extends infer _ ? ReturnType<Window['document']['createElement']> : never>; mutate(): void} {
+function createMutationScenario(elementCount: number): {
+  elements: Array<
+    Window['document']['body'] extends infer _
+      ? ReturnType<Window['document']['createElement']>
+      : never
+  >;
+  mutate(): void;
+} {
   const document = new Window().document;
   const elements = [] as Array<ReturnType<typeof document.createElement>>;
   let revision = 0;

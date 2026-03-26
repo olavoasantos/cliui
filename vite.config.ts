@@ -13,16 +13,42 @@ export default defineConfig({
       },
     },
     lib: {
-      formats: ['es', 'cjs'],
       entry: {
         index: 'src/index.ts',
+        components: 'src/components/index.ts',
       },
     },
     rollupOptions: {
       external: [/@micra\/*/],
-      output: {
-        preserveModules: true,
-      },
+      output: [
+        {
+          format: 'es',
+          preserveModules: true,
+          // Intercept the entry files
+          entryFileNames: (chunkInfo) => {
+            // Catches both .css?inline and .css_inline
+            const cleanName = chunkInfo.name.replace(/\.css[\?_]inline/g, '');
+            return `${cleanName}.js`;
+          },
+          // Intercept dynamic imports/chunks
+          chunkFileNames: (chunkInfo) => {
+            const cleanName = chunkInfo.name.replace(/\.css[\?_]inline/g, '');
+            return `${cleanName}.js`;
+          },
+        },
+        {
+          format: 'cjs',
+          preserveModules: true,
+          entryFileNames: (chunkInfo) => {
+            const cleanName = chunkInfo.name.replace(/\.css[\?_]inline/g, '');
+            return `${cleanName}.cjs`;
+          },
+          chunkFileNames: (chunkInfo) => {
+            const cleanName = chunkInfo.name.replace(/\.css[\?_]inline/g, '');
+            return `${cleanName}.cjs`;
+          },
+        },
+      ],
     },
   },
 
