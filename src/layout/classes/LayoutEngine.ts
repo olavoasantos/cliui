@@ -153,7 +153,9 @@ export class LayoutEngine {
     }
 
     // Layout child elements recursively
-    const childBoxes: LayoutBox[] = [];
+    const inFlowChildren: LayoutBox[] = [];
+    const absoluteChildren: LayoutBox[] = [];
+    const childOrder: LayoutBox[] = [];
 
     for (const child of childElements) {
       const childStyle = this.styleEngine.getComputedStyle(child);
@@ -172,14 +174,20 @@ export class LayoutEngine {
         dirtySet,
       );
 
-      childBoxes.push(childBox);
+      childOrder.push(childBox);
+
+      if (childBox.computedStyle.get('position') === 'absolute') {
+        absoluteChildren.push(childBox);
+      } else {
+        inFlowChildren.push(childBox);
+      }
     }
 
     // Use FlexLayout to compute the final box
     const box = this.flexLayout.layout(
       element,
       resolvedStyle,
-      childBoxes,
+      inFlowChildren,
       measuredTextLines,
       availableWidth,
       availableHeight,
@@ -187,9 +195,39 @@ export class LayoutEngine {
       y,
     );
 
+    for (const absoluteChild of absoluteChildren) {
+      this.positionAbsoluteChild(absoluteChild, box.contentX, box.contentY);
+    }
+
+    box.children = childOrder;
     this.cache.set(element, box);
 
     return box;
+  }
+
+  /**
+   * Positions an absolutely positioned child relative to the containing box's
+   * content area using its `top` and `left` offsets.
+   */
+  private positionAbsoluteChild(box: LayoutBox, containingX: number, containingY: number): void {
+    const left = this.parseCellValue(box.computedStyle.get('left'));
+    const top = this.parseCellValue(box.computedStyle.get('top'));
+
+    this.offsetBox(box, containingX + left, containingY + top);
+  }
+
+  /**
+   * Recursively offsets a layout box subtree by the provided delta.
+   */
+  private offsetBox(box: LayoutBox, dx: number, dy: number): void {
+    box.x += dx;
+    box.y += dy;
+    box.contentX += dx;
+    box.contentY += dy;
+
+    for (const child of box.children) {
+      this.offsetBox(child, dx, dy);
+    }
   }
 
   /**

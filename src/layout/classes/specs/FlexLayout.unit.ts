@@ -425,6 +425,61 @@ describe('FlexLayout', () => {
     });
   });
 
+  describe('absolute positioning', () => {
+    it('shrink-wraps auto-sized absolute boxes to their content width', () => {
+      const el = document.createElement('div');
+      const result = layout.layout(el, style({position: 'absolute'}), [], ['hello'], 80, 24, 0, 0);
+
+      expect(result.width).toBe(5);
+      expect(result.contentWidth).toBe(5);
+      expect(result.height).toBe(1);
+    });
+
+    it('preserves explicit width and height for absolute boxes', () => {
+      const el = document.createElement('div');
+      const result = layout.layout(
+        el,
+        style({position: 'absolute', width: '12', height: '4'}),
+        [],
+        ['hello'],
+        80,
+        24,
+        0,
+        0,
+      );
+
+      expect(result.width).toBe(12);
+      expect(result.contentWidth).toBe(12);
+      expect(result.height).toBe(4);
+      expect(result.contentHeight).toBe(4);
+    });
+
+    it('includes margin, padding, and border when shrink-wrapping absolute boxes', () => {
+      const el = document.createElement('div');
+      const result = layout.layout(
+        el,
+        style({
+          position: 'absolute',
+          'margin-left': '1',
+          'margin-right': '1',
+          'padding-left': '2',
+          'padding-right': '2',
+          'border-style': 'single',
+        }),
+        [],
+        ['hello'],
+        80,
+        24,
+        0,
+        0,
+      );
+
+      expect(result.contentWidth).toBe(5);
+      expect(result.width).toBe(13);
+      expect(result.contentX).toBe(4);
+    });
+  });
+
   describe('flex direction', () => {
     it('lays out children horizontally for row direction', () => {
       const el = document.createElement('div');

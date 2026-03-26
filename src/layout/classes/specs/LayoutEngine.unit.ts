@@ -471,4 +471,106 @@ describe('LayoutEngine', () => {
       expect(itemBox.textLines).toEqual(['text']);
     });
   });
+
+  describe('absolute positioning', () => {
+    it('excludes absolute children from flex flow and positions them from top/left', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const flow = document.createElement('div');
+      const absolute = document.createElement('div');
+
+      flow.setAttribute('id', 'flow');
+      absolute.setAttribute('id', 'absolute');
+      body.appendChild(flow);
+      body.appendChild(absolute);
+
+      addStyle(document, '#flow { height: 3; } #absolute { position: absolute; top: 4; left: 7; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 80, 24);
+      const flowBox = box.children[0]!;
+      const absoluteBox = box.children[1]!;
+
+      expect(flowBox.y).toBe(0);
+      expect(absoluteBox.x).toBe(7);
+      expect(absoluteBox.y).toBe(4);
+      expect(box.height).toBe(3);
+    });
+
+    it('positions absolute descendants relative to the nearest ancestor content area', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const container = document.createElement('div');
+      const absolute = document.createElement('div');
+
+      container.appendChild(absolute);
+      body.appendChild(container);
+
+      addStyle(document, 'div { padding: 1; } div div { position: absolute; top: 2; left: 3; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 80, 24);
+      const containerBox = box.children[0]!;
+      const absoluteBox = containerBox.children[0]!;
+
+      expect(containerBox.contentX).toBe(1);
+      expect(containerBox.contentY).toBe(1);
+      expect(absoluteBox.x).toBe(4);
+      expect(absoluteBox.y).toBe(3);
+    });
+
+    it('positions root-level absolute children relative to the root content area', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const absolute = document.createElement('div');
+
+      absolute.appendChild(document.createTextNode('hello'));
+      body.appendChild(absolute);
+
+      addStyle(document, 'body { padding: 2; } div { position: absolute; top: 3; left: 4; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 80, 24);
+      const absoluteBox = box.children[0]!;
+
+      expect(absoluteBox.x).toBe(6);
+      expect(absoluteBox.y).toBe(5);
+      expect(absoluteBox.width).toBe(5);
+      expect(box.height).toBe(4);
+    });
+
+    it('keeps absolute children in the returned DOM child order', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const first = document.createElement('div');
+      const second = document.createElement('div');
+      const third = document.createElement('div');
+
+      first.setAttribute('id', 'first');
+      second.setAttribute('id', 'second');
+      third.setAttribute('id', 'third');
+      body.appendChild(first);
+      body.appendChild(second);
+      body.appendChild(third);
+
+      addStyle(
+        document,
+        '#second { position: absolute; top: 1; left: 1; } #first, #third { height: 1; }',
+      );
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 80, 24);
+
+      expect(box.children.map((child) => child.element.getAttribute('id'))).toEqual([
+        'first',
+        'second',
+        'third',
+      ]);
+      expect(box.children[2]!.y).toBe(1);
+    });
+  });
 });

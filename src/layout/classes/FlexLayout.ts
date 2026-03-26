@@ -1,3 +1,4 @@
+import {cellWidth} from '../utilities/cellWidth';
 import type {Element} from '../../dom/classes/Element';
 import type {ComputedStyle} from '../../css/types';
 import type {LayoutBox} from '../types';
@@ -60,6 +61,7 @@ export class FlexLayout {
     const flexDirection = computedStyle.get('flex-direction') ?? 'column';
     const isRowDirection = flexDirection === 'row' || flexDirection === 'row-reverse';
     const isWrapEnabled = computedStyle.get('flex-wrap') === 'wrap';
+    const isAbsolute = computedStyle.get('position') === 'absolute';
 
     const horizontalBorderPadding =
       box.borderLeft + box.paddingLeft + box.paddingRight + box.borderRight;
@@ -74,6 +76,17 @@ export class FlexLayout {
         outerWidth = explicitWidth;
       } else {
         outerWidth = explicitWidth + horizontalBorderPadding;
+      }
+    } else if (isAbsolute) {
+      outerWidth = this.resolveIntrinsicContentWidth(
+        children,
+        textLines,
+        flexDirection,
+        computedStyle,
+      );
+
+      if (boxSizing === 'border-box') {
+        outerWidth += horizontalBorderPadding;
       }
     } else {
       outerWidth = availableWidth - horizontalMargin;
@@ -187,6 +200,46 @@ export class FlexLayout {
       children,
       zIndex,
     };
+  }
+
+  /**
+   * Resolves the intrinsic content width used to shrink-wrap absolute boxes.
+   */
+  private resolveIntrinsicContentWidth(
+    children: LayoutBox[],
+    textLines: string[],
+    flexDirection: string,
+    computedStyle: ComputedStyle,
+  ): number {
+    const textWidth = this.maxTextWidth(textLines);
+    const isRowDirection = flexDirection === 'row' || flexDirection === 'row-reverse';
+
+    if (children.length === 0) {
+      return textWidth;
+    }
+
+    if (isRowDirection) {
+      const gap = this.parseCellValue(computedStyle.get('column-gap'));
+      return Math.max(
+        textWidth,
+        this.sumChildrenWidth(children) + Math.max(0, children.length - 1) * gap,
+      );
+    }
+
+    return Math.max(textWidth, this.maxChildWidth(children));
+  }
+
+  /**
+   * Measures the widest text line in terminal cells.
+   */
+  private maxTextWidth(textLines: string[]): number {
+    let maxWidth = 0;
+
+    for (const line of textLines) {
+      maxWidth = Math.max(maxWidth, cellWidth(line));
+    }
+
+    return maxWidth;
   }
 
   /**
@@ -753,6 +806,32 @@ export class FlexLayout {
 
     box.width = clampedSize;
     box.contentWidth = Math.max(0, clampedSize - horizontalInset);
+  }
+
+  /**
+   * Computes the total width occupied by all children.
+   */
+  private sumChildrenWidth(children: LayoutBox[]): number {
+    let total = 0;
+
+    for (const child of children) {
+      total += child.width;
+    }
+
+    return total;
+  }
+
+  /**
+   * Computes the widest child width.
+   */
+  private maxChildWidth(children: LayoutBox[]): number {
+    let maxWidth = 0;
+
+    for (const child of children) {
+      maxWidth = Math.max(maxWidth, child.width);
+    }
+
+    return maxWidth;
   }
 
   /**
