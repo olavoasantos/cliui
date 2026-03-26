@@ -1,20 +1,34 @@
-import {describe, it} from 'vitest';
+import {describe, expect, it} from 'vitest';
 
+import {NodeType} from '../../constants';
 import {Window} from '../Window';
-
-function createEnv() {
-  const window = new Window();
-  return {window, document: window.document};
-}
 
 describe('Comment', () => {
   describe('properties', () => {
-    it.todo('has nodeType COMMENT_NODE');
-    it.todo('has nodeName #comment');
+    it('has nodeType COMMENT_NODE', () => {
+      const comment = new Window().document.createComment('hello');
+
+      expect(comment.nodeType).toBe(NodeType.COMMENT_NODE);
+    });
+
+    it('has nodeName #comment', () => {
+      const comment = new Window().document.createComment('hello');
+
+      expect(comment.nodeName).toBe('#COMMENT');
+    });
   });
 
   describe('constructor', () => {
-    it.todo('creates a comment node with the given data');
-    it.todo('creates a comment node with empty data when omitted');
+    it('creates a comment node with the given data', () => {
+      const comment = new Window().document.createComment('hello');
+
+      expect(comment.data).toBe('hello');
+    });
+
+    it('creates a comment node with empty data when omitted', () => {
+      const comment = new Window().document.createComment(undefined);
+
+      expect(comment.data).toBe('');
+    });
   });
 });

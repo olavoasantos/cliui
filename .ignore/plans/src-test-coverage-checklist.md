@@ -214,8 +214,8 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Coverage: lines 100.00%, branches 66.66%, functions 100.00%
 - Actions:
   - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover omitted `clipboardData` and default init dictionary behavior
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover omitted `clipboardData` and default init dictionary behavior
 
 ### `src/dom/classes/Comment.ts`
 
@@ -238,11 +238,11 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 0.00%, branches 100.00%, functions 0.00%
 - Actions:
-  - [ ] replace todo-only specs with executable assertions
+  - [x] replace todo-only specs with executable assertions
   - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] exercise currently uncovered methods and constructor paths
-  - [ ] replace todo-only tests with executable constructor and `initCustomEvent()` assertions
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] exercise currently uncovered methods and constructor paths
+  - [x] replace todo-only tests with executable constructor and `initCustomEvent()` assertions
 
 ### `src/dom/classes/DOMTokenList.ts`
 
@@ -257,7 +257,7 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Coverage: lines 93.61%, branches 73.68%, functions 100.00%
 - Actions:
   - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover focus transitions, creation edge cases, and fragment/template interactions
+  - [x] cover focus transitions, creation edge cases, and fragment/template interactions
 
 ### `src/dom/classes/DocumentFragment.ts`
 
@@ -271,7 +271,7 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration exists; bench missing
 - Coverage: lines 89.58%, branches 87.50%, functions 87.50%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
   - [ ] cover namespace attribute mutations and synchronization between attributes, style, and classList
 
 ### `src/dom/classes/ErrorEvent.ts`
@@ -367,9 +367,9 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration exists; bench missing
 - Coverage: lines 87.50%, branches 72.13%, functions 95.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
   - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover batching, subtree observation, attribute filters, disconnect, and takeRecords edge cases
+  - [x] cover batching, subtree observation, attribute filters, disconnect, and takeRecords edge cases
 
 ### `src/dom/classes/NamedNodeMap.ts`
 
@@ -408,11 +408,11 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 0.00%, branches 100.00%, functions 0.00%
 - Actions:
-  - [ ] replace todo-only specs with executable assertions
+  - [x] replace todo-only specs with executable assertions
   - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] exercise currently uncovered methods and constructor paths
-  - [ ] replace todo-only tests with executable constructor assertions for `promise` and `reason`
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] exercise currently uncovered methods and constructor paths
+  - [x] replace todo-only tests with executable constructor assertions for `promise` and `reason`
 
 ### `src/dom/classes/SVGElement.ts`
 
@@ -433,11 +433,11 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 0.00%, branches 100.00%, functions 0.00%
 - Actions:
-  - [ ] replace todo-only specs with executable assertions
+  - [x] replace todo-only specs with executable assertions
   - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] exercise currently uncovered methods and constructor paths
-  - [ ] replace todo-only tests with executable constructor assertions for `oldState` and `newState`
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] exercise currently uncovered methods and constructor paths
+  - [x] replace todo-only tests with executable constructor assertions for `oldState` and `newState`
 
 ### `src/dom/classes/UIEvent.ts`
 

@@ -1,14 +1,25 @@
-import {describe, it} from 'vitest';
+import {describe, expect, it} from 'vitest';
 
+import {Element} from '../Element';
+import {HTMLHeadElement} from '../HTMLHeadElement';
 import {Window} from '../Window';
 
-function createEnv() {
-  const window = new Window();
-  return {window, document: window.document};
-}
-
 describe('HTMLHeadElement', () => {
-  it.todo('is created as the head element of the document');
-  it.todo('is an instance of Element');
-  it.todo('has localName head');
+  it('is created as the head element of the document', () => {
+    const document = new Window().document;
+
+    expect(document.head).toBeInstanceOf(HTMLHeadElement);
+  });
+
+  it('is an instance of Element', () => {
+    const document = new Window().document;
+
+    expect(document.head).toBeInstanceOf(Element);
+  });
+
+  it('has localName head', () => {
+    const document = new Window().document;
+
+    expect(document.head.localName).toBe('head');
+  });
 });
