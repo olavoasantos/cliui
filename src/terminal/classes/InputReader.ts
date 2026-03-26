@@ -343,7 +343,7 @@ export class InputReader {
     const normalizedShift = modifiers.shift ?? this.isShiftedPrintable(char);
 
     if (/^[a-z]$/i.test(char)) {
-      return this.createKeyEvent(char.toLowerCase(), `Key${char.toUpperCase()}`, {
+      return this.createKeyEvent(char, `Key${char.toUpperCase()}`, {
         ...modifiers,
         shift: normalizedShift,
       });
