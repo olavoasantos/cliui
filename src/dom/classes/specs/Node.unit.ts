@@ -130,6 +130,13 @@ describe('Node', () => {
       expect(el.firstChild).toBe(null);
       expect(el.lastChild).toBe(null);
     });
+
+    it('exposes null siblings for orphan nodes', () => {
+      const {document} = createEnv();
+      const el = document.createElement('div');
+      expect(el.previousSibling).toBe(null);
+      expect(el.nextSibling).toBe(null);
+    });
   });
 
   describe('nodeValue', () => {

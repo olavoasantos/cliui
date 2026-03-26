@@ -47,6 +47,18 @@ describe('Element', () => {
       expect(el.getAttribute('id')).toBe('test');
     });
 
+    it('supports namespace-aware attribute mutations', () => {
+      const {document} = createEnv();
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      el.setAttributeNS('http://www.w3.org/2000/svg', 'viewBox', '0 0 10 10');
+
+      expect(el.getAttributeNS('http://www.w3.org/2000/svg', 'viewBox')).toBe('0 0 10 10');
+      expect(el.hasAttributeNS('http://www.w3.org/2000/svg', 'viewBox')).toBe(true);
+
+      el.removeAttributeNS('http://www.w3.org/2000/svg', 'viewBox');
+      expect(el.getAttributeNS('http://www.w3.org/2000/svg', 'viewBox')).toBe(null);
+    });
+
     it('hasAttribute returns true for set attributes', () => {
       const {document} = createEnv();
       const el = document.createElement('div');
@@ -164,6 +176,17 @@ describe('Element', () => {
       el.setAttribute('id', 'test');
       el.appendChild(document.createTextNode('hello'));
       expect(el.outerHTML).toBe('<div id="test">hello</div>');
+    });
+
+    it('keeps class and style state synchronized with serialized output', () => {
+      const {document} = createEnv();
+      const el = document.createElement('div');
+      el.classList.add('card');
+      el.style.padding = '1 2';
+
+      expect(el.className).toBe('card');
+      expect(el.style.getPropertyValue('padding-left')).toBe('2');
+      expect(el.outerHTML).toContain('class="card"');
     });
   });
 

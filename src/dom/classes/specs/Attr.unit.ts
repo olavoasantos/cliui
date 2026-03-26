@@ -52,6 +52,20 @@ describe('Attr', () => {
     expect(attr.namespaceURI).toBe('http://www.w3.org/1999/xhtml');
   });
 
+  it('updates a namespaced attribute value through the owning element map', () => {
+    const {document} = new Window();
+    const el = document.createElement('svg');
+    el.setAttributeNS('http://www.w3.org/2000/svg', 'viewBox', '0 0 10 10');
+
+    const attr = el.attributes.getNamedItemNS('http://www.w3.org/2000/svg', 'viewBox');
+
+    expect(attr?.value).toBe('0 0 10 10');
+    el.setAttributeNS('http://www.w3.org/2000/svg', 'viewBox', '0 0 20 20');
+    expect(el.attributes.getNamedItemNS('http://www.w3.org/2000/svg', 'viewBox')?.value).toBe(
+      '0 0 20 20',
+    );
+  });
+
   it('specified is always true', () => {
     const attr = new Attr('id', 'test');
     expect(attr.specified).toBe(true);

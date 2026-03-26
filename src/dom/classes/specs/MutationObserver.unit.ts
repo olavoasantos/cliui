@@ -167,4 +167,42 @@ describe('MutationObserver', () => {
     expect(observer.takeRecords()).toEqual([]);
     expect(callback).not.toHaveBeenCalled();
   });
+
+  it('filters observed attributes when attributeFilter is provided', async () => {
+    const {document} = createEnv();
+    const element = document.createElement('div');
+    const callback = vi.fn();
+    const observer = new MutationObserver(callback);
+
+    observer.observe(element, {attributes: true, attributeFilter: ['data-keep']});
+    element.setAttribute('data-skip', '1');
+    element.setAttribute('data-keep', '2');
+    await Promise.resolve();
+
+    expect(callback).toHaveBeenCalledOnce();
+    expect(callback.mock.calls[0]?.[0]).toHaveLength(1);
+    expect(callback.mock.calls[0]?.[0][0]?.attributeName).toBe('data-keep');
+  });
+
+  it('throws when observe is called without any enabled mutation types', () => {
+    const {document} = createEnv();
+    const observer = new MutationObserver(() => {});
+
+    expect(() => observer.observe(document.body, {})).toThrow(TypeError);
+  });
+
+  it('does not observe descendant mutations when subtree is disabled', async () => {
+    const {document} = createEnv();
+    const parent = document.createElement('div');
+    const child = document.createElement('span');
+    parent.appendChild(child);
+    const callback = vi.fn();
+    const observer = new MutationObserver(callback);
+
+    observer.observe(parent, {attributes: true, subtree: false});
+    child.setAttribute('data-state', 'ready');
+    await Promise.resolve();
+
+    expect(callback).not.toHaveBeenCalled();
+  });
 });

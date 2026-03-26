@@ -33,6 +33,13 @@ describe('CharacterData', () => {
       expect(text.data).toBe('world');
     });
 
+    it('keeps the same value on no-op text updates', () => {
+      const {document} = createEnv();
+      const text = document.createTextNode('hello');
+      text.data = 'hello';
+      expect(text.data).toBe('hello');
+    });
+
     it('coerces null data to empty string', () => {
       const {document} = createEnv();
       const text = document.createTextNode(null);

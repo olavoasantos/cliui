@@ -225,6 +225,29 @@ describe('Document', () => {
       expect(document.activeElement).toBe(document.body);
     });
 
+    it('focusNext falls back to document.body when no focusable elements exist', () => {
+      const {document} = createEnv();
+
+      expect(document.focusNext()).toBe(document.body);
+      expect(document.activeElement).toBe(document.body);
+    });
+
+    it('focusNext cycles forward and backward through tabindex elements', () => {
+      const {document} = createEnv();
+      const first = document.createElement('button');
+      const second = document.createElement('button');
+      const third = document.createElement('button');
+      first.setAttribute('tabindex', '0');
+      second.setAttribute('tabindex', '0');
+      third.setAttribute('tabindex', '0');
+      document.body.append(first, second, third);
+
+      expect(document.focusNext()).toBe(first);
+      expect(document.focusNext()).toBe(second);
+      expect(document.focusNext(true)).toBe(first);
+      expect(document.focusNext(true)).toBe(third);
+    });
+
     it('dispatches blur/focusout and focus/focusin when the active element changes', () => {
       const {document} = createEnv();
       const first = document.createElement('button');

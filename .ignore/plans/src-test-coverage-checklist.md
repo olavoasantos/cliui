@@ -178,93 +178,93 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 
 ### `src/dom/classes/Attr.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 95.23%, branches 75.00%, functions 83.33%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover namespace-aware attribute construction and value update edge cases
+  - [x] add an integration spec if this file coordinates behavior with other modules
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover namespace-aware attribute construction and value update edge cases
 
 ### `src/dom/classes/CSSStyleDeclaration.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 98.50%, branches 85.10%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/CharacterData.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 66.66%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover no-op text updates and parent-notification edge cases
+  - [x] add an integration spec if this file coordinates behavior with other modules
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover no-op text updates and parent-notification edge cases
 
 ### `src/dom/classes/ChildNode.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/ClipboardEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 66.66%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
   - [x] raise branch coverage by exercising fallback, guard, and error paths
   - [x] cover omitted `clipboardData` and default init dictionary behavior
 
 ### `src/dom/classes/Comment.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/CustomElementRegistry.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 90.62%, branches 72.22%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover duplicate registration, invalid constructors, and lookup failure paths
+  - [x] add an integration spec if this file coordinates behavior with other modules
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover duplicate registration, invalid constructors, and lookup failure paths
 
 ### `src/dom/classes/CustomEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 0.00%, branches 100.00%, functions 0.00%
 - Actions:
   - [x] replace todo-only specs with executable assertions
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
   - [x] raise line coverage with missing happy-path and edge-case scenarios
   - [x] exercise currently uncovered methods and constructor paths
   - [x] replace todo-only tests with executable constructor and `initCustomEvent()` assertions
 
 ### `src/dom/classes/DOMTokenList.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 91.66%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/Document.ts`
 
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 93.61%, branches 73.68%, functions 100.00%
 - Actions:
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
   - [x] cover focus transitions, creation edge cases, and fragment/template interactions
 
 ### `src/dom/classes/DocumentFragment.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/Element.ts`
 
@@ -272,95 +272,95 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Coverage: lines 89.58%, branches 87.50%, functions 87.50%
 - Actions:
   - [x] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] cover namespace attribute mutations and synchronization between attributes, style, and classList
+  - [x] cover namespace attribute mutations and synchronization between attributes, style, and classList
 
 ### `src/dom/classes/ErrorEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/Event.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/EventTarget.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 90.90%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/FocusEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/HTMLBodyElement.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/HTMLElement.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/HTMLHeadElement.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/HTMLHtmlElement.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/HTMLStyleElement.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 50.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover empty and populated stylesheet text paths
+  - [x] add an integration spec if this file coordinates behavior with other modules
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover empty and populated stylesheet text paths
 
 ### `src/dom/classes/HTMLTemplateElement.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 75.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] exercise currently uncovered methods and constructor paths
-  - [ ] cover template content/document fragment behavior beyond constructor defaults
+  - [x] add an integration spec if this file coordinates behavior with other modules
+  - [x] exercise currently uncovered methods and constructor paths
+  - [x] cover template content/document fragment behavior beyond constructor defaults
 
 ### `src/dom/classes/KeyboardEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/MouseEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 94.44%, branches 96.42%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/MutationObserver.ts`
 
@@ -368,97 +368,97 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Coverage: lines 87.50%, branches 72.13%, functions 95.00%
 - Actions:
   - [x] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
   - [x] cover batching, subtree observation, attribute filters, disconnect, and takeRecords edge cases
 
 ### `src/dom/classes/NamedNodeMap.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 96.77%, branches 87.50%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/Node.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 84.90%, branches 73.07%, functions 60.71%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] exercise currently uncovered methods and constructor paths
-  - [ ] cover orphan operations, relationship updates, and unexercised node mutation/navigation methods
+  - [x] add an integration spec if this file coordinates behavior with other modules
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] exercise currently uncovered methods and constructor paths
+  - [x] cover orphan operations, relationship updates, and unexercised node mutation/navigation methods
 
 ### `src/dom/classes/NodeList.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/ParentNode.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 97.77%, branches 91.30%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/PromiseRejectionEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 0.00%, branches 100.00%, functions 0.00%
 - Actions:
   - [x] replace todo-only specs with executable assertions
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
   - [x] raise line coverage with missing happy-path and edge-case scenarios
   - [x] exercise currently uncovered methods and constructor paths
   - [x] replace todo-only tests with executable constructor assertions for `promise` and `reason`
 
 ### `src/dom/classes/SVGElement.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/Text.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/ToggleEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 0.00%, branches 100.00%, functions 0.00%
 - Actions:
   - [x] replace todo-only specs with executable assertions
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
   - [x] raise line coverage with missing happy-path and edge-case scenarios
   - [x] exercise currently uncovered methods and constructor paths
   - [x] replace todo-only tests with executable constructor assertions for `oldState` and `newState`
 
 ### `src/dom/classes/UIEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/WheelEvent.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/dom/classes/Window.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 92.85%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ## src/dom/guards
 

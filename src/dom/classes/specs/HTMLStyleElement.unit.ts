@@ -24,6 +24,13 @@ describe('HTMLStyleElement', () => {
       expect(style.sheet).toBe('');
     });
 
+    it('returns empty string when text content is explicitly cleared', () => {
+      const style = doc.createElement('style') as HTMLStyleElement;
+      style.textContent = '.a { color: red; }';
+      style.textContent = '';
+      expect(style.sheet).toBe('');
+    });
+
     it('returns the text content', () => {
       const style = doc.createElement('style') as HTMLStyleElement;
       style.textContent = '.box { color: red; }';

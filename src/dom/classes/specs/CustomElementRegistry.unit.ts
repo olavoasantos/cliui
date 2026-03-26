@@ -54,4 +54,20 @@ describe('CustomElementRegistry', () => {
     expect(result1).toBe(MyElement);
     expect(result2).toBe(MyElement);
   });
+
+  it('overwrites an existing definition when the same name is defined again', () => {
+    const registry = new CustomElementRegistryImplementation();
+    class FirstElement {}
+    class SecondElement {}
+    registry.define('my-element', FirstElement as unknown as CustomElementConstructor);
+    registry.define('my-element', SecondElement as unknown as CustomElementConstructor);
+    expect(registry.get('my-element')).toBe(SecondElement);
+  });
+
+  it('stores non-class constructor values as provided', () => {
+    const registry = new CustomElementRegistryImplementation();
+    const Constructor = (() => undefined) as unknown as CustomElementConstructor;
+    registry.define('my-element', Constructor);
+    expect(registry.get('my-element')).toBe(Constructor);
+  });
 });

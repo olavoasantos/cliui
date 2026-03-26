@@ -21,6 +21,15 @@ describe('HTMLTemplateElement', () => {
     expect(el.content.nodeType).toBe(NodeType.DOCUMENT_FRAGMENT_NODE);
   });
 
+  it('keeps the content setter as a no-op', () => {
+    const {document} = createEnv();
+    const el = document.createElement('template') as HTMLTemplateElement;
+    const originalContent = el.content;
+    const replacement = document.createDocumentFragment();
+    el.content = replacement;
+    expect(el.content).toBe(originalContent);
+  });
+
   it('content is lazily created', () => {
     const {document} = createEnv();
     const el = document.createElement('template') as HTMLTemplateElement;

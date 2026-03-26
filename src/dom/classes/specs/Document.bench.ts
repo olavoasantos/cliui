@@ -2,7 +2,11 @@ import {bench, describe} from 'vitest';
 
 import {Window} from '../Window';
 
-function populateDocument(document: Window['document'], sectionCount: number, itemsPerSection: number): void {
+function populateDocument(
+  document: Window['document'],
+  sectionCount: number,
+  itemsPerSection: number,
+): void {
   for (let sectionIndex = 0; sectionIndex < sectionCount; sectionIndex += 1) {
     const section = document.createElement('section');
     section.className = `section section-${sectionIndex}`;
@@ -35,12 +39,12 @@ describe('Document', () => {
   bench('queries and serializes a typical document tree', () => {
     typicalDocument.querySelectorAll('.card .badge');
     typicalDocument.querySelector('[data-kind="odd"] .title');
-    typicalDocument.body.outerHTML;
+    void typicalDocument.body.outerHTML;
   });
 
   bench('queries and serializes a large document tree', () => {
     largeDocument.querySelectorAll('.card .badge');
     largeDocument.querySelector('[data-kind="odd"] .title');
-    largeDocument.body.outerHTML;
+    void largeDocument.body.outerHTML;
   });
 });
