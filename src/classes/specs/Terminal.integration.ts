@@ -36,20 +36,24 @@ function createInput(): {stream: TerminalReadableInput; emit(chunk: Buffer | str
 
   stream = {
     setRawMode: vi.fn(),
-    on: vi.fn((event: 'data', listener: (chunk: Buffer | string) => void): TerminalReadableInput => {
-      if (event === 'data') {
-        listeners.add(listener);
-      }
+    on: vi.fn(
+      (event: 'data', listener: (chunk: Buffer | string) => void): TerminalReadableInput => {
+        if (event === 'data') {
+          listeners.add(listener);
+        }
 
-      return stream;
-    }),
-    off: vi.fn((event: 'data', listener: (chunk: Buffer | string) => void): TerminalReadableInput => {
-      if (event === 'data') {
-        listeners.delete(listener);
-      }
+        return stream;
+      },
+    ),
+    off: vi.fn(
+      (event: 'data', listener: (chunk: Buffer | string) => void): TerminalReadableInput => {
+        if (event === 'data') {
+          listeners.delete(listener);
+        }
 
-      return stream;
-    }),
+        return stream;
+      },
+    ),
     resume: vi.fn(),
     pause: vi.fn(),
   };
