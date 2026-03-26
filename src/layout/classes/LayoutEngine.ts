@@ -200,9 +200,50 @@ export class LayoutEngine {
     }
 
     box.children = childOrder;
+    this.applyScrollState(element, box, measuredTextLines.length);
     this.cache.set(element, box);
 
     return box;
+  }
+
+  /**
+   * Applies persistent scroll state for `overflow: scroll` boxes.
+   */
+  private applyScrollState(element: Element, box: LayoutBox, textLineCount: number): void {
+    if (box.computedStyle.get('overflow') !== 'scroll') {
+      return;
+    }
+
+    const scrollHeight = this.computeScrollHeight(box, textLineCount);
+    const maxScrollOffset = Math.max(0, scrollHeight - box.contentHeight);
+    const elementWithScroll = element as Element & {scrollTop?: number};
+    const rawScrollOffset = elementWithScroll.scrollTop ?? 0;
+    const scrollOffsetY = Math.max(0, Math.min(maxScrollOffset, rawScrollOffset));
+
+    elementWithScroll.scrollTop = scrollOffsetY;
+    box.scrollHeight = scrollHeight;
+    box.scrollOffsetY = scrollOffsetY;
+
+    if (scrollOffsetY === 0) {
+      return;
+    }
+
+    for (const child of box.children) {
+      this.offsetBox(child, 0, -scrollOffsetY);
+    }
+  }
+
+  /**
+   * Computes the full scrollable content height of a box.
+   */
+  private computeScrollHeight(box: LayoutBox, textLineCount: number): number {
+    let maxBottom = textLineCount;
+
+    for (const child of box.children) {
+      maxBottom = Math.max(maxBottom, child.y + child.height - box.contentY);
+    }
+
+    return Math.max(0, maxBottom);
   }
 
   /**

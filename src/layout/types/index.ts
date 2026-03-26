@@ -72,6 +72,12 @@ export interface LayoutBox {
   /** Child layout boxes positioned within this box's content area. */
   children: LayoutBox[];
 
+  /** The active vertical scroll offset for `overflow: scroll`. */
+  scrollOffsetY?: number;
+
+  /** The total scrollable content height for `overflow: scroll`. */
+  scrollHeight?: number;
+
   /** The z-index for layer ordering. */
   zIndex: number;
 }

@@ -32,6 +32,7 @@ function createBox(overrides: Partial<LayoutBox> = {}): LayoutBox {
     textLines: overrides.textLines,
     children: overrides.children ?? [],
     zIndex: overrides.zIndex ?? 0,
+    ...overrides,
   };
 }
 
@@ -391,6 +392,31 @@ describe('Painter', () => {
       expect(buffer.get(1, 1)?.char).toBe('h');
       expect(buffer.get(2, 1)?.char).toBe('e');
       expect(buffer.get(3, 1)?.char).toBe(' ');
+    });
+
+    it('clips and vertically shifts text when overflow is scroll', () => {
+      const buffer = new CellBuffer(8, 6);
+      const box = createBox({
+        x: 0,
+        y: 0,
+        width: 6,
+        height: 5,
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 4,
+        contentHeight: 2,
+        textLines: ['first', 'second', 'third'],
+        computedStyle: style({overflow: 'scroll'}),
+        scrollOffsetY: 1,
+        scrollHeight: 3,
+      });
+
+      painter.paint(box, buffer);
+
+      expect(buffer.get(1, 1)?.char).toBe('s');
+      expect(buffer.get(1, 2)?.char).toBe('t');
+      expect(buffer.get(1, 0)?.char).toBe(' ');
+      expect(buffer.get(1, 3)?.char).toBe(' ');
     });
 
     it('intersects nested overflow clipping regions', () => {

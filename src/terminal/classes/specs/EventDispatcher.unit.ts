@@ -30,6 +30,7 @@ function createBox(document: Window['document'], overrides: Partial<LayoutBox> =
     textLines: overrides.textLines,
     children: overrides.children ?? [],
     zIndex: overrides.zIndex ?? 0,
+    ...overrides,
   };
 }
 
@@ -413,6 +414,71 @@ describe('EventDispatcher', () => {
     expect(event?.deltaY).toBe(1);
     expect(event?.deltaMode).toBe(WheelEvent.DOM_DELTA_LINE);
     expect(event?.altKey).toBe(true);
+  });
+
+  it('updates scroll state for scrollable wheel targets and clamps it to content bounds', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const region = document.createElement('div');
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10,
+        children: [
+          createBox(document, {
+            element: region,
+            x: 0,
+            y: 0,
+            width: 10,
+            height: 3,
+            contentX: 0,
+            contentY: 0,
+            contentWidth: 10,
+            contentHeight: 3,
+            computedStyle: style({overflow: 'scroll'}),
+            scrollOffsetY: 1,
+            scrollHeight: 7,
+          }),
+        ],
+      }),
+    );
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'wheel',
+      button: 'wheel-down',
+      column: 1,
+      row: 1,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'wheel',
+      button: 'wheel-down',
+      column: 1,
+      row: 1,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'wheel',
+      button: 'wheel-down',
+      column: 1,
+      row: 1,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+
+    expect((region as typeof region & {scrollTop?: number}).scrollTop).toBe(4);
   });
 
   it('cycles focus with Tab and Shift+Tab in document order', () => {

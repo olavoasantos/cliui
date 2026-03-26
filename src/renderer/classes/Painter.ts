@@ -43,10 +43,11 @@ export class Painter {
   private paintBox(box: LayoutBox, buffer: CellBuffer, clipRect: ClipRect | null): void {
     const metrics = this.getMetrics(box);
     const textCell = this.createStyledCell(box.computedStyle);
+    const contentClipRect = this.createChildClipRect(box, clipRect);
 
     this.paintBackground(metrics, textCell, buffer, clipRect);
     this.paintBorder(metrics, box.computedStyle, textCell, buffer, clipRect);
-    this.paintText(box, textCell, buffer, clipRect);
+    this.paintText(box, textCell, buffer, contentClipRect);
   }
 
   private flattenBoxes(
@@ -318,20 +319,23 @@ export class Painter {
     const verticalAlign = box.computedStyle.get('vertical-align') ?? 'top';
     const textHeight = box.textLines?.length ?? 0;
     const freeSpace = Math.max(0, box.contentHeight - textHeight);
+    const scrollOffsetY = box.scrollOffsetY ?? 0;
 
     switch (verticalAlign) {
       case 'middle':
-        return box.contentY + Math.floor(freeSpace / 2);
+        return box.contentY + Math.floor(freeSpace / 2) - scrollOffsetY;
       case 'bottom':
-        return box.contentY + freeSpace;
+        return box.contentY + freeSpace - scrollOffsetY;
       case 'top':
       default:
-        return box.contentY;
+        return box.contentY - scrollOffsetY;
     }
   }
 
   private createChildClipRect(box: LayoutBox, clipRect: ClipRect | null): ClipRect | null {
-    if (box.computedStyle.get('overflow') !== 'hidden') {
+    const overflow = box.computedStyle.get('overflow');
+
+    if (overflow !== 'hidden' && overflow !== 'scroll') {
       return clipRect;
     }
 

@@ -573,4 +573,34 @@ describe('LayoutEngine', () => {
       expect(box.children[2]!.y).toBe(1);
     });
   });
+
+  describe('overflow scroll', () => {
+    it('tracks and clamps vertical scroll offset for scrollable boxes', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const container = document.createElement('div');
+      const item = document.createElement('div');
+
+      item.setAttribute('id', 'item');
+      (container as typeof container & {scrollTop?: number}).scrollTop = 99;
+      container.appendChild(item);
+      body.appendChild(container);
+
+      addStyle(
+        document,
+        'body > div { overflow: scroll; height: 1; } #item { position: absolute; top: 2; height: 1; }',
+      );
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 80, 24);
+      const containerBox = box.children[0]!;
+      const itemBox = containerBox.children[0]!;
+
+      expect(containerBox.scrollHeight).toBe(3);
+      expect(containerBox.scrollOffsetY).toBe(2);
+      expect((container as typeof container & {scrollTop?: number}).scrollTop).toBe(2);
+      expect(itemBox.y).toBe(0);
+    });
+  });
 });

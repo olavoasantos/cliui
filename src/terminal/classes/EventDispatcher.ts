@@ -95,17 +95,7 @@ export class EventDispatcher {
       return null;
     }
 
-    const boxes = this.flattenBoxes(this.layoutRoot);
-
-    for (const box of boxes) {
-      if (box.computedStyle.get('display') === 'none' || !this.containsPoint(box, column, row)) {
-        continue;
-      }
-
-      return box.element;
-    }
-
-    return null;
+    return this.hitTestLayoutBox(column, row)?.element ?? null;
   }
 
   private dispatchKeyEvent(event: TerminalKeyEvent): void {
@@ -122,7 +112,8 @@ export class EventDispatcher {
   }
 
   private dispatchMouseEvent(event: TerminalMouseEvent): void {
-    const target = this.hitTest(event.column, event.row) ?? this.document.body;
+    const targetBox = this.hitTestLayoutBox(event.column, event.row);
+    const target = targetBox?.element ?? this.document.body;
 
     switch (event.eventType) {
       case 'press':
@@ -159,6 +150,10 @@ export class EventDispatcher {
         target.dispatchEvent(this.createMouseDomEvent('mousemove', event));
         return;
       case 'wheel':
+        if (targetBox !== null) {
+          this.updateScrollOffset(targetBox, event);
+        }
+
         target.dispatchEvent(this.createWheelDomEvent(event));
         return;
     }
@@ -182,6 +177,22 @@ export class EventDispatcher {
 
   private dispatchWindowFocusEvent(focus: 'in' | 'out'): void {
     this.document.defaultView.dispatchEvent(new FocusEvent(focus === 'in' ? 'focus' : 'blur'));
+  }
+
+  private hitTestLayoutBox(column: number, row: number): LayoutBox | null {
+    if (this.layoutRoot === null) {
+      return null;
+    }
+
+    for (const box of this.flattenBoxes(this.layoutRoot)) {
+      if (box.computedStyle.get('display') === 'none' || !this.containsPoint(box, column, row)) {
+        continue;
+      }
+
+      return box;
+    }
+
+    return null;
   }
 
   private flattenBoxes(root: LayoutBox): LayoutBox[] {
@@ -208,6 +219,23 @@ export class EventDispatcher {
     });
 
     return flattened.map((entry) => entry.box);
+  }
+
+  private updateScrollOffset(box: LayoutBox, event: TerminalMouseEvent): void {
+    if (box.computedStyle.get('overflow') !== 'scroll') {
+      return;
+    }
+
+    const delta = this.mapWheelDelta(event.button).deltaY;
+    const maxScrollOffset = Math.max(
+      0,
+      (box.scrollHeight ?? box.contentHeight) - box.contentHeight,
+    );
+    const elementWithScroll = box.element as Element & {scrollTop?: number};
+    const currentScrollOffset = elementWithScroll.scrollTop ?? box.scrollOffsetY ?? 0;
+    const nextScrollOffset = Math.max(0, Math.min(maxScrollOffset, currentScrollOffset + delta));
+
+    elementWithScroll.scrollTop = nextScrollOffset;
   }
 
   private containsPoint(box: LayoutBox, column: number, row: number): boolean {
