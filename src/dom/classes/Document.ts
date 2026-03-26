@@ -8,12 +8,14 @@ import {setupElement} from '../utilities/setupElement';
 import {Comment} from './Comment';
 import {DocumentFragment} from './DocumentFragment';
 import {Event} from './Event';
+import {FocusEvent} from './FocusEvent';
 import {HTMLBodyElement} from './HTMLBodyElement';
 import {HTMLHeadElement} from './HTMLHeadElement';
 import {HTMLHtmlElement} from './HTMLHtmlElement';
 import {ParentNode} from './ParentNode';
 import {Text} from './Text';
 
+import type {Element} from './Element';
 import type {Node} from './Node';
 import type {Window} from './Window';
 import type {Hooks, NamespaceURI} from '../types';
@@ -25,6 +27,7 @@ export class Document extends ParentNode {
   head: HTMLHeadElement;
   documentElement: HTMLHtmlElement;
   defaultView: Window;
+  activeElement: HTMLBodyElement | Element;
   [IS_CONNECTED] = true;
 
   constructor(defaultView: Window) {
@@ -34,10 +37,83 @@ export class Document extends ParentNode {
     this.documentElement = setupElement(new HTMLHtmlElement(), this, 'html');
     this.body = setupElement(new HTMLBodyElement(), this, 'body');
     this.head = setupElement(new HTMLHeadElement(), this, 'head');
+    this.activeElement = this.body;
 
     this.appendChild(this.documentElement);
     this.documentElement.appendChild(this.head);
     this.documentElement.appendChild(this.body);
+  }
+
+  /**
+   * Sets the document's active element and dispatches the corresponding focus
+   * transition events.
+   *
+   * @param element - The element to focus. Defaults to `document.body`.
+   */
+  setActiveElement(element: Element | null): void {
+    const nextActiveElement = element ?? this.body;
+
+    if (nextActiveElement === this.activeElement) {
+      return;
+    }
+
+    const previousActiveElement = this.activeElement;
+
+    previousActiveElement.dispatchEvent(
+      new FocusEvent('blur', {
+        relatedTarget: nextActiveElement,
+      }),
+    );
+    previousActiveElement.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: nextActiveElement,
+      }),
+    );
+
+    this.activeElement = nextActiveElement;
+
+    nextActiveElement.dispatchEvent(
+      new FocusEvent('focus', {
+        relatedTarget: previousActiveElement,
+      }),
+    );
+    nextActiveElement.dispatchEvent(
+      new FocusEvent('focusin', {
+        bubbles: true,
+        relatedTarget: previousActiveElement,
+      }),
+    );
+  }
+
+  /**
+   * Cycles focus forward or backward across elements with a `tabindex`
+   * attribute, in document order.
+   *
+   * @param backwards - Whether to move backward instead of forward.
+   * @returns The newly focused element.
+   */
+  focusNext(backwards = false): Element {
+    const focusableElements = this.querySelectorAll('[tabindex]');
+
+    if (focusableElements.length === 0) {
+      this.setActiveElement(this.body);
+      return this.body;
+    }
+
+    const currentIndex = focusableElements.indexOf(this.activeElement as Element);
+    const nextIndex =
+      currentIndex === -1
+        ? backwards
+          ? focusableElements.length - 1
+          : 0
+        : (currentIndex + (backwards ? -1 : 1) + focusableElements.length) %
+          focusableElements.length;
+    const nextElement = focusableElements[nextIndex] ?? this.body;
+
+    this.setActiveElement(nextElement);
+
+    return nextElement;
   }
 
   createElement(localName: string) {

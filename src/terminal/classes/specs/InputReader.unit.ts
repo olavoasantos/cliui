@@ -91,6 +91,98 @@ describe('InputReader', () => {
     expect(reader.parse(' world\u001B[201~')).toEqual([{type: 'paste', text: 'hello world'}]);
   });
 
+  it('parses SGR mouse press, release, motion, and wheel events', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[<0;3;5M\u001B[<0;3;5m\u001B[<34;8;13M\u001B[<64;10;4M')).toEqual([
+      {
+        type: 'mouse',
+        eventType: 'press',
+        button: 'left',
+        column: 2,
+        row: 4,
+        ctrl: false,
+        alt: false,
+        shift: false,
+      },
+      {
+        type: 'mouse',
+        eventType: 'release',
+        button: 'left',
+        column: 2,
+        row: 4,
+        ctrl: false,
+        alt: false,
+        shift: false,
+      },
+      {
+        type: 'mouse',
+        eventType: 'motion',
+        button: 'right',
+        column: 7,
+        row: 12,
+        ctrl: false,
+        alt: false,
+        shift: false,
+      },
+      {
+        type: 'mouse',
+        eventType: 'wheel',
+        button: 'wheel-up',
+        column: 9,
+        row: 3,
+        ctrl: false,
+        alt: false,
+        shift: false,
+      },
+    ]);
+  });
+
+  it('parses SGR mouse modifiers and additional buttons', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[<20;4;7M\u001B[<129;12;9M')).toEqual([
+      {
+        type: 'mouse',
+        eventType: 'press',
+        button: 'left',
+        column: 3,
+        row: 6,
+        ctrl: true,
+        alt: false,
+        shift: true,
+      },
+      {
+        type: 'mouse',
+        eventType: 'press',
+        button: 'forward',
+        column: 11,
+        row: 8,
+        ctrl: false,
+        alt: false,
+        shift: false,
+      },
+    ]);
+  });
+
+  it('buffers incomplete SGR mouse sequences until enough bytes arrive', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[<0;12')).toEqual([]);
+    expect(reader.parse(';8M')).toEqual([
+      {
+        type: 'mouse',
+        eventType: 'press',
+        button: 'left',
+        column: 11,
+        row: 7,
+        ctrl: false,
+        alt: false,
+        shift: false,
+      },
+    ]);
+  });
+
   it('buffers incomplete escape sequences until enough bytes arrive', () => {
     const reader = new InputReader({});
 

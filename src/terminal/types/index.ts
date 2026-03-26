@@ -86,6 +86,57 @@ export interface TerminalKeyEvent {
 }
 
 /**
+ * Supported terminal mouse buttons decoded from SGR mouse reporting.
+ */
+export type TerminalMouseButton =
+  | 'none'
+  | 'left'
+  | 'middle'
+  | 'right'
+  | 'wheel-up'
+  | 'wheel-down'
+  | 'wheel-left'
+  | 'wheel-right'
+  | 'backward'
+  | 'forward'
+  | 'button10'
+  | 'button11';
+
+/**
+ * Supported terminal mouse event kinds decoded from SGR mouse reporting.
+ */
+export type TerminalMouseEventType = 'press' | 'release' | 'motion' | 'wheel';
+
+/**
+ * Parsed mouse event emitted from SGR mouse reporting mode.
+ */
+export interface TerminalMouseEvent {
+  /** Discriminator for mouse events. */
+  type: 'mouse';
+
+  /** The decoded mouse event kind. */
+  eventType: TerminalMouseEventType;
+
+  /** The decoded terminal mouse button. */
+  button: TerminalMouseButton;
+
+  /** Zero-based terminal column. */
+  column: number;
+
+  /** Zero-based terminal row. */
+  row: number;
+
+  /** Whether the Control modifier is active. */
+  ctrl: boolean;
+
+  /** Whether the Alt modifier is active. */
+  alt: boolean;
+
+  /** Whether the Shift modifier is active. */
+  shift: boolean;
+}
+
+/**
  * Parsed paste event emitted from bracketed paste mode.
  */
 export interface TerminalPasteEvent {
@@ -99,7 +150,7 @@ export interface TerminalPasteEvent {
 /**
  * Union of parsed terminal input events.
  */
-export type TerminalInputEvent = TerminalKeyEvent | TerminalPasteEvent;
+export type TerminalInputEvent = TerminalKeyEvent | TerminalMouseEvent | TerminalPasteEvent;
 
 /**
  * Configuration for terminal mode lifecycle management.

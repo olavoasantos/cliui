@@ -121,6 +121,7 @@ export class Terminal {
     }
 
     const layout = this.layoutEngine.layout(this.document.body, columns, rows);
+    this.eventDispatcher.setLayoutRoot(layout);
     const output = this.renderer.render(layout);
 
     if (output.length > 0) {

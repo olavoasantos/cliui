@@ -2,7 +2,13 @@ import {BRACKETED_PASTE_END, BRACKETED_PASTE_START} from '../constants/controlSe
 import {ESCAPE} from '../constants/escape';
 import {CSI_FINAL_KEYS, CSI_TILDE_KEYS, SS3_FUNCTION_KEYS} from '../constants/keyMappings';
 
-import type {TerminalInputEvent, TerminalKeyEvent, TerminalReadableInput} from '../types';
+import type {
+  TerminalInputEvent,
+  TerminalKeyEvent,
+  TerminalMouseButton,
+  TerminalMouseEvent,
+  TerminalReadableInput,
+} from '../types';
 
 /**
  * Reads raw terminal bytes and parses them into structured input events.
@@ -152,6 +158,12 @@ export class InputReader {
   }
 
   private readCsiSequence(): TerminalInputEvent | null | undefined {
+    const mouseEvent = this.readSgrMouseSequence();
+
+    if (mouseEvent !== null) {
+      return mouseEvent;
+    }
+
     const match = this.pending.match(/^\u001B\[([0-9;]*)([~A-Za-z])?/);
 
     if (match === null) {
@@ -189,6 +201,32 @@ export class InputReader {
     const modifierParameter = parameters.length > 1 ? parameters.at(-1) : undefined;
 
     return this.createKeyEvent(key, key, this.parseModifier(modifierParameter));
+  }
+
+  private readSgrMouseSequence(): TerminalMouseEvent | null | undefined {
+    if (!this.pending.startsWith(`${ESCAPE}[<`)) {
+      return null;
+    }
+
+    const match = this.pending.match(/^\u001B\[<([0-9]+);([0-9]+);([0-9]+)([Mm])?/);
+
+    if (match === null) {
+      return undefined;
+    }
+
+    const final = match[4];
+
+    if (final === undefined) {
+      return undefined;
+    }
+
+    this.pending = this.pending.slice(match[0].length);
+
+    const encodedButton = Number.parseInt(match[1] ?? '', 10);
+    const column = Number.parseInt(match[2] ?? '', 10) - 1;
+    const row = Number.parseInt(match[3] ?? '', 10) - 1;
+
+    return this.createMouseEvent(encodedButton, column, row, final === 'm');
   }
 
   private readSs3Sequence(): TerminalInputEvent | null | undefined {
@@ -276,6 +314,76 @@ export class InputReader {
       alt: (encoded & 2) !== 0,
       ctrl: (encoded & 4) !== 0,
     };
+  }
+
+  private createMouseEvent(
+    encodedButton: number,
+    column: number,
+    row: number,
+    isRelease: boolean,
+  ): TerminalMouseEvent {
+    const modifiers = {
+      shift: (encodedButton & 4) !== 0,
+      alt: (encodedButton & 8) !== 0,
+      ctrl: (encodedButton & 16) !== 0,
+    };
+    const isMotion = (encodedButton & 32) !== 0;
+    const isWheel = (encodedButton & 64) !== 0;
+    const button = this.parseMouseButton(encodedButton);
+
+    let eventType: TerminalMouseEvent['eventType'] = 'press';
+
+    if (isWheel) {
+      eventType = 'wheel';
+    } else if (isRelease) {
+      eventType = 'release';
+    } else if (isMotion) {
+      eventType = 'motion';
+    }
+
+    return {
+      type: 'mouse',
+      eventType,
+      button,
+      column: Math.max(0, column),
+      row: Math.max(0, row),
+      ctrl: modifiers.ctrl,
+      alt: modifiers.alt,
+      shift: modifiers.shift,
+    };
+  }
+
+  private parseMouseButton(encodedButton: number): TerminalMouseButton {
+    const buttonCode = encodedButton & 0b1100_0011;
+
+    switch (buttonCode) {
+      case 0:
+        return 'left';
+      case 1:
+        return 'middle';
+      case 2:
+        return 'right';
+      case 3:
+        return 'none';
+      case 64:
+        return 'wheel-up';
+      case 65:
+        return 'wheel-down';
+      case 66:
+        return 'wheel-left';
+      case 67:
+        return 'wheel-right';
+      case 128:
+        return 'backward';
+      case 129:
+        return 'forward';
+      case 130:
+        return 'button10';
+      case 131:
+        return 'button11';
+      default:
+        return 'none';
+    }
   }
 
   private createKeyEvent(

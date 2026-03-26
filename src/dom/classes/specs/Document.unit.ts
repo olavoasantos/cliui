@@ -217,4 +217,57 @@ describe('Document', () => {
       expect(result.length).toBe(2);
     });
   });
+
+  describe('focus management', () => {
+    it('defaults activeElement to document.body', () => {
+      const {document} = createEnv();
+
+      expect(document.activeElement).toBe(document.body);
+    });
+
+    it('dispatches blur/focusout and focus/focusin when the active element changes', () => {
+      const {document} = createEnv();
+      const first = document.createElement('button');
+      const second = document.createElement('input');
+      const events: string[] = [];
+
+      first.setAttribute('tabindex', '0');
+      second.setAttribute('tabindex', '0');
+      document.body.appendChild(first);
+      document.body.appendChild(second);
+
+      first.addEventListener('blur', () => {
+        events.push('first:blur');
+      });
+      first.addEventListener('focusout', () => {
+        events.push('first:focusout');
+      });
+      second.addEventListener('focus', () => {
+        events.push('second:focus');
+      });
+      second.addEventListener('focusin', () => {
+        events.push('second:focusin');
+      });
+      document.body.addEventListener('focusout', () => {
+        events.push('body:focusout');
+      });
+      document.body.addEventListener('focusin', () => {
+        events.push('body:focusin');
+      });
+
+      document.setActiveElement(first);
+      events.length = 0;
+      document.setActiveElement(second);
+
+      expect(document.activeElement).toBe(second);
+      expect(events).toEqual([
+        'first:blur',
+        'first:focusout',
+        'body:focusout',
+        'second:focus',
+        'second:focusin',
+        'body:focusin',
+      ]);
+    });
+  });
 });
