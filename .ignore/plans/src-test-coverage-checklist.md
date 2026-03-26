@@ -66,113 +66,113 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/utilities/collectStyleElements.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 93.33%, branches 50.00%, functions 100.00%
 - Actions:
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover empty document, missing head, and multiple style element ordering cases
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover empty document, missing head, and multiple style element ordering cases
 
 ### `src/css/utilities/compareSpecificity.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/utilities/computeSpecificity.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 81.25%, branches 62.50%, functions 100.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover wildcard, attribute, compound, and nested selector specificity cases
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover wildcard, attribute, compound, and nested selector specificity cases
 
 ### `src/css/utilities/findClosingBrace.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 78.94%, branches 84.21%, functions 100.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] cover nested braces, braces inside strings, comments, and unterminated input
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] cover nested braces, braces inside strings, comments, and unterminated input
 
 ### `src/css/utilities/hasLayoutChange.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/utilities/matchesSelectorParts.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 66.66%, branches 50.00%, functions 100.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover matching and non-matching ancestor/sibling selector chains
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover matching and non-matching ancestor/sibling selector chains
 
 ### `src/css/utilities/parseDeclarations.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/utilities/parseSelectorList.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 83.33%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/utilities/serializeSelectorParts.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 84.00%, branches 64.70%, functions 100.00%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover serialization of wildcard, attribute, function, and mixed combinator selectors
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover serialization of wildcard, attribute, function, and mixed combinator selectors
 
 ### `src/css/utilities/skipBlock.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/utilities/skipString.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/utilities/skipWhitespaceAndComments.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/utilities/walkAndCollectStyle.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/css/utilities/walkElements.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ## src/dom/classes
 
