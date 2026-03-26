@@ -72,6 +72,15 @@ export class Renderer {
   }
 
   /**
+   * Enables or disables synchronized output wrapping for rendered frames.
+   *
+   * @param enabled - Whether frame output should be wrapped in mode 2026.
+   */
+  setSynchronizedOutputEnabled(enabled: boolean): void {
+    this.ansiWriter.setSynchronizedOutputEnabled(enabled);
+  }
+
+  /**
    * Resizes the renderer buffers to match new terminal dimensions.
    *
    * Both buffers are resized together so subsequent diffs operate on the same

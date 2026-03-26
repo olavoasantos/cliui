@@ -1,5 +1,8 @@
 import {BEL, CSI, OSC} from '../constants/controlSequences';
 
+const ENABLE_SYNCHRONIZED_OUTPUT = `${CSI}?2026h`;
+const DISABLE_SYNCHRONIZED_OUTPUT = `${CSI}?2026l`;
+
 import type {Cell, ChangedRegion, RGBColor, UnderlineStyle} from '../types';
 import type {StyleState} from '../types/StyleState';
 
@@ -11,6 +14,17 @@ import type {StyleState} from '../types/StyleState';
  * avoid unnecessary full resets.
  */
 export class ANSIWriter {
+  private synchronizedOutputEnabled = false;
+
+  /**
+   * Enables or disables synchronized output wrapping.
+   *
+   * @param enabled - Whether frame output should be wrapped in mode 2026.
+   */
+  setSynchronizedOutputEnabled(enabled: boolean): void {
+    this.synchronizedOutputEnabled = enabled;
+  }
+
   /**
    * Converts changed regions into ANSI output.
    *
@@ -42,7 +56,11 @@ export class ANSIWriter {
       output += this.serializeHyperlink(state.hyperlink, null);
     }
 
-    return output;
+    if (output.length === 0 || !this.synchronizedOutputEnabled) {
+      return output;
+    }
+
+    return `${ENABLE_SYNCHRONIZED_OUTPUT}${output}${DISABLE_SYNCHRONIZED_OUTPUT}`;
   }
 
   private getSgrCodes(previous: StyleState, current: Cell): string[] {

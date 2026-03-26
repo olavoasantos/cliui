@@ -140,6 +140,9 @@ export class Terminal {
 
     const layout = this.layoutEngine.layout(this.document.body, columns, rows);
     this.eventDispatcher.setLayoutRoot(layout);
+    this.renderer.setSynchronizedOutputEnabled(
+      this.terminalManager.getCapabilities().synchronizedOutput,
+    );
     const output = this.renderer.render(layout);
 
     if (output.length > 0) {

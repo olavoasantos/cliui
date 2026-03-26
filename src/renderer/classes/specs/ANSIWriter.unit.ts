@@ -93,4 +93,20 @@ describe('ANSIWriter', () => {
 
     expect(output).toBe('\u001B[1;1H\u001B[38;2;10;20;30mA\u001B[2;5HB');
   });
+
+  it('wraps output in synchronized mode sequences when enabled', () => {
+    writer.setSynchronizedOutputEnabled(true);
+
+    const output = writer.write([region(0, 0, [createCell({char: 'A'})])]);
+
+    expect(output).toBe('\u001B[?2026h\u001B[1;1HA\u001B[?2026l');
+  });
+
+  it('does not emit synchronized mode sequences when disabled', () => {
+    writer.setSynchronizedOutputEnabled(false);
+
+    const output = writer.write([region(0, 0, [createCell({char: 'A'})])]);
+
+    expect(output).toBe('\u001B[1;1HA');
+  });
 });
