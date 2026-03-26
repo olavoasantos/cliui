@@ -146,44 +146,89 @@ export class UiInput extends HTMLElement implements TerminalFrameAware {
   }
 
   private handleEditableKeyDown(event: KeyboardEvent): void {
-    const keyEvent = event as unknown as {altKey: boolean; ctrlKey: boolean; metaKey: boolean};
+    const alt = (event as unknown as {altKey: boolean}).altKey;
+    const ctrl = (event as unknown as {ctrlKey: boolean}).ctrlKey;
+    const meta = (event as unknown as {metaKey: boolean}).metaKey;
+    const {key} = event;
 
-    if (event.key === 'Escape') {
+    if (key === 'Escape') {
       this.blurSelf();
       return;
     }
 
-    if (event.key === 'Backspace' && keyEvent.altKey) {
+    // Word delete backward: Alt+Backspace or Ctrl+W
+    if ((key === 'Backspace' && alt) || (key === 'w' && ctrl)) {
       this.deleteWordBackward();
       return;
     }
 
-    if (event.key === 'Delete' && keyEvent.altKey) {
+    // Word delete forward: Alt+Delete or Alt+D
+    if ((key === 'Delete' && alt) || (key === 'd' && alt)) {
       this.deleteWordForward();
       return;
     }
 
-    if (event.key === 'u' && keyEvent.ctrlKey) {
+    // Delete to line start: Ctrl+U
+    if (key === 'u' && ctrl) {
       this.deleteToLineStart();
       return;
     }
 
-    if (event.key === 'k' && keyEvent.ctrlKey) {
+    // Delete to line end: Ctrl+K
+    if (key === 'k' && ctrl) {
       this.deleteToLineEnd();
       return;
     }
 
-    if (event.key === 'ArrowLeft' && keyEvent.altKey) {
+    // Word left: Alt+ArrowLeft or Alt+B
+    if ((key === 'ArrowLeft' && alt) || (key === 'b' && alt)) {
       this.moveCursorWordLeft();
       return;
     }
 
-    if (event.key === 'ArrowRight' && keyEvent.altKey) {
+    // Word right: Alt+ArrowRight or Alt+F
+    if ((key === 'ArrowRight' && alt) || (key === 'f' && alt)) {
       this.moveCursorWordRight();
       return;
     }
 
-    switch (event.key) {
+    // Char forward: Ctrl+F
+    if (key === 'f' && ctrl) {
+      this.moveCursorRight();
+      return;
+    }
+
+    // Char backward: Ctrl+B
+    if (key === 'b' && ctrl) {
+      this.moveCursorLeft();
+      return;
+    }
+
+    // Line start: Ctrl+A
+    if (key === 'a' && ctrl) {
+      this.moveCursorToStart();
+      return;
+    }
+
+    // Line end: Ctrl+E
+    if (key === 'e' && ctrl) {
+      this.moveCursorToEnd();
+      return;
+    }
+
+    // Delete forward: Ctrl+D
+    if (key === 'd' && ctrl) {
+      this.deleteForward();
+      return;
+    }
+
+    // Backspace: Ctrl+H
+    if (key === 'h' && ctrl) {
+      this.deleteBackward();
+      return;
+    }
+
+    switch (key) {
       case 'ArrowLeft':
         this.moveCursorLeft();
         return;
@@ -206,8 +251,8 @@ export class UiInput extends HTMLElement implements TerminalFrameAware {
         break;
     }
 
-    if (event.key.length === 1 && !keyEvent.ctrlKey && !keyEvent.altKey && !keyEvent.metaKey) {
-      this.insertText(event.key);
+    if (key.length === 1 && !ctrl && !alt && !meta) {
+      this.insertText(key);
     }
   }
 

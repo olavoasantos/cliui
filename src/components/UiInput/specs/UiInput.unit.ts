@@ -306,6 +306,26 @@ describe('UiInput', () => {
     expect(input.getAttribute('value')).toBe('hello ');
   });
 
+  it('deletes word backward with Ctrl+W', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'h');
+    typeKey(input, 'e');
+    typeKey(input, 'l');
+    typeKey(input, 'l');
+    typeKey(input, 'o');
+    typeKey(input, ' ');
+    typeKey(input, 'w');
+    typeKey(input, 'o');
+    typeKey(input, 'r');
+    typeKey(input, 'l');
+    typeKey(input, 'd');
+    typeKey(input, 'w', {ctrlKey: true});
+
+    expect(input.getAttribute('value')).toBe('hello ');
+  });
+
   it('deletes word forward with Alt+Delete', () => {
     const {input} = createInput();
 
@@ -323,6 +343,27 @@ describe('UiInput', () => {
     typeKey(input, 'd');
     typeKey(input, 'Home');
     typeKey(input, 'Delete', {altKey: true});
+
+    expect(input.getAttribute('value')).toBe('world');
+  });
+
+  it('deletes word forward with Alt+D', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'h');
+    typeKey(input, 'e');
+    typeKey(input, 'l');
+    typeKey(input, 'l');
+    typeKey(input, 'o');
+    typeKey(input, ' ');
+    typeKey(input, 'w');
+    typeKey(input, 'o');
+    typeKey(input, 'r');
+    typeKey(input, 'l');
+    typeKey(input, 'd');
+    typeKey(input, 'Home');
+    typeKey(input, 'd', {altKey: true});
 
     expect(input.getAttribute('value')).toBe('world');
   });
@@ -352,6 +393,56 @@ describe('UiInput', () => {
     expect(input.getAttribute('value')).toBe('');
   });
 
+  it('moves cursor by word with Alt+B and Alt+F', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'h');
+    typeKey(input, 'i');
+    typeKey(input, ' ');
+    typeKey(input, 'y');
+    typeKey(input, 'o');
+    typeKey(input, 'b', {altKey: true});
+    typeKey(input, 'x');
+
+    expect(input.getAttribute('value')).toBe('hi xyo');
+  });
+
+  it('supports Ctrl+A for Home and Ctrl+E for End', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'a');
+    typeKey(input, 'b');
+    typeKey(input, 'a', {ctrlKey: true});
+    typeKey(input, 'x');
+
+    expect(input.getAttribute('value')).toBe('xab');
+
+    typeKey(input, 'e', {ctrlKey: true});
+    typeKey(input, 'y');
+
+    expect(input.getAttribute('value')).toBe('xaby');
+  });
+
+  it('supports Ctrl+F and Ctrl+B for cursor movement', () => {
+    const {input} = createInput();
+
+    focusInput(input);
+    typeKey(input, 'a');
+    typeKey(input, 'b');
+    typeKey(input, 'c');
+    typeKey(input, 'b', {ctrlKey: true});
+    typeKey(input, 'x');
+
+    expect(input.getAttribute('value')).toBe('abxc');
+
+    typeKey(input, 'f', {ctrlKey: true});
+    typeKey(input, 'y');
+
+    expect(input.getAttribute('value')).toBe('abxcy');
+  });
+
   it('blurs on Escape', () => {
     const {window, input} = createInput();
     const events: Event[] = [];
@@ -378,21 +469,6 @@ describe('UiInput', () => {
     input.dispatchEvent(new Event('mousedown'));
 
     expect(window.document.activeElement).toBe(input);
-  });
-
-  it('moves cursor by word with Alt+Arrow', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'h');
-    typeKey(input, 'i');
-    typeKey(input, ' ');
-    typeKey(input, 'y');
-    typeKey(input, 'o');
-    typeKey(input, 'ArrowLeft', {altKey: true});
-    typeKey(input, 'x');
-
-    expect(input.getAttribute('value')).toBe('hi xyo');
   });
 
   it('toggles cursor blink via onTerminalFrame', () => {
