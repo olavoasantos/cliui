@@ -772,42 +772,42 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/layout/utilities/cellWidth.ts`
 
 - Status: unit exists; integration missing; bench exists
 - Coverage: lines 100.00%, branches 94.44%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/layout/utilities/codePointInRange.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/layout/utilities/findWideFastPathRange.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/layout/utilities/stripAnsi.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/layout/utilities/trailingHalfwidthWidth.ts`
 
 - Status: unit exists; integration missing; bench missing
 - Coverage: lines 100.00%, branches 87.50%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ## src/renderer/classes
 
