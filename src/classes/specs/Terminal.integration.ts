@@ -64,4 +64,36 @@ describe('Terminal integration', () => {
     expect(output.read()).toContain('\u001B[?25h');
     expect(output.read()).toContain('\u001B[?2004l');
   });
+
+  it('handles SIGWINCH by rerendering and dispatching window resize', async () => {
+    vi.useFakeTimers();
+
+    const output = createOutput();
+    const input = createInput();
+    const terminal = new Terminal({
+      altScreen: false,
+      mouse: false,
+      fps: 30,
+      output: output.stream,
+      input,
+    });
+    const resizeListener = vi.fn();
+
+    terminal.document.body.textContent = 'Resize me';
+    terminal.window.addEventListener('resize', resizeListener);
+
+    await terminal.run();
+
+    output.stream.columns = 10;
+    output.stream.rows = 4;
+    process.emit('SIGWINCH');
+
+    const renderer = (terminal as unknown as {renderer: {cols: number; rows: number}}).renderer;
+
+    expect(resizeListener).toHaveBeenCalledOnce();
+    expect(renderer.cols).toBe(10);
+    expect(renderer.rows).toBe(4);
+
+    terminal.exit();
+  });
 });

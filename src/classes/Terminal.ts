@@ -1,6 +1,6 @@
 import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../constants/terminal';
 import {StyleEngine} from '../css';
-import {Window} from '../dom';
+import {Event, Window} from '../dom';
 import {LayoutEngine} from '../layout';
 import {Renderer} from '../renderer';
 import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
@@ -33,6 +33,9 @@ export class Terminal {
   private readonly terminalManager: TerminalManager;
   private readonly inputReader: InputReader;
   private readonly eventDispatcher: EventDispatcher;
+  private readonly boundResizeListener = (): void => {
+    this.handleResize();
+  };
   private loop: NodeJS.Timeout | null = null;
   private running = false;
 
@@ -78,6 +81,7 @@ export class Terminal {
     this.inputReader.start((event) => {
       this.eventDispatcher.dispatch(event);
     });
+    process.on('SIGWINCH', this.boundResizeListener);
 
     this.renderFrame();
 
@@ -102,8 +106,20 @@ export class Terminal {
     }
 
     this.inputReader.stop();
+    process.off('SIGWINCH', this.boundResizeListener);
     this.terminalManager.stop();
     this.running = false;
+  }
+
+  private handleResize(): void {
+    if (!this.running) {
+      return;
+    }
+
+    this.layoutEngine.clearCache();
+    this.styleEngine.markAllDirty();
+    this.renderFrame();
+    this.window.dispatchEvent(new Event('resize'));
   }
 
   private renderFrame(): void {
