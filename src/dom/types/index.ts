@@ -79,6 +79,11 @@ export interface MutationRecord {
   oldValue: string | null;
 }
 
+export interface InputEventInit extends UIEventInit {
+  data?: string | null;
+  inputType?: string;
+}
+
 export interface ClipboardEventInit extends EventInit {
   clipboardData?: DataTransfer | null;
 }

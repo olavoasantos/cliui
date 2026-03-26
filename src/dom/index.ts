@@ -19,6 +19,7 @@ export {KeyboardEvent} from './classes/KeyboardEvent';
 export {MouseEvent} from './classes/MouseEvent';
 export {WheelEvent} from './classes/WheelEvent';
 export {FocusEvent} from './classes/FocusEvent';
+export {InputEvent} from './classes/InputEvent';
 export {ClipboardEvent} from './classes/ClipboardEvent';
 export {ErrorEvent} from './classes/ErrorEvent';
 export {PromiseRejectionEvent} from './classes/PromiseRejectionEvent';
@@ -54,6 +55,7 @@ export {
 } from './constants';
 
 export type {
+  InputEventInit,
   ClipboardEventInit,
   ErrorEventInit,
   EventInit,
