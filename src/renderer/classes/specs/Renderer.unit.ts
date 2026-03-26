@@ -137,4 +137,52 @@ describe('Renderer', () => {
     expect(output).toContain('\u001B[7;1H');
     expect(output).toMatch(new RegExp(String.raw`\u001B\[7;1H +`, 'u'));
   });
+
+  it('invalidates the previous frame when synchronized output changes', () => {
+    const renderer = new Renderer(6, 2);
+    const box = createBox({textLines: ['AB']});
+
+    renderer.render(box);
+    renderer.setSynchronizedOutputEnabled(true);
+
+    const output = renderer.render(box);
+
+    expect(output).toBe('\u001B[?2026h\u001B[1;1HAB\u001B[?2026l');
+  });
+
+  it('invalidates the previous frame when the color profile changes', () => {
+    const renderer = new Renderer(6, 2);
+    const box = createBox({
+      textLines: ['AB'],
+      computedStyle: style({color: '#ff0000'}),
+    });
+
+    renderer.render(box);
+    renderer.setColorProfile('ansi16');
+
+    const output = renderer.render(box);
+
+    expect(output).toBe('\u001B[1;1H\u001B[91mAB');
+  });
+
+  it('swaps buffers across consecutive renders after a resize reset', () => {
+    const renderer = new Renderer(4, 1);
+
+    renderer.render(createBox({width: 4, contentWidth: 4, textLines: ['ABCD']}));
+    renderer.resize(5, 1);
+
+    const firstAfterResize = renderer.render(
+      createBox({width: 5, contentWidth: 5, textLines: ['ABCDE']}),
+    );
+    const secondAfterResize = renderer.render(
+      createBox({width: 5, contentWidth: 5, textLines: ['ABCDE']}),
+    );
+    const changedFrame = renderer.render(
+      createBox({width: 5, contentWidth: 5, textLines: ['ABCXE']}),
+    );
+
+    expect(firstAfterResize).toBe('\u001B[1;1HABCDE');
+    expect(secondAfterResize).toBe('');
+    expect(changedFrame).toBe('\u001B[1;4HX');
+  });
 });

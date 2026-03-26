@@ -813,42 +813,42 @@ Generated from `src/**`, existing spec files, and `.testing/coverage/coverage-su
 
 ### `src/renderer/classes/ANSIWriter.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 91.39%, branches 87.71%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/renderer/classes/CellBuffer.ts`
 
-- Status: unit exists; integration missing; bench missing
+- Status: unit exists; integration exists; bench missing
 - Coverage: lines 100.00%, branches 100.00%, functions 100.00%
 - Actions:
-  - [ ] add an integration spec if this file coordinates behavior with other modules
+  - [x] add an integration spec if this file coordinates behavior with other modules
 
 ### `src/renderer/classes/Differ.ts`
 
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 95.83%, branches 93.10%, functions 75.00%
 - Actions:
-  - [ ] exercise currently uncovered methods and constructor paths
-  - [ ] cover unchanged-frame fast path and full-frame change extremes
+  - [x] exercise currently uncovered methods and constructor paths
+  - [x] cover unchanged-frame fast path and full-frame change extremes
 
 ### `src/renderer/classes/Painter.ts`
 
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 92.30%, branches 87.37%, functions 100.00%
 - Actions:
-  - [ ] keep the current test set and revisit only if behavior expands or performance regresses
+  - [x] keep the current test set and revisit only if behavior expands or performance regresses
 
 ### `src/renderer/classes/Renderer.ts`
 
 - Status: unit exists; integration exists; bench exists
 - Coverage: lines 78.78%, branches 71.42%, functions 88.88%
 - Actions:
-  - [ ] raise line coverage with missing happy-path and edge-case scenarios
-  - [ ] raise branch coverage by exercising fallback, guard, and error paths
-  - [ ] cover invalidation behavior when sync output or color profile changes
-  - [ ] cover resize reset behavior and consecutive render buffer swapping
+  - [x] raise line coverage with missing happy-path and edge-case scenarios
+  - [x] raise branch coverage by exercising fallback, guard, and error paths
+  - [x] cover invalidation behavior when sync output or color profile changes
+  - [x] cover resize reset behavior and consecutive render buffer swapping
 
 ## src/terminal/classes
 
