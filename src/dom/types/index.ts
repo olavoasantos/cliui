@@ -1,5 +1,6 @@
 import type {EventTarget} from '../classes/EventTarget';
 import type {Element} from '../classes/Element';
+import type {Node} from '../classes/Node';
 import type {Text} from '../classes/Text';
 
 export type NodeType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
@@ -56,6 +57,27 @@ export interface FocusEventInit extends EventInit {
   relatedTarget?: EventTarget | null;
 }
 
+export type MutationRecordType = 'attributes' | 'characterData' | 'childList';
+
+export interface MutationObserverInit {
+  attributeFilter?: string[];
+  attributeOldValue?: boolean;
+  attributes?: boolean;
+  characterData?: boolean;
+  characterDataOldValue?: boolean;
+  childList?: boolean;
+  subtree?: boolean;
+}
+
+export interface MutationRecord {
+  type: MutationRecordType;
+  target: Node | Element | Text;
+  addedNodes: Array<Node | Element | Text>;
+  removedNodes: Array<Node | Element | Text>;
+  attributeName: string | null;
+  oldValue: string | null;
+}
+
 export interface ClipboardEventInit extends EventInit {
   clipboardData?: DataTransfer | null;
 }
@@ -97,10 +119,21 @@ export interface SelectorPart {
 
 export interface Hooks {
   createElement(element: Element, ns?: string | null): void;
-  setAttribute(element: Element, name: string, value: string, ns?: string | null): void;
-  removeAttribute(element: Element, name: string, ns?: string | null): void;
+  setAttribute(
+    element: Element,
+    name: string,
+    value: string,
+    ns?: string | null,
+    oldValue?: string | null,
+  ): void;
+  removeAttribute(
+    element: Element,
+    name: string,
+    ns?: string | null,
+    oldValue?: string | null,
+  ): void;
   createText(text: Text, data: string): void;
-  setText(text: Text, data: string): void;
+  setText(text: Text, data: string, oldValue?: string | null): void;
   insertChild(parent: Element, node: Element | Text, index: number): void;
   removeChild(parent: Element, node: Element | Text, index: number): void;
   addEventListener(

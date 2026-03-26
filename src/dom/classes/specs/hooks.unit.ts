@@ -57,7 +57,7 @@ describe('hooks bridge', () => {
       const {document} = createEnv({setAttribute});
       const el = document.createElement('div');
       el.setAttribute('id', 'test');
-      expect(setAttribute).toHaveBeenCalledWith(el, 'id', 'test', null);
+      expect(setAttribute).toHaveBeenCalledWith(el, 'id', 'test', null, null);
     });
 
     it('fires when updating an attribute value', () => {
@@ -67,7 +67,7 @@ describe('hooks bridge', () => {
       el.setAttribute('id', 'old');
       el.setAttribute('id', 'new');
       expect(setAttribute).toHaveBeenCalledTimes(2);
-      expect(setAttribute.mock.calls[1]).toEqual([el, 'id', 'new', null]);
+      expect(setAttribute.mock.calls[1]).toEqual([el, 'id', 'new', null, 'old']);
     });
   });
 
@@ -78,7 +78,7 @@ describe('hooks bridge', () => {
       const el = document.createElement('div');
       el.setAttribute('id', 'test');
       el.removeAttribute('id');
-      expect(removeAttribute).toHaveBeenCalledWith(el, 'id', null);
+      expect(removeAttribute).toHaveBeenCalledWith(el, 'id', null, 'test');
     });
   });
 

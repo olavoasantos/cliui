@@ -67,6 +67,7 @@ export class NamedNodeMap {
           ownerElement as never,
           name,
           namespaceURI,
+          attr.value,
         );
         return attr;
       }
@@ -111,6 +112,7 @@ export class NamedNodeMap {
         attr.name,
         attr.value,
         attr[NS],
+        old?.value ?? null,
       );
     }
 

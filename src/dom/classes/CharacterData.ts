@@ -12,11 +12,12 @@ export class CharacterData extends ChildNode {
 
   protected setData(data: unknown) {
     let str = '';
+    const oldValue = this[DATA];
     if (data != null) {
       str = typeof data === 'string' ? data : String(data);
     }
     this[DATA] = str;
-    (this[HOOKS] as Partial<Hooks>).setText?.(this as never, str);
+    (this[HOOKS] as Partial<Hooks>).setText?.(this as never, str, oldValue);
   }
 
   get data(): string {
