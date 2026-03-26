@@ -205,6 +205,71 @@ describe('Painter', () => {
       expect(buffer.get(0, 1)?.char).toBe(' ');
       expect(buffer.get(0, 0)?.bg).toEqual({r: 34, g: 34, b: 34});
     });
+
+    it('paints overlapping boxes in ascending z-index order', () => {
+      const buffer = new CellBuffer(6, 4);
+      const lower = createBox({
+        x: 1,
+        y: 1,
+        width: 3,
+        height: 2,
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 3,
+        contentHeight: 2,
+        computedStyle: style({'background-color': '#ff0000'}),
+        zIndex: 1,
+      });
+      const higher = createBox({
+        x: 2,
+        y: 1,
+        width: 3,
+        height: 2,
+        contentX: 2,
+        contentY: 1,
+        contentWidth: 3,
+        contentHeight: 2,
+        computedStyle: style({'background-color': '#0000ff'}),
+        zIndex: 2,
+      });
+
+      painter.paint([higher, lower], buffer);
+
+      expect(buffer.get(2, 1)?.bg).toEqual({r: 0, g: 0, b: 255});
+      expect(buffer.get(1, 1)?.bg).toEqual({r: 255, g: 0, b: 0});
+    });
+
+    it('uses document order as the tiebreaker for equal z-index values', () => {
+      const buffer = new CellBuffer(6, 4);
+      const earlier = createBox({
+        x: 1,
+        y: 1,
+        width: 3,
+        height: 2,
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 3,
+        contentHeight: 2,
+        computedStyle: style({'background-color': '#00ff00'}),
+        zIndex: 3,
+      });
+      const later = createBox({
+        x: 2,
+        y: 1,
+        width: 3,
+        height: 2,
+        contentX: 2,
+        contentY: 1,
+        contentWidth: 3,
+        contentHeight: 2,
+        computedStyle: style({'background-color': '#ffff00'}),
+        zIndex: 3,
+      });
+
+      painter.paint([earlier, later], buffer);
+
+      expect(buffer.get(2, 1)?.bg).toEqual({r: 255, g: 255, b: 0});
+    });
   });
 
   describe('text painting', () => {

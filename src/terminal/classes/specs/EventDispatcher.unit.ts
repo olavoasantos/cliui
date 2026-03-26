@@ -209,6 +209,80 @@ describe('EventDispatcher', () => {
     expect(dispatcher.hitTest(8, 8)).toBeNull();
   });
 
+  it('hit-tests the highest z-index element at overlapping coordinates', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const lower = document.createElement('div');
+    const higher = document.createElement('button');
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10,
+        children: [
+          createBox(document, {
+            element: higher,
+            x: 2,
+            y: 2,
+            width: 4,
+            height: 4,
+            zIndex: 2,
+          }),
+          createBox(document, {
+            element: lower,
+            x: 1,
+            y: 1,
+            width: 4,
+            height: 4,
+            zIndex: 1,
+          }),
+        ],
+      }),
+    );
+
+    expect(dispatcher.hitTest(3, 3)).toBe(higher);
+  });
+
+  it('uses document order as the tiebreaker for equal z-index values during hit-testing', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const earlier = document.createElement('div');
+    const later = document.createElement('button');
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10,
+        children: [
+          createBox(document, {
+            element: earlier,
+            x: 1,
+            y: 1,
+            width: 4,
+            height: 4,
+            zIndex: 5,
+          }),
+          createBox(document, {
+            element: later,
+            x: 2,
+            y: 2,
+            width: 4,
+            height: 4,
+            zIndex: 5,
+          }),
+        ],
+      }),
+    );
+
+    expect(dispatcher.hitTest(3, 3)).toBe(later);
+  });
+
   it('dispatches mouse down, up, and click events to the hit-tested element with bubbling', () => {
     const {document} = createEnv();
     const dispatcher = new EventDispatcher(document);

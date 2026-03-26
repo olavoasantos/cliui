@@ -82,8 +82,9 @@ export class EventDispatcher {
   /**
    * Returns the topmost element at the given terminal coordinates.
    *
-   * Child boxes are searched in reverse document order so later siblings are
-   * treated as painting on top for this milestone phase.
+   * Layout boxes are flattened into a single global z-order so the visually
+   * topmost box wins, with document order as the tiebreaker for equal z-index
+   * values.
    *
    * @param column - Zero-based terminal column.
    * @param row - Zero-based terminal row.
@@ -94,7 +95,17 @@ export class EventDispatcher {
       return null;
     }
 
-    return this.hitTestBox(this.layoutRoot, column, row);
+    const boxes = this.flattenBoxes(this.layoutRoot);
+
+    for (const box of boxes) {
+      if (box.computedStyle.get('display') === 'none' || !this.containsPoint(box, column, row)) {
+        continue;
+      }
+
+      return box.element;
+    }
+
+    return null;
   }
 
   private dispatchKeyEvent(event: TerminalKeyEvent): void {
@@ -173,26 +184,30 @@ export class EventDispatcher {
     this.document.defaultView.dispatchEvent(new FocusEvent(focus === 'in' ? 'focus' : 'blur'));
   }
 
-  private hitTestBox(box: LayoutBox, column: number, row: number): Element | null {
-    if (box.computedStyle.get('display') === 'none' || !this.containsPoint(box, column, row)) {
-      return null;
-    }
+  private flattenBoxes(root: LayoutBox): LayoutBox[] {
+    const flattened: Array<{box: LayoutBox; order: number}> = [];
+    let order = 0;
 
-    for (let index = box.children.length - 1; index >= 0; index -= 1) {
-      const child = box.children[index];
+    const visit = (box: LayoutBox): void => {
+      flattened.push({box, order});
+      order += 1;
 
-      if (child === undefined) {
-        continue;
+      for (const child of box.children) {
+        visit(child);
+      }
+    };
+
+    visit(root);
+
+    flattened.sort((left, right) => {
+      if (left.box.zIndex !== right.box.zIndex) {
+        return right.box.zIndex - left.box.zIndex;
       }
 
-      const match = this.hitTestBox(child, column, row);
+      return right.order - left.order;
+    });
 
-      if (match !== null) {
-        return match;
-      }
-    }
-
-    return box.element;
+    return flattened.map((entry) => entry.box);
   }
 
   private containsPoint(box: LayoutBox, column: number, row: number): boolean {

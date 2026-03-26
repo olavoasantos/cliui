@@ -25,9 +25,18 @@ export class Painter {
    */
   paint(boxes: LayoutBox | LayoutBox[], buffer: CellBuffer): void {
     const list = Array.isArray(boxes) ? boxes : [boxes];
+    const flattened = this.flattenBoxes(list);
 
-    for (const box of list) {
-      this.paintBox(box, buffer, null);
+    flattened.sort((left, right) => {
+      if (left.box.zIndex !== right.box.zIndex) {
+        return left.box.zIndex - right.box.zIndex;
+      }
+
+      return left.order - right.order;
+    });
+
+    for (const entry of flattened) {
+      this.paintBox(entry.box, buffer, entry.clipRect);
     }
   }
 
@@ -38,12 +47,30 @@ export class Painter {
     this.paintBackground(metrics, textCell, buffer, clipRect);
     this.paintBorder(metrics, box.computedStyle, textCell, buffer, clipRect);
     this.paintText(box, textCell, buffer, clipRect);
+  }
 
-    const childClipRect = this.createChildClipRect(box, clipRect);
+  private flattenBoxes(
+    boxes: LayoutBox[],
+  ): Array<{box: LayoutBox; clipRect: ClipRect | null; order: number}> {
+    const flattened: Array<{box: LayoutBox; clipRect: ClipRect | null; order: number}> = [];
+    let order = 0;
 
-    for (const child of box.children) {
-      this.paintBox(child, buffer, childClipRect);
+    const visit = (box: LayoutBox, clipRect: ClipRect | null): void => {
+      flattened.push({box, clipRect, order});
+      order += 1;
+
+      const childClipRect = this.createChildClipRect(box, clipRect);
+
+      for (const child of box.children) {
+        visit(child, childClipRect);
+      }
+    };
+
+    for (const box of boxes) {
+      visit(box, null);
     }
+
+    return flattened;
   }
 
   private paintBackground(
