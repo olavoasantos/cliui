@@ -164,6 +164,12 @@ export class InputReader {
       return mouseEvent;
     }
 
+    const focusEvent = this.readFocusSequence();
+
+    if (focusEvent !== null) {
+      return focusEvent;
+    }
+
     const match = this.pending.match(/^\u001B\[([0-9;]*)([~A-Za-z])?/);
 
     if (match === null) {
@@ -227,6 +233,28 @@ export class InputReader {
     const row = Number.parseInt(match[3] ?? '', 10) - 1;
 
     return this.createMouseEvent(encodedButton, column, row, final === 'm');
+  }
+
+  private readFocusSequence(): TerminalInputEvent | null | undefined {
+    if (!this.pending.startsWith(`${ESCAPE}[`)) {
+      return null;
+    }
+
+    if (this.pending.length < 3) {
+      return undefined;
+    }
+
+    if (this.pending.startsWith(`${ESCAPE}[I`)) {
+      this.pending = this.pending.slice(3);
+      return {type: 'focus', focus: 'in'};
+    }
+
+    if (this.pending.startsWith(`${ESCAPE}[O`)) {
+      this.pending = this.pending.slice(3);
+      return {type: 'focus', focus: 'out'};
+    }
+
+    return null;
   }
 
   private readSs3Sequence(): TerminalInputEvent | null | undefined {

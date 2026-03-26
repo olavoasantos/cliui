@@ -1,4 +1,4 @@
-import {ClipboardEvent, KeyboardEvent, MouseEvent, WheelEvent} from '../../dom';
+import {ClipboardEvent, FocusEvent, KeyboardEvent, MouseEvent, WheelEvent} from '../../dom';
 
 import type {Document, Element} from '../../dom';
 import type {LayoutBox} from '../../layout/types';
@@ -46,6 +46,11 @@ export class EventDispatcher {
 
     if (event.type === 'mouse') {
       this.dispatchMouseEvent(event);
+      return;
+    }
+
+    if (event.type === 'focus') {
+      this.dispatchWindowFocusEvent(event.focus);
       return;
     }
 
@@ -150,6 +155,10 @@ export class EventDispatcher {
         clipboardData,
       }),
     );
+  }
+
+  private dispatchWindowFocusEvent(focus: 'in' | 'out'): void {
+    this.document.defaultView.dispatchEvent(new FocusEvent(focus === 'in' ? 'focus' : 'blur'));
   }
 
   private hitTestBox(box: LayoutBox, column: number, row: number): Element | null {

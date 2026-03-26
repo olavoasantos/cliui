@@ -415,4 +415,22 @@ describe('EventDispatcher', () => {
 
     expect(order).toEqual(['keydown:x', 'keyup:x', 'hello']);
   });
+
+  it('dispatches focus and blur events on window from terminal focus input', () => {
+    const {window, document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const events: string[] = [];
+
+    window.addEventListener('focus', () => {
+      events.push('focus');
+    });
+    window.addEventListener('blur', () => {
+      events.push('blur');
+    });
+
+    dispatcher.dispatch({type: 'focus', focus: 'in'});
+    dispatcher.dispatch({type: 'focus', focus: 'out'});
+
+    expect(events).toEqual(['focus', 'blur']);
+  });
 });

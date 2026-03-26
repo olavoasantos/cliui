@@ -183,6 +183,22 @@ describe('InputReader', () => {
     ]);
   });
 
+  it('parses terminal focus reporting sequences', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[I\u001B[O')).toEqual([
+      {type: 'focus', focus: 'in'},
+      {type: 'focus', focus: 'out'},
+    ]);
+  });
+
+  it('buffers incomplete focus reporting sequences until enough bytes arrive', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[')).toEqual([]);
+    expect(reader.parse('I')).toEqual([{type: 'focus', focus: 'in'}]);
+  });
+
   it('buffers incomplete escape sequences until enough bytes arrive', () => {
     const reader = new InputReader({});
 

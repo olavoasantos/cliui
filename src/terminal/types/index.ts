@@ -137,6 +137,17 @@ export interface TerminalMouseEvent {
 }
 
 /**
+ * Parsed terminal focus event emitted from focus reporting mode.
+ */
+export interface TerminalFocusEvent {
+  /** Discriminator for focus events. */
+  type: 'focus';
+
+  /** Whether terminal focus was gained or lost. */
+  focus: 'in' | 'out';
+}
+
+/**
  * Parsed paste event emitted from bracketed paste mode.
  */
 export interface TerminalPasteEvent {
@@ -150,7 +161,11 @@ export interface TerminalPasteEvent {
 /**
  * Union of parsed terminal input events.
  */
-export type TerminalInputEvent = TerminalKeyEvent | TerminalMouseEvent | TerminalPasteEvent;
+export type TerminalInputEvent =
+  | TerminalKeyEvent
+  | TerminalMouseEvent
+  | TerminalFocusEvent
+  | TerminalPasteEvent;
 
 /**
  * Configuration for terminal mode lifecycle management.
