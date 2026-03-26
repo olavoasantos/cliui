@@ -6,45 +6,22 @@ Run from the repository root:
 pnpm --dir examples/basic start
 ```
 
-The start flow rebuilds the library first, then launches the example with `node --import tsx`, so it runs against the latest local implementation without relying on stale build output.
-
-This example is a compact milestone 4 dashboard meant to fit in common terminal sizes while still exercising the new rendering features. The interaction feedback is intentionally condensed into a few status lines so the overlay and scroll demos have more room.
+This example is now a focused `ui-progress` playground for manually testing the built-in progress component.
 
 ## What to test
 
-### Capability-driven rendering
+### Animated progress
 
-- the capability line should render with colors immediately on startup
-- if your terminal supports synchronized output and advanced color, the renderer now applies those settings without requiring a resize
+- the `Deploy` and `Sync` bars should animate smoothly as their `value` attributes change
+- the bar fill should move gradually rather than jump immediately
+- the numeric percentage should track the animated visible value
 
-### Colors + border styles
+### Default block rendering
 
-- the red / green / blue / pink swatches exercise terminal color adaptation
-- the `block` and `half-block` tiles exercise the two new built-in border styles
+- the `Queue` and `Index` bars use the default block preset
+- filled and empty segments should look visually closer in height than before
+- labels and percentages should render inline with each bar
 
-### Built-in custom elements
+### Exit
 
-- the spinner row now uses explicitly registered `<ui-spinner>` elements
-- both spinners should animate without owning their own timers
-- one spinner uses the default variant and one uses `pulse` with a custom interval
-
-### Absolute positioning + z-index
-
-- click the overlapping `low`, `mid`, and `top` cards
-- in overlap regions, the visually topmost card should win hit-testing
-- the overlay status line reports which layer received the click
-
-### Overflow scroll
-
-- focus the log pane with `Tab`
-- use the mouse wheel over it
-- the log viewport should clip and scroll its content
-- paste while the log pane is focused to verify paste routing
-
-### General interaction
-
-- `Tab` / `Shift+Tab` cycles focus through the stage, layered cards, and log pane
-- typing updates the key line
-- resizing updates the resize line
-- changing terminal app focus updates the window line
-- press `q` to quit
+- press `q` or `Ctrl+C` to quit

@@ -27,12 +27,12 @@ export default defineConfig({
           // Intercept the entry files
           entryFileNames: (chunkInfo) => {
             // Catches both .css?inline and .css_inline
-            const cleanName = chunkInfo.name.replace(/\.css[\?_]inline/g, '');
+            const cleanName = chunkInfo.name.replace(/\.css[?_]inline/g, '');
             return `${cleanName}.js`;
           },
           // Intercept dynamic imports/chunks
           chunkFileNames: (chunkInfo) => {
-            const cleanName = chunkInfo.name.replace(/\.css[\?_]inline/g, '');
+            const cleanName = chunkInfo.name.replace(/\.css[?_]inline/g, '');
             return `${cleanName}.js`;
           },
         },
@@ -40,11 +40,11 @@ export default defineConfig({
           format: 'cjs',
           preserveModules: true,
           entryFileNames: (chunkInfo) => {
-            const cleanName = chunkInfo.name.replace(/\.css[\?_]inline/g, '');
+            const cleanName = chunkInfo.name.replace(/\.css[?_]inline/g, '');
             return `${cleanName}.cjs`;
           },
           chunkFileNames: (chunkInfo) => {
-            const cleanName = chunkInfo.name.replace(/\.css[\?_]inline/g, '');
+            const cleanName = chunkInfo.name.replace(/\.css[?_]inline/g, '');
             return `${cleanName}.cjs`;
           },
         },
