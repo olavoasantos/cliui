@@ -78,7 +78,14 @@ export class Terminal {
 
     this.running = true;
     this.terminalManager.start();
-    void this.terminalManager.detectCapabilities();
+    void this.terminalManager.detectCapabilities().then(() => {
+      if (!this.running) {
+        return;
+      }
+
+      this.styleEngine.markAllDirty();
+      this.renderFrame();
+    });
     this.inputReader.start((event) => {
       this.eventDispatcher.dispatch(event);
     });

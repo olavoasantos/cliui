@@ -200,6 +200,25 @@ describe('InputReader', () => {
     expect(reader.parse('I')).toEqual([{type: 'focus', focus: 'in'}]);
   });
 
+  it('ignores terminal mode responses and continues parsing later input', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[?2026;1$y')).toEqual([]);
+    expect(reader.parse('\t')).toEqual([
+      {type: 'key', key: 'Tab', code: 'Tab', ctrl: false, alt: false, shift: false},
+    ]);
+  });
+
+  it('buffers incomplete terminal mode responses until they are complete', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[?2026;')).toEqual([]);
+    expect(reader.parse('1$y')).toEqual([]);
+    expect(reader.parse('a')).toEqual([
+      {type: 'key', key: 'a', code: 'KeyA', ctrl: false, alt: false, shift: false},
+    ]);
+  });
+
   it('buffers incomplete escape sequences until enough bytes arrive', () => {
     const reader = new InputReader({});
 

@@ -51,8 +51,16 @@ export class LayoutEngine {
    */
   layout(root: Element, columns: number, rows: number): LayoutBox {
     const dirtySet = this.styleEngine.getLayoutDirtyElements();
-    const isIncremental = dirtySet.size > 0;
-    const box = this.layoutElement(root, columns, rows, 0, 0, isIncremental, dirtySet);
+
+    if (dirtySet.size > 0) {
+      this.clearCache();
+    }
+
+    const box = this.layoutElement(root, columns, rows, 0, 0, false, dirtySet);
+
+    if (dirtySet.size > 0) {
+      this.styleEngine.clearLayoutDirty();
+    }
 
     return box;
   }
@@ -85,7 +93,7 @@ export class LayoutEngine {
       const cached = this.cache.get(element);
 
       if (cached) {
-        return cached;
+        return this.cloneLocalizedBox(cached);
       }
     }
 
@@ -255,6 +263,24 @@ export class LayoutEngine {
     const top = this.parseCellValue(box.computedStyle.get('top'));
 
     this.offsetBox(box, containingX + left, containingY + top);
+  }
+
+  /**
+   * Creates a deep clone of a cached box tree and normalizes it back to the
+   * local `(0, 0)` coordinate space expected by parent layout passes.
+   */
+  private cloneLocalizedBox(box: LayoutBox): LayoutBox {
+    const cloneChildren = box.children.map((child) => this.cloneLocalizedBox(child));
+    const clone: LayoutBox = {
+      ...box,
+      computedStyle: box.computedStyle,
+      textLines: box.textLines === undefined ? undefined : [...box.textLines],
+      children: cloneChildren,
+    };
+
+    this.offsetBox(clone, -box.x, -box.y);
+
+    return clone;
   }
 
   /**

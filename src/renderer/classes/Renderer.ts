@@ -30,6 +30,8 @@ export class Renderer {
   private painter: Painter;
   private differ: Differ;
   private ansiWriter: ANSIWriter;
+  private synchronizedOutputEnabled = false;
+  private colorProfile: TerminalColorProfile = 'truecolor';
 
   /**
    * Creates a renderer sized to the given terminal dimensions.
@@ -78,7 +80,13 @@ export class Renderer {
    * @param enabled - Whether frame output should be wrapped in mode 2026.
    */
   setSynchronizedOutputEnabled(enabled: boolean): void {
+    if (this.synchronizedOutputEnabled === enabled) {
+      return;
+    }
+
+    this.synchronizedOutputEnabled = enabled;
     this.ansiWriter.setSynchronizedOutputEnabled(enabled);
+    this.invalidate();
   }
 
   /**
@@ -87,7 +95,13 @@ export class Renderer {
    * @param profile - The detected terminal color capability.
    */
   setColorProfile(profile: TerminalColorProfile): void {
+    if (this.colorProfile === profile) {
+      return;
+    }
+
+    this.colorProfile = profile;
     this.ansiWriter.setColorProfile(profile);
+    this.invalidate();
   }
 
   /**
@@ -103,6 +117,10 @@ export class Renderer {
     this.currentBuffer.resize(cols, rows);
     this.previousBuffer.resize(cols, rows);
     this.currentBuffer.clear();
+    this.previousBuffer.clear();
+  }
+
+  private invalidate(): void {
     this.previousBuffer.clear();
   }
 

@@ -123,6 +123,13 @@ export class StyleEngine {
   }
 
   /**
+   * Clears the layout-dirty set after a layout pass consumes it.
+   */
+  clearLayoutDirty(): void {
+    this.layoutDirty.clear();
+  }
+
+  /**
    * Clears both the style-dirty and layout-dirty sets.
    */
   clearDirty(): void {
@@ -291,6 +298,7 @@ export class StyleEngine {
     const engine = this;
     const prevSetAttribute = hooks.setAttribute;
     const prevRemoveAttribute = hooks.removeAttribute;
+    const prevSetText = hooks.setText;
     const prevInsertChild = hooks.insertChild;
     const prevRemoveChild = hooks.removeChild;
 
@@ -316,6 +324,16 @@ export class StyleEngine {
       }
     };
 
+    hooks.setText = function setText(text, data, oldValue) {
+      prevSetText?.(text, data, oldValue);
+
+      const parent = text.parentElement;
+
+      if (parent !== null && parent.nodeType === NodeType.ELEMENT_NODE) {
+        engine.layoutDirty.add(parent as unknown as Element);
+      }
+    };
+
     hooks.insertChild = function insertChild(parent, node, index) {
       prevInsertChild?.(parent, node, index);
       if (node.nodeType === NodeType.ELEMENT_NODE) {
@@ -323,14 +341,16 @@ export class StyleEngine {
         engine.markStyleDirty(el);
         walkElements(el, (child) => engine.markStyleDirty(child));
       }
-      // Structural changes can affect sibling selectors
+      // Structural changes can affect sibling selectors and layout
       engine.markStyleDirty(parent);
+      engine.layoutDirty.add(parent);
     };
 
     hooks.removeChild = function removeChild(parent, node, index) {
       prevRemoveChild?.(parent, node, index);
       // Structural changes can affect sibling selectors on remaining children
       engine.markStyleDirty(parent);
+      engine.layoutDirty.add(parent);
       walkElements(parent, (child) => engine.markStyleDirty(child));
     };
   }
@@ -343,6 +363,7 @@ export class StyleEngine {
       const hooks = window[HOOKS] as Partial<Hooks>;
       hooks.setAttribute = this.previousHooks.setAttribute;
       hooks.removeAttribute = this.previousHooks.removeAttribute;
+      hooks.setText = this.previousHooks.setText;
       hooks.insertChild = this.previousHooks.insertChild;
       hooks.removeChild = this.previousHooks.removeChild;
       this.previousHooks = null;

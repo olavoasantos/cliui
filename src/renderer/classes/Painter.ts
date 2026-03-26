@@ -80,17 +80,19 @@ export class Painter {
     buffer: CellBuffer,
     clipRect: ClipRect | null,
   ): void {
+    if (textCell.bg === null) {
+      return;
+    }
+
     for (let y = metrics.outerY; y < metrics.outerY + metrics.outerHeight; y += 1) {
       for (let x = metrics.outerX; x < metrics.outerX + metrics.outerWidth; x += 1) {
-        const existing = buffer.get(x, y);
-
-        if (existing === undefined || !this.isWithinClipRect(x, y, clipRect)) {
+        if (buffer.get(x, y) === undefined || !this.isWithinClipRect(x, y, clipRect)) {
           continue;
         }
 
         buffer.set(x, y, {
-          ...existing,
-          bg: textCell.bg,
+          ...textCell,
+          char: ' ',
         });
       }
     }

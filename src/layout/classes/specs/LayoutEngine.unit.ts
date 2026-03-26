@@ -112,6 +112,32 @@ describe('LayoutEngine', () => {
       expect(box.height).toBe(6);
     });
 
+    it('repositions clean cached siblings when an earlier sibling changes height', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const first = document.createElement('div');
+      const second = document.createElement('div');
+
+      first.appendChild(document.createTextNode('alpha beta gamma delta'));
+      second.appendChild(document.createTextNode('tail'));
+      body.appendChild(first);
+      body.appendChild(second);
+
+      addStyle(document, 'div { width: 10; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const initial = engine.layout(body, 10, 24);
+
+      expect(initial.children[1]!.y).toBeGreaterThan(0);
+
+      first.firstChild!.nodeValue = 'short';
+      const updated = engine.layout(body, 10, 24);
+
+      expect(updated.children[0]!.height).toBeLessThan(initial.children[0]!.height);
+      expect(updated.children[1]!.y).toBe(updated.children[0]!.height);
+    });
+
     it('lays out children horizontally when flex-direction is row', () => {
       const {document, styleEngine} = createEnv();
       const body = document.body;
@@ -265,7 +291,7 @@ describe('LayoutEngine', () => {
   });
 
   describe('incremental re-layout', () => {
-    it('reuses cached layout boxes for clean subtrees', () => {
+    it('re-lays out clean subtrees without retaining stale coordinates', () => {
       const {document, styleEngine} = createEnv();
       const body = document.body;
       const c1 = document.createElement('div');
@@ -295,8 +321,9 @@ describe('LayoutEngine', () => {
 
       const box2 = engine.layout(body, 80, 24);
 
-      // First child should be reused (same object reference)
-      expect(box2.children[0]).toBe(firstChild1);
+      // First child keeps the same layout shape without stale absolute coordinates
+      expect(box2.children[0]).toStrictEqual(firstChild1);
+      expect(box2.children[0]).not.toBe(firstChild1);
       // Second child should be re-laid out with new height
       expect(box2.children[1]!.height).toBe(7);
       expect(box2.children[1]).not.toBe(secondChild1);

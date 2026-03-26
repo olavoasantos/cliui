@@ -631,6 +631,34 @@ describe('StyleEngine', () => {
 
       expect(engine.getDirtyElements().has(div)).toBe(true);
     });
+
+    it('marks the parent layout-dirty when text content changes', () => {
+      const {document, engine} = createEnv();
+      const div = document.createElement('div');
+      const text = document.createTextNode('alpha');
+      div.appendChild(text);
+      document.body.appendChild(div);
+
+      engine.clearDirty();
+      text.data = 'beta gamma';
+
+      expect(engine.getLayoutDirtyElements().has(div)).toBe(true);
+    });
+
+    it('marks the parent layout-dirty when children are inserted or removed', () => {
+      const {document, engine} = createEnv();
+      const parent = document.createElement('div');
+      document.body.appendChild(parent);
+      const child = document.createTextNode('hello');
+
+      engine.clearDirty();
+      parent.appendChild(child);
+      expect(engine.getLayoutDirtyElements().has(parent)).toBe(true);
+
+      engine.clearDirty();
+      parent.removeChild(child);
+      expect(engine.getLayoutDirtyElements().has(parent)).toBe(true);
+    });
   });
 
   describe('detach', () => {

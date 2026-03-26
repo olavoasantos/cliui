@@ -6,28 +6,39 @@ Run from the repository root:
 pnpm --dir examples/basic start
 ```
 
-This example is a compact playground for the features implemented through Milestones 1, 2, and 3.
+The start flow rebuilds the library first, then launches the example with `node --import tsx`, so it runs against the latest local implementation without relying on stale build output.
+
+This example is a compact milestone 4 dashboard meant to fit in common terminal sizes while still exercising the new rendering features. The interaction feedback is intentionally condensed into a few status lines so the overlay and scroll demos have more room.
 
 ## What to test
 
-- `Tab` / `Shift+Tab` cycles focus between **Alpha**, **Beta**, and **Paste**
-- typing on a focused control updates the key line
-- pasting while **Paste** is focused updates the paste line
-- clicking controls updates the mouse line
-- using the mouse wheel over a control updates the counter-backed mouse line
-- changing the observed text triggers `MutationObserver`
-- resizing the terminal updates the resize line
-- switching terminal focus away and back updates the window line
+### Capability-driven rendering
+
+- the capability line should render with colors immediately on startup
+- if your terminal supports synchronized output and advanced color, the renderer now applies those settings without requiring a resize
+
+### Colors + border styles
+
+- the red / green / blue / pink swatches exercise terminal color adaptation
+- the `block` and `half-block` tiles exercise the two new built-in border styles
+
+### Absolute positioning + z-index
+
+- click the overlapping `low`, `mid`, and `top` cards
+- in overlap regions, the visually topmost card should win hit-testing
+- the overlay status line reports which layer received the click
+
+### Overflow scroll
+
+- focus the log pane with `Tab`
+- use the mouse wheel over it
+- the log viewport should clip and scroll its content
+- paste while the log pane is focused to verify paste routing
+
+### General interaction
+
+- `Tab` / `Shift+Tab` cycles focus through the stage, layered cards, and log pane
+- typing updates the key line
+- resizing updates the resize line
+- changing terminal app focus updates the window line
 - press `q` to quit
-
-## Suggested walkthrough
-
-1. Start the example.
-2. Press `Tab` a few times.
-3. Type a few keys.
-4. Focus **Paste** and paste text.
-5. Click the controls with the mouse.
-6. Use the mouse wheel over any control.
-7. Resize the terminal window.
-8. Focus another app/window and come back.
-9. Press `q` to quit.

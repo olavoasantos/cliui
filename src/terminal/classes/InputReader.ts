@@ -140,6 +140,10 @@ export class InputReader {
         return null;
       }
 
+      if (csiEvent === null) {
+        return this.pending.length > 0 ? this.readNextEvent() : null;
+      }
+
       return csiEvent;
     }
 
@@ -168,6 +172,12 @@ export class InputReader {
 
     if (focusEvent !== null) {
       return focusEvent;
+    }
+
+    const modeResponse = this.readModeResponseSequence();
+
+    if (modeResponse !== false) {
+      return modeResponse;
     }
 
     const match = this.pending.match(/^\u001B\[([0-9;]*)([~A-Za-z])?/);
@@ -257,6 +267,22 @@ export class InputReader {
       this.pending = this.pending.slice(3);
       return {type: 'focus', focus: 'out'};
     }
+
+    return null;
+  }
+
+  private readModeResponseSequence(): null | undefined | false {
+    if (!this.pending.startsWith(`${ESCAPE}[?`)) {
+      return false;
+    }
+
+    const match = this.pending.match(/^\u001B\[\?[0-9;]+\$y/);
+
+    if (match === null) {
+      return undefined;
+    }
+
+    this.pending = this.pending.slice(match[0].length);
 
     return null;
   }

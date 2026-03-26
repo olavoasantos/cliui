@@ -116,4 +116,25 @@ describe('Renderer', () => {
 
     expect(output).toBe('\u001B[1;1HA\u001B[1;3HB');
   });
+
+  it('preserves the previous frame when capabilities are unchanged', () => {
+    const renderer = new Renderer(20, 8);
+
+    renderer.setSynchronizedOutputEnabled(false);
+    renderer.setColorProfile('truecolor');
+    renderer.render([
+      createBox({y: 5, contentY: 5, textLines: ['Focus: body']}),
+      createBox({y: 6, contentY: 6, textLines: ['Observed: ready']}),
+    ]);
+
+    renderer.setSynchronizedOutputEnabled(false);
+    renderer.setColorProfile('truecolor');
+    const output = renderer.render([
+      createBox({y: 4, contentY: 4, textLines: ['Focus: stage']}),
+      createBox({y: 5, contentY: 5, textLines: ['Observed: tab']}),
+    ]);
+
+    expect(output).toContain('\u001B[7;1H');
+    expect(output).toMatch(/\u001B\[7;1H +/u);
+  });
 });

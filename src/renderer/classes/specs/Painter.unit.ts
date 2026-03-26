@@ -271,6 +271,44 @@ describe('Painter', () => {
 
       expect(buffer.get(2, 1)?.bg).toEqual({r: 255, g: 255, b: 0});
     });
+
+    it('overwrites lower-z border glyphs when a higher-z background overlaps them', () => {
+      const buffer = new CellBuffer(8, 5);
+      const lower = createBox({
+        x: 1,
+        y: 1,
+        width: 5,
+        height: 3,
+        contentX: 2,
+        contentY: 2,
+        contentWidth: 3,
+        contentHeight: 1,
+        computedStyle: style({
+          'background-color': '#001122',
+          'border-style': 'single',
+          'border-color': '#00ff00',
+        }),
+        zIndex: 1,
+      });
+      const higher = createBox({
+        x: 3,
+        y: 2,
+        width: 3,
+        height: 2,
+        contentX: 3,
+        contentY: 2,
+        contentWidth: 3,
+        contentHeight: 2,
+        computedStyle: style({'background-color': '#ff00ff'}),
+        zIndex: 2,
+      });
+
+      painter.paint([lower, higher], buffer);
+
+      expect(buffer.get(3, 3)?.char).toBe(' ');
+      expect(buffer.get(3, 3)?.bg).toEqual({r: 255, g: 0, b: 255});
+      expect(buffer.get(3, 3)?.fg).toBeNull();
+    });
   });
 
   describe('text painting', () => {
