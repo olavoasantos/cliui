@@ -31,6 +31,12 @@ export default defineConfig({
   plugins: [
     dts({
       entryRoot: 'src',
+      beforeWriteFile: (filePath, content) => {
+        return {
+          filePath: filePath.replace('/dist/src/', '/dist/'),
+          content,
+        };
+      },
       exclude: [
         '**/specs/**',
         'dist/**',
