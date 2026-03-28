@@ -4,11 +4,15 @@ import {Event, Window} from '../dom';
 import {selfAndDescendants} from '../dom/utilities/selfAndDescendants';
 import {LayoutEngine} from '../layout';
 import {Renderer} from '../renderer';
+import {CaretManager} from '../terminal/classes/CaretManager';
+import {handleCaretKeyDown} from '../terminal/classes/handleCaretKeyDown';
 import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
 
-import type {Document} from '../dom';
+import type {Document, Element} from '../dom';
+import type {KeyboardEvent} from '../dom/classes/KeyboardEvent';
 import type {TerminalFrameAware} from '../types/TerminalFrameAware';
 import type {TerminalOptions} from '../types';
+import type {Editable} from '../terminal/types/Editable';
 import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
 
 /**
@@ -56,6 +60,7 @@ export class Terminal {
   private readonly terminalManager: TerminalManager;
   private readonly inputReader: InputReader;
   private readonly eventDispatcher: EventDispatcher;
+  private readonly caretManager = new CaretManager();
   private readonly boundResizeListener = (): void => {
     this.handleResize();
   };
@@ -93,6 +98,70 @@ export class Terminal {
     });
     this.inputReader = new InputReader(this.input);
     this.eventDispatcher = new EventDispatcher(this.document);
+
+    this.wireCaretListeners();
+  }
+
+  /**
+   * Wires document-level listeners so the caret system automatically
+   * creates/removes carets on focus transitions and handles editing keys.
+   */
+  private wireCaretListeners(): void {
+    this.document.body.addEventListener('focusin', ((event: Event) => {
+      const target = event.target as Element | null;
+
+      if (target && this.isEditable(target)) {
+        const editable = target as unknown as Editable;
+        const caret = this.caretManager.createCaret(editable);
+
+        if (
+          'setCaret' in target &&
+          typeof (target as Record<string, unknown>).setCaret === 'function'
+        ) {
+          (target as unknown as {setCaret(c: unknown): void}).setCaret(caret);
+        }
+      }
+    }) as EventListener);
+
+    this.document.body.addEventListener('focusout', ((event: Event) => {
+      const target = event.target as Element | null;
+
+      if (target && this.isEditable(target)) {
+        for (const caret of this.caretManager.getCarets()) {
+          if (caret.target.getElement() === target) {
+            this.caretManager.removeCaret(caret);
+            break;
+          }
+        }
+
+        if (
+          'setCaret' in target &&
+          typeof (target as Record<string, unknown>).setCaret === 'function'
+        ) {
+          (target as unknown as {setCaret(c: unknown): void}).setCaret(null);
+        }
+      }
+    }) as EventListener);
+
+    this.document.body.addEventListener('keydown', ((event: Event) => {
+      for (const caret of this.caretManager.getCarets()) {
+        if (caret.target.getElement() === this.document.activeElement) {
+          if (handleCaretKeyDown(caret, event as KeyboardEvent)) {
+            return;
+          }
+        }
+      }
+    }) as EventListener);
+  }
+
+  /**
+   * Checks whether a DOM element implements the `Editable` interface.
+   */
+  private isEditable(element: Element): boolean {
+    return (
+      typeof (element as unknown as Partial<Editable>).getGraphemes === 'function' &&
+      typeof (element as unknown as Partial<Editable>).getCursorPosition === 'function'
+    );
   }
 
   /**
@@ -161,8 +230,10 @@ export class Terminal {
   private renderFrame(): void {
     const columns = this.getColumns();
     const rows = this.getRows();
+    const now = Date.now();
 
-    this.advanceFrameAwareNodes(Date.now());
+    this.advanceFrameAwareNodes(now);
+    this.caretManager.tick(now);
 
     if (columns !== this.renderer.cols || rows !== this.renderer.rows) {
       this.renderer.resize(columns, rows);
@@ -181,7 +252,9 @@ export class Terminal {
 
     this.renderer.setSynchronizedOutputEnabled(capabilities.synchronizedOutput);
     this.renderer.setColorProfile(capabilities.colorProfile);
-    const output = this.renderer.render(layout);
+
+    const caretOverlays = this.caretManager.getOverlays(layout);
+    const output = this.renderer.render(layout, caretOverlays);
 
     if (output.length > 0) {
       this.output.write(output);

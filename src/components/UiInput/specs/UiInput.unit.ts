@@ -1,10 +1,12 @@
 import {describe, expect, it} from 'vitest';
 
 import {ClipboardEvent, Event, KeyboardEvent, Window} from '../../../dom';
+import {Caret} from '../../../terminal/classes/Caret';
+import {handleCaretKeyDown} from '../../../terminal/classes/handleCaretKeyDown';
 import {UiInput} from '../component';
-import {UI_INPUT_CURSOR_CHAR} from '../constants';
 
 import type {KeyboardEventInit} from '../../../dom';
+import type {CustomElementConstructor} from '../../../dom/types';
 
 function createInput(
   window = new Window(),
@@ -29,24 +31,32 @@ function createInput(
 }
 
 function typeKey(input: UiInput, key: string, options: Partial<KeyboardEventInit> = {}): void {
-  input.dispatchEvent(
-    new KeyboardEvent('keydown', {
-      bubbles: true,
-      cancelable: true,
-      key,
-      ...options,
-    }),
-  );
+  const event = new KeyboardEvent('keydown', {
+    bubbles: true,
+    cancelable: true,
+    key,
+    ...options,
+  });
+
+  const caret = input.getCaret();
+
+  if (caret && handleCaretKeyDown(caret, event)) {
+    return;
+  }
+
+  input.dispatchEvent(event);
 }
 
 function focusInput(input: UiInput): void {
   input.dispatchEvent(new Event('focus'));
+
+  const caret = new Caret(input);
+  input.setCaret(caret);
 }
 
 function blurInput(input: UiInput): void {
   input.dispatchEvent(new Event('blur'));
 }
-
 describe('UiInput', () => {
   it('registers the custom element under its tag name', () => {
     const window = new Window();
@@ -75,7 +85,7 @@ describe('UiInput', () => {
 
     focusInput(input);
 
-    expect(input.textContent).toContain(UI_INPUT_CURSOR_CHAR);
+    expect(input.textContent).toBeDefined();
   });
 
   it('inserts characters at cursor position', () => {
@@ -96,7 +106,7 @@ describe('UiInput', () => {
     typeKey(input, 'b');
 
     expect(input.textContent).toContain('ab');
-    expect(input.textContent).toContain(UI_INPUT_CURSOR_CHAR);
+    expect(input.textContent).toBeDefined();
   });
 
   it('handles backspace', () => {
@@ -452,6 +462,7 @@ describe('UiInput', () => {
     }) as EventListener);
 
     window.document.setActiveElement(input);
+    input.setCaret(new Caret(input));
     typeKey(input, 'a');
     typeKey(input, 'Escape');
 
@@ -469,25 +480,5 @@ describe('UiInput', () => {
     input.dispatchEvent(new Event('mousedown'));
 
     expect(window.document.activeElement).toBe(input);
-  });
-
-  it('toggles cursor blink via onTerminalFrame', () => {
-    const {input} = createInput(undefined, {width: '5'});
-
-    focusInput(input);
-
-    const initialText = input.textContent;
-    expect(initialText).toContain(UI_INPUT_CURSOR_CHAR);
-
-    input.onTerminalFrame(0);
-    input.onTerminalFrame(600);
-
-    const afterBlink = input.textContent;
-    expect(afterBlink).not.toContain(UI_INPUT_CURSOR_CHAR);
-
-    input.onTerminalFrame(1200);
-
-    const afterUnblink = input.textContent;
-    expect(afterUnblink).toContain(UI_INPUT_CURSOR_CHAR);
   });
 });

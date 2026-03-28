@@ -1,5 +1,6 @@
 import type {LayoutBox} from '../../layout/types';
 import type {TerminalColorProfile} from '../../terminal/types';
+import type {CaretOverlay} from '../../terminal/types/CaretOverlay';
 import {ANSIWriter} from './ANSIWriter';
 import {CellBuffer} from './CellBuffer';
 import {Differ} from './Differ';
@@ -67,11 +68,16 @@ export class Renderer {
    * Renders one frame from layout boxes and returns the ANSI output.
    *
    * @param boxes - Root layout boxes to paint for this frame.
+   * @param caretOverlays - Optional caret overlays to apply after painting.
    * @returns ANSI escape sequences for the changed cells only.
    */
-  render(boxes: LayoutBox | LayoutBox[]): string {
+  render(boxes: LayoutBox | LayoutBox[], caretOverlays?: CaretOverlay[]): string {
     this.currentBuffer.clear();
     this.painter.paint(boxes, this.currentBuffer);
+
+    if (caretOverlays) {
+      this.applyCaretOverlays(caretOverlays);
+    }
 
     const changedRegions = this.differ.diff(this.previousBuffer, this.currentBuffer);
     const output = this.ansiWriter.write(changedRegions);
@@ -136,5 +142,42 @@ export class Renderer {
 
     this.previousBuffer = this.currentBuffer;
     this.currentBuffer = previousBuffer;
+  }
+
+  /**
+   * Applies caret overlays to the current cell buffer by inverting the
+   * foreground and background colors at the cursor position.
+   */
+  private applyCaretOverlays(overlays: CaretOverlay[]): void {
+    for (const overlay of overlays) {
+      if (overlay.cursorVisible) {
+        const cell = this.currentBuffer.get(overlay.cursorX, overlay.cursorY);
+
+        if (cell) {
+          const fg = cell.fg;
+          const bg = cell.bg;
+
+          this.currentBuffer.set(overlay.cursorX, overlay.cursorY, {
+            ...cell,
+            fg: bg ?? {r: 255, g: 255, b: 255},
+            bg: fg ?? {r: 0, g: 0, b: 0},
+          });
+        }
+      }
+
+      for (const range of overlay.selection) {
+        for (let x = range.x; x < range.x + range.width; x++) {
+          const cell = this.currentBuffer.get(x, range.y);
+
+          if (cell) {
+            this.currentBuffer.set(x, range.y, {
+              ...cell,
+              fg: cell.bg ?? {r: 255, g: 255, b: 255},
+              bg: cell.fg ?? {r: 0, g: 0, b: 0},
+            });
+          }
+        }
+      }
+    }
   }
 }

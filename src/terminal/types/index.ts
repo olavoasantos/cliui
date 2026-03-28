@@ -217,3 +217,6 @@ export interface TerminalManagerOptions {
   /** Whether to enable mouse reporting mode 1006. */
   mouse?: boolean;
 }
+
+export type {Editable} from './Editable';
+export type {CaretOverlay, CaretSelectionRange} from './CaretOverlay';
