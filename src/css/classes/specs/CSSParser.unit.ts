@@ -8,14 +8,14 @@ describe('CSSParser', () => {
 
   describe('basic parsing', () => {
     it('parses a single rule with one declaration', () => {
-      const rules = parser.parse('div { color: red; }');
+      const {rules} = parser.parse('div { color: red; }');
 
       expect(rules).toHaveLength(1);
       expect(rules[0]!.declarations).toEqual([{property: 'color', value: 'red'}]);
     });
 
     it('parses a single rule with multiple declarations', () => {
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         div {
           color: red;
           padding: 1 2;
@@ -32,7 +32,7 @@ describe('CSSParser', () => {
     });
 
     it('parses multiple rules', () => {
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         div { color: red; }
         span { font-weight: bold; }
       `);
@@ -43,7 +43,7 @@ describe('CSSParser', () => {
     });
 
     it('parses declarations without trailing semicolons', () => {
-      const rules = parser.parse('div { color: red }');
+      const {rules} = parser.parse('div { color: red }');
 
       expect(rules).toHaveLength(1);
       expect(rules[0]!.declarations).toEqual([{property: 'color', value: 'red'}]);
@@ -52,7 +52,7 @@ describe('CSSParser', () => {
 
   describe('selector parsing', () => {
     it('parses element selectors', () => {
-      const rules = parser.parse('div { color: red; }');
+      const {rules} = parser.parse('div { color: red; }');
 
       expect(rules[0]!.selectors).toHaveLength(1);
       const parts = rules[0]!.selectors[0]!;
@@ -62,7 +62,7 @@ describe('CSSParser', () => {
     });
 
     it('parses id selectors', () => {
-      const rules = parser.parse('#main { color: red; }');
+      const {rules} = parser.parse('#main { color: red; }');
 
       const parts = rules[0]!.selectors[0]!;
       expect(parts[0]!.matchers[0]!.type).toBe(SelectorMatcherType.Id);
@@ -70,7 +70,7 @@ describe('CSSParser', () => {
     });
 
     it('parses class selectors', () => {
-      const rules = parser.parse('.container { padding: 1; }');
+      const {rules} = parser.parse('.container { padding: 1; }');
 
       const parts = rules[0]!.selectors[0]!;
       expect(parts[0]!.matchers[0]!.type).toBe(SelectorMatcherType.Class);
@@ -78,7 +78,7 @@ describe('CSSParser', () => {
     });
 
     it('parses attribute selectors', () => {
-      const rules = parser.parse('[data-active] { color: blue; }');
+      const {rules} = parser.parse('[data-active] { color: blue; }');
 
       const parts = rules[0]!.selectors[0]!;
       expect(parts[0]!.matchers[0]!.type).toBe(SelectorMatcherType.Attribute);
@@ -86,7 +86,7 @@ describe('CSSParser', () => {
     });
 
     it('parses compound selectors', () => {
-      const rules = parser.parse('div.container#main { color: red; }');
+      const {rules} = parser.parse('div.container#main { color: red; }');
 
       const parts = rules[0]!.selectors[0]!;
       expect(parts).toHaveLength(1);
@@ -97,7 +97,7 @@ describe('CSSParser', () => {
     });
 
     it('parses descendant combinators', () => {
-      const rules = parser.parse('div span { color: red; }');
+      const {rules} = parser.parse('div span { color: red; }');
 
       const parts = rules[0]!.selectors[0]!;
       expect(parts).toHaveLength(2);
@@ -109,20 +109,20 @@ describe('CSSParser', () => {
     });
 
     it('parses child combinators', () => {
-      const rules = parser.parse('div > span { color: red; }');
+      const {rules} = parser.parse('div > span { color: red; }');
 
       const parts = rules[0]!.selectors[0]!;
       expect(parts).toHaveLength(2);
     });
 
     it('parses comma-separated selector lists', () => {
-      const rules = parser.parse('div, span, .box { color: red; }');
+      const {rules} = parser.parse('div, span, .box { color: red; }');
 
       expect(rules[0]!.selectors).toHaveLength(3);
     });
 
     it('parses complex selectors with multiple combinators', () => {
-      const rules = parser.parse('.parent > .child + .sibling { color: red; }');
+      const {rules} = parser.parse('.parent > .child + .sibling { color: red; }');
 
       const parts = rules[0]!.selectors[0]!;
       expect(parts.length).toBeGreaterThanOrEqual(3);
@@ -131,25 +131,25 @@ describe('CSSParser', () => {
 
   describe('declaration values', () => {
     it('preserves hex color values', () => {
-      const rules = parser.parse('div { color: #7c3aed; }');
+      const {rules} = parser.parse('div { color: #7c3aed; }');
 
       expect(rules[0]!.declarations[0]!.value).toBe('#7c3aed');
     });
 
     it('preserves rgb() function values', () => {
-      const rules = parser.parse('div { color: rgb(124, 58, 237); }');
+      const {rules} = parser.parse('div { color: rgb(124, 58, 237); }');
 
       expect(rules[0]!.declarations[0]!.value).toBe('rgb(124, 58, 237)');
     });
 
     it('preserves multi-value shorthand properties', () => {
-      const rules = parser.parse('div { padding: 1 2 3 4; }');
+      const {rules} = parser.parse('div { padding: 1 2 3 4; }');
 
       expect(rules[0]!.declarations[0]!.value).toBe('1 2 3 4');
     });
 
     it('trims property names and values', () => {
-      const rules = parser.parse('div {  color :  red  ; }');
+      const {rules} = parser.parse('div {  color :  red  ; }');
 
       expect(rules[0]!.declarations[0]!.property).toBe('color');
       expect(rules[0]!.declarations[0]!.value).toBe('red');
@@ -158,7 +158,7 @@ describe('CSSParser', () => {
 
   describe('comments', () => {
     it('skips block comments between rules', () => {
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         /* This is a comment */
         div { color: red; }
       `);
@@ -167,7 +167,7 @@ describe('CSSParser', () => {
     });
 
     it('skips comments inside declaration blocks', () => {
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         div {
           color: red;
           /* This is a comment */
@@ -180,7 +180,7 @@ describe('CSSParser', () => {
     });
 
     it('skips comments between rules', () => {
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         div { color: red; }
         /* separator */
         span { color: blue; }
@@ -191,38 +191,38 @@ describe('CSSParser', () => {
   });
 
   describe('edge cases and malformed input', () => {
-    it('returns empty array for empty string', () => {
-      expect(parser.parse('')).toEqual([]);
+    it('returns empty result for empty string', () => {
+      expect(parser.parse('')).toEqual({rules: [], atRules: []});
     });
 
-    it('returns empty array for whitespace only', () => {
-      expect(parser.parse('   \n\t  ')).toEqual([]);
+    it('returns empty result for whitespace only', () => {
+      expect(parser.parse('   \n\t  ')).toEqual({rules: [], atRules: []});
     });
 
-    it('returns empty array for comments only', () => {
-      expect(parser.parse('/* nothing here */')).toEqual([]);
+    it('returns empty result for comments only', () => {
+      expect(parser.parse('/* nothing here */')).toEqual({rules: [], atRules: []});
     });
 
     it('handles missing closing brace gracefully', () => {
-      const rules = parser.parse('div { color: red;');
+      const {rules} = parser.parse('div { color: red;');
 
       expect(rules).toEqual([]);
     });
 
     it('handles empty declaration blocks', () => {
-      const rules = parser.parse('div { }');
+      const {rules} = parser.parse('div { }');
 
       expect(rules).toEqual([]);
     });
 
     it('handles empty selector text', () => {
-      const rules = parser.parse('{ color: red; }');
+      const {rules} = parser.parse('{ color: red; }');
 
       expect(rules).toEqual([]);
     });
 
     it('skips declarations missing colons', () => {
-      const rules = parser.parse('div { color red; font-weight: bold; }');
+      const {rules} = parser.parse('div { color red; font-weight: bold; }');
 
       expect(rules).toHaveLength(1);
       expect(rules[0]!.declarations).toHaveLength(1);
@@ -230,7 +230,7 @@ describe('CSSParser', () => {
     });
 
     it('handles declarations without values', () => {
-      const rules = parser.parse('div { color: ; font-weight: bold; }');
+      const {rules} = parser.parse('div { color: ; font-weight: bold; }');
 
       expect(rules).toHaveLength(1);
       expect(rules[0]!.declarations).toHaveLength(1);
@@ -238,14 +238,14 @@ describe('CSSParser', () => {
     });
 
     it('handles consecutive semicolons', () => {
-      const rules = parser.parse('div { color: red;; font-weight: bold; }');
+      const {rules} = parser.parse('div { color: red;; font-weight: bold; }');
 
       expect(rules).toHaveLength(1);
       expect(rules[0]!.declarations).toHaveLength(2);
     });
 
     it('handles unclosed comment', () => {
-      const rules = parser.parse('/* unclosed');
+      const {rules} = parser.parse('/* unclosed');
 
       expect(rules).toEqual([]);
     });
@@ -253,7 +253,7 @@ describe('CSSParser', () => {
 
   describe('real-world CSS', () => {
     it('parses a typical terminal-dom stylesheet', () => {
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         .container {
           display: flex;
           flex-direction: column;
@@ -286,7 +286,7 @@ describe('CSSParser', () => {
     });
 
     it('parses selector lists with whitespace variations', () => {
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         h1,
         h2,
         h3 {
@@ -296,6 +296,71 @@ describe('CSSParser', () => {
 
       expect(rules).toHaveLength(1);
       expect(rules[0]!.selectors).toHaveLength(3);
+    });
+  });
+
+  describe('at-rules', () => {
+    it('parses a @border-style at-rule into atRules', () => {
+      const result = parser.parse(`
+        @border-style stars {
+          top: "★";
+          bottom: "★";
+          left: "☆";
+          right: "☆";
+          top-left: "✦";
+          top-right: "✦";
+          bottom-left: "✦";
+          bottom-right: "✦";
+        }
+      `);
+
+      expect(result.rules).toHaveLength(0);
+      expect(result.atRules).toHaveLength(1);
+      expect(result.atRules[0]!.identifier).toBe('border-style');
+      expect(result.atRules[0]!.prelude).toBe('stars');
+      expect(result.atRules[0]!.declarations).toHaveLength(8);
+      expect(result.atRules[0]!.declarations[0]).toEqual({property: 'top', value: '"★"'});
+    });
+
+    it('parses at-rules alongside normal rules', () => {
+      const result = parser.parse(`
+        .box { color: red; }
+
+        @border-style custom {
+          top: "=";
+          bottom: "=";
+        }
+
+        .other { padding: 1; }
+      `);
+
+      expect(result.rules).toHaveLength(2);
+      expect(result.atRules).toHaveLength(1);
+      expect(result.atRules[0]!.identifier).toBe('border-style');
+      expect(result.atRules[0]!.prelude).toBe('custom');
+    });
+
+    it('parses at-rules with no prelude', () => {
+      const result = parser.parse(`
+        @font-face {
+          font-family: "MyFont";
+        }
+      `);
+
+      expect(result.atRules).toHaveLength(1);
+      expect(result.atRules[0]!.identifier).toBe('font-face');
+      expect(result.atRules[0]!.prelude).toBe('');
+    });
+
+    it('parses at-rules with empty body', () => {
+      const result = parser.parse(`
+        @border-style empty {}
+      `);
+
+      expect(result.atRules).toHaveLength(1);
+      expect(result.atRules[0]!.identifier).toBe('border-style');
+      expect(result.atRules[0]!.prelude).toBe('empty');
+      expect(result.atRules[0]!.declarations).toHaveLength(0);
     });
   });
 });

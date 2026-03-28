@@ -5,6 +5,8 @@ import {CellBuffer} from './CellBuffer';
 import {Differ} from './Differ';
 import {Painter} from './Painter';
 
+import type {BorderStyleRegistry} from './BorderStyleRegistry';
+
 /**
  * Coordinates painting, diffing, and ANSI serialization for each frame.
  *
@@ -32,6 +34,11 @@ export class Renderer {
   private ansiWriter: ANSIWriter;
   private synchronizedOutputEnabled = false;
   private colorProfile: TerminalColorProfile = 'truecolor';
+
+  /** The border style registry shared with the style engine. */
+  get borderStyles(): BorderStyleRegistry {
+    return this.painter.borderStyles;
+  }
 
   /**
    * Creates a renderer sized to the given terminal dimensions.

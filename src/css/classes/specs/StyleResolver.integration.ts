@@ -13,7 +13,7 @@ describe('StyleResolver integration', () => {
     const matcher = new SelectorMatcher();
     const resolver = new StyleResolver();
 
-    const rules = parser.parse(`
+    const {rules} = parser.parse(`
       .panel {
         color: red;
         text-align: left;

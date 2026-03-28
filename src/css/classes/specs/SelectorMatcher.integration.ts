@@ -10,7 +10,7 @@ describe('SelectorMatcher integration', () => {
     const matcher = new SelectorMatcher();
     const document = new Window().document;
 
-    const rules = parser.parse(`
+    const {rules} = parser.parse(`
       .app .panel > .title.active {
         color: red;
       }

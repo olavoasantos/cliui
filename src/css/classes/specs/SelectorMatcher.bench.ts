@@ -4,10 +4,12 @@ import {Window} from '../../../dom/classes/Window';
 import {CSSParser} from '../CSSParser';
 import {SelectorMatcher} from '../SelectorMatcher';
 
+import type {CSSRule} from '../../types';
+
 import type {Element} from '../../../dom/classes/Element';
 
 function createDeepTreeScenario(depth: number): {
-  rules: ReturnType<CSSParser['parse']>;
+  rules: CSSRule[];
   target: Element;
 } {
   const document = new Window().document;
@@ -31,7 +33,7 @@ function createDeepTreeScenario(depth: number): {
       .level .target { color: red; }
       .level-0 .level-1 .level-2 .level-3 .target.active[data-state="open"] { font-weight: bold; }
       section > .target { text-align: center; }
-    `),
+    `).rules,
     target,
   };
 }
@@ -40,7 +42,7 @@ function createWideTreeScenario(
   rowCount: number,
   columnsPerRow: number,
 ): {
-  rules: ReturnType<CSSParser['parse']>;
+  rules: CSSRule[];
   target: Element;
 } {
   const document = new Window().document;
@@ -72,7 +74,7 @@ function createWideTreeScenario(
       .row .cell { color: #93c5fd; }
       .row-11 > .target.highlighted { background-color: #111827; }
       [data-kind="summary"] { font-weight: bold; }
-    `),
+    `).rules,
     target,
   };
 }

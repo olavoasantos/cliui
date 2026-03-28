@@ -18,7 +18,7 @@ describe('SelectorMatcher', () => {
       const doc = createDocument();
       const div = doc.createElement('div');
       doc.body.appendChild(div);
-      const rules = parser.parse('div { color: red; }');
+      const {rules} = parser.parse('div { color: red; }');
 
       const matched = matcher.match(rules, div);
 
@@ -30,7 +30,7 @@ describe('SelectorMatcher', () => {
       const doc = createDocument();
       const span = doc.createElement('span');
       doc.body.appendChild(span);
-      const rules = parser.parse('div { color: red; }');
+      const {rules} = parser.parse('div { color: red; }');
 
       const matched = matcher.match(rules, span);
 
@@ -44,7 +44,7 @@ describe('SelectorMatcher', () => {
       const div = doc.createElement('div');
       div.setAttribute('id', 'main');
       doc.body.appendChild(div);
-      const rules = parser.parse('#main { color: blue; }');
+      const {rules} = parser.parse('#main { color: blue; }');
 
       const matched = matcher.match(rules, div);
 
@@ -59,7 +59,7 @@ describe('SelectorMatcher', () => {
       const div = doc.createElement('div');
       div.setAttribute('class', 'container');
       doc.body.appendChild(div);
-      const rules = parser.parse('.container { padding: 1; }');
+      const {rules} = parser.parse('.container { padding: 1; }');
 
       const matched = matcher.match(rules, div);
 
@@ -72,7 +72,7 @@ describe('SelectorMatcher', () => {
       const div = doc.createElement('div');
       div.setAttribute('class', 'box active');
       doc.body.appendChild(div);
-      const rules = parser.parse('.active { color: green; }');
+      const {rules} = parser.parse('.active { color: green; }');
 
       const matched = matcher.match(rules, div);
 
@@ -86,7 +86,7 @@ describe('SelectorMatcher', () => {
       const div = doc.createElement('div');
       div.setAttribute('data-active', '');
       doc.body.appendChild(div);
-      const rules = parser.parse('[data-active] { color: blue; }');
+      const {rules} = parser.parse('[data-active] { color: blue; }');
 
       const matched = matcher.match(rules, div);
 
@@ -98,7 +98,7 @@ describe('SelectorMatcher', () => {
       const div = doc.createElement('div');
       div.setAttribute('data-type', 'panel');
       doc.body.appendChild(div);
-      const rules = parser.parse('[data-type="panel"] { color: red; }');
+      const {rules} = parser.parse('[data-type="panel"] { color: red; }');
 
       const matched = matcher.match(rules, div);
 
@@ -113,7 +113,7 @@ describe('SelectorMatcher', () => {
       const child = doc.createElement('span');
       parent.appendChild(child);
       doc.body.appendChild(parent);
-      const rules = parser.parse('div span { color: red; }');
+      const {rules} = parser.parse('div span { color: red; }');
 
       const matched = matcher.match(rules, child);
 
@@ -126,7 +126,7 @@ describe('SelectorMatcher', () => {
       const child = doc.createElement('span');
       parent.appendChild(child);
       doc.body.appendChild(parent);
-      const rules = parser.parse('div > span { color: red; }');
+      const {rules} = parser.parse('div > span { color: red; }');
 
       const matched = matcher.match(rules, child);
 
@@ -141,7 +141,7 @@ describe('SelectorMatcher', () => {
       grandparent.appendChild(parent);
       parent.appendChild(child);
       doc.body.appendChild(grandparent);
-      const rules = parser.parse('div > span { color: red; }');
+      const {rules} = parser.parse('div > span { color: red; }');
 
       const matched = matcher.match(rules, child);
 
@@ -157,7 +157,7 @@ describe('SelectorMatcher', () => {
       parent.appendChild(first);
       parent.appendChild(second);
       doc.body.appendChild(parent);
-      const rules = parser.parse('span + .second { color: red; }');
+      const {rules} = parser.parse('span + .second { color: red; }');
 
       const matched = matcher.match(rules, second);
 
@@ -173,7 +173,7 @@ describe('SelectorMatcher', () => {
       parent.appendChild(first);
       parent.appendChild(second);
       doc.body.appendChild(parent);
-      const rules = parser.parse('span ~ .second { color: red; }');
+      const {rules} = parser.parse('span ~ .second { color: red; }');
 
       const matched = matcher.match(rules, second);
 
@@ -189,7 +189,7 @@ describe('SelectorMatcher', () => {
       div.setAttribute('class', 'box');
       doc.body.appendChild(div);
 
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         .box { color: blue; }
         #main { color: red; }
       `);
@@ -208,7 +208,7 @@ describe('SelectorMatcher', () => {
       div.setAttribute('class', 'box');
       doc.body.appendChild(div);
 
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         div { color: blue; }
         .box { color: red; }
       `);
@@ -226,7 +226,7 @@ describe('SelectorMatcher', () => {
       div.setAttribute('class', 'a b');
       doc.body.appendChild(div);
 
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         .a { color: blue; }
         .b { color: red; }
       `);
@@ -246,7 +246,7 @@ describe('SelectorMatcher', () => {
       div.setAttribute('class', 'box');
       doc.body.appendChild(div);
 
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         div { color: blue; }
         .box { color: green; }
         #main { color: red; }
@@ -266,7 +266,7 @@ describe('SelectorMatcher', () => {
       const doc = createDocument();
       const span = doc.createElement('span');
       doc.body.appendChild(span);
-      const rules = parser.parse('div, span { color: red; }');
+      const {rules} = parser.parse('div, span { color: red; }');
 
       const matched = matcher.match(rules, span);
 
@@ -280,7 +280,7 @@ describe('SelectorMatcher', () => {
       doc.body.appendChild(div);
 
       // Both selectors match — should use the higher specificity (#main)
-      const rules = parser.parse('div, #main { color: red; }');
+      const {rules} = parser.parse('div, #main { color: red; }');
 
       const matched = matcher.match(rules, div);
 
@@ -295,7 +295,7 @@ describe('SelectorMatcher', () => {
       const div = doc.createElement('div');
       doc.body.appendChild(div);
 
-      const rules = parser.parse(`
+      const {rules} = parser.parse(`
         div {
           color: red;
           font-weight: bold;
@@ -319,7 +319,7 @@ describe('SelectorMatcher', () => {
       div.setAttribute('class', 'box');
       doc.body.appendChild(div);
 
-      const rules = parser.parse('.box { color: red; padding: 1; }');
+      const {rules} = parser.parse('.box { color: red; padding: 1; }');
 
       const matched = matcher.match(rules, div);
 
@@ -334,7 +334,7 @@ describe('SelectorMatcher', () => {
       const div = doc.createElement('div');
       doc.body.appendChild(div);
 
-      const rules = parser.parse('span { color: red; } .foo { padding: 1; }');
+      const {rules} = parser.parse('span { color: red; } .foo { padding: 1; }');
 
       const matched = matcher.match(rules, div);
 

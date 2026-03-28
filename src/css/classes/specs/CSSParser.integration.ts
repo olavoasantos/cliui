@@ -12,7 +12,7 @@ describe('CSSParser integration', () => {
     const resolver = new StyleResolver();
     const document = new Window().document;
 
-    const rules = parser.parse(`
+    const {rules} = parser.parse(`
       /* layout */
       .app, .shell {
         display: flex;

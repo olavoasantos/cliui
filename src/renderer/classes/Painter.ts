@@ -1,8 +1,8 @@
 import {cellWidth} from '../../layout/utilities/cellWidth';
-import {BORDER_CHARACTERS} from '../constants/borders';
 import {NAMED_COLORS} from '../constants/namedColors';
 import {PAINTER_SEGMENTER} from '../constants/segmenter';
 import type {Cell, RGBColor, UnderlineStyle} from '../types';
+import {BorderStyleRegistry} from './BorderStyleRegistry';
 import {CellBuffer} from './CellBuffer';
 
 import type {LayoutBox} from '../../layout/types';
@@ -17,6 +17,8 @@ import type {ClipRect} from '../types/ClipRect';
  * clipping in addition to the Phase 1 background, border, and text painting.
  */
 export class Painter {
+  /** Border style registry for resolving `border-style` values. */
+  readonly borderStyles = new BorderStyleRegistry();
   /**
    * Paints one or more layout boxes into the provided cell buffer.
    *
@@ -110,7 +112,7 @@ export class Painter {
     }
 
     const borderStyle = computedStyle.get('border-style') ?? 'single';
-    const characters = BORDER_CHARACTERS[borderStyle] ?? BORDER_CHARACTERS.single;
+    const characters = this.borderStyles.get(borderStyle);
     const borderColor = this.parseColor(computedStyle.get('border-color'));
     const borderCell: Cell = {
       ...textCell,

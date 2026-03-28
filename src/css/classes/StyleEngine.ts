@@ -12,7 +12,7 @@ import type {Document} from '../../dom/classes/Document';
 import type {Window} from '../../dom/classes/Window';
 import type {HTMLStyleElement} from '../../dom/classes/HTMLStyleElement';
 import type {Hooks} from '../../dom/types';
-import type {CSSRule, ComputedStyle} from '../types';
+import type {CSSAtRule, CSSRule, ComputedStyle} from '../types';
 
 /**
  * Orchestrates the full style computation pipeline:
@@ -35,6 +35,28 @@ export class StyleEngine {
   private parsedRules: CSSRule[] = [];
   private stylesheetsDirty = true;
   private previousHooks: Partial<Hooks> | null = null;
+  private readonly atRuleHandlers = new Map<string, Array<(rule: CSSAtRule) => void>>();
+
+  /**
+   * Registers a handler for a specific at-rule identifier.
+   *
+   * During stylesheet collection, each parsed `@identifier` at-rule is
+   * dispatched to all handlers registered for that identifier.  This
+   * keeps the style engine decoupled from specific at-rule semantics.
+   *
+   * @param identifier - The at-rule keyword without `@` (e.g. `"border-style"`).
+   * @param handler - Callback invoked with the parsed at-rule.
+   */
+  onAtRule(identifier: string, handler: (rule: CSSAtRule) => void): void {
+    let handlers = this.atRuleHandlers.get(identifier);
+
+    if (!handlers) {
+      handlers = [];
+      this.atRuleHandlers.set(identifier, handlers);
+    }
+
+    handlers.push(handler);
+  }
 
   /**
    * Attaches this engine to a document and wires the hooks bridge so that
@@ -221,8 +243,18 @@ export class StyleEngine {
     for (const styleEl of styleElements) {
       const cssText = (styleEl as HTMLStyleElement).sheet;
       if (cssText) {
-        const rules = this.parser.parse(cssText);
-        this.parsedRules.push(...rules);
+        const result = this.parser.parse(cssText);
+        this.parsedRules.push(...result.rules);
+
+          for (const atRule of result.atRules) {
+            const handlers = this.atRuleHandlers.get(atRule.identifier);
+
+            if (handlers) {
+              for (const handler of handlers) {
+                handler(atRule);
+              }
+            }
+          }
       }
     }
   }

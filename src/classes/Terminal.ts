@@ -80,6 +80,11 @@ export class Terminal {
 
     this.layoutEngine = new LayoutEngine(this.styleEngine);
     this.renderer = new Renderer(this.getColumns(), this.getRows());
+    this.styleEngine.onAtRule('border-style', (rule) => {
+      if (rule.prelude) {
+        this.renderer.borderStyles.register(rule);
+      }
+    });
     this.terminalManager = new TerminalManager({
       input: this.input,
       output: this.output,
