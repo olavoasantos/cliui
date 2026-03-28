@@ -2,10 +2,15 @@ import {defineConfig} from 'vite';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue({
+      style: {trim: false},
+    }),
+  ],
   build: {
     target: 'node22',
     outDir: 'dist',
+    cssCodeSplit: false,
     lib: {
       entry: 'src/app.ts',
       formats: ['es'],

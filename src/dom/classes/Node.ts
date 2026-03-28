@@ -52,6 +52,16 @@ export class Node extends EventTarget {
     return this[IS_CONNECTED];
   }
 
+  getRootNode(): Node {
+    let root: Node = this;
+
+    while (root[PARENT] != null) {
+      root = root[PARENT];
+    }
+
+    return root;
+  }
+
   isDefaultNamespace(namespace: string) {
     return namespace === NamespaceURI.XHTML;
   }

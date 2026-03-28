@@ -6,16 +6,16 @@ describe('TextLayout', () => {
   const layout = new TextLayout();
 
   describe('empty and whitespace-only text', () => {
-    it('returns a single empty line for an empty string', () => {
+    it('returns no lines for an empty string', () => {
       const lines = layout.measure('', 80);
 
-      expect(lines).toEqual([{text: '', width: 0}]);
+      expect(lines).toEqual([]);
     });
 
-    it('returns a single empty line for whitespace-only text', () => {
+    it('returns no lines for whitespace-only text', () => {
       const lines = layout.measure('   ', 80);
 
-      expect(lines).toEqual([{text: '', width: 0}]);
+      expect(lines).toEqual([]);
     });
   });
 

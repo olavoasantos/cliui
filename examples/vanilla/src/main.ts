@@ -1,4 +1,5 @@
 import {Terminal} from '@micra/terminal-dom';
+import css from './styles.css?inline';
 
 const terminal = new Terminal({
   altScreen: true,
@@ -7,31 +8,8 @@ const terminal = new Terminal({
   input: process.stdin,
 });
 
-const {document} = terminal;
-
 const style = document.createElement('style');
-style.textContent = `
-  .app {
-    padding: 1 2;
-    border-style: rounded;
-    border-color: #7c3aed;
-    color: #e5e7eb;
-    background-color: #1e1b2e;
-    display: flex;
-    flex-direction: column;
-    gap: 1;
-  }
-  .title {
-    color: #c4b5fd;
-    font-weight: bold;
-  }
-  .counter {
-    color: #86efac;
-  }
-  .hint {
-    color: #64748b;
-  }
-`;
+style.textContent = css;
 document.head.appendChild(style);
 
 const app = document.createElement('div');

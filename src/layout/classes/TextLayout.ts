@@ -22,7 +22,7 @@ export class TextLayout {
    */
   measure(text: string, availableWidth: number, options: TextLayoutOptions = {}): TextLine[] {
     if (text.length === 0) {
-      return [{text: '', width: 0}];
+      return [];
     }
 
     const effectiveWidth = Math.max(1, Math.floor(availableWidth));
@@ -49,7 +49,7 @@ export class TextLayout {
     const collapsed = this.collapseWhitespace(text);
 
     if (collapsed.length === 0) {
-      return [{text: '', width: 0}];
+      return [];
     }
 
     const words = collapsed.split(' ');
