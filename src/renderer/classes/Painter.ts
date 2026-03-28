@@ -1,9 +1,9 @@
 import {cellWidth} from '../../layout/utilities/cellWidth';
 import {PAINTER_SEGMENTER} from '../constants/segmenter';
-import {lerpColor} from '../utilities/lerpColor';
+import {createLinearGradient} from '../utilities/createLinearGradient';
 import {parseColor} from '../utilities/parseColor';
 import {parseGradientStops} from '../utilities/parseGradientStops';
-import type {Cell, RGBColor, UnderlineStyle} from '../types';
+import type {Cell, UnderlineStyle} from '../types';
 import {BorderStyleRegistry} from './BorderStyleRegistry';
 import {CellBuffer} from './CellBuffer';
 
@@ -116,8 +116,16 @@ export class Painter {
     const borderStyle = computedStyle.get('border-style') ?? 'single';
     const characters = this.borderStyles.get(borderStyle);
     const borderColorValue = computedStyle.get('border-color');
-    const gradientStops = borderColorValue ? parseGradientStops(borderColorValue) : null;
-    const solidColor = gradientStops ? null : parseColor(borderColorValue);
+    const gradient = borderColorValue ? parseGradientStops(borderColorValue) : null;
+    const sampler = gradient
+      ? createLinearGradient(
+          gradient.angleDeg,
+          gradient.stops,
+          metrics.outerWidth,
+          metrics.outerHeight,
+        )
+      : null;
+    const solidColor = gradient ? null : parseColor(borderColorValue);
     const borderCell: Cell = {
       ...textCell,
       char: ' ',
@@ -125,41 +133,30 @@ export class Painter {
     };
     const maxX = metrics.outerX + metrics.outerWidth - 1;
     const maxY = metrics.outerY + metrics.outerHeight - 1;
-    const hLen = Math.max(1, metrics.outerWidth);
-    const vLen = Math.max(1, metrics.outerHeight);
+
+    /** Resolve the foreground color for a border cell at local (lx, ly). */
+    const fgAt = sampler ? (lx: number, ly: number) => sampler(lx, ly) : () => solidColor;
 
     /* Corners */
     this.writeCell(
       buffer,
       metrics.outerX,
       metrics.outerY,
-      {
-        ...borderCell,
-        char: characters.topLeft,
-        fg: this.gradientColor(gradientStops, solidColor, 0, hLen),
-      },
+      {...borderCell, char: characters.topLeft, fg: fgAt(0, 0)},
       clipRect,
     );
     this.writeCell(
       buffer,
       maxX,
       metrics.outerY,
-      {
-        ...borderCell,
-        char: characters.topRight,
-        fg: this.gradientColor(gradientStops, solidColor, hLen - 1, hLen),
-      },
+      {...borderCell, char: characters.topRight, fg: fgAt(metrics.outerWidth - 1, 0)},
       clipRect,
     );
     this.writeCell(
       buffer,
       metrics.outerX,
       maxY,
-      {
-        ...borderCell,
-        char: characters.bottomLeft,
-        fg: this.gradientColor(gradientStops, solidColor, vLen - 1, vLen),
-      },
+      {...borderCell, char: characters.bottomLeft, fg: fgAt(0, metrics.outerHeight - 1)},
       clipRect,
     );
     this.writeCell(
@@ -169,64 +166,48 @@ export class Painter {
       {
         ...borderCell,
         char: characters.bottomRight,
-        fg: this.gradientColor(gradientStops, solidColor, hLen - 1, hLen),
+        fg: fgAt(metrics.outerWidth - 1, metrics.outerHeight - 1),
       },
       clipRect,
     );
 
-    /* Horizontal edges */
+    /* Top and bottom edges */
     for (let x = metrics.outerX + 1; x < maxX; x += 1) {
-      const i = x - metrics.outerX;
-      const fg = this.gradientColor(gradientStops, solidColor, i, hLen);
-
+      const lx = x - metrics.outerX;
       this.writeCell(
         buffer,
         x,
         metrics.outerY,
-        {...borderCell, char: characters.top, fg},
+        {...borderCell, char: characters.top, fg: fgAt(lx, 0)},
         clipRect,
       );
-      this.writeCell(buffer, x, maxY, {...borderCell, char: characters.bottom, fg}, clipRect);
+      this.writeCell(
+        buffer,
+        x,
+        maxY,
+        {...borderCell, char: characters.bottom, fg: fgAt(lx, metrics.outerHeight - 1)},
+        clipRect,
+      );
     }
 
-    /* Vertical edges */
+    /* Left and right edges */
     for (let y = metrics.outerY + 1; y < maxY; y += 1) {
-      const i = y - metrics.outerY;
-      const fg = this.gradientColor(gradientStops, solidColor, i, vLen);
-
+      const ly = y - metrics.outerY;
       this.writeCell(
         buffer,
         metrics.outerX,
         y,
-        {...borderCell, char: characters.left, fg},
+        {...borderCell, char: characters.left, fg: fgAt(0, ly)},
         clipRect,
       );
-      this.writeCell(buffer, maxX, y, {...borderCell, char: characters.right, fg}, clipRect);
+      this.writeCell(
+        buffer,
+        maxX,
+        y,
+        {...borderCell, char: characters.right, fg: fgAt(metrics.outerWidth - 1, ly)},
+        clipRect,
+      );
     }
-  }
-
-  /**
-   * Resolves the border color for a single cell position along an edge.
-   * When a gradient is active, interpolates between stops.  Otherwise
-   * returns the solid color.
-   */
-  private gradientColor(
-    stops: RGBColor[] | null,
-    solid: RGBColor | null,
-    index: number,
-    length: number,
-  ): RGBColor | null {
-    if (!stops || stops.length < 2) {
-      return solid;
-    }
-
-    const factor = length <= 1 ? 0 : index / (length - 1);
-    const segmentCount = stops.length - 1;
-    const scaledFactor = factor * segmentCount;
-    const segmentIndex = Math.min(Math.floor(scaledFactor), segmentCount - 1);
-    const segmentFactor = scaledFactor - segmentIndex;
-
-    return lerpColor(stops[segmentIndex]!, stops[segmentIndex + 1]!, segmentFactor);
   }
 
   private paintText(

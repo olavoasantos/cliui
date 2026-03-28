@@ -9,7 +9,7 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     sourcemap: true,
-    minify: 'terser',
+    // minify: 'terser',
     terserOptions: {
       format: {
         comments: false,

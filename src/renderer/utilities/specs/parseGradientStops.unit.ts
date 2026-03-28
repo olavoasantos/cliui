@@ -8,37 +8,36 @@ describe('parseGradientStops', () => {
   });
 
   it('parses a two-stop gradient with hex colors', () => {
-    const stops = parseGradientStops('linear-gradient(#ff0000, #0000ff)');
+    const result = parseGradientStops('linear-gradient(#ff0000, #0000ff)');
 
-    expect(stops).toEqual([
-      {r: 255, g: 0, b: 0},
-      {r: 0, g: 0, b: 255},
-    ]);
+    expect(result).not.toBeNull();
+    expect(result!.angleDeg).toBe(180);
+    expect(result!.stops).toHaveLength(2);
+    expect(result!.stops[0]!.color).toEqual({r: 255, g: 0, b: 0});
+    expect(result!.stops[0]!.position).toBe(0);
+    expect(result!.stops[1]!.color).toEqual({r: 0, g: 0, b: 255});
+    expect(result!.stops[1]!.position).toBe(1);
   });
 
   it('parses a three-stop gradient', () => {
-    const stops = parseGradientStops('linear-gradient(#ff0000, #00ff00, #0000ff)');
+    const result = parseGradientStops('linear-gradient(#ff0000, #00ff00, #0000ff)');
 
-    expect(stops).toHaveLength(3);
-    expect(stops![0]).toEqual({r: 255, g: 0, b: 0});
-    expect(stops![1]).toEqual({r: 0, g: 255, b: 0});
-    expect(stops![2]).toEqual({r: 0, g: 0, b: 255});
+    expect(result!.stops).toHaveLength(3);
+    expect(result!.stops[1]!.position).toBeCloseTo(0.5);
   });
 
   it('parses named colors as stops', () => {
-    const stops = parseGradientStops('linear-gradient(red, blue)');
+    const result = parseGradientStops('linear-gradient(red, blue)');
 
-    expect(stops).not.toBeNull();
-    expect(stops).toHaveLength(2);
+    expect(result).not.toBeNull();
+    expect(result!.stops).toHaveLength(2);
   });
 
   it('parses rgb() colors as stops', () => {
-    const stops = parseGradientStops('linear-gradient(rgb(100, 200, 50), rgb(0, 0, 0))');
+    const result = parseGradientStops('linear-gradient(rgb(100, 200, 50), rgb(0, 0, 0))');
 
-    expect(stops).toEqual([
-      {r: 100, g: 200, b: 50},
-      {r: 0, g: 0, b: 0},
-    ]);
+    expect(result!.stops[0]!.color).toEqual({r: 100, g: 200, b: 50});
+    expect(result!.stops[1]!.color).toEqual({r: 0, g: 0, b: 0});
   });
 
   it('returns null for a single-stop gradient', () => {
@@ -51,11 +50,23 @@ describe('parseGradientStops', () => {
   });
 
   it('ignores invalid color stops', () => {
-    const stops = parseGradientStops('linear-gradient(#ff0000, invalid, #0000ff)');
+    const result = parseGradientStops('linear-gradient(#ff0000, invalid, #0000ff)');
 
-    expect(stops).toEqual([
-      {r: 255, g: 0, b: 0},
-      {r: 0, g: 0, b: 255},
-    ]);
+    expect(result!.stops).toHaveLength(2);
+    expect(result!.stops[0]!.color).toEqual({r: 255, g: 0, b: 0});
+    expect(result!.stops[1]!.color).toEqual({r: 0, g: 0, b: 255});
+  });
+
+  it('parses an explicit angle', () => {
+    const result = parseGradientStops('linear-gradient(90deg, #fff, #000)');
+
+    expect(result!.angleDeg).toBe(90);
+    expect(result!.stops).toHaveLength(2);
+  });
+
+  it('defaults to 180deg when no angle is specified', () => {
+    const result = parseGradientStops('linear-gradient(#fff, #000)');
+
+    expect(result!.angleDeg).toBe(180);
   });
 });

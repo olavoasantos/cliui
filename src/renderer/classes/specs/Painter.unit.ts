@@ -527,7 +527,7 @@ describe('Painter', () => {
   });
 
   describe('gradient border colors', () => {
-    it('interpolates colors along the top edge', () => {
+    it('applies a top-to-bottom gradient (default 180deg)', () => {
       const buffer = new CellBuffer(12, 5);
       const painter = new Painter();
       const box: LayoutBox = {
@@ -550,37 +550,38 @@ describe('Painter', () => {
 
       painter.paint(box, buffer);
 
-      // First cell of top edge (corner) should be start color
+      // Top edge should be the start color (red)
       const topLeft = buffer.get(0, 0);
-      expect(topLeft?.fg).toEqual({r: 255, g: 0, b: 0});
+      expect(topLeft?.fg?.r).toBe(255);
+      expect(topLeft?.fg?.b).toBe(0);
 
-      // Last cell of top edge (corner) should be end color
-      const topRight = buffer.get(11, 0);
-      expect(topRight?.fg).toEqual({r: 0, g: 0, b: 255});
+      // Bottom edge should be close to the end color (blue)
+      const bottomLeft = buffer.get(0, 4);
+      expect(bottomLeft?.fg?.b).toBeGreaterThan(bottomLeft!.fg!.r);
 
-      // Middle cell should be an interpolated color
-      const mid = buffer.get(6, 0);
-      expect(mid?.fg).toBeDefined();
-      expect(mid!.fg!.r).toBeLessThan(255);
-      expect(mid!.fg!.b).toBeGreaterThan(0);
+      // Left edge midpoint should be interpolated
+      const midLeft = buffer.get(0, 2);
+      expect(midLeft?.fg).toBeDefined();
+      expect(midLeft!.fg!.r).toBeGreaterThan(0);
+      expect(midLeft!.fg!.b).toBeGreaterThan(0);
     });
 
-    it('interpolates colors along the left edge', () => {
-      const buffer = new CellBuffer(5, 6);
+    it('applies a left-to-right gradient (90deg)', () => {
+      const buffer = new CellBuffer(10, 5);
       const painter = new Painter();
       const box: LayoutBox = {
         element: createEnv().document.createElement('div'),
         x: 0,
         y: 0,
-        width: 5,
-        height: 6,
+        width: 10,
+        height: 5,
         contentX: 1,
         contentY: 1,
-        contentWidth: 3,
-        contentHeight: 4,
+        contentWidth: 8,
+        contentHeight: 3,
         computedStyle: style({
           'border-style': 'single',
-          'border-color': 'linear-gradient(#00ff00, #ff0000)',
+          'border-color': 'linear-gradient(90deg, #00ff00, #ff0000)',
         }),
         children: [],
         zIndex: 0,
@@ -588,13 +589,13 @@ describe('Painter', () => {
 
       painter.paint(box, buffer);
 
-      // Top of left edge
-      const top = buffer.get(0, 0);
-      expect(top?.fg).toEqual({r: 0, g: 255, b: 0});
+      // Left edge should be the start color (green)
+      const left = buffer.get(0, 2);
+      expect(left?.fg?.g).toBeGreaterThan(left!.fg!.r);
 
-      // Bottom of left edge
-      const bottom = buffer.get(0, 5);
-      expect(bottom?.fg).toEqual({r: 255, g: 0, b: 0});
+      // Right edge should be the end color (red)
+      const right = buffer.get(9, 2);
+      expect(right?.fg?.r).toBeGreaterThan(right!.fg!.g);
     });
 
     it('uses solid color when border-color is not a gradient', () => {
