@@ -525,4 +525,105 @@ describe('Painter', () => {
       expect(buffer.get(2, 1)?.fg).toEqual({r: 255, g: 255, b: 255});
     });
   });
+
+  describe('gradient border colors', () => {
+    it('interpolates colors along the top edge', () => {
+      const buffer = new CellBuffer(12, 5);
+      const painter = new Painter();
+      const box: LayoutBox = {
+        element: createEnv().document.createElement('div'),
+        x: 0,
+        y: 0,
+        width: 12,
+        height: 5,
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 10,
+        contentHeight: 3,
+        computedStyle: style({
+          'border-style': 'single',
+          'border-color': 'linear-gradient(#ff0000, #0000ff)',
+        }),
+        children: [],
+        zIndex: 0,
+      };
+
+      painter.paint(box, buffer);
+
+      // First cell of top edge (corner) should be start color
+      const topLeft = buffer.get(0, 0);
+      expect(topLeft?.fg).toEqual({r: 255, g: 0, b: 0});
+
+      // Last cell of top edge (corner) should be end color
+      const topRight = buffer.get(11, 0);
+      expect(topRight?.fg).toEqual({r: 0, g: 0, b: 255});
+
+      // Middle cell should be an interpolated color
+      const mid = buffer.get(6, 0);
+      expect(mid?.fg).toBeDefined();
+      expect(mid!.fg!.r).toBeLessThan(255);
+      expect(mid!.fg!.b).toBeGreaterThan(0);
+    });
+
+    it('interpolates colors along the left edge', () => {
+      const buffer = new CellBuffer(5, 6);
+      const painter = new Painter();
+      const box: LayoutBox = {
+        element: createEnv().document.createElement('div'),
+        x: 0,
+        y: 0,
+        width: 5,
+        height: 6,
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 3,
+        contentHeight: 4,
+        computedStyle: style({
+          'border-style': 'single',
+          'border-color': 'linear-gradient(#00ff00, #ff0000)',
+        }),
+        children: [],
+        zIndex: 0,
+      };
+
+      painter.paint(box, buffer);
+
+      // Top of left edge
+      const top = buffer.get(0, 0);
+      expect(top?.fg).toEqual({r: 0, g: 255, b: 0});
+
+      // Bottom of left edge
+      const bottom = buffer.get(0, 5);
+      expect(bottom?.fg).toEqual({r: 255, g: 0, b: 0});
+    });
+
+    it('uses solid color when border-color is not a gradient', () => {
+      const buffer = new CellBuffer(5, 3);
+      const painter = new Painter();
+      const box: LayoutBox = {
+        element: createEnv().document.createElement('div'),
+        x: 0,
+        y: 0,
+        width: 5,
+        height: 3,
+        contentX: 1,
+        contentY: 1,
+        contentWidth: 3,
+        contentHeight: 1,
+        computedStyle: style({
+          'border-style': 'single',
+          'border-color': '#ff0000',
+        }),
+        children: [],
+        zIndex: 0,
+      };
+
+      painter.paint(box, buffer);
+
+      // All border cells should have the same color
+      expect(buffer.get(0, 0)?.fg).toEqual({r: 255, g: 0, b: 0});
+      expect(buffer.get(4, 0)?.fg).toEqual({r: 255, g: 0, b: 0});
+      expect(buffer.get(0, 2)?.fg).toEqual({r: 255, g: 0, b: 0});
+    });
+  });
 });

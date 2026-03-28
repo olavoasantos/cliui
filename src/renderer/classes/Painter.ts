@@ -1,6 +1,8 @@
 import {cellWidth} from '../../layout/utilities/cellWidth';
-import {NAMED_COLORS} from '../constants/namedColors';
 import {PAINTER_SEGMENTER} from '../constants/segmenter';
+import {lerpColor} from '../utilities/lerpColor';
+import {parseColor} from '../utilities/parseColor';
+import {parseGradientStops} from '../utilities/parseGradientStops';
 import type {Cell, RGBColor, UnderlineStyle} from '../types';
 import {BorderStyleRegistry} from './BorderStyleRegistry';
 import {CellBuffer} from './CellBuffer';
@@ -113,47 +115,118 @@ export class Painter {
 
     const borderStyle = computedStyle.get('border-style') ?? 'single';
     const characters = this.borderStyles.get(borderStyle);
-    const borderColor = this.parseColor(computedStyle.get('border-color'));
+    const borderColorValue = computedStyle.get('border-color');
+    const gradientStops = borderColorValue ? parseGradientStops(borderColorValue) : null;
+    const solidColor = gradientStops ? null : parseColor(borderColorValue);
     const borderCell: Cell = {
       ...textCell,
       char: ' ',
-      fg: borderColor,
+      fg: solidColor,
     };
     const maxX = metrics.outerX + metrics.outerWidth - 1;
     const maxY = metrics.outerY + metrics.outerHeight - 1;
+    const hLen = Math.max(1, metrics.outerWidth);
+    const vLen = Math.max(1, metrics.outerHeight);
 
+    /* Corners */
     this.writeCell(
       buffer,
       metrics.outerX,
       metrics.outerY,
-      {...borderCell, char: characters.topLeft},
+      {
+        ...borderCell,
+        char: characters.topLeft,
+        fg: this.gradientColor(gradientStops, solidColor, 0, hLen),
+      },
       clipRect,
     );
     this.writeCell(
       buffer,
       maxX,
       metrics.outerY,
-      {...borderCell, char: characters.topRight},
+      {
+        ...borderCell,
+        char: characters.topRight,
+        fg: this.gradientColor(gradientStops, solidColor, hLen - 1, hLen),
+      },
       clipRect,
     );
     this.writeCell(
       buffer,
       metrics.outerX,
       maxY,
-      {...borderCell, char: characters.bottomLeft},
+      {
+        ...borderCell,
+        char: characters.bottomLeft,
+        fg: this.gradientColor(gradientStops, solidColor, vLen - 1, vLen),
+      },
       clipRect,
     );
-    this.writeCell(buffer, maxX, maxY, {...borderCell, char: characters.bottomRight}, clipRect);
+    this.writeCell(
+      buffer,
+      maxX,
+      maxY,
+      {
+        ...borderCell,
+        char: characters.bottomRight,
+        fg: this.gradientColor(gradientStops, solidColor, hLen - 1, hLen),
+      },
+      clipRect,
+    );
 
+    /* Horizontal edges */
     for (let x = metrics.outerX + 1; x < maxX; x += 1) {
-      this.writeCell(buffer, x, metrics.outerY, {...borderCell, char: characters.top}, clipRect);
-      this.writeCell(buffer, x, maxY, {...borderCell, char: characters.bottom}, clipRect);
+      const i = x - metrics.outerX;
+      const fg = this.gradientColor(gradientStops, solidColor, i, hLen);
+
+      this.writeCell(
+        buffer,
+        x,
+        metrics.outerY,
+        {...borderCell, char: characters.top, fg},
+        clipRect,
+      );
+      this.writeCell(buffer, x, maxY, {...borderCell, char: characters.bottom, fg}, clipRect);
     }
 
+    /* Vertical edges */
     for (let y = metrics.outerY + 1; y < maxY; y += 1) {
-      this.writeCell(buffer, metrics.outerX, y, {...borderCell, char: characters.left}, clipRect);
-      this.writeCell(buffer, maxX, y, {...borderCell, char: characters.right}, clipRect);
+      const i = y - metrics.outerY;
+      const fg = this.gradientColor(gradientStops, solidColor, i, vLen);
+
+      this.writeCell(
+        buffer,
+        metrics.outerX,
+        y,
+        {...borderCell, char: characters.left, fg},
+        clipRect,
+      );
+      this.writeCell(buffer, maxX, y, {...borderCell, char: characters.right, fg}, clipRect);
     }
+  }
+
+  /**
+   * Resolves the border color for a single cell position along an edge.
+   * When a gradient is active, interpolates between stops.  Otherwise
+   * returns the solid color.
+   */
+  private gradientColor(
+    stops: RGBColor[] | null,
+    solid: RGBColor | null,
+    index: number,
+    length: number,
+  ): RGBColor | null {
+    if (!stops || stops.length < 2) {
+      return solid;
+    }
+
+    const factor = length <= 1 ? 0 : index / (length - 1);
+    const segmentCount = stops.length - 1;
+    const scaledFactor = factor * segmentCount;
+    const segmentIndex = Math.min(Math.floor(scaledFactor), segmentCount - 1);
+    const segmentFactor = scaledFactor - segmentIndex;
+
+    return lerpColor(stops[segmentIndex]!, stops[segmentIndex + 1]!, segmentFactor);
   }
 
   private paintText(
@@ -215,12 +288,12 @@ export class Painter {
 
     return {
       char: ' ',
-      fg: this.parseColor(computedStyle.get('color')),
-      bg: this.parseColor(computedStyle.get('background-color')),
+      fg: parseColor(computedStyle.get('color')),
+      bg: parseColor(computedStyle.get('background-color')),
       bold: computedStyle.get('font-weight') === 'bold',
       italic: computedStyle.get('font-style') === 'italic',
       underline,
-      underlineColor: this.parseColor(computedStyle.get('text-decoration-color')),
+      underlineColor: parseColor(computedStyle.get('text-decoration-color')),
       strikethrough: decorations.includes('line-through'),
       faint: Number.isFinite(opacity) && opacity < 0.5,
       hyperlink: computedStyle.get('hyperlink') ?? null,
@@ -237,56 +310,6 @@ export class Painter {
       default:
         return 'solid';
     }
-  }
-
-  private parseColor(value: string | undefined): RGBColor | null {
-    if (value === undefined || value === '' || value === 'inherit') {
-      return null;
-    }
-
-    const normalized = value.trim().toLowerCase();
-
-    if (normalized in NAMED_COLORS) {
-      return {...NAMED_COLORS[normalized]!};
-    }
-
-    const shortHexMatch = normalized.match(/^#([0-9a-f]{3})$/i);
-
-    if (shortHexMatch !== null) {
-      const [r, g, b] = shortHexMatch[1]!.split('');
-
-      return {
-        r: Number.parseInt(`${r}${r}`, 16),
-        g: Number.parseInt(`${g}${g}`, 16),
-        b: Number.parseInt(`${b}${b}`, 16),
-      };
-    }
-
-    const hexMatch = normalized.match(/^#([0-9a-f]{6})$/i);
-
-    if (hexMatch !== null) {
-      return {
-        r: Number.parseInt(hexMatch[1]!.slice(0, 2), 16),
-        g: Number.parseInt(hexMatch[1]!.slice(2, 4), 16),
-        b: Number.parseInt(hexMatch[1]!.slice(4, 6), 16),
-      };
-    }
-
-    const rgbMatch = normalized.match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/);
-
-    if (rgbMatch !== null) {
-      return {
-        r: this.clampChannel(Number.parseInt(rgbMatch[1]!, 10)),
-        g: this.clampChannel(Number.parseInt(rgbMatch[2]!, 10)),
-        b: this.clampChannel(Number.parseInt(rgbMatch[3]!, 10)),
-      };
-    }
-
-    return null;
-  }
-
-  private clampChannel(value: number): number {
-    return Math.min(255, Math.max(0, value));
   }
 
   private writeCell(

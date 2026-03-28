@@ -1,3 +1,5 @@
+import {parseCSSFunction} from './parseCSSFunction';
+
 import type {ComputedStyle} from '../types';
 
 /**
@@ -21,34 +23,25 @@ export function resolveVar(value: string, properties: ComputedStyle, maxDepth = 
   let pos = 0;
 
   while (pos < value.length) {
-    const varStart = value.indexOf('var(', pos);
+    const fn = parseCSSFunction(value, pos);
 
-    if (varStart === -1) {
+    if (fn === null || fn.name !== 'var') {
       result += value.slice(pos);
       break;
     }
 
-    result += value.slice(pos, varStart);
+    result += value.slice(pos, fn.start);
 
-    const contentStart = varStart + 4;
-    const contentEnd = findMatchingParen(value, contentStart);
-
-    if (contentEnd === -1) {
-      result += value.slice(varStart);
-      break;
-    }
-
-    const content = value.slice(contentStart, contentEnd);
-    const commaIndex = findTopLevelComma(content);
+    const commaIndex = findTopLevelComma(fn.args);
 
     let name: string;
     let fallback: string | undefined;
 
     if (commaIndex === -1) {
-      name = content.trim();
+      name = fn.args.trim();
     } else {
-      name = content.slice(0, commaIndex).trim();
-      fallback = content.slice(commaIndex + 1).trim();
+      name = fn.args.slice(0, commaIndex).trim();
+      fallback = fn.args.slice(commaIndex + 1).trim();
     }
 
     const resolved = properties.get(name);
@@ -59,32 +52,10 @@ export function resolveVar(value: string, properties: ComputedStyle, maxDepth = 
       result += resolveVar(fallback, properties, maxDepth - 1);
     }
 
-    pos = contentEnd + 1;
+    pos = fn.end;
   }
 
   return result;
-}
-
-/**
- * Finds the index of the closing parenthesis that matches the opening
- * one at `start - 1`.  Handles nested parentheses.
- */
-function findMatchingParen(text: string, start: number): number {
-  let depth = 1;
-
-  for (let i = start; i < text.length; i++) {
-    if (text[i] === '(') {
-      depth++;
-    } else if (text[i] === ')') {
-      depth--;
-
-      if (depth === 0) {
-        return i;
-      }
-    }
-  }
-
-  return -1;
 }
 
 /**
