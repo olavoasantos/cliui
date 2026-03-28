@@ -89,4 +89,21 @@ describe('resolveVar', () => {
 
     expect(resolveVar('var(--missing, var(--pad))', props)).toBe('1 2');
   });
+
+  it('resolves var() inside other CSS functions like linear-gradient()', () => {
+    const props = new Map([
+      ['--start', '#ff0000'],
+      ['--end', '#0000ff'],
+    ]);
+
+    expect(resolveVar('linear-gradient(var(--start), var(--end))', props)).toBe(
+      'linear-gradient(#ff0000, #0000ff)',
+    );
+  });
+
+  it('resolves var() inside nested function arguments', () => {
+    const props = new Map([['--color', 'red']]);
+
+    expect(resolveVar('rgb(var(--color))', props)).toBe('rgb(red)');
+  });
 });

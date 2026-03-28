@@ -25,9 +25,17 @@ export function resolveVar(value: string, properties: ComputedStyle, maxDepth = 
   while (pos < value.length) {
     const fn = parseCSSFunction(value, pos);
 
-    if (fn === null || fn.name !== 'var') {
+    if (fn === null) {
       result += value.slice(pos);
       break;
+    }
+
+    if (fn.name !== 'var') {
+      /* Skip past this non-var function, but recurse into its args */
+      result += value.slice(pos, fn.start);
+      result += fn.name + '(' + resolveVar(fn.args, properties, maxDepth - 1) + ')';
+      pos = fn.end;
+      continue;
     }
 
     result += value.slice(pos, fn.start);
