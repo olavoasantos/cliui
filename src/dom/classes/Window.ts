@@ -66,6 +66,14 @@ export class Window extends EventTarget {
   Navigator = Navigator;
   Location = Location;
 
+  /**
+   * Stub constructor so that `instanceof` checks in frameworks like
+   * React 19 (`element instanceof window.HTMLIFrameElement`) do not
+   * throw.  No element in the terminal DOM will ever be an instance of
+   * this class.
+   */
+  HTMLIFrameElement = class HTMLIFrameElement extends HTMLElement {};
+
   #currentOnErrorHandler: EventListener | null = null;
   #currentOriginalOnErrorHandler: OnErrorHandler = null;
   #currentOnUnhandledRejectionHandler: EventListener | null = null;
