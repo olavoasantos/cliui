@@ -108,10 +108,10 @@ describe('matches', () => {
     expect(matches(element, 'div:not(.active)')).toBe(false);
   });
 
-  it('throws for unsupported pseudo selectors', () => {
+  it('returns false for unsupported pseudo selectors', () => {
     const element = document.createElement('div');
 
-    expect(() => matches(element, 'div:hover')).toThrow('Pseudo :hover not implemented');
+    expect(matches(element, 'div:hover')).toBe(false);
   });
 
   it('throws for unsupported selector functions', () => {
@@ -126,5 +126,10 @@ describe('matches', () => {
     const detached = document.createElement('p');
 
     expect(matches(detached, 'section > p')).toBe(false);
+  });
+
+  it('matches :root against the document element', () => {
+    expect(matches(document.documentElement, ':root')).toBe(true);
+    expect(matches(document.body, ':root')).toBe(false);
   });
 });

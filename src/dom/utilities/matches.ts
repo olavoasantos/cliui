@@ -73,7 +73,12 @@ function matchesSelectorMatcher(
     case SelectorMatcherType.Attribute:
       return value == null ? element.hasAttribute(name) : element.getAttribute(name) === value;
     case SelectorMatcherType.Pseudo:
-      throw Error(`Pseudo :${name} not implemented`);
+      switch (name) {
+        case 'root':
+          return element.ownerDocument?.documentElement === element;
+        default:
+          return false;
+      }
     case SelectorMatcherType.Function:
       switch (name) {
         case 'has':
