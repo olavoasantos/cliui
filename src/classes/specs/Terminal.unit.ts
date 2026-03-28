@@ -1,6 +1,7 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../../constants/terminal';
+import {Window} from '../../dom';
 import {Terminal} from '../Terminal';
 
 import type {TerminalReadableInput} from '../../terminal/types';
@@ -87,6 +88,13 @@ describe('Terminal', () => {
     const invalidFpsInternals = terminalWithInvalidFps as unknown as TerminalInternals;
 
     expect(invalidFpsInternals.fps).toBe(DEFAULT_FPS);
+  });
+
+  it('uses an explicit window when provided in options', () => {
+    const window = new Window();
+    const terminal = new Terminal({window});
+    expect(terminal.window).toBe(window);
+    expect(terminal.document).toBe(window.document);
   });
 
   it('does not start the terminal loop more than once', async () => {

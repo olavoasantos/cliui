@@ -7,6 +7,8 @@ import {PromiseRejectionEvent} from './PromiseRejectionEvent';
 import {ToggleEvent} from './ToggleEvent';
 import {FocusEvent} from './FocusEvent';
 import {ClipboardEvent} from './ClipboardEvent';
+import {Location} from './Location';
+import {Navigator} from './Navigator';
 import {Node} from './Node';
 import {ParentNode} from './ParentNode';
 import {ChildNode} from './ChildNode';
@@ -34,6 +36,12 @@ export class Window extends EventTarget {
   top = this;
   document = new Document(this);
   customElements = new CustomElementRegistryImplementation();
+  navigator = new Navigator();
+  location = new Location();
+
+  /** Legacy `window.event` property. Always `undefined` in terminal context. */
+  event: Event | undefined = undefined;
+
   Event = Event;
   ErrorEvent = ErrorEvent;
   PromiseRejectionEvent = PromiseRejectionEvent;
@@ -55,6 +63,8 @@ export class Window extends EventTarget {
   SVGElement = SVGElement;
   HTMLTemplateElement = HTMLTemplateElement;
   MutationObserver = MutationObserver;
+  Navigator = Navigator;
+  Location = Location;
 
   #currentOnErrorHandler: EventListener | null = null;
   #currentOriginalOnErrorHandler: OnErrorHandler = null;

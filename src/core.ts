@@ -1,16 +1,11 @@
 /**
- * Main entry point — installs the global environment polyfill as a side
- * effect so that frameworks referencing `document`, `window`,
- * `navigator`, etc. on `globalThis` pick up the terminal DOM
- * automatically.
+ * Side-effect-free entry point.
  *
- * Use `@micra/terminal-dom/core` for a side-effect-free import.
+ * Exports the same public API as the main `@micra/terminal-dom` entry
+ * point but does **not** install the global environment polyfill.  Use
+ * this when global mutation is unacceptable — you are then responsible
+ * for passing a `Window` instance to `Terminal` via its options.
  */
-
-import {Window} from './dom';
-import {polyfillEnvironment} from './dom';
-
-polyfillEnvironment(new Window());
 
 export {Terminal} from './classes/Terminal';
 

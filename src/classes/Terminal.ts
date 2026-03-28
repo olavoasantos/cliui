@@ -12,6 +12,27 @@ import type {TerminalOptions} from '../types';
 import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
 
 /**
+ * Resolves the `Window` instance for the terminal.
+ *
+ * Prefers an explicit instance from `options.window`, then falls back to
+ * `globalThis.window` (populated by the default import's environment
+ * polyfill), then creates a fresh `Window` as a last resort.
+ */
+function resolveWindow(options: TerminalOptions): Window {
+  if (options.window) {
+    return options.window;
+  }
+
+  const globalWindow = (globalThis as Record<string, unknown>).window;
+
+  if (globalWindow != null && typeof globalWindow === 'object' && 'document' in globalWindow) {
+    return globalWindow as Window;
+  }
+
+  return new Window();
+}
+
+/**
  * Public entry point that wires the DOM, style, layout, renderer, and terminal
  * I/O layers together.
  *
@@ -47,7 +68,7 @@ export class Terminal {
    * @param options - Terminal configuration and I/O streams.
    */
   constructor(options: TerminalOptions = {}) {
-    this.window = new Window();
+    this.window = resolveWindow(options);
     this.document = this.window.document;
     this.output = options.output ?? (process.stdout as unknown as TerminalOutput);
     this.input = options.input ?? (process.stdin as unknown as TerminalReadableInput);

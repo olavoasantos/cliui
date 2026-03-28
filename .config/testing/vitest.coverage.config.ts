@@ -5,7 +5,6 @@ export default mergeConfig(
   projectConfig,
   defineConfig({
     test: {
-      environment: 'happy-dom',
       include: ['**/*.unit.ts', '**/*.unit.tsx', '**/*.integration.ts', '**/*.integration.tsx'],
       exclude: ['**/.testing/**', '**/build/**', '**/node_modules/**'],
       passWithNoTests: true,

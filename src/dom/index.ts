@@ -44,6 +44,7 @@ export {querySelectorAll} from './utilities/querySelectorAll';
 export {serializeChildren} from './utilities/serializeChildren';
 export {serializeNode} from './utilities/serializeNode';
 export {expandShorthand} from './utilities/expandShorthand';
+export {polyfillEnvironment} from './utilities/polyfillEnvironment';
 
 export {
   EventPhase,
@@ -53,6 +54,9 @@ export {
   SelectorCombinator,
   SelectorMatcherType,
 } from './constants';
+
+export {Location} from './classes/Location';
+export {Navigator} from './classes/Navigator';
 
 export type {
   InputEventInit,

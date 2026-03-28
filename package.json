@@ -24,6 +24,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js",
+      "require": "./dist/core.cjs"
+    },
     "./components": {
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components.js",

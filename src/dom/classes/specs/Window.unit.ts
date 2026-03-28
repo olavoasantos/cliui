@@ -28,6 +28,28 @@ describe('Window', () => {
       const window = new Window();
       expect(window.name).toBe('');
     });
+
+    it('has a navigator with a user agent string', () => {
+      const window = new Window();
+      expect(window.navigator).toBeDefined();
+      expect(window.navigator.userAgent).toContain('TerminalDOM');
+      expect(window.navigator.language).toBe('en-US');
+      expect(window.navigator.onLine).toBe(true);
+      expect(window.navigator.toString()).toBe('[object Navigator]');
+    });
+
+    it('has a location defaulting to about:blank', () => {
+      const window = new Window();
+      expect(window.location).toBeDefined();
+      expect(window.location.href).toBe('about:blank');
+      expect(window.location.protocol).toBe('about:');
+      expect(window.location.toString()).toBe('about:blank');
+    });
+
+    it('has event as undefined', () => {
+      const window = new Window();
+      expect(window.event).toBeUndefined();
+    });
   });
 
   describe('class references', () => {

@@ -1,5 +1,7 @@
 import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
 
+import type {Window} from '../dom';
+
 /**
  * Public configuration options for the `Terminal` class.
  */
@@ -18,4 +20,14 @@ export interface TerminalOptions {
 
   /** Input stream that provides raw terminal input chunks. */
   input?: TerminalReadableInput;
+
+  /**
+   * DOM `Window` instance powering this terminal.
+   *
+   * When omitted the constructor reads `globalThis.window` — which the
+   * default `@micra/terminal-dom` import populates automatically via
+   * the environment polyfill.  Pass an explicit instance when using the
+   * side-effect-free `@micra/terminal-dom/core` entry point.
+   */
+  window?: Window;
 }
