@@ -25,10 +25,12 @@ export class ParentNode extends ChildNode {
 
   appendChild(child: Node) {
     this.insertInto(child, null);
+    return child;
   }
 
   insertBefore(child: Node, ref?: Node | null) {
     this.insertInto(child, ref || null);
+    return child;
   }
 
   append(...nodes: (Node | string)[]) {

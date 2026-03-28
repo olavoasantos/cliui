@@ -1,6 +1,7 @@
-import {createApp} from 'vue';
+import '@micra/terminal-dom';
+import {mount} from 'svelte';
 import {Terminal} from '@micra/terminal-dom';
-import App from './App.vue';
+import App from './App.svelte';
 
 const terminal = new Terminal({
   altScreen: true,
@@ -29,7 +30,9 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-const app = createApp(App, {terminal, doc: document});
-app.mount(document.body);
+mount(App, {
+  target: document.body,
+  props: {terminal, doc: document},
+});
 
 await terminal.run();

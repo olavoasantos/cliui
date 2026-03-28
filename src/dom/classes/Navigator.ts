@@ -30,13 +30,7 @@ export class Navigator {
 
   /** Number of logical processors available. */
   get hardwareConcurrency(): number {
-    // Use actual value when available (Node.js exposes os.cpus())
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      return require('node:os').cpus().length;
-    } catch {
-      return 1;
-    }
+    return 1;
   }
 
   /** Whether cookies are enabled. Always `false` in terminal context. */
@@ -64,7 +58,7 @@ export class Navigator {
 
   /** Runtime platform identifier. */
   get platform(): string {
-    return typeof process !== 'undefined' ? process.platform : '';
+    return '';
   }
 
   /** Browser product identifier. */

@@ -30,8 +30,8 @@ export function parseHtml(html: string, contextNode: Node) {
       parent = node;
     } else if (token[5]) {
       parent = (stack.pop() as ParentNode) || root;
-    } else if (token[6]) {
-      parent.append(document.createComment(token[6]!));
+    } else if (token[6] != null) {
+      parent.append(document.createComment(token[6]));
     } else {
       parent.append(token[7]!);
     }

@@ -1,2 +1,4 @@
+declare const __TERMINAL_DOM_VERSION__: string;
+
 /** User agent string identifying the terminal DOM runtime. */
-export const TERMINAL_DOM_USER_AGENT = `TerminalDOM/1.0 (Node.js ${process.version}; terminal)`;
+export const TERMINAL_DOM_USER_AGENT = `TerminalDOM/${__TERMINAL_DOM_VERSION__} (terminal)`;

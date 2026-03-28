@@ -28,9 +28,9 @@ describe('Navigator', () => {
     expect(navigator.cookieEnabled).toBe(false);
   });
 
-  it('returns the runtime platform', () => {
+  it('returns an empty platform string', () => {
     const navigator = new Navigator();
-    expect(navigator.platform).toBe(process.platform);
+    expect(navigator.platform).toBe('');
   });
 
   it('returns standard browser identification strings', () => {

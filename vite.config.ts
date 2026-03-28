@@ -3,6 +3,9 @@ import dts from 'vite-plugin-dts';
 import pkg from './package.json';
 
 export default defineConfig({
+  define: {
+    __TERMINAL_DOM_VERSION__: JSON.stringify(pkg.version),
+  },
   build: {
     emptyOutDir: true,
     sourcemap: true,

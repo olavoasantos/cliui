@@ -13,6 +13,7 @@ import {Node} from './Node';
 import {ParentNode} from './ParentNode';
 import {ChildNode} from './ChildNode';
 import {Element} from './Element';
+import {HTMLIFrameElement} from './HTMLIFrameElement';
 import {HTMLElement} from './HTMLElement';
 import {SVGElement} from './SVGElement';
 import {CharacterData} from './CharacterData';
@@ -66,13 +67,7 @@ export class Window extends EventTarget {
   Navigator = Navigator;
   Location = Location;
 
-  /**
-   * Stub constructor so that `instanceof` checks in frameworks like
-   * React 19 (`element instanceof window.HTMLIFrameElement`) do not
-   * throw.  No element in the terminal DOM will ever be an instance of
-   * this class.
-   */
-  HTMLIFrameElement = class HTMLIFrameElement extends HTMLElement {};
+  HTMLIFrameElement = HTMLIFrameElement;
 
   #currentOnErrorHandler: EventListener | null = null;
   #currentOriginalOnErrorHandler: OnErrorHandler = null;

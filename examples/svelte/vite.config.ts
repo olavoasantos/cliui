@@ -1,8 +1,14 @@
+import {svelte} from '@sveltejs/vite-plugin-svelte';
 import {defineConfig} from 'vite';
-import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    svelte({
+      compilerOptions: {
+        css: 'injected',
+      },
+    }),
+  ],
   build: {
     target: 'node22',
     outDir: 'dist',
