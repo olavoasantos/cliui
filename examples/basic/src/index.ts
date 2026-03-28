@@ -18,47 +18,71 @@ window.customElements.define(UiInput.tagName, UiInput);
 
 const style = document.createElement('style');
 style.textContent = `
+  :root {
+    --bg: #0f172a;
+    --fg: #e5e7eb;
+    --accent: #7c3aed;
+    --accent-secondary: #06b6d4;
+    --panel-border: #475569;
+    --title-color: #c4b5fd;
+    --hint-color: #93c5fd;
+    --label-color: #cbd5e1;
+    --status-color: #86efac;
+    --error-color: #fca5a5;
+  }
+
+  @border-style fancy {
+    top: "═";
+    bottom: "═";
+    left: "║";
+    right: "║";
+    top-left: "╔";
+    top-right: "╗";
+    bottom-left: "╚";
+    bottom-right: "╝";
+  }
+
   .app {
     padding: 1;
-    border-style: rounded;
-    border-color: #7c3aed;
-    color: #e5e7eb;
-    background-color: #0f172a;
+    border-style: fancy;
+    border-color: linear-gradient(var(--accent), var(--accent-secondary));
+    color: var(--fg);
+    background-color: var(--bg);
     display: flex;
     flex-direction: column;
     gap: 1;
   }
 
   .title {
-    color: #c4b5fd;
+    color: var(--title-color);
     font-weight: bold;
   }
 
   .hint {
-    color: #93c5fd;
+    color: var(--hint-color);
   }
 
   .panel {
     padding: 0 1;
     border-style: rounded;
-    border-color: #475569;
-    color: #e2e8f0;
+    border-color: linear-gradient(var(--panel-border), var(--accent));
+    color: var(--fg);
     display: flex;
     flex-direction: column;
     gap: 1;
   }
 
   .panel-title {
-    color: #fca5a5;
+    color: var(--error-color);
     font-weight: bold;
   }
 
   .label {
-    color: #cbd5e1;
+    color: var(--label-color);
   }
 
   .status {
-    color: #86efac;
+    color: var(--status-color);
   }
 `;
 document.head.appendChild(style);
