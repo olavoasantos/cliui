@@ -33,11 +33,7 @@ export class Window extends EventTarget {
   self = this;
   top = this;
   document = new Document(this);
-  customElements = (() => {
-    const registry = new CustomElementRegistryImplementation();
-    registry.setOwner(this);
-    return registry;
-  })();
+  customElements = new CustomElementRegistryImplementation();
   Event = Event;
   ErrorEvent = ErrorEvent;
   PromiseRejectionEvent = PromiseRejectionEvent;
@@ -97,5 +93,10 @@ export class Window extends EventTarget {
     } else {
       this.#currentOnUnhandledRejectionHandler = null;
     }
+  }
+
+  constructor() {
+    super();
+    this.customElements.setOwner(this);
   }
 }
