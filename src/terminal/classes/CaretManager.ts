@@ -108,11 +108,53 @@ export class CaretManager {
       return null;
     }
 
+    const selection = this.resolveSelectionRanges(caret, box, graphemes, scrollOffset);
+
     return {
       cursorX,
       cursorY,
       cursorVisible: caret.cursorVisible,
-      selection: [],
+      selection,
     };
+  }
+
+  /**
+   * Resolves the caret's selected grapheme range into one or more
+   * contiguous screen-space cell ranges.
+   */
+  private resolveSelectionRanges(
+    caret: Caret,
+    box: LayoutBox,
+    graphemes: string[],
+    scrollOffset: number,
+  ): Array<{x: number; y: number; width: number}> {
+    const range = caret.getSelectedRange();
+    if (!range) return [];
+
+    const [start, end] = range;
+    const visibleStart = Math.max(start, scrollOffset);
+    const visibleEnd = Math.min(end, graphemes.length);
+
+    if (visibleEnd <= visibleStart) return [];
+
+    let x = box.contentX;
+
+    /* Skip graphemes before the visible selection start */
+    for (let i = scrollOffset; i < visibleStart; i++) {
+      x += cellWidth(graphemes[i]!);
+    }
+
+    let width = 0;
+    for (let i = visibleStart; i < visibleEnd; i++) {
+      const w = cellWidth(graphemes[i]!);
+
+      if (x + width + w > box.contentX + box.contentWidth) {
+        break;
+      }
+
+      width += w;
+    }
+
+    return width > 0 ? [{x, y: box.contentY, width}] : [];
   }
 }

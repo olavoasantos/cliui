@@ -118,4 +118,21 @@ describe('CaretManager', () => {
 
     expect(manager.getOverlays(null)).toEqual([]);
   });
+
+  it('resolves selection ranges into overlay spans', () => {
+    const manager = new CaretManager();
+    const doc = new Window().document;
+    const element = doc.createElement('div');
+    const editable = createEditable(element, ['h', 'e', 'l', 'l', 'o']);
+
+    const caret = manager.createCaret(editable);
+    caret.moveTo(1);
+    caret.selectTo(4); // selects 'ell'
+
+    const box = makeBox(element, 5, 3, 20);
+    const overlays = manager.getOverlays(box);
+
+    expect(overlays).toHaveLength(1);
+    expect(overlays[0]!.selection).toEqual([{x: 6, y: 3, width: 3}]);
+  });
 });
