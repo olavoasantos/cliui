@@ -279,4 +279,79 @@ describe('StyleResolver', () => {
       expect(style.has('display')).toBe(false);
     });
   });
+
+  describe('custom properties', () => {
+    it('passes through --* declarations from stylesheets', () => {
+      const style = resolver.resolve([makeMatched('--brand', '#7c3aed')], null, null);
+
+      expect(style.get('--brand')).toBe('#7c3aed');
+    });
+
+    it('passes through --* declarations from inline styles', () => {
+      const inline = new CSSStyleDeclaration();
+      inline.setProperty('--gap', '2');
+
+      const style = resolver.resolve([], inline, null);
+
+      expect(style.get('--gap')).toBe('2');
+    });
+
+    it('inherits custom properties from the parent style', () => {
+      const parent: ComputedStyle = new Map([['--theme', 'dark']]);
+      const style = resolver.resolve([], null, parent);
+
+      expect(style.get('--theme')).toBe('dark');
+    });
+
+    it('overrides inherited custom properties with local declarations', () => {
+      const parent: ComputedStyle = new Map([['--color', 'red']]);
+      const style = resolver.resolve([makeMatched('--color', 'blue')], null, parent);
+
+      expect(style.get('--color')).toBe('blue');
+    });
+
+    it('resolves var() references in property values', () => {
+      const style = resolver.resolve(
+        [makeMatched('--fg', '#fff'), makeMatched('color', 'var(--fg)')],
+        null,
+        null,
+      );
+
+      expect(style.get('color')).toBe('#fff');
+    });
+
+    it('resolves var() with fallback when property is missing', () => {
+      const style = resolver.resolve([makeMatched('color', 'var(--missing, red)')], null, null);
+
+      expect(style.get('color')).toBe('red');
+    });
+
+    it('resolves var() referencing an inherited custom property', () => {
+      const parent: ComputedStyle = new Map([['--accent', '#7c3aed']]);
+      const style = resolver.resolve([makeMatched('border-color', 'var(--accent)')], null, parent);
+
+      expect(style.get('border-color')).toBe('#7c3aed');
+    });
+
+    it('resolves nested var() in fallback', () => {
+      const style = resolver.resolve(
+        [
+          makeMatched('--fallback', 'green'),
+          makeMatched('color', 'var(--primary, var(--fallback))'),
+        ],
+        null,
+        null,
+      );
+
+      expect(style.get('color')).toBe('green');
+    });
+
+    it('inherits custom properties through multiple levels', () => {
+      const grandparent: ComputedStyle = new Map([['--root-color', 'navy']]);
+      const parent = resolver.resolve([], null, grandparent);
+      const child = resolver.resolve([makeMatched('color', 'var(--root-color)')], null, parent);
+
+      expect(child.get('color')).toBe('navy');
+    });
+  });
 });

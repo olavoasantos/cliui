@@ -246,15 +246,15 @@ export class StyleEngine {
         const result = this.parser.parse(cssText);
         this.parsedRules.push(...result.rules);
 
-          for (const atRule of result.atRules) {
-            const handlers = this.atRuleHandlers.get(atRule.identifier);
+        for (const atRule of result.atRules) {
+          const handlers = this.atRuleHandlers.get(atRule.identifier);
 
-            if (handlers) {
-              for (const handler of handlers) {
-                handler(atRule);
-              }
+          if (handlers) {
+            for (const handler of handlers) {
+              handler(atRule);
             }
           }
+        }
       }
     }
   }

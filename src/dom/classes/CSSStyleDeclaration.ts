@@ -9,6 +9,11 @@ import {notifyCSSStyleDeclaration} from '../utilities/notifyCSSStyleDeclaration'
 
 import type {Element} from './Element';
 
+/** Returns whether a property name is a CSS custom property (`--*`). */
+function isCustomProperty(name: string): boolean {
+  return name.length > 2 && name[0] === '-' && name[1] === '-';
+}
+
 /**
  * A CSSStyleDeclaration-like object that stores CSS property values
  * and notifies the hooks bridge when properties change.
@@ -27,7 +32,7 @@ export class CSSStyleDeclaration {
           if (existing !== undefined) return existing;
 
           const kebabProperty = camelToKebab(property);
-          if (LONGHAND_PROPERTIES.has(kebabProperty)) {
+          if (LONGHAND_PROPERTIES.has(kebabProperty) || isCustomProperty(kebabProperty)) {
             return target.getPropertyValue(kebabProperty);
           }
         }
@@ -37,7 +42,11 @@ export class CSSStyleDeclaration {
       set(target, property, value) {
         if (typeof property === 'string') {
           const kebabProperty = camelToKebab(property);
-          if (LONGHAND_PROPERTIES.has(kebabProperty) || SHORTHAND_PROPERTIES.has(kebabProperty)) {
+          if (
+            LONGHAND_PROPERTIES.has(kebabProperty) ||
+            SHORTHAND_PROPERTIES.has(kebabProperty) ||
+            isCustomProperty(kebabProperty)
+          ) {
             target.setProperty(kebabProperty, String(value));
             return true;
           }
@@ -106,6 +115,12 @@ export class CSSStyleDeclaration {
 
     if (value === '' || value == null) {
       this.removeProperty(kebabProperty);
+      return;
+    }
+
+    if (isCustomProperty(kebabProperty)) {
+      state.properties.set(kebabProperty, value);
+      if (!batch) notifyCSSStyleDeclaration(this);
       return;
     }
 
