@@ -84,11 +84,12 @@ describe('UiSelect', () => {
     expect(select.hasAttribute('tabindex')).toBe(false);
   });
 
-  it('shows the selected option label in the trigger with right-aligned indicator', () => {
+  it('shows the selected option label with right-aligned indicator', () => {
     const {select} = createSelect(FRUITS, {value: 'banana', width: '20'});
+    const text = select.textContent ?? '';
 
-    expect(select.textContent).toContain('Banana');
-    expect(select.textContent).toContain('▾');
+    expect(text).toContain('Banana');
+    expect(text).toContain('▾');
   });
 
   it('shows first option when no value is set', () => {
@@ -148,6 +149,16 @@ describe('UiSelect', () => {
       keyDown(select, 'Enter');
 
       expect(select.isOpen()).toBe(true);
+    });
+
+    it('flips indicator to up caret when opened', () => {
+      const {select} = createSelect(FRUITS, {value: 'apple', width: '20'});
+
+      keyDown(select, 'Enter');
+
+      const text = select.textContent ?? '';
+      expect(text).toContain('▴');
+      expect(text).not.toContain('▾');
     });
 
     it('Space opens the dropdown', () => {

@@ -122,7 +122,7 @@ style.textContent = `
     display: inline;
     color: #e5e7eb;
     background-color: #1e293b;
-    padding: 0 1;
+    text-decoration: none;
   }
 
   ui-select:focus {
@@ -131,8 +131,6 @@ style.textContent = `
 
   ui-select .ui-select-listbox {
     background-color: #1e293b;
-    border-style: single;
-    border-color: #475569;
   }
 
   ui-option {

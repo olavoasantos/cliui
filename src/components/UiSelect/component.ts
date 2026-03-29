@@ -1,7 +1,8 @@
 import styles from './styles.css?inline';
 
 import {
-  UI_SELECT_INDICATOR,
+  UI_SELECT_INDICATOR_DOWN,
+  UI_SELECT_INDICATOR_UP,
   UI_SELECT_LISTBOX_Z_INDEX,
   UI_SELECT_OBSERVED_ATTRIBUTES,
   UI_SELECT_TAG_NAME,
@@ -49,6 +50,7 @@ export class UiSelect extends HTMLElement {
   private readonly boundClick = this.handleClick.bind(this) as EventListener;
   private readonly boundFocus = this.handleFocus.bind(this) as EventListener;
   private readonly boundBlur = this.handleBlur.bind(this) as EventListener;
+  private readonly boundFocusOut = this.handleBlur.bind(this) as EventListener;
   private readonly boundDocClick = this.handleDocumentClick.bind(this) as EventListener;
 
   connectedCallback(): void {
@@ -63,6 +65,7 @@ export class UiSelect extends HTMLElement {
     this.addEventListener('click', this.boundClick);
     this.addEventListener('focus', this.boundFocus);
     this.addEventListener('blur', this.boundBlur);
+    this.addEventListener('focusout', this.boundFocusOut);
   }
 
   disconnectedCallback(): void {
@@ -70,6 +73,7 @@ export class UiSelect extends HTMLElement {
     this.removeEventListener('click', this.boundClick);
     this.removeEventListener('focus', this.boundFocus);
     this.removeEventListener('blur', this.boundBlur);
+    this.removeEventListener('focusout', this.boundFocusOut);
     this.removeDocumentClickListener();
     this.close();
   }
@@ -271,7 +275,8 @@ export class UiSelect extends HTMLElement {
     }
 
     const padding = Math.max(0, maxLabelWidth - label.length);
-    this.trigger.textContent = `${label}${' '.repeat(padding)} ${UI_SELECT_INDICATOR}`;
+    const indicator = this.isOpen() ? UI_SELECT_INDICATOR_UP : UI_SELECT_INDICATOR_DOWN;
+    this.trigger.textContent = `${label}${' '.repeat(padding)} ${indicator}`;
   }
 
   /** Updates the visual highlight in the listbox. */
@@ -294,6 +299,7 @@ export class UiSelect extends HTMLElement {
     this.listbox.style.display = 'block';
     this.listbox.style.width = String(this.getWidth());
     this.syncHighlight();
+    this.syncTriggerText();
   }
 
   private hideListbox(): void {
@@ -305,6 +311,8 @@ export class UiSelect extends HTMLElement {
     for (const option of options) {
       option.removeAttribute('highlighted');
     }
+
+    this.syncTriggerText();
   }
 
   /* ── Private: Keyboard ──────────────────────────────────── */
