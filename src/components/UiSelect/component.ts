@@ -166,9 +166,11 @@ export class UiSelect extends HTMLElement {
     this.triggerLabel = doc.createElement('div');
     this.triggerLabel.style.flexGrow = '1';
     this.triggerLabel.style.whiteSpace = 'nowrap';
+    this.triggerLabel.style.display = 'inline';
 
     this.triggerIndicator = doc.createElement('div');
     this.triggerIndicator.style.whiteSpace = 'pre';
+    this.triggerIndicator.style.display = 'inline';
 
     this.trigger.appendChild(this.triggerLabel);
     this.trigger.appendChild(this.triggerIndicator);
@@ -194,6 +196,7 @@ export class UiSelect extends HTMLElement {
     /* Ensure critical layout properties on self */
     this.style.position = 'relative';
     this.style.display = 'block';
+    this.style.alignItems = 'stretch';
     if (!this.style.padding) {
       this.style.padding = '0 1';
     }

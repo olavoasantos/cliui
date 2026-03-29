@@ -96,10 +96,12 @@ describe('UiSelect rendering (real example CSS)', () => {
     expect(rows[0]).toContain('▾');
 
     const indicatorIndex = rows[0]!.indexOf('▾');
-    const labelEnd = rows[0]!.indexOf('Apple') + 5;
 
-    /* Indicator should be well past the label, near the right edge */
-    expect(indicatorIndex).toBeGreaterThan(labelEnd + 3);
+    /* Select has width: 20 (border-box), padding: 0 1.
+     * Content area spans columns 1..18.
+     * Indicator should be within 2 cells of the right content edge. */
+    expect(indicatorIndex).toBeGreaterThanOrEqual(16);
+    expect(indicatorIndex).toBeLessThanOrEqual(19);
   });
 
   it('shows options when opened', () => {
