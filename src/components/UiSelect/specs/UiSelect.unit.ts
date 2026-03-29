@@ -84,15 +84,15 @@ describe('UiSelect', () => {
     expect(select.hasAttribute('tabindex')).toBe(false);
   });
 
-  it('shows the selected option label in the trigger', () => {
-    const {select} = createSelect(FRUITS, {value: 'banana'});
+  it('shows the selected option label in the trigger with right-aligned indicator', () => {
+    const {select} = createSelect(FRUITS, {value: 'banana', width: '20'});
 
     expect(select.textContent).toContain('Banana');
     expect(select.textContent).toContain('▾');
   });
 
   it('shows first option when no value is set', () => {
-    const {select} = createSelect(FRUITS);
+    const {select} = createSelect(FRUITS, {width: '20'});
 
     expect(select.textContent).toContain('Apple');
   });
@@ -331,6 +331,41 @@ describe('UiSelect', () => {
       select.setAttribute('disabled', '');
 
       expect(select.isOpen()).toBe(false);
+    });
+  });
+
+  describe('type-ahead', () => {
+    it('jumps to the first matching option when collapsed', () => {
+      const {select} = createSelect(FRUITS, {value: 'apple'});
+
+      keyDown(select, 'c');
+
+      expect(select.getAttribute('value')).toBe('cherry');
+    });
+
+    it('moves highlight to matching option when expanded', () => {
+      const {select, options} = createSelect(FRUITS, {value: 'apple'});
+
+      select.open();
+      keyDown(select, 'c');
+
+      expect(options[2]!.hasAttribute('highlighted')).toBe(true);
+    });
+
+    it('wraps around when searching', () => {
+      const {select} = createSelect(FRUITS, {value: 'cherry'});
+
+      keyDown(select, 'a');
+
+      expect(select.getAttribute('value')).toBe('apple');
+    });
+
+    it('is case-insensitive', () => {
+      const {select} = createSelect(FRUITS, {value: 'apple'});
+
+      keyDown(select, 'B');
+
+      expect(select.getAttribute('value')).toBe('banana');
     });
   });
 });

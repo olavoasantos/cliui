@@ -5,6 +5,8 @@ import {
   UI_SELECT_LISTBOX_Z_INDEX,
   UI_SELECT_OBSERVED_ATTRIBUTES,
   UI_SELECT_TAG_NAME,
+  DEFAULT_UI_SELECT_WIDTH,
+  MIN_UI_SELECT_WIDTH,
 } from './constants';
 import {Event, HTMLElement, InputEvent} from '../../dom';
 
@@ -20,6 +22,7 @@ import type {UiOption} from '../UiOption/component';
  * Keyboard behavior follows macOS browser conventions:
  * - **Collapsed**: ArrowUp/Down changes selection, Enter/Space opens
  * - **Expanded**: ArrowUp/Down highlights, Enter/Space selects, Escape closes
+ * - **Type-ahead**: typing a character jumps to the first matching option
  *
  * Register with `window.customElements.define(UiSelect.tagName, UiSelect)`
  * before creating `<ui-select>` elements in a window.
@@ -153,6 +156,7 @@ export class UiSelect extends HTMLElement {
     this.listbox.style.left = '0';
     this.listbox.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
     this.listbox.style.display = 'none';
+    this.listbox.style.width = String(this.getWidth());
 
     /* Move options into listbox */
     for (const option of options) {
@@ -162,11 +166,6 @@ export class UiSelect extends HTMLElement {
     /* Attach internals */
     this.appendChild(this.trigger);
     this.appendChild(this.listbox);
-
-    /* Hide options initially */
-    for (const option of options) {
-      option.style.display = 'block';
-    }
 
     this.syncSelectedAttribute();
   }
@@ -235,12 +234,16 @@ export class UiSelect extends HTMLElement {
     }
   }
 
-  /** Updates the trigger text to show the selected option's label. */
+  /**
+   * Updates the trigger text to show the selected option's label,
+   * right-padded so the indicator sits at the right edge.
+   */
   private syncTriggerText(): void {
     if (!this.trigger) return;
 
     const value = this.getAttribute('value');
     const options = this.getOptions();
+    const width = this.getWidth();
     let label = '';
 
     for (const option of options) {
@@ -254,7 +257,16 @@ export class UiSelect extends HTMLElement {
       label = options[0]!.getLabel();
     }
 
-    this.trigger.textContent = `${label} ${UI_SELECT_INDICATOR}`;
+    /* Pad label so indicator is right-aligned within the width */
+    const indicatorWidth = 2; /* space + indicator char */
+    const maxLabelWidth = width - indicatorWidth;
+
+    if (label.length > maxLabelWidth) {
+      label = label.slice(0, maxLabelWidth);
+    }
+
+    const padding = Math.max(0, maxLabelWidth - label.length);
+    this.trigger.textContent = `${label}${' '.repeat(padding)} ${UI_SELECT_INDICATOR}`;
   }
 
   /** Updates the visual highlight in the listbox. */
@@ -275,6 +287,7 @@ export class UiSelect extends HTMLElement {
   private showListbox(): void {
     if (!this.listbox) return;
     this.listbox.style.display = 'block';
+    this.listbox.style.width = String(this.getWidth());
     this.syncHighlight();
   }
 
@@ -319,6 +332,12 @@ export class UiSelect extends HTMLElement {
     if (key === 'Enter' || key === ' ') {
       event.preventDefault();
       this.open();
+      return;
+    }
+
+    /* Type-ahead: jump to first matching option */
+    if (key.length === 1 && !this.isModifiedKey(event)) {
+      this.typeAhead(key);
     }
   }
 
@@ -345,6 +364,12 @@ export class UiSelect extends HTMLElement {
     if (key === 'Escape') {
       event.preventDefault();
       this.close();
+      return;
+    }
+
+    /* Type-ahead while expanded: move highlight to match */
+    if (key.length === 1 && !this.isModifiedKey(event)) {
+      this.typeAheadHighlight(key);
     }
   }
 
@@ -376,26 +401,79 @@ export class UiSelect extends HTMLElement {
     }
   }
 
+  /**
+   * Type-ahead when collapsed: select the next option whose label
+   * starts with the typed character (case-insensitive).
+   */
+  private typeAhead(char: string): void {
+    const options = this.getOptions();
+    const current = this.getSelectedIndex();
+    const lower = char.toLowerCase();
+
+    for (let offset = 1; offset <= options.length; offset++) {
+      const index = (current + offset) % options.length;
+      const option = options[index]!;
+
+      if (!option.isDisabled() && option.getLabel().toLowerCase().startsWith(lower)) {
+        this.selectIndex(index);
+        return;
+      }
+    }
+  }
+
+  /**
+   * Type-ahead when expanded: highlight the next option whose label
+   * starts with the typed character.
+   */
+  private typeAheadHighlight(char: string): void {
+    const options = this.getOptions();
+    const lower = char.toLowerCase();
+
+    for (let offset = 1; offset <= options.length; offset++) {
+      const index = (this.highlightedIndex + offset) % options.length;
+      const option = options[index]!;
+
+      if (!option.isDisabled() && option.getLabel().toLowerCase().startsWith(lower)) {
+        this.highlightedIndex = index;
+        this.syncHighlight();
+        return;
+      }
+    }
+  }
+
+  /** Checks if a keyboard event has Ctrl/Alt/Meta modifiers. */
+  private isModifiedKey(event: Event): boolean {
+    const ke = event as import('../../dom').KeyboardEvent;
+    return !!(
+      (ke as unknown as {ctrlKey?: boolean}).ctrlKey ||
+      (ke as unknown as {altKey?: boolean}).altKey ||
+      (ke as unknown as {metaKey?: boolean}).metaKey
+    );
+  }
+
   /* ── Private: Mouse ─────────────────────────────────────── */
 
   private handleClick(event: Event): void {
     if (this.isDisabled()) return;
 
     const target = event.target as import('../../dom').Element | null;
-
     if (!target) return;
 
-    /* Click on an option inside the listbox */
-    if (target.localName === 'ui-option' && this.isOpen()) {
-      const options = this.getOptions();
-      const index = options.indexOf(target as unknown as UiOption);
+    /* Walk up from target to find a ui-option ancestor */
+    if (this.isOpen()) {
+      const option = this.findOptionFromTarget(target);
 
-      if (index >= 0 && !options[index]!.isDisabled()) {
-        this.selectIndex(index);
-        this.close();
+      if (option) {
+        const options = this.getOptions();
+        const index = options.indexOf(option);
+
+        if (index >= 0 && !option.isDisabled()) {
+          this.selectIndex(index);
+          this.close();
+        }
+
+        return;
       }
-
-      return;
     }
 
     /* Click on trigger or self: toggle dropdown */
@@ -406,13 +484,28 @@ export class UiSelect extends HTMLElement {
     }
   }
 
+  /**
+   * Walks up from a click target to find the nearest `<ui-option>`.
+   */
+  private findOptionFromTarget(target: import('../../dom').Element): UiOption | null {
+    let current: import('../../dom').Element | null = target;
+
+    while (current && current !== (this as unknown as import('../../dom').Element)) {
+      if (current.localName === 'ui-option') {
+        return current as unknown as UiOption;
+      }
+
+      current = current.parentElement as import('../../dom').Element | null;
+    }
+
+    return null;
+  }
+
   /** Closes the dropdown when clicking outside the select. */
   private handleDocumentClick(event: Event): void {
     const target = event.target as import('../../dom').Element | null;
-
     if (!target) return;
 
-    /* Walk up from target to see if the click is inside this element */
     let current: import('../../dom').Element | null = target;
 
     while (current) {
@@ -454,6 +547,14 @@ export class UiSelect extends HTMLElement {
   }
 
   /* ── Private: Utilities ─────────────────────────────────── */
+
+  private getWidth(): number {
+    const raw = this.getAttribute('width');
+    if (raw == null) return DEFAULT_UI_SELECT_WIDTH;
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed) || parsed < MIN_UI_SELECT_WIDTH) return DEFAULT_UI_SELECT_WIDTH;
+    return parsed;
+  }
 
   private ensureTabIndex(): void {
     if (!this.hasAttribute('tabindex')) {
