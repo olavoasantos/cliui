@@ -420,34 +420,6 @@ describe('handleCaretKeyDown multiline', () => {
     expect(editable.getGraphemes().join('')).toBe('a\nb');
   });
 
-  it('moves to start of content with Cmd+ArrowUp', () => {
-    const editable = createEditable(g('abc\ndef\nghi'));
-    const caret = new Caret(editable);
-
-    caret.moveTo(8); // on 'h'
-
-    const handled = handleCaretKeyDown(caret, key('ArrowUp', {meta: true}), {
-      config: multiLineConfig,
-    });
-
-    expect(handled).toBe(true);
-    expect(caret.position).toBe(0);
-  });
-
-  it('moves to end of content with Cmd+ArrowDown', () => {
-    const editable = createEditable(g('abc\ndef\nghi'));
-    const caret = new Caret(editable);
-
-    caret.moveTo(0);
-
-    const handled = handleCaretKeyDown(caret, key('ArrowDown', {meta: true}), {
-      config: multiLineConfig,
-    });
-
-    expect(handled).toBe(true);
-    expect(caret.position).toBe(11);
-  });
-
   it('moves to previous paragraph with Option+ArrowUp', () => {
     const editable = createEditable(g('abc\n\ndef'));
     const caret = new Caret(editable);
@@ -474,19 +446,5 @@ describe('handleCaretKeyDown multiline', () => {
 
     expect(handled).toBe(true);
     expect(caret.position).toBe(5); // start of 'def' (past blank line)
-  });
-
-  it('supports Shift+Cmd+ArrowDown for selection to end', () => {
-    const editable = createEditable(g('abc\ndef'));
-    const caret = new Caret(editable);
-
-    caret.moveTo(1);
-
-    handleCaretKeyDown(caret, key('ArrowDown', {meta: true, shift: true}), {
-      config: multiLineConfig,
-    });
-
-    expect(caret.hasSelection()).toBe(true);
-    expect(caret.getSelectedRange()).toEqual([1, 7]);
   });
 });

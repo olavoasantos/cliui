@@ -86,13 +86,6 @@ export function handleCaretKeyDown(
     return true;
   }
 
-  /* Cmd+Up/Down: move to start/end of all content */
-  if (config && (key === 'ArrowUp' || key === 'ArrowDown') && meta && !alt && !ctrl) {
-    const pos = key === 'ArrowUp' ? 0 : target.getGraphemes().length;
-    shift ? caret.selectTo(pos) : caret.moveTo(pos);
-    return true;
-  }
-
   /* Option+Up/Down: move to previous/next paragraph boundary */
   if (config && (key === 'ArrowUp' || key === 'ArrowDown') && alt && !ctrl && !meta) {
     const graphemes = target.getGraphemes();
