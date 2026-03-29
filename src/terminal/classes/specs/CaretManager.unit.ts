@@ -30,6 +30,7 @@ function createEditable(
     },
     getEditableWidth: () => 20,
     getScrollOffset: () => 0,
+    getScrollY: () => 0,
     updateScroll: () => {},
     isReadonly: () => false,
     isDisabled: () => false,

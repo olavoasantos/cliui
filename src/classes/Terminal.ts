@@ -396,6 +396,7 @@ export class Terminal {
       },
       getEditableWidth: () => state.resolvedWidth,
       getScrollOffset: () => state.scrollX,
+      getScrollY: () => state.scrollY,
       updateScroll: () => {
         updateScroll();
         syncRendering();
@@ -479,7 +480,7 @@ export class Terminal {
    * Vertical scroll for multi-line editables.
    */
   private updateVerticalScroll(
-    element: Element,
+    _element: Element,
     state: EditableState,
     config: EditableConfiguration,
   ): void {
@@ -505,8 +506,6 @@ export class Terminal {
     } else if (cursorLine >= state.scrollY + viewportHeight) {
       state.scrollY = cursorLine - viewportHeight + 1;
     }
-
-    (element as unknown as {scrollTop?: number}).scrollTop = state.scrollY;
   }
 
   /**

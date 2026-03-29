@@ -29,6 +29,7 @@ function createEditable(graphemes: string[] = []): Editable & {cursorPos: number
     },
     getEditableWidth: () => 20,
     getScrollOffset: () => 0,
+    getScrollY: () => 0,
     updateScroll: () => {},
     isReadonly: () => false,
     isDisabled: () => false,

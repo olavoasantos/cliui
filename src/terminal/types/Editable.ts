@@ -30,6 +30,9 @@ export interface Editable {
   /** Returns the scroll offset as a grapheme index (for horizontal scrolling). */
   getScrollOffset(): number;
 
+  /** Returns the vertical scroll offset as a visual line index. */
+  getScrollY(): number;
+
   /** Updates the scroll offset to keep the cursor visible. */
   updateScroll(): void;
 

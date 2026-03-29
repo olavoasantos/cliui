@@ -1,5 +1,4 @@
 ui-textarea {
   display: block;
   white-space: pre-wrap;
-  overflow: scroll;
 }
