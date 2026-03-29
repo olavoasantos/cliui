@@ -384,6 +384,14 @@ export class StyleEngine {
       this.layoutDirty.add(parent);
       walkElements(parent, (child) => this.markStyleDirty(child));
     };
+
+    const prevFocusChange = hooks.focusChange;
+
+    hooks.focusChange = (previous, next) => {
+      prevFocusChange?.(previous, next);
+      this.markStyleDirty(previous);
+      this.markStyleDirty(next);
+    };
   }
 
   /**
@@ -397,6 +405,7 @@ export class StyleEngine {
       hooks.setText = this.previousHooks.setText;
       hooks.insertChild = this.previousHooks.insertChild;
       hooks.removeChild = this.previousHooks.removeChild;
+      hooks.focusChange = this.previousHooks.focusChange;
       this.previousHooks = null;
     }
   }

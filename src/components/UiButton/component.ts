@@ -23,8 +23,8 @@ import type {UiButtonTone, UiButtonVariant} from './types';
  * - All activation is blocked while `disabled` is set.
  *
  * The button is focusable by default — `tabindex="0"` is set
- * automatically on connect unless the element is disabled. A `focused`
- * attribute is set while the element holds focus for CSS targeting.
+ * automatically on connect unless the element is disabled. Focus and
+ * active states are targetable via `:focus` and `:active` pseudo-classes.
  *
  * Register with `window.customElements.define(UiButton.tagName, UiButton)`
  * before creating `<ui-button>` elements in a window.
@@ -44,7 +44,6 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
   private readonly boundKeyUp = this.handleKeyUp.bind(this) as EventListener;
   private readonly boundClick = this.handleClick.bind(this) as EventListener;
-  private readonly boundFocus = this.handleFocus.bind(this) as EventListener;
   private readonly boundBlur = this.handleBlur.bind(this) as EventListener;
 
   connectedCallback(): void {
@@ -55,7 +54,6 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
     this.addEventListener('keydown', this.boundKeyDown);
     this.addEventListener('keyup', this.boundKeyUp);
     this.addEventListener('click', this.boundClick);
-    this.addEventListener('focus', this.boundFocus);
     this.addEventListener('blur', this.boundBlur);
   }
 
@@ -63,10 +61,8 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
     this.removeEventListener('keydown', this.boundKeyDown);
     this.removeEventListener('keyup', this.boundKeyUp);
     this.removeEventListener('click', this.boundClick);
-    this.removeEventListener('focus', this.boundFocus);
     this.removeEventListener('blur', this.boundBlur);
     this.clearPressed();
-    this.removeAttribute('focused');
   }
 
   override attributeChangedCallback(
@@ -176,12 +172,7 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
     }
   }
 
-  private handleFocus(): void {
-    this.setAttribute('focused', '');
-  }
-
   private handleBlur(): void {
-    this.removeAttribute('focused');
     this.clearPressed();
   }
 

@@ -108,6 +108,41 @@ describe('matches', () => {
     expect(matches(element, 'div:not(.active)')).toBe(false);
   });
 
+  it('matches :focus against the document active element', () => {
+    const first = document.createElement('button');
+    const second = document.createElement('button');
+    document.body.appendChild(first);
+    document.body.appendChild(second);
+
+    document.setActiveElement(first);
+
+    expect(matches(first, 'button:focus')).toBe(true);
+    expect(matches(second, 'button:focus')).toBe(false);
+  });
+
+  it('matches :active against pressed elements', () => {
+    const element = document.createElement('button');
+
+    element.setAttribute('pressed', '');
+
+    expect(matches(element, 'button:active')).toBe(true);
+
+    element.removeAttribute('pressed');
+
+    expect(matches(element, 'button:active')).toBe(false);
+  });
+
+  it('matches :disabled and :enabled using the disabled attribute', () => {
+    const enabled = document.createElement('button');
+    const disabled = document.createElement('button');
+    disabled.setAttribute('disabled', '');
+
+    expect(matches(enabled, 'button:enabled')).toBe(true);
+    expect(matches(enabled, 'button:disabled')).toBe(false);
+    expect(matches(disabled, 'button:disabled')).toBe(true);
+    expect(matches(disabled, 'button:enabled')).toBe(false);
+  });
+
   it('returns false for unsupported pseudo selectors', () => {
     const element = document.createElement('div');
 

@@ -99,26 +99,6 @@ describe('UiButton', () => {
   });
 
   describe('focus tracking', () => {
-    it('sets focused attribute on focus', () => {
-      const {button} = createButton();
-
-      button.dispatchEvent(new Event('focus'));
-
-      expect(button.hasAttribute('focused')).toBe(true);
-    });
-
-    it('removes focused attribute on blur', () => {
-      const {button} = createButton();
-
-      button.dispatchEvent(new Event('focus'));
-
-      expect(button.hasAttribute('focused')).toBe(true);
-
-      button.dispatchEvent(new Event('blur'));
-
-      expect(button.hasAttribute('focused')).toBe(false);
-    });
-
     it('clears pressed state on blur', () => {
       const {button} = createButton();
 
@@ -129,18 +109,6 @@ describe('UiButton', () => {
       button.dispatchEvent(new Event('blur'));
 
       expect(button.hasAttribute('pressed')).toBe(false);
-    });
-
-    it('removes focused attribute on disconnect', () => {
-      const {button} = createButton();
-
-      button.dispatchEvent(new Event('focus'));
-
-      expect(button.hasAttribute('focused')).toBe(true);
-
-      button.parentNode?.removeChild(button);
-
-      expect(button.hasAttribute('focused')).toBe(false);
     });
   });
 

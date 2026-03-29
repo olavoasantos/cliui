@@ -91,4 +91,65 @@ describe('StyleEngine integration', () => {
     expect(engine.getComputedStyle(badge).get('text-align')).toBe('center');
     expect(engine.getComputedStyle(badge).get('color')).toBe('purple');
   });
+
+  it('recomputes pseudo-class styles when focus and active state change', () => {
+    const window = new Window();
+    const document = window.document;
+    const engine = new StyleEngine();
+
+    engine.attach(document);
+
+    const style = document.createElement('style');
+    style.textContent = `
+      button:focus {
+        color: purple;
+      }
+
+      button:active {
+        background-color: blue;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+      }
+    `;
+    document.head.appendChild(style);
+
+    const first = document.createElement('button');
+    const second = document.createElement('button');
+    document.body.appendChild(first);
+    document.body.appendChild(second);
+
+    engine.computeAll();
+
+    expect(engine.getComputedStyle(first).get('color')).toBe('');
+    expect(engine.getComputedStyle(second).get('color')).toBe('');
+
+    document.setActiveElement(first);
+    engine.recomputeDirty();
+
+    expect(engine.getComputedStyle(first).get('color')).toBe('purple');
+    expect(engine.getComputedStyle(second).get('color')).toBe('');
+
+    document.setActiveElement(second);
+    engine.recomputeDirty();
+
+    expect(engine.getComputedStyle(first).get('color')).toBe('');
+    expect(engine.getComputedStyle(second).get('color')).toBe('purple');
+
+    first.setAttribute('pressed', '');
+    engine.recomputeDirty();
+
+    expect(engine.getComputedStyle(first).get('background-color')).toBe('blue');
+
+    first.removeAttribute('pressed');
+    engine.recomputeDirty();
+
+    expect(engine.getComputedStyle(first).get('background-color')).toBeUndefined();
+
+    first.setAttribute('disabled', '');
+    engine.recomputeDirty();
+
+    expect(engine.getComputedStyle(first).get('opacity')).toBe('0.5');
+  });
 });

@@ -73,6 +73,11 @@ export class Document extends ParentNode {
 
     this.activeElement = nextActiveElement;
 
+    (this.defaultView[HOOKS] as Partial<Hooks>).focusChange?.(
+      previousActiveElement,
+      nextActiveElement,
+    );
+
     nextActiveElement.dispatchEvent(
       new FocusEvent('focus', {
         relatedTarget: previousActiveElement,

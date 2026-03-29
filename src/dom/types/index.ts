@@ -156,6 +156,7 @@ export interface Hooks {
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | EventListenerOptions,
   ): void;
+  focusChange(previous: Element, next: Element): void;
 }
 
 export interface CustomElementConstructor {

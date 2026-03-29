@@ -565,6 +565,7 @@ describe('StyleEngine', () => {
       const previousInsertChild = vi.fn<Hooks['insertChild']>();
       const previousRemoveChild = vi.fn<Hooks['removeChild']>();
       const previousSetText = vi.fn<Hooks['setText']>();
+      const previousFocusChange = vi.fn<Hooks['focusChange']>();
       const hooks = window[HOOKS] as Partial<Hooks>;
 
       hooks.setAttribute = previousSetAttribute;
@@ -572,6 +573,7 @@ describe('StyleEngine', () => {
       hooks.insertChild = previousInsertChild;
       hooks.removeChild = previousRemoveChild;
       hooks.setText = previousSetText;
+      hooks.focusChange = previousFocusChange;
 
       const engine = new StyleEngine();
       engine.attach(window.document);
@@ -588,12 +590,14 @@ describe('StyleEngine', () => {
       text.data = 'updated';
       parent.removeChild(child);
       parent.removeAttribute('class');
+      window.document.setActiveElement(parent);
 
       expect(previousSetAttribute).toHaveBeenCalled();
       expect(previousInsertChild).toHaveBeenCalled();
       expect(previousSetText).toHaveBeenCalled();
       expect(previousRemoveChild).toHaveBeenCalled();
       expect(previousRemoveAttribute).toHaveBeenCalled();
+      expect(previousFocusChange).toHaveBeenCalled();
       expect(engine.getDirtyElements().has(parent)).toBe(true);
       expect(engine.getLayoutDirtyElements().has(parent)).toBe(true);
     });
@@ -606,12 +610,14 @@ describe('StyleEngine', () => {
       const originalInsertChild = vi.fn<Hooks['insertChild']>();
       const originalRemoveChild = vi.fn<Hooks['removeChild']>();
       const originalSetText = vi.fn<Hooks['setText']>();
+      const originalFocusChange = vi.fn<Hooks['focusChange']>();
 
       hooks.setAttribute = originalSetAttribute;
       hooks.removeAttribute = originalRemoveAttribute;
       hooks.insertChild = originalInsertChild;
       hooks.removeChild = originalRemoveChild;
       hooks.setText = originalSetText;
+      hooks.focusChange = originalFocusChange;
 
       const engine = new StyleEngine();
       engine.attach(window.document);
@@ -622,6 +628,7 @@ describe('StyleEngine', () => {
       expect(hooks.insertChild).toBe(originalInsertChild);
       expect(hooks.removeChild).toBe(originalRemoveChild);
       expect(hooks.setText).toBe(originalSetText);
+      expect(hooks.focusChange).toBe(originalFocusChange);
     });
 
     it('marks element style-dirty on setAttribute', () => {
@@ -699,6 +706,26 @@ describe('StyleEngine', () => {
       div.setAttribute('data-active', 'true');
 
       expect(engine.getDirtyElements().has(div)).toBe(true);
+    });
+
+    it('marks previous and next active elements dirty on focus change', () => {
+      const {document, engine} = createEnv();
+      const first = document.createElement('button');
+      const second = document.createElement('button');
+      document.body.appendChild(first);
+      document.body.appendChild(second);
+
+      engine.clearDirty();
+      document.setActiveElement(first);
+
+      expect(engine.getDirtyElements().has(document.body)).toBe(true);
+      expect(engine.getDirtyElements().has(first)).toBe(true);
+
+      engine.clearDirty();
+      document.setActiveElement(second);
+
+      expect(engine.getDirtyElements().has(first)).toBe(true);
+      expect(engine.getDirtyElements().has(second)).toBe(true);
     });
 
     it('marks the parent layout-dirty when text content changes', () => {

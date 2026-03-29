@@ -10,10 +10,10 @@ ui-button[variant='secondary'] {
   font-weight: normal;
 }
 
-ui-button[pressed] {
+ui-button:active {
   font-style: italic;
 }
 
-ui-button[disabled] {
+ui-button:disabled {
   opacity: 0.5;
 }

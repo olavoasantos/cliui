@@ -76,6 +76,14 @@ function matchesSelectorMatcher(
       switch (name) {
         case 'root':
           return element.ownerDocument?.documentElement === element;
+        case 'focus':
+          return element.ownerDocument?.activeElement === element;
+        case 'active':
+          return element.hasAttribute('pressed');
+        case 'disabled':
+          return element.hasAttribute('disabled');
+        case 'enabled':
+          return !element.hasAttribute('disabled');
         default:
           return false;
       }

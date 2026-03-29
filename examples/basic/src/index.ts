@@ -80,15 +80,15 @@ style.textContent = `
     background-color: #7c3aed;
   }
 
-  ui-button[variant="primary"][focused] {
+  ui-button[variant="primary"]:focus {
     background-color: #6d28d9;
   }
 
-  ui-button[variant="primary"][pressed] {
+  ui-button[variant="primary"]:active {
     background-color: #5b21b6;
   }
 
-  ui-button[variant="primary"][disabled] {
+  ui-button[variant="primary"]:disabled {
     color: #a1a1aa;
     background-color: #3f3f46;
   }
@@ -100,15 +100,15 @@ style.textContent = `
     background-color: #334155;
   }
 
-  ui-button[variant="secondary"][focused] {
+  ui-button[variant="secondary"]:focus {
     background-color: #475569;
   }
 
-  ui-button[variant="secondary"][pressed] {
+  ui-button[variant="secondary"]:active {
     background-color: #1e293b;
   }
 
-  ui-button[variant="secondary"][disabled] {
+  ui-button[variant="secondary"]:disabled {
     color: #71717a;
     background-color: #27272a;
   }
@@ -120,15 +120,15 @@ style.textContent = `
     color: #fef2f2;
   }
 
-  ui-button[tone="dangerous"][variant="primary"][focused] {
+  ui-button[tone="dangerous"][variant="primary"]:focus {
     background-color: #b91c1c;
   }
 
-  ui-button[tone="dangerous"][variant="primary"][pressed] {
+  ui-button[tone="dangerous"][variant="primary"]:active {
     background-color: #991b1b;
   }
 
-  ui-button[tone="dangerous"][variant="primary"][disabled] {
+  ui-button[tone="dangerous"][variant="primary"]:disabled {
     color: #a1a1aa;
     background-color: #3f3f46;
   }
@@ -138,11 +138,11 @@ style.textContent = `
     background-color: #451a1a;
   }
 
-  ui-button[tone="dangerous"][variant="secondary"][focused] {
+  ui-button[tone="dangerous"][variant="secondary"]:focus {
     background-color: #5c2020;
   }
 
-  ui-button[tone="dangerous"][variant="secondary"][pressed] {
+  ui-button[tone="dangerous"][variant="secondary"]:active {
     background-color: #331111;
   }
 `;
