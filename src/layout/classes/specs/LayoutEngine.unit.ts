@@ -630,4 +630,51 @@ describe('LayoutEngine', () => {
       expect(itemBox.y).toBe(0);
     });
   });
+
+  describe('vertical overflow', () => {
+    it('does not shrink children when content exceeds available height', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const engine = new LayoutEngine(styleEngine);
+
+      /* Create 5 children, each 5 rows tall = 25 rows total, in a 10-row terminal */
+      for (let i = 0; i < 5; i++) {
+        const child = document.createElement('div');
+        child.style.height = '5';
+        body.appendChild(child);
+      }
+
+      styleEngine.computeAll();
+      const box = engine.layout(body, 80, 10);
+
+      /* Each child should keep its explicit 5-row height, not be shrunk */
+      for (const child of box.children) {
+        expect(child.height).toBe(5);
+      }
+
+      /* Root should grow to intrinsic content height, not clamp to 10 */
+      expect(box.height).toBeGreaterThanOrEqual(25);
+    });
+
+    it('preserves intrinsic height of text-heavy children', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const engine = new LayoutEngine(styleEngine);
+
+      /* Create 3 children with text, in a 5-row terminal */
+      for (let i = 0; i < 3; i++) {
+        const child = document.createElement('div');
+        child.textContent = `Line ${i + 1}`;
+        body.appendChild(child);
+      }
+
+      styleEngine.computeAll();
+      const box = engine.layout(body, 80, 5);
+
+      /* Each text child is at least 1 row tall */
+      for (const child of box.children) {
+        expect(child.height).toBeGreaterThanOrEqual(1);
+      }
+    });
+  });
 });

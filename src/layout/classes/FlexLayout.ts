@@ -118,6 +118,18 @@ export class FlexLayout {
       : this.parseCellValue(computedStyle.get('column-gap'));
     const availableMainSize = isRowDirection ? contentWidth : availableContentHeight;
 
+    /* When the main axis is column and the height is not explicitly
+     * constrained, use the intrinsic children height as the available
+     * main size for flex sizing. This prevents flex-shrink from
+     * squeezing content to fit the viewport — mirroring browser
+     * behavior where the body overflows vertically. */
+    const childrenIntrinsicHeight =
+      this.sumChildrenHeight(children) + Math.max(0, children.length - 1) * mainGap + textHeight;
+    const flexSizingMainSize =
+      !isRowDirection && explicitHeight === null
+        ? Math.max(availableMainSize, childrenIntrinsicHeight)
+        : availableMainSize;
+
     let lines: FlexLine[];
 
     if (isWrapEnabled && isRowDirection) {
@@ -135,7 +147,7 @@ export class FlexLayout {
       this.applyFlexSizing(
         children,
         isRowDirection,
-        Math.max(0, availableMainSize - Math.max(0, children.length - 1) * mainGap),
+        Math.max(0, flexSizingMainSize - Math.max(0, children.length - 1) * mainGap),
       );
       lines = [
         {children, crossSize: isRowDirection ? this.maxChildHeight(children) : contentWidth},
