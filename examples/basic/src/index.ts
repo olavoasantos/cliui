@@ -5,7 +5,14 @@ import {
   UiInput,
   UiOption,
   UiSelect,
+  UiTable,
+  UiTbody,
+  UiTd,
   UiTextarea,
+  UiTfoot,
+  UiTh,
+  UiThead,
+  UiTr,
 } from '@micra/terminal-dom/components';
 
 process.stdin.setRawMode?.(true);
@@ -26,7 +33,14 @@ window.customElements.define(UiDetails.tagName, UiDetails);
 window.customElements.define(UiInput.tagName, UiInput);
 window.customElements.define(UiOption.tagName, UiOption);
 window.customElements.define(UiSelect.tagName, UiSelect);
+window.customElements.define(UiTable.tagName, UiTable);
+window.customElements.define(UiTbody.tagName, UiTbody);
+window.customElements.define(UiTd.tagName, UiTd);
 window.customElements.define(UiTextarea.tagName, UiTextarea);
+window.customElements.define(UiTfoot.tagName, UiTfoot);
+window.customElements.define(UiTh.tagName, UiTh);
+window.customElements.define(UiThead.tagName, UiThead);
+window.customElements.define(UiTr.tagName, UiTr);
 
 const style = document.createElement('style');
 style.textContent = `
@@ -48,20 +62,6 @@ style.textContent = `
 
   .hint {
     color: #64748b;
-  }
-
-  .section {
-    padding: 0 1;
-    border-style: rounded;
-    border-color: #475569;
-    display: flex;
-    flex-direction: column;
-    gap: 1;
-  }
-
-  .section-title {
-    font-weight: bold;
-    color: #fbbf24;
   }
 
   .row {
@@ -179,6 +179,20 @@ style.textContent = `
   ui-details .ui-details-content {
     color: #cbd5e1;
   }
+
+  /* ── Table styles ──────────────────────────────────────── */
+
+  ui-table {
+    padding: 0 1;
+  }
+
+  ui-th {
+    color: #c4b5fd;
+  }
+
+  ui-td {
+    color: #e5e7eb;
+  }
 `;
 document.head.appendChild(style);
 
@@ -195,7 +209,7 @@ const hint = document.createElement('div');
 hint.className = 'hint';
 hint.textContent = 'Tab to cycle. Arrow keys to navigate. Enter/Space to activate. Ctrl+Q to quit.';
 
-/* ── Details sections ──────────────────────────────────── */
+/* ── Form details ──────────────────────────────────────── */
 
 const formDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
 formDetails.setAttribute('tabindex', '0');
@@ -277,10 +291,72 @@ formDetails.appendChild(sizeSelect);
 formDetails.appendChild(notesLabel);
 formDetails.appendChild(notesTextarea);
 
-/* ── Help details (collapsed by default) ───────────────── */
+/* ── Table details ─────────────────────────────────────── */
+
+const tableDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+tableDetails.setAttribute('tabindex', '5');
+tableDetails.setAttribute('open', '');
+
+const tableSummary = document.createElement('ui-summary');
+tableSummary.textContent = 'Team roster';
+
+const teamTable = document.createElement('ui-table') as InstanceType<typeof UiTable>;
+
+const thead = document.createElement('ui-thead');
+const headerRow = document.createElement('ui-tr');
+
+for (const heading of ['Name', 'Role', 'Status']) {
+  const th = document.createElement('ui-th');
+  th.textContent = heading;
+  headerRow.appendChild(th);
+}
+
+thead.appendChild(headerRow);
+
+const tbody = document.createElement('ui-tbody');
+const teamData = [
+  ['Alice', 'Engineer', 'Active'],
+  ['Bob', 'Designer', 'Active'],
+  ['Charlie', 'Manager', 'Away'],
+  ['Diana', 'QA Lead', 'Active'],
+];
+
+for (const row of teamData) {
+  const tr = document.createElement('ui-tr');
+
+  for (const cell of row) {
+    const td = document.createElement('ui-td');
+    td.textContent = cell!;
+    tr.appendChild(td);
+  }
+
+  tbody.appendChild(tr);
+}
+
+const tfoot = document.createElement('ui-tfoot');
+const footerRow = document.createElement('ui-tr');
+const totalCell = document.createElement('ui-td');
+totalCell.textContent = 'Total';
+const countCell = document.createElement('ui-td');
+countCell.textContent = `${teamData.length} members`;
+const blankCell = document.createElement('ui-td');
+blankCell.textContent = '';
+footerRow.appendChild(totalCell);
+footerRow.appendChild(countCell);
+footerRow.appendChild(blankCell);
+tfoot.appendChild(footerRow);
+
+teamTable.appendChild(thead);
+teamTable.appendChild(tbody);
+teamTable.appendChild(tfoot);
+
+tableDetails.appendChild(tableSummary);
+tableDetails.appendChild(teamTable);
+
+/* ── Help details (collapsed) ──────────────────────────── */
 
 const helpDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
-helpDetails.setAttribute('tabindex', '5');
+helpDetails.setAttribute('tabindex', '6');
 
 const helpSummary = document.createElement('ui-summary');
 helpSummary.textContent = 'Help & shortcuts';
@@ -291,21 +367,6 @@ helpContent.textContent =
 
 helpDetails.appendChild(helpSummary);
 helpDetails.appendChild(helpContent);
-
-/* ── About details (collapsed by default) ──────────────── */
-
-const aboutDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
-aboutDetails.setAttribute('tabindex', '6');
-
-const aboutSummary = document.createElement('ui-summary');
-aboutSummary.textContent = 'About this demo';
-
-const aboutContent = document.createElement('div');
-aboutContent.textContent =
-  '@micra/terminal-dom component showcase. Built-in components: button, input, select, textarea, details.';
-
-aboutDetails.appendChild(aboutSummary);
-aboutDetails.appendChild(aboutContent);
 
 /* ── Button row ────────────────────────────────────────── */
 
@@ -336,8 +397,8 @@ status.textContent = 'Status: ready';
 app.appendChild(title);
 app.appendChild(hint);
 app.appendChild(formDetails);
+app.appendChild(tableDetails);
 app.appendChild(helpDetails);
-app.appendChild(aboutDetails);
 app.appendChild(buttonRow);
 app.appendChild(status);
 document.body.appendChild(app);
@@ -372,12 +433,12 @@ formDetails.addEventListener('toggle', () => {
   status.textContent = `Status: form section ${formDetails.isOpen() ? 'expanded' : 'collapsed'}`;
 });
 
-helpDetails.addEventListener('toggle', () => {
-  status.textContent = `Status: help section ${helpDetails.isOpen() ? 'expanded' : 'collapsed'}`;
+tableDetails.addEventListener('toggle', () => {
+  status.textContent = `Status: table section ${tableDetails.isOpen() ? 'expanded' : 'collapsed'}`;
 });
 
-aboutDetails.addEventListener('toggle', () => {
-  status.textContent = `Status: about section ${aboutDetails.isOpen() ? 'expanded' : 'collapsed'}`;
+helpDetails.addEventListener('toggle', () => {
+  status.textContent = `Status: help section ${helpDetails.isOpen() ? 'expanded' : 'collapsed'}`;
 });
 
 document.setActiveElement(formDetails);
