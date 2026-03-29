@@ -96,7 +96,8 @@ title.textContent = 'ui-input basic example';
 
 const hint = document.createElement('div');
 hint.className = 'hint';
-hint.textContent = 'Tab to switch fields. Type, backspace, Home/End, paste. Press Ctrl+C to quit.';
+hint.textContent =
+  'Tab to switch fields. Shift+Arrow to select. Ctrl+C copy, Ctrl+X cut. Ctrl+Q to quit.';
 
 const inputPanel = document.createElement('div');
 inputPanel.className = 'panel';
@@ -184,7 +185,7 @@ document.setActiveElement(nameInput);
 const emergencyInputHandler = (chunk: Buffer | string): void => {
   const text = typeof chunk === 'string' ? chunk : chunk.toString('utf8');
 
-  if (text.includes('\u0003')) {
+  if (text.includes('\u0011')) {
     terminal.exit();
     process.exit(0);
   }
