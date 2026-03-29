@@ -77,7 +77,7 @@ export class FlexLayout {
       } else {
         outerWidth = explicitWidth + horizontalBorderPadding;
       }
-    } else if (isAbsolute) {
+    } else if (isAbsolute || computedStyle.get('display') === 'inline') {
       outerWidth = this.resolveIntrinsicContentWidth(
         children,
         textLines,
@@ -88,6 +88,8 @@ export class FlexLayout {
       if (boxSizing === 'border-box') {
         outerWidth += horizontalBorderPadding;
       }
+
+      outerWidth = Math.min(outerWidth, availableWidth - horizontalMargin);
     } else {
       outerWidth = availableWidth - horizontalMargin;
     }
