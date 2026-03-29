@@ -218,5 +218,7 @@ export interface TerminalManagerOptions {
   mouse?: boolean;
 }
 
-export type {Editable} from './Editable';
 export type {CaretOverlay, CaretSelectionRange} from './CaretOverlay';
+export type {EditableConfiguration} from './EditableConfiguration';
+export type {EditableState} from './EditableState';
+export type {VisualLine} from './VisualLine';

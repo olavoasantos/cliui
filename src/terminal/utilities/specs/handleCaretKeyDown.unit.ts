@@ -1,7 +1,7 @@
 import {describe, expect, it, vi} from 'vitest';
 
 import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
-import {Caret} from '../Caret';
+import {Caret} from '../../classes/Caret';
 import {handleCaretKeyDown} from '../handleCaretKeyDown';
 
 import type {Editable} from '../../types/Editable';
@@ -267,5 +267,153 @@ describe('handleCaretKeyDown clipboard', () => {
 
     expect(handled).toBe(true);
     expect(editable.getGraphemes()).toEqual(['a']);
+  });
+});
+
+describe('handleCaretKeyDown multiline', () => {
+  const multiLineConfig = {
+    intrinsicWidth: () => 20,
+    intrinsicHeight: () => 5,
+    wordWrap: false,
+    multiLine: true,
+  };
+
+  function g(text: string): string[] {
+    return [...new Intl.Segmenter('en', {granularity: 'grapheme'}).segment(text)].map(
+      (s) => s.segment,
+    );
+  }
+
+  it('inserts a newline on Enter', () => {
+    const editable = createEditable(g('ab'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(1);
+
+    const handled = handleCaretKeyDown(caret, key('Enter'), {config: multiLineConfig});
+
+    expect(handled).toBe(true);
+    expect(editable.getGraphemes().join('')).toBe('a\nb');
+    expect(caret.position).toBe(2);
+  });
+
+  it('does not insert a newline when multiLine is false', () => {
+    const editable = createEditable(g('ab'));
+    const caret = new Caret(editable);
+    const singleLineConfig = {...multiLineConfig, multiLine: false};
+
+    caret.moveTo(1);
+
+    const handled = handleCaretKeyDown(caret, key('Enter'), {config: singleLineConfig});
+
+    expect(handled).toBe(false);
+  });
+
+  it('navigates down with ArrowDown', () => {
+    const editable = createEditable(g('abc\ndef'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(1); // on 'b' in line 0
+
+    const handled = handleCaretKeyDown(caret, key('ArrowDown'), {config: multiLineConfig});
+
+    expect(handled).toBe(true);
+    expect(caret.position).toBe(5); // 'e' in line 1
+  });
+
+  it('navigates up with ArrowUp', () => {
+    const editable = createEditable(g('abc\ndef'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(5); // on 'e' in line 1
+
+    const handled = handleCaretKeyDown(caret, key('ArrowUp'), {config: multiLineConfig});
+
+    expect(handled).toBe(true);
+    expect(caret.position).toBe(1); // 'b' in line 0
+  });
+
+  it('clamps ArrowDown at the last line', () => {
+    const editable = createEditable(g('abc\ndef'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(5);
+
+    const handled = handleCaretKeyDown(caret, key('ArrowDown'), {config: multiLineConfig});
+
+    expect(handled).toBe(true);
+    expect(caret.position).toBe(5); // unchanged
+  });
+
+  it('clamps ArrowUp at the first line', () => {
+    const editable = createEditable(g('abc\ndef'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(1);
+
+    const handled = handleCaretKeyDown(caret, key('ArrowUp'), {config: multiLineConfig});
+
+    expect(handled).toBe(true);
+    expect(caret.position).toBe(1); // unchanged
+  });
+
+  it('moves Home to start of current line', () => {
+    const editable = createEditable(g('abc\ndef'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(6); // on 'f' in line 1
+
+    const handled = handleCaretKeyDown(caret, key('Home'), {config: multiLineConfig});
+
+    expect(handled).toBe(true);
+    expect(caret.position).toBe(4); // start of line 1
+  });
+
+  it('moves End to end of current line', () => {
+    const editable = createEditable(g('abc\ndef'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(4); // start of line 1
+
+    const handled = handleCaretKeyDown(caret, key('End'), {config: multiLineConfig});
+
+    expect(handled).toBe(true);
+    expect(caret.position).toBe(7); // end of line 1
+  });
+
+  it('Ctrl+U deletes to start of current line', () => {
+    const editable = createEditable(g('abc\ndef'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(6); // on 'f' in line 1
+
+    const handled = handleCaretKeyDown(caret, key('u', {ctrl: true}), {config: multiLineConfig});
+
+    expect(handled).toBe(true);
+    expect(editable.getGraphemes().join('')).toBe('abc\nf');
+  });
+
+  it('Ctrl+K deletes to end of current line', () => {
+    const editable = createEditable(g('abc\ndef'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(4); // start of 'def'
+
+    const handled = handleCaretKeyDown(caret, key('k', {ctrl: true}), {config: multiLineConfig});
+
+    expect(handled).toBe(true);
+    expect(editable.getGraphemes().join('')).toBe('abc\n');
+  });
+
+  it('supports Shift+ArrowDown for selection', () => {
+    const editable = createEditable(g('abc\ndef'));
+    const caret = new Caret(editable);
+
+    caret.moveTo(1);
+
+    handleCaretKeyDown(caret, key('ArrowDown', {shift: true}), {config: multiLineConfig});
+
+    expect(caret.hasSelection()).toBe(true);
+    expect(caret.getSelectedRange()).toEqual([1, 5]);
   });
 });

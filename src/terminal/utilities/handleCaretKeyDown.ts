@@ -1,7 +1,11 @@
-import {Caret} from './Caret';
+import {cellWidth} from '../../layout/utilities/cellWidth';
+import {computeVisualLines} from './computeVisualLines';
+import {Caret} from '../classes/Caret';
 
 import type {KeyboardEvent} from '../../dom/classes/KeyboardEvent';
+import type {EditableConfiguration} from '../types/EditableConfiguration';
 import type {Editable} from '../types/Editable';
+import type {VisualLine} from '../types/VisualLine';
 
 /**
  * Options for {@link handleCaretKeyDown}.
@@ -21,10 +25,33 @@ export interface CaretKeyDownOptions {
    * emulator still works independently).
    */
   onClipboardRead?: () => string;
+
+  /**
+   * Declarative editable configuration for 2D navigation support.
+   * When provided, enables ArrowUp/Down navigation and per-line
+   * Home/End behavior.
+   */
+  config?: EditableConfiguration;
+
+  /**
+   * Resolved viewport width in terminal cells from the element's layout.
+   * Takes precedence over `config.intrinsicWidth()` when provided.
+   */
+  viewportWidth?: number;
+
+  /**
+   * Resolved viewport height in rows from the element's layout.
+   * Takes precedence over `config.intrinsicHeight()` when provided.
+   */
+  viewportHeight?: number;
 }
 
 /**
  * Handles standard editing keyboard shortcuts for a caret.
+ *
+ * When a {@link EditableConfiguration} is provided via options, supports
+ * multi-line navigation (ArrowUp/Down, Enter, per-line Home/End).
+ * Without it, behaves as a single-line editor.
  *
  * Returns `true` if the key was handled (caller should stop propagation),
  * `false` if the key should pass through to the component.
@@ -40,10 +67,36 @@ export function handleCaretKeyDown(
   const meta = (event as unknown as {metaKey: boolean}).metaKey;
   const shift = (event as unknown as {shiftKey: boolean}).shiftKey;
   const {key} = event;
+  const config = options?.config;
+  const resolvedWidth = options?.viewportWidth ?? config?.intrinsicWidth() ?? 0;
 
   if (target.isDisabled()) return false;
 
-  /* Navigation (works in readonly too) */
+  /* ── Multi-line navigation ────────────────────────────── */
+
+  if (config && (key === 'ArrowUp' || key === 'ArrowDown') && !alt && !ctrl && !meta) {
+    const lines = computeVisualLines(target.getGraphemes(), resolvedWidth, config.wordWrap);
+    const {lineIndex, columnCells} = findCursorLinePosition(target, lines);
+    const nextLineIndex = key === 'ArrowUp' ? lineIndex - 1 : lineIndex + 1;
+
+    if (nextLineIndex < 0 || nextLineIndex >= lines.length) return true;
+
+    const pos = mapCellOffsetToGraphemeIndex(lines[nextLineIndex]!, columnCells, target);
+    shift ? caret.selectTo(pos) : caret.moveTo(pos);
+    return true;
+  }
+
+  /* Enter: insert newline in multi-line mode */
+  if (config?.multiLine && key === 'Enter' && !alt && !ctrl && !meta) {
+    if (!target.isReadonly()) {
+      caret.insertText('\n');
+    }
+
+    return true;
+  }
+
+  /* ── Navigation (works in readonly too) ───────────────── */
+
   if (key === 'ArrowLeft' && !alt && !ctrl && !meta) {
     shift ? caret.selectTo(caret.position - 1) : caret.moveTo(caret.position - 1);
     return true;
@@ -55,13 +108,16 @@ export function handleCaretKeyDown(
   }
 
   if (key === 'Home' || (key === 'a' && ctrl)) {
-    shift ? caret.selectTo(0) : caret.moveTo(0);
+    const pos = config ? getLineStart(target, config, caret.position, resolvedWidth) : 0;
+    shift ? caret.selectTo(pos) : caret.moveTo(pos);
     return true;
   }
 
   if (key === 'End' || (key === 'e' && ctrl)) {
-    const end = target.getGraphemes().length;
-    shift ? caret.selectTo(end) : caret.moveTo(end);
+    const pos = config
+      ? getLineEnd(target, config, caret.position, resolvedWidth)
+      : target.getGraphemes().length;
+    shift ? caret.selectTo(pos) : caret.moveTo(pos);
     return true;
   }
 
@@ -120,7 +176,8 @@ export function handleCaretKeyDown(
     return true;
   }
 
-  /* Editing (blocked by readonly) */
+  /* ── Editing (blocked by readonly) ────────────────────── */
+
   if (target.isReadonly()) return false;
 
   if (key === 'Backspace' && !alt && !ctrl) {
@@ -175,8 +232,9 @@ export function handleCaretKeyDown(
   /* Delete to line start: Ctrl+U */
   if (key === 'u' && ctrl) {
     if (!caret.deleteSelection()) {
-      target.deleteRange(0, caret.position);
-      caret.moveTo(0);
+      const lineStart = config ? getLineStart(target, config, caret.position, resolvedWidth) : 0;
+      target.deleteRange(lineStart, caret.position);
+      caret.moveTo(lineStart);
     }
 
     target.updateScroll();
@@ -186,7 +244,10 @@ export function handleCaretKeyDown(
   /* Delete to line end: Ctrl+K */
   if (key === 'k' && ctrl) {
     if (!caret.deleteSelection()) {
-      target.deleteRange(caret.position, target.getGraphemes().length);
+      const lineEnd = config
+        ? getLineEnd(target, config, caret.position, resolvedWidth)
+        : target.getGraphemes().length;
+      target.deleteRange(caret.position, lineEnd);
     }
 
     target.updateScroll();
@@ -230,6 +291,8 @@ export function handleCaretKeyDown(
   return false;
 }
 
+/* ── Helpers ─────────────────────────────────────────────── */
+
 function findWordBoundaryLeft(target: Editable, position: number): number {
   const graphemes = target.getGraphemes();
   let index = position - 1;
@@ -258,4 +321,101 @@ function findWordBoundaryRight(target: Editable, position: number): number {
   }
 
   return index;
+}
+
+/**
+ * Finds the visual line containing the cursor and the cursor's column
+ * offset in terminal cells within that line.
+ */
+function findCursorLinePosition(
+  target: Editable,
+  lines: VisualLine[],
+): {lineIndex: number; columnCells: number} {
+  const cursorPos = target.getCursorPosition();
+  const graphemes = target.getGraphemes();
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!;
+
+    if (cursorPos >= line.start && (cursorPos < line.end || i === lines.length - 1)) {
+      let columnCells = 0;
+
+      for (let j = line.start; j < cursorPos && j < graphemes.length; j++) {
+        columnCells += cellWidth(graphemes[j]!);
+      }
+
+      return {lineIndex: i, columnCells};
+    }
+  }
+
+  return {lineIndex: lines.length - 1, columnCells: 0};
+}
+
+/**
+ * Maps a cell offset (in terminal cells) to a grapheme index within a
+ * visual line, choosing the closest grapheme boundary.
+ */
+function mapCellOffsetToGraphemeIndex(
+  line: VisualLine,
+  targetCells: number,
+  target: Editable,
+): number {
+  const graphemes = target.getGraphemes();
+  let cells = 0;
+
+  for (let i = line.start; i < line.end && i < graphemes.length; i++) {
+    const w = cellWidth(graphemes[i]!);
+
+    if (cells + w > targetCells) {
+      return i;
+    }
+
+    cells += w;
+  }
+
+  return line.end;
+}
+
+/**
+ * Returns the start grapheme index of the visual line containing the cursor.
+ */
+function getLineStart(
+  target: Editable,
+  config: EditableConfiguration,
+  cursorPos: number,
+  width: number,
+): number {
+  const lines = computeVisualLines(target.getGraphemes(), width, config.wordWrap);
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!;
+
+    if (cursorPos >= line.start && (cursorPos <= line.end || i === lines.length - 1)) {
+      return line.start;
+    }
+  }
+
+  return 0;
+}
+
+/**
+ * Returns the end grapheme index of the visual line containing the cursor.
+ */
+function getLineEnd(
+  target: Editable,
+  config: EditableConfiguration,
+  cursorPos: number,
+  width: number,
+): number {
+  const lines = computeVisualLines(target.getGraphemes(), width, config.wordWrap);
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!;
+
+    if (cursorPos >= line.start && (cursorPos <= line.end || i === lines.length - 1)) {
+      return line.end;
+    }
+  }
+
+  return target.getGraphemes().length;
 }

@@ -1,12 +1,12 @@
 import type {Element} from '../../dom/classes/Element';
 
 /**
- * Contract for DOM elements that support text editing with a caret.
+ * Internal contract used by the caret system to interact with editable
+ * text content.
  *
- * Input components (`<ui-input>`, `<ui-textarea>`, etc.) implement this
- * interface so the centralized caret system can read their content,
- * move the cursor, and perform edits without knowing the component's
- * internal structure.
+ * Components do not implement this directly. Instead, they declare an
+ * `[EDITABLE]` configuration symbol and the terminal system creates
+ * bridge objects that implement this interface internally.
  */
 export interface Editable {
   /** Returns the grapheme array representing the editable content. */

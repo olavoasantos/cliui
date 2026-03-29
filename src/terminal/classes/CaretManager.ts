@@ -1,10 +1,14 @@
 import {cellWidth} from '../../layout/utilities/cellWidth';
+import {computeVisualLines} from '../utilities/computeVisualLines';
+import {EDITABLE} from '../constants/editable';
 import {Caret} from './Caret';
 
 import type {Element} from '../../dom/classes/Element';
 import type {LayoutBox} from '../../layout/types';
 import type {CaretOverlay} from '../types/CaretOverlay';
+import type {EditableConfiguration} from '../types/EditableConfiguration';
 import type {Editable} from '../types/Editable';
+import type {VisualLine} from '../types/VisualLine';
 
 /**
  * Manages all active carets in the terminal.
@@ -12,6 +16,10 @@ import type {Editable} from '../types/Editable';
  * Typically one caret exists per focused editable element.  The manager
  * ticks blink timers, creates/removes carets on focus transitions, and
  * resolves screen-space overlays for the renderer.
+ *
+ * Supports both single-line and multi-line editables. When an element
+ * carries an `[EDITABLE]` configuration, cursor and selection overlays
+ * are computed using 2D visual line mapping.
  */
 export class CaretManager {
   private readonly carets = new Set<Caret>();
@@ -63,7 +71,11 @@ export class CaretManager {
       const box = this.findLayoutBox(layoutRoot, caret.target.getElement());
       if (!box) continue;
 
-      const overlay = this.resolveOverlay(caret, box);
+      const config = this.getConfig(caret.target.getElement());
+      const overlay = config
+        ? this.resolveOverlay2D(caret, box, config)
+        : this.resolveOverlay1D(caret, box);
+
       if (overlay) overlays.push(overlay);
     }
 
@@ -85,15 +97,21 @@ export class CaretManager {
   }
 
   /**
-   * Computes the screen-space cursor position for a caret within its
-   * layout box's content area.
+   * Reads the `[EDITABLE]` configuration from a DOM element, if present.
    */
-  private resolveOverlay(caret: Caret, box: LayoutBox): CaretOverlay | null {
+  private getConfig(element: Element): EditableConfiguration | null {
+    const el = element as unknown as Partial<Record<typeof EDITABLE, EditableConfiguration>>;
+    return el[EDITABLE] ?? null;
+  }
+
+  /**
+   * Legacy single-line overlay computation (no config).
+   */
+  private resolveOverlay1D(caret: Caret, box: LayoutBox): CaretOverlay | null {
     const graphemes = caret.target.getGraphemes();
     const scrollOffset = caret.target.getScrollOffset();
     const cursorPos = caret.position;
 
-    /* Walk graphemes from the scroll offset to the cursor to find the x offset */
     let xOffset = 0;
 
     for (let i = scrollOffset; i < cursorPos && i < graphemes.length; i++) {
@@ -103,12 +121,11 @@ export class CaretManager {
     const cursorX = box.contentX + xOffset;
     const cursorY = box.contentY;
 
-    /* Cursor is clipped if it falls outside the content area */
     if (cursorX >= box.contentX + box.contentWidth) {
       return null;
     }
 
-    const selection = this.resolveSelectionRanges(caret, box, graphemes, scrollOffset);
+    const selection = this.resolveSelectionRanges1D(caret, box, graphemes, scrollOffset);
 
     return {
       cursorX,
@@ -119,10 +136,9 @@ export class CaretManager {
   }
 
   /**
-   * Resolves the caret's selected grapheme range into one or more
-   * contiguous screen-space cell ranges.
+   * Legacy single-line selection range computation.
    */
-  private resolveSelectionRanges(
+  private resolveSelectionRanges1D(
     caret: Caret,
     box: LayoutBox,
     graphemes: string[],
@@ -139,7 +155,6 @@ export class CaretManager {
 
     let x = box.contentX;
 
-    /* Skip graphemes before the visible selection start */
     for (let i = scrollOffset; i < visibleStart; i++) {
       x += cellWidth(graphemes[i]!);
     }
@@ -156,5 +171,130 @@ export class CaretManager {
     }
 
     return width > 0 ? [{x, y: box.contentY, width}] : [];
+  }
+
+  /**
+   * 2D overlay computation using visual lines.
+   */
+  private resolveOverlay2D(
+    caret: Caret,
+    box: LayoutBox,
+    config: EditableConfiguration,
+  ): CaretOverlay | null {
+    const graphemes = caret.target.getGraphemes();
+    const scrollX = caret.target.getScrollOffset();
+    const scrollY = (caret.target as unknown as {scrollY?: number}).scrollY ?? 0;
+    const lines = computeVisualLines(graphemes, box.contentWidth, config.wordWrap);
+    const cursorPos = caret.position;
+
+    const {lineIndex, columnCells} = this.findCursorLine(graphemes, lines, cursorPos, scrollX);
+
+    const screenRow = lineIndex - scrollY;
+
+    if (screenRow < 0 || screenRow >= box.contentHeight) {
+      return {
+        cursorX: box.contentX,
+        cursorY: box.contentY,
+        cursorVisible: false,
+        selection: this.resolveSelectionRanges2D(caret, box, graphemes, lines, scrollY),
+      };
+    }
+
+    const cursorX = box.contentX + columnCells;
+    const cursorY = box.contentY + screenRow;
+
+    if (cursorX >= box.contentX + box.contentWidth) {
+      return null;
+    }
+
+    const selection = this.resolveSelectionRanges2D(caret, box, graphemes, lines, scrollY);
+
+    return {
+      cursorX,
+      cursorY,
+      cursorVisible: caret.cursorVisible,
+      selection,
+    };
+  }
+
+  /**
+   * Finds the visual line and column cell offset for a cursor position.
+   */
+  private findCursorLine(
+    graphemes: string[],
+    lines: VisualLine[],
+    cursorPos: number,
+    scrollX: number,
+  ): {lineIndex: number; columnCells: number} {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]!;
+
+      if (cursorPos >= line.start && (cursorPos < line.end || i === lines.length - 1)) {
+        let columnCells = 0;
+        const start = Math.max(line.start, line.start + scrollX);
+
+        for (let j = start; j < cursorPos && j < graphemes.length; j++) {
+          if (graphemes[j] === '\n') continue;
+          columnCells += cellWidth(graphemes[j]!);
+        }
+
+        return {lineIndex: i, columnCells};
+      }
+    }
+
+    return {lineIndex: lines.length - 1, columnCells: 0};
+  }
+
+  /**
+   * 2D selection range computation across visual lines.
+   */
+  private resolveSelectionRanges2D(
+    caret: Caret,
+    box: LayoutBox,
+    graphemes: string[],
+    lines: VisualLine[],
+    scrollY: number,
+  ): Array<{x: number; y: number; width: number}> {
+    const range = caret.getSelectedRange();
+    if (!range) return [];
+
+    const [selStart, selEnd] = range;
+    const ranges: Array<{x: number; y: number; width: number}> = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const screenRow = i - scrollY;
+
+      if (screenRow < 0 || screenRow >= box.contentHeight) continue;
+
+      const line = lines[i]!;
+      const lineSelStart = Math.max(selStart, line.start);
+      const lineSelEnd = Math.min(selEnd, line.end);
+
+      if (lineSelStart >= lineSelEnd) continue;
+
+      let x = box.contentX;
+
+      for (let j = line.start; j < lineSelStart; j++) {
+        if (graphemes[j] === '\n') continue;
+        x += cellWidth(graphemes[j]!);
+      }
+
+      let width = 0;
+
+      for (let j = lineSelStart; j < lineSelEnd; j++) {
+        if (graphemes[j] === '\n') continue;
+        const w = cellWidth(graphemes[j]!);
+
+        if (x + width + w > box.contentX + box.contentWidth) break;
+
+        width += w;
+      }
+
+      if (width > 0) {
+        ranges.push({x, y: box.contentY + screenRow, width});
+      }
+    }
+
+    return ranges;
   }
 }

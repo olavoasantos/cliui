@@ -1,12 +1,11 @@
 import {describe, expect, it} from 'vitest';
 
-import {ClipboardEvent, Event, KeyboardEvent, MouseEvent, Window} from '../../../dom';
-import {Caret} from '../../../terminal/classes/Caret';
-import {handleCaretKeyDown} from '../../../terminal/classes/handleCaretKeyDown';
+import {Window} from '../../../dom';
+import {EDITABLE} from '../../../terminal/constants/editable';
 import {UiInput} from '../component';
 
-import type {KeyboardEventInit} from '../../../dom';
 import type {CustomElementConstructor} from '../../../dom/types';
+import type {EditableConfiguration} from '../../../terminal/types/EditableConfiguration';
 
 function createInput(
   window = new Window(),
@@ -30,33 +29,6 @@ function createInput(
   return {window, input};
 }
 
-function typeKey(input: UiInput, key: string, options: Partial<KeyboardEventInit> = {}): void {
-  const event = new KeyboardEvent('keydown', {
-    bubbles: true,
-    cancelable: true,
-    key,
-    ...options,
-  });
-
-  const caret = input.getCaret();
-
-  if (caret && handleCaretKeyDown(caret, event)) {
-    return;
-  }
-
-  input.dispatchEvent(event);
-}
-
-function focusInput(input: UiInput): void {
-  input.dispatchEvent(new Event('focus'));
-
-  const caret = new Caret(input);
-  input.setCaret(caret);
-}
-
-function blurInput(input: UiInput): void {
-  input.dispatchEvent(new Event('blur'));
-}
 describe('UiInput', () => {
   it('registers the custom element under its tag name', () => {
     const window = new Window();
@@ -68,196 +40,27 @@ describe('UiInput', () => {
     );
   });
 
+  it('carries an [EDITABLE] configuration', () => {
+    const {input} = createInput();
+    const config = (input as unknown as Record<symbol, EditableConfiguration>)[EDITABLE];
+
+    expect(config).toBeDefined();
+    expect(config.intrinsicWidth()).toBe(20);
+    expect(config.intrinsicHeight()).toBe(1);
+    expect(config.wordWrap).toBe(false);
+    expect(config.multiLine).toBe(false);
+  });
+
   it('renders an empty field with spaces by default', () => {
     const {input} = createInput();
 
     expect(input.textContent).toBe(' '.repeat(20));
   });
 
-  it('renders placeholder text when value is empty and unfocused', () => {
+  it('renders placeholder text when value is empty', () => {
     const {input} = createInput(undefined, {placeholder: 'Type here...'});
 
     expect(input.textContent).toContain('Type here...');
-  });
-
-  it('renders cursor when focused and empty', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-
-    expect(input.textContent).toBeDefined();
-  });
-
-  it('inserts characters at cursor position', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'h');
-    typeKey(input, 'i');
-
-    expect(input.getAttribute('value')).toBe('hi');
-  });
-
-  it('renders typed text with cursor', () => {
-    const {input} = createInput(undefined, {width: '10'});
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-
-    expect(input.textContent).toContain('ab');
-    expect(input.textContent).toBeDefined();
-  });
-
-  it('handles backspace', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'c');
-    typeKey(input, 'Backspace');
-
-    expect(input.getAttribute('value')).toBe('ab');
-  });
-
-  it('handles delete', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'c');
-    typeKey(input, 'Home');
-    typeKey(input, 'Delete');
-
-    expect(input.getAttribute('value')).toBe('bc');
-  });
-
-  it('moves cursor left and right', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'ArrowLeft');
-    typeKey(input, 'x');
-
-    expect(input.getAttribute('value')).toBe('axb');
-  });
-
-  it('moves cursor to start with Home', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'Home');
-    typeKey(input, 'x');
-
-    expect(input.getAttribute('value')).toBe('xab');
-  });
-
-  it('moves cursor to end with End', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'Home');
-    typeKey(input, 'End');
-    typeKey(input, 'x');
-
-    expect(input.getAttribute('value')).toBe('abx');
-  });
-
-  it('ignores input when disabled', () => {
-    const {input} = createInput(undefined, {disabled: true});
-
-    focusInput(input);
-    typeKey(input, 'a');
-
-    expect(input.getAttribute('value')).toBeNull();
-  });
-
-  it('allows cursor movement but not editing when readonly', () => {
-    const {input} = createInput(undefined, {readonly: true, value: 'abc'});
-
-    focusInput(input);
-    typeKey(input, 'x');
-    typeKey(input, 'Backspace');
-
-    expect(input.getAttribute('value')).toBe('abc');
-  });
-
-  it('respects maxlength', () => {
-    const {input} = createInput(undefined, {maxlength: '3'});
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'c');
-    typeKey(input, 'd');
-
-    expect(input.getAttribute('value')).toBe('abc');
-  });
-
-  it('dispatches input events on each edit', () => {
-    const {input} = createInput();
-    const events: Event[] = [];
-
-    input.addEventListener('input', ((event: Event) => {
-      events.push(event);
-    }) as EventListener);
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'Backspace');
-
-    expect(events).toHaveLength(2);
-  });
-
-  it('dispatches change event on blur when value changed', () => {
-    const {input} = createInput();
-    const events: Event[] = [];
-
-    input.addEventListener('change', ((event: Event) => {
-      events.push(event);
-    }) as EventListener);
-
-    focusInput(input);
-    typeKey(input, 'a');
-    blurInput(input);
-
-    expect(events).toHaveLength(1);
-  });
-
-  it('does not dispatch change event on blur when value unchanged', () => {
-    const {input} = createInput();
-    const events: Event[] = [];
-
-    input.addEventListener('change', ((event: Event) => {
-      events.push(event);
-    }) as EventListener);
-
-    focusInput(input);
-    blurInput(input);
-
-    expect(events).toHaveLength(0);
-  });
-
-  it('handles paste events', () => {
-    const {input} = createInput();
-    const clipboardData = {
-      getData: (type: string): string => (type === 'text/plain' ? 'pasted' : ''),
-    } as DataTransfer;
-
-    focusInput(input);
-    input.dispatchEvent(
-      new ClipboardEvent('paste', {bubbles: true, cancelable: true, clipboardData}),
-    );
-
-    expect(input.getAttribute('value')).toBe('pasted');
   });
 
   it('renders initial value from attribute', () => {
@@ -266,327 +69,61 @@ describe('UiInput', () => {
     expect(input.textContent).toContain('hello');
   });
 
-  it('applies custom width', () => {
+  it('applies custom width to viewport config', () => {
     const {input} = createInput(undefined, {width: '5'});
+    const config = (input as unknown as Record<symbol, EditableConfiguration>)[EDITABLE];
 
+    expect(config.intrinsicWidth()).toBe(5);
     expect(input.textContent?.length).toBe(5);
   });
 
-  it('handles horizontal scrolling when text exceeds width', () => {
-    const {input} = createInput(undefined, {width: '5'});
+  it('reports maxlength through config', () => {
+    const {input} = createInput(undefined, {maxlength: '3'});
+    const config = (input as unknown as Record<symbol, EditableConfiguration>)[EDITABLE];
 
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'c');
-    typeKey(input, 'd');
-    typeKey(input, 'e');
-    typeKey(input, 'f');
-
-    expect(input.getAttribute('value')).toBe('abcdef');
-    expect(input.textContent?.length).toBe(5);
+    expect(config.maxLength?.()).toBe(3);
   });
 
-  it('ignores control key combinations for text insertion', () => {
+  it('reports placeholder through config', () => {
+    const {input} = createInput(undefined, {placeholder: 'Enter text'});
+    const config = (input as unknown as Record<symbol, EditableConfiguration>)[EDITABLE];
+
+    expect(config.placeholder?.()).toBe('Enter text');
+  });
+
+  it('sets tabindex on connect when not disabled', () => {
     const {input} = createInput();
 
-    focusInput(input);
-    typeKey(input, 'a', {ctrlKey: true});
-
-    expect(input.getAttribute('value')).toBeNull();
+    expect(input.getAttribute('tabindex')).toBe('0');
   });
 
-  it('deletes word backward with Alt+Backspace', () => {
+  it('does not set tabindex when disabled', () => {
+    const {input} = createInput(undefined, {disabled: true});
+
+    expect(input.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('removes tabindex when disabled attribute is added', () => {
     const {input} = createInput();
 
-    focusInput(input);
-    typeKey(input, 'h');
-    typeKey(input, 'e');
-    typeKey(input, 'l');
-    typeKey(input, 'l');
-    typeKey(input, 'o');
-    typeKey(input, ' ');
-    typeKey(input, 'w');
-    typeKey(input, 'o');
-    typeKey(input, 'r');
-    typeKey(input, 'l');
-    typeKey(input, 'd');
-    typeKey(input, 'Backspace', {altKey: true});
+    expect(input.getAttribute('tabindex')).toBe('0');
 
-    expect(input.getAttribute('value')).toBe('hello ');
+    input.setAttribute('disabled', '');
+
+    expect(input.hasAttribute('tabindex')).toBe(false);
   });
 
-  it('deletes word backward with Ctrl+W', () => {
-    const {input} = createInput();
+  it('restores tabindex when disabled attribute is removed', () => {
+    const {input} = createInput(undefined, {disabled: true});
 
-    focusInput(input);
-    typeKey(input, 'h');
-    typeKey(input, 'e');
-    typeKey(input, 'l');
-    typeKey(input, 'l');
-    typeKey(input, 'o');
-    typeKey(input, ' ');
-    typeKey(input, 'w');
-    typeKey(input, 'o');
-    typeKey(input, 'r');
-    typeKey(input, 'l');
-    typeKey(input, 'd');
-    typeKey(input, 'w', {ctrlKey: true});
+    input.removeAttribute('disabled');
 
-    expect(input.getAttribute('value')).toBe('hello ');
+    expect(input.getAttribute('tabindex')).toBe('0');
   });
 
-  it('deletes word forward with Alt+Delete', () => {
-    const {input} = createInput();
+  it('reports readonly state', () => {
+    const {input} = createInput(undefined, {readonly: true});
 
-    focusInput(input);
-    typeKey(input, 'h');
-    typeKey(input, 'e');
-    typeKey(input, 'l');
-    typeKey(input, 'l');
-    typeKey(input, 'o');
-    typeKey(input, ' ');
-    typeKey(input, 'w');
-    typeKey(input, 'o');
-    typeKey(input, 'r');
-    typeKey(input, 'l');
-    typeKey(input, 'd');
-    typeKey(input, 'Home');
-    typeKey(input, 'Delete', {altKey: true});
-
-    expect(input.getAttribute('value')).toBe('world');
-  });
-
-  it('deletes word forward with Alt+D', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'h');
-    typeKey(input, 'e');
-    typeKey(input, 'l');
-    typeKey(input, 'l');
-    typeKey(input, 'o');
-    typeKey(input, ' ');
-    typeKey(input, 'w');
-    typeKey(input, 'o');
-    typeKey(input, 'r');
-    typeKey(input, 'l');
-    typeKey(input, 'd');
-    typeKey(input, 'Home');
-    typeKey(input, 'd', {altKey: true});
-
-    expect(input.getAttribute('value')).toBe('world');
-  });
-
-  it('deletes to line start with Ctrl+U', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'c');
-    typeKey(input, 'u', {ctrlKey: true});
-
-    expect(input.getAttribute('value')).toBe('');
-  });
-
-  it('deletes to line end with Ctrl+K', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'c');
-    typeKey(input, 'Home');
-    typeKey(input, 'k', {ctrlKey: true});
-
-    expect(input.getAttribute('value')).toBe('');
-  });
-
-  it('moves cursor by word with Alt+B and Alt+F', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'h');
-    typeKey(input, 'i');
-    typeKey(input, ' ');
-    typeKey(input, 'y');
-    typeKey(input, 'o');
-    typeKey(input, 'b', {altKey: true});
-    typeKey(input, 'x');
-
-    expect(input.getAttribute('value')).toBe('hi xyo');
-  });
-
-  it('supports Ctrl+A for Home and Ctrl+E for End', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'a', {ctrlKey: true});
-    typeKey(input, 'x');
-
-    expect(input.getAttribute('value')).toBe('xab');
-
-    typeKey(input, 'e', {ctrlKey: true});
-    typeKey(input, 'y');
-
-    expect(input.getAttribute('value')).toBe('xaby');
-  });
-
-  it('supports Ctrl+F and Ctrl+B for cursor movement', () => {
-    const {input} = createInput();
-
-    focusInput(input);
-    typeKey(input, 'a');
-    typeKey(input, 'b');
-    typeKey(input, 'c');
-    typeKey(input, 'b', {ctrlKey: true});
-    typeKey(input, 'x');
-
-    expect(input.getAttribute('value')).toBe('abxc');
-
-    typeKey(input, 'f', {ctrlKey: true});
-    typeKey(input, 'y');
-
-    expect(input.getAttribute('value')).toBe('abxcy');
-  });
-
-  it('blurs on Escape', () => {
-    const {window, input} = createInput();
-    const events: Event[] = [];
-
-    input.addEventListener('change', ((event: Event) => {
-      events.push(event);
-    }) as EventListener);
-
-    window.document.setActiveElement(input);
-    input.setCaret(new Caret(input));
-    typeKey(input, 'a');
-    typeKey(input, 'Escape');
-
-    expect(events).toHaveLength(1);
-    expect(window.document.activeElement).not.toBe(input);
-  });
-
-  it('focuses on mousedown', () => {
-    const {window, input} = createInput();
-    const other = window.document.createElement('div');
-    window.document.body.appendChild(other);
-
-    window.document.setActiveElement(other);
-
-    input.dispatchEvent(new Event('mousedown'));
-
-    expect(window.document.activeElement).toBe(input);
-  });
-
-  it('sets cursor position from mousedown offsetX', () => {
-    const {input} = createInput(undefined, {value: 'hello', width: '20'});
-
-    focusInput(input);
-
-    input.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        offsetX: 3,
-      }),
-    );
-
-    typeKey(input, 'X');
-
-    expect(input.getAttribute('value')).toBe('helXlo');
-  });
-
-  it('sets cursor to start when offsetX is zero', () => {
-    const {input} = createInput(undefined, {value: 'abc', width: '10'});
-
-    focusInput(input);
-
-    input.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        offsetX: 0,
-      }),
-    );
-
-    typeKey(input, 'X');
-
-    expect(input.getAttribute('value')).toBe('Xabc');
-  });
-
-  it('sets cursor to end when offsetX exceeds text length', () => {
-    const {input} = createInput(undefined, {value: 'ab', width: '10'});
-
-    focusInput(input);
-
-    input.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        offsetX: 8,
-      }),
-    );
-
-    typeKey(input, 'X');
-
-    expect(input.getAttribute('value')).toBe('abX');
-  });
-
-  it('extends selection when shift-clicking', () => {
-    const {input} = createInput(undefined, {value: 'hello', width: '20'});
-
-    focusInput(input);
-
-    input.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        offsetX: 1,
-      }),
-    );
-
-    input.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        offsetX: 4,
-        shiftKey: true,
-      }),
-    );
-
-    const caret = input.getCaret();
-    expect(caret?.hasSelection()).toBe(true);
-    expect(caret?.getSelectedRange()).toEqual([1, 4]);
-  });
-
-  it('clears selection when clicking without shift', () => {
-    const {input} = createInput(undefined, {value: 'hello', width: '20'});
-
-    focusInput(input);
-
-    input.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        offsetX: 1,
-      }),
-    );
-
-    input.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        offsetX: 4,
-        shiftKey: true,
-      }),
-    );
-
-    input.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        offsetX: 2,
-      }),
-    );
-
-    const caret = input.getCaret();
-    expect(caret?.hasSelection()).toBe(false);
-    expect(caret?.position).toBe(2);
+    expect(input.hasAttribute('readonly')).toBe(true);
   });
 });

@@ -1,9 +1,11 @@
 import {describe, expect, it} from 'vitest';
 import {Window} from '../../../dom/classes/Window';
+import {EDITABLE} from '../../constants/editable';
 import {CaretManager} from '../CaretManager';
 
 import type {Element} from '../../../dom/classes/Element';
 import type {LayoutBox} from '../../../layout/types';
+import type {EditableConfiguration} from '../../types/EditableConfiguration';
 import type {Editable} from '../../types/Editable';
 
 function createEditable(
@@ -134,5 +136,60 @@ describe('CaretManager', () => {
 
     expect(overlays).toHaveLength(1);
     expect(overlays[0]!.selection).toEqual([{x: 6, y: 3, width: 3}]);
+  });
+
+  it('resolves 2D cursor position on the correct visual line', () => {
+    const manager = new CaretManager();
+    const doc = new Window().document;
+    const element = doc.createElement('div');
+    const editable = createEditable(element, ['a', 'b', '\n', 'd', 'e', 'f']);
+    const config: EditableConfiguration = {
+      intrinsicWidth: () => 20,
+      intrinsicHeight: () => 5,
+      wordWrap: false,
+      multiLine: true,
+    };
+
+    (element as unknown as Record<symbol, EditableConfiguration>)[EDITABLE] = config;
+
+    const caret = manager.createCaret(editable);
+    caret.moveTo(4); // 'e' on line 1
+
+    const box = makeBox(element, 5, 3, 20);
+    box.contentHeight = 5;
+    const overlays = manager.getOverlays(box);
+
+    expect(overlays).toHaveLength(1);
+    expect(overlays[0]!.cursorX).toBe(6); // 'd'=1 cell offset
+    expect(overlays[0]!.cursorY).toBe(4); // line 1 → row 3+1=4
+  });
+
+  it('resolves multi-line selection into per-row ranges', () => {
+    const manager = new CaretManager();
+    const doc = new Window().document;
+    const element = doc.createElement('div');
+    const editable = createEditable(element, ['a', 'b', '\n', 'd', 'e', 'f']);
+    const config: EditableConfiguration = {
+      intrinsicWidth: () => 20,
+      intrinsicHeight: () => 5,
+      wordWrap: false,
+      multiLine: true,
+    };
+
+    (element as unknown as Record<symbol, EditableConfiguration>)[EDITABLE] = config;
+
+    const caret = manager.createCaret(editable);
+    caret.moveTo(0);
+    caret.selectTo(5); // 'a','b','\n','d','e' across 2 lines
+
+    const box = makeBox(element, 5, 3, 20);
+    box.contentHeight = 5;
+    const overlays = manager.getOverlays(box);
+
+    expect(overlays).toHaveLength(1);
+    expect(overlays[0]!.selection).toEqual([
+      {x: 5, y: 3, width: 2}, // 'ab' on line 0
+      {x: 5, y: 4, width: 2}, // 'de' on line 1
+    ]);
   });
 });
