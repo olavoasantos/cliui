@@ -63,6 +63,10 @@ style.textContent = `
     color: #cbd5e1;
   }
 
+  .hover-status {
+    color: #94a3b8;
+  }
+
   .status {
     color: #86efac;
   }
@@ -78,6 +82,10 @@ style.textContent = `
   ui-button[variant="primary"] {
     color: #ffffff;
     background-color: #7c3aed;
+  }
+
+  ui-button[variant="primary"]:hover {
+    background-color: #6d28d9;
   }
 
   ui-button[variant="primary"]:focus {
@@ -100,6 +108,10 @@ style.textContent = `
     background-color: #334155;
   }
 
+  ui-button[variant="secondary"]:hover {
+    background-color: #3f4d61;
+  }
+
   ui-button[variant="secondary"]:focus {
     background-color: #475569;
   }
@@ -120,6 +132,10 @@ style.textContent = `
     color: #fef2f2;
   }
 
+  ui-button[tone="dangerous"][variant="primary"]:hover {
+    background-color: #c32525;
+  }
+
   ui-button[tone="dangerous"][variant="primary"]:focus {
     background-color: #b91c1c;
   }
@@ -136,6 +152,10 @@ style.textContent = `
   ui-button[tone="dangerous"][variant="secondary"] {
     color: #fca5a5;
     background-color: #451a1a;
+  }
+
+  ui-button[tone="dangerous"][variant="secondary"]:hover {
+    background-color: #532020;
   }
 
   ui-button[tone="dangerous"][variant="secondary"]:focus {
@@ -306,6 +326,10 @@ interactiveSection.appendChild(interactiveRow);
 
 /* ── Status ────────────────────────────────────────────── */
 
+const hoverStatus = document.createElement('div');
+hoverStatus.className = 'hover-status';
+hoverStatus.textContent = 'Hover: none';
+
 const status = document.createElement('div');
 status.className = 'status';
 status.textContent = 'Status: ready';
@@ -318,6 +342,7 @@ app.appendChild(variantsSection);
 app.appendChild(tonesSection);
 app.appendChild(statesSection);
 app.appendChild(interactiveSection);
+app.appendChild(hoverStatus);
 app.appendChild(status);
 document.body.appendChild(app);
 
@@ -349,6 +374,31 @@ resetBtn.addEventListener('click', () => {
 deleteBtn.addEventListener('click', () => {
   status.textContent = 'Status: delete confirmed!';
 });
+
+/* ── Hover handlers ──────────────────────────────────── */
+
+const hoverTargets: Array<[InstanceType<typeof UiButton>, string]> = [
+  [primaryBtn, 'Primary'],
+  [secondaryBtn, 'Secondary'],
+  [defaultToneBtn, 'Default'],
+  [dangerPrimaryBtn, 'Dangerous'],
+  [dangerSecondaryBtn, 'Danger Secondary'],
+  [disabledPrimaryBtn, 'Disabled Primary'],
+  [disabledSecondaryBtn, 'Disabled Secondary'],
+  [disabledDangerBtn, 'Disabled Danger'],
+  [submitBtn, 'Submit'],
+  [resetBtn, 'Reset'],
+  [deleteBtn, 'Delete'],
+];
+
+for (const [btn, label] of hoverTargets) {
+  btn.addEventListener('mouseenter', () => {
+    hoverStatus.textContent = `Hover: ${label}`;
+  });
+  btn.addEventListener('mouseleave', () => {
+    hoverStatus.textContent = 'Hover: none';
+  });
+}
 
 document.setActiveElement(primaryBtn);
 

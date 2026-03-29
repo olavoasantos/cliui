@@ -80,6 +80,19 @@ function matchesSelectorMatcher(
           return element.ownerDocument?.activeElement === element;
         case 'active':
           return element.hasAttribute('pressed');
+        case 'hover': {
+          let hovered = element.ownerDocument?.hoveredElement ?? null;
+
+          while (hovered !== null) {
+            if (hovered === element) {
+              return true;
+            }
+
+            hovered = hovered.parentElement as Element | null;
+          }
+
+          return false;
+        }
         case 'disabled':
           return element.hasAttribute('disabled');
         case 'enabled':

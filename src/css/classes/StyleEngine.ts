@@ -386,11 +386,18 @@ export class StyleEngine {
     };
 
     const prevFocusChange = hooks.focusChange;
+    const prevHoverChange = hooks.hoverChange;
 
     hooks.focusChange = (previous, next) => {
       prevFocusChange?.(previous, next);
       this.markStyleDirty(previous);
       this.markStyleDirty(next);
+    };
+
+    hooks.hoverChange = (previous, next) => {
+      prevHoverChange?.(previous, next);
+      this.markHoverChainDirty(previous);
+      this.markHoverChainDirty(next);
     };
   }
 
@@ -406,7 +413,17 @@ export class StyleEngine {
       hooks.insertChild = this.previousHooks.insertChild;
       hooks.removeChild = this.previousHooks.removeChild;
       hooks.focusChange = this.previousHooks.focusChange;
+      hooks.hoverChange = this.previousHooks.hoverChange;
       this.previousHooks = null;
+    }
+  }
+
+  private markHoverChainDirty(element: Element | null): void {
+    let current = element;
+
+    while (current !== null) {
+      this.markStyleDirty(current);
+      current = current.parentElement as Element | null;
     }
   }
 }

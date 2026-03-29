@@ -566,6 +566,7 @@ describe('StyleEngine', () => {
       const previousRemoveChild = vi.fn<Hooks['removeChild']>();
       const previousSetText = vi.fn<Hooks['setText']>();
       const previousFocusChange = vi.fn<Hooks['focusChange']>();
+      const previousHoverChange = vi.fn<Hooks['hoverChange']>();
       const hooks = window[HOOKS] as Partial<Hooks>;
 
       hooks.setAttribute = previousSetAttribute;
@@ -574,6 +575,7 @@ describe('StyleEngine', () => {
       hooks.removeChild = previousRemoveChild;
       hooks.setText = previousSetText;
       hooks.focusChange = previousFocusChange;
+      hooks.hoverChange = previousHoverChange;
 
       const engine = new StyleEngine();
       engine.attach(window.document);
@@ -591,6 +593,7 @@ describe('StyleEngine', () => {
       parent.removeChild(child);
       parent.removeAttribute('class');
       window.document.setActiveElement(parent);
+      window.document.setHoveredElement(parent);
 
       expect(previousSetAttribute).toHaveBeenCalled();
       expect(previousInsertChild).toHaveBeenCalled();
@@ -598,6 +601,7 @@ describe('StyleEngine', () => {
       expect(previousRemoveChild).toHaveBeenCalled();
       expect(previousRemoveAttribute).toHaveBeenCalled();
       expect(previousFocusChange).toHaveBeenCalled();
+      expect(previousHoverChange).toHaveBeenCalled();
       expect(engine.getDirtyElements().has(parent)).toBe(true);
       expect(engine.getLayoutDirtyElements().has(parent)).toBe(true);
     });
@@ -611,6 +615,7 @@ describe('StyleEngine', () => {
       const originalRemoveChild = vi.fn<Hooks['removeChild']>();
       const originalSetText = vi.fn<Hooks['setText']>();
       const originalFocusChange = vi.fn<Hooks['focusChange']>();
+      const originalHoverChange = vi.fn<Hooks['hoverChange']>();
 
       hooks.setAttribute = originalSetAttribute;
       hooks.removeAttribute = originalRemoveAttribute;
@@ -618,6 +623,7 @@ describe('StyleEngine', () => {
       hooks.removeChild = originalRemoveChild;
       hooks.setText = originalSetText;
       hooks.focusChange = originalFocusChange;
+      hooks.hoverChange = originalHoverChange;
 
       const engine = new StyleEngine();
       engine.attach(window.document);
@@ -629,6 +635,7 @@ describe('StyleEngine', () => {
       expect(hooks.removeChild).toBe(originalRemoveChild);
       expect(hooks.setText).toBe(originalSetText);
       expect(hooks.focusChange).toBe(originalFocusChange);
+      expect(hooks.hoverChange).toBe(originalHoverChange);
     });
 
     it('marks element style-dirty on setAttribute', () => {
@@ -726,6 +733,31 @@ describe('StyleEngine', () => {
 
       expect(engine.getDirtyElements().has(first)).toBe(true);
       expect(engine.getDirtyElements().has(second)).toBe(true);
+    });
+
+    it('marks hover target chains dirty on hover change', () => {
+      const {document, engine} = createEnv();
+      const parent = document.createElement('div');
+      const first = document.createElement('button');
+      const second = document.createElement('button');
+      parent.appendChild(first);
+      parent.appendChild(second);
+      document.body.appendChild(parent);
+
+      engine.clearDirty();
+      document.setHoveredElement(first);
+
+      expect(engine.getDirtyElements().has(first)).toBe(true);
+      expect(engine.getDirtyElements().has(parent)).toBe(true);
+      expect(engine.getDirtyElements().has(document.body)).toBe(true);
+
+      engine.clearDirty();
+      document.setHoveredElement(second);
+
+      expect(engine.getDirtyElements().has(first)).toBe(true);
+      expect(engine.getDirtyElements().has(second)).toBe(true);
+      expect(engine.getDirtyElements().has(parent)).toBe(true);
+      expect(engine.getDirtyElements().has(document.body)).toBe(true);
     });
 
     it('marks the parent layout-dirty when text content changes', () => {

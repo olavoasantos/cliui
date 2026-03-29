@@ -93,9 +93,9 @@ describe('TerminalManager integration', () => {
       unicodeWidth: false,
     });
     expect(output.read()).toBe(
-      '\u001B[?1049h\u001B[?25l\u001B[?1002h\u001B[?1006h\u001B[?1004h\u001B[?2004h' +
+      '\u001B[?1049h\u001B[?25l\u001B[?1003h\u001B[?1006h\u001B[?1004h\u001B[?2004h' +
         '\u001B[?2026$p\u001B[?2027$p' +
-        '\u001B[?2004l\u001B[?1004l\u001B[?1006l\u001B[?1002l\u001B[?25h\u001B[?1049l',
+        '\u001B[?2004l\u001B[?1004l\u001B[?1006l\u001B[?1003l\u001B[?25h\u001B[?1049l',
     );
   });
 });

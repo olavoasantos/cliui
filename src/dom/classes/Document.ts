@@ -28,6 +28,7 @@ export class Document extends ParentNode {
   documentElement: HTMLHtmlElement;
   defaultView: Window;
   activeElement: HTMLBodyElement | Element;
+  hoveredElement: Element | null = null;
   [IS_CONNECTED] = true;
 
   constructor(defaultView: Window) {
@@ -89,6 +90,23 @@ export class Document extends ParentNode {
         relatedTarget: previousActiveElement,
       }),
     );
+  }
+
+  /**
+   * Sets the document's currently hovered element and notifies hooks so
+   * `:hover`-dependent styles can be invalidated.
+   *
+   * @param element - The deepest hovered element, or `null` when nothing is hovered.
+   */
+  setHoveredElement(element: Element | null): void {
+    if (element === this.hoveredElement) {
+      return;
+    }
+
+    const previousHoveredElement = this.hoveredElement;
+    this.hoveredElement = element;
+
+    (this.defaultView[HOOKS] as Partial<Hooks>).hoverChange?.(previousHoveredElement, element);
   }
 
   /**

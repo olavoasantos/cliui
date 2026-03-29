@@ -364,6 +364,126 @@ describe('EventDispatcher', () => {
     expect(bubbled).toEqual(['mousedown', 'mouseup', 'click']);
   });
 
+  it('dispatches mouseover and mouseenter when the pointer first moves onto an element', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const button = document.createElement('button');
+    const events: string[] = [];
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10,
+        children: [
+          createBox(document, {
+            element: button,
+            x: 1,
+            y: 1,
+            width: 4,
+            height: 2,
+          }),
+        ],
+      }),
+    );
+
+    button.addEventListener('mouseover', () => {
+      events.push('mouseover');
+    });
+    button.addEventListener('mouseenter', () => {
+      events.push('mouseenter');
+    });
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'motion',
+      button: 'none',
+      column: 2,
+      row: 1,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+
+    expect(events).toEqual(['mouseover', 'mouseenter']);
+    expect(document.hoveredElement).toBe(button);
+  });
+
+  it('dispatches mouseout/mouseleave and mouseover/mouseenter when moving between elements', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const first = document.createElement('button');
+    const second = document.createElement('button');
+    const events: string[] = [];
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 20,
+        height: 5,
+        children: [
+          createBox(document, {
+            element: first,
+            x: 1,
+            y: 1,
+            width: 4,
+            height: 2,
+          }),
+          createBox(document, {
+            element: second,
+            x: 8,
+            y: 1,
+            width: 4,
+            height: 2,
+          }),
+        ],
+      }),
+    );
+
+    first.addEventListener('mouseout', () => {
+      events.push('first:out');
+    });
+    first.addEventListener('mouseleave', () => {
+      events.push('first:leave');
+    });
+    second.addEventListener('mouseover', () => {
+      events.push('second:over');
+    });
+    second.addEventListener('mouseenter', () => {
+      events.push('second:enter');
+    });
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'motion',
+      button: 'none',
+      column: 2,
+      row: 1,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+    events.length = 0;
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'motion',
+      button: 'none',
+      column: 9,
+      row: 1,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+
+    expect(events).toEqual(['first:out', 'first:leave', 'second:over', 'second:enter']);
+    expect(document.hoveredElement).toBe(second);
+  });
+
   it('dispatches wheel events with wheel deltas to the hit-tested element', () => {
     const {document} = createEnv();
     const dispatcher = new EventDispatcher(document);

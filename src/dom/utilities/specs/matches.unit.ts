@@ -143,10 +143,28 @@ describe('matches', () => {
     expect(matches(disabled, 'button:enabled')).toBe(false);
   });
 
+  it('matches :hover against the hovered element and its ancestors', () => {
+    const parent = document.createElement('div');
+    const child = document.createElement('button');
+    parent.appendChild(child);
+    document.body.appendChild(parent);
+
+    document.setHoveredElement(child);
+
+    expect(matches(child, 'button:hover')).toBe(true);
+    expect(matches(parent, 'div:hover')).toBe(true);
+    expect(matches(document.body, 'body:hover')).toBe(true);
+
+    document.setHoveredElement(null);
+
+    expect(matches(child, 'button:hover')).toBe(false);
+    expect(matches(parent, 'div:hover')).toBe(false);
+  });
+
   it('returns false for unsupported pseudo selectors', () => {
     const element = document.createElement('div');
 
-    expect(matches(element, 'div:hover')).toBe(false);
+    expect(matches(element, 'div:visited')).toBe(false);
   });
 
   it('throws for unsupported selector functions', () => {

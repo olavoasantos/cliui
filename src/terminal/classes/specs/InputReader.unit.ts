@@ -139,6 +139,23 @@ describe('InputReader', () => {
     ]);
   });
 
+  it('parses no-button any-motion SGR mouse events for hover tracking', () => {
+    const reader = new InputReader({});
+
+    expect(reader.parse('\u001B[<35;6;4M')).toEqual([
+      {
+        type: 'mouse',
+        eventType: 'motion',
+        button: 'none',
+        column: 5,
+        row: 3,
+        ctrl: false,
+        alt: false,
+        shift: false,
+      },
+    ]);
+  });
+
   it('parses SGR mouse modifiers and additional buttons', () => {
     const reader = new InputReader({});
 

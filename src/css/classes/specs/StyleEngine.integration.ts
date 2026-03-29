@@ -92,7 +92,7 @@ describe('StyleEngine integration', () => {
     expect(engine.getComputedStyle(badge).get('color')).toBe('purple');
   });
 
-  it('recomputes pseudo-class styles when focus and active state change', () => {
+  it('recomputes pseudo-class styles when focus, hover, and active state change', () => {
     const window = new Window();
     const document = window.document;
     const engine = new StyleEngine();
@@ -103,6 +103,10 @@ describe('StyleEngine integration', () => {
     style.textContent = `
       button:focus {
         color: purple;
+      }
+
+      button:hover {
+        font-weight: bold;
       }
 
       button:active {
@@ -136,6 +140,18 @@ describe('StyleEngine integration', () => {
 
     expect(engine.getComputedStyle(first).get('color')).toBe('');
     expect(engine.getComputedStyle(second).get('color')).toBe('purple');
+
+    document.setHoveredElement(first);
+    engine.recomputeDirty();
+
+    expect(engine.getComputedStyle(first).get('font-weight')).toBe('bold');
+    expect(engine.getComputedStyle(second).get('font-weight')).toBe('normal');
+
+    document.setHoveredElement(second);
+    engine.recomputeDirty();
+
+    expect(engine.getComputedStyle(first).get('font-weight')).toBe('normal');
+    expect(engine.getComputedStyle(second).get('font-weight')).toBe('bold');
 
     first.setAttribute('pressed', '');
     engine.recomputeDirty();

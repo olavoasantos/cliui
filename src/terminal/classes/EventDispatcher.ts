@@ -115,6 +115,8 @@ export class EventDispatcher {
     const targetBox = this.hitTestLayoutBox(event.column, event.row);
     const target = targetBox?.element ?? this.document.body;
 
+    this.updateHoveredTarget(target, event);
+
     switch (event.eventType) {
       case 'press':
         this.activeMousePress = {target, button: event.button};
@@ -251,6 +253,126 @@ export class EventDispatcher {
     );
   }
 
+  private updateHoveredTarget(target: Element, event: TerminalMouseEvent): void {
+    const previous = this.document.hoveredElement;
+
+    if (previous === target) {
+      this.document.setHoveredElement(target);
+      return;
+    }
+
+    this.document.setHoveredElement(target);
+    this.dispatchHoverTransitionEvents(previous, target, event);
+  }
+
+  private dispatchHoverTransitionEvents(
+    previous: Element | null,
+    next: Element | null,
+    event: TerminalMouseEvent,
+  ): void {
+    if (previous === next) {
+      return;
+    }
+
+    const previousChain = this.getElementChain(previous);
+    const nextChain = this.getElementChain(next);
+    const commonAncestor = this.findCommonAncestor(previousChain, nextChain);
+    const previousLeaving =
+      commonAncestor === null
+        ? previousChain
+        : previousChain.slice(0, previousChain.indexOf(commonAncestor));
+    const nextEntering =
+      commonAncestor === null ? nextChain : nextChain.slice(0, nextChain.indexOf(commonAncestor));
+
+    if (previous !== null) {
+      previous.dispatchEvent(
+        this.createMouseDomEvent(
+          'mouseout',
+          event,
+          this.findLayoutBoxForElement(previous),
+          next,
+          true,
+        ),
+      );
+    }
+
+    for (const element of previousLeaving) {
+      element.dispatchEvent(
+        this.createMouseDomEvent(
+          'mouseleave',
+          event,
+          this.findLayoutBoxForElement(element),
+          next,
+          false,
+        ),
+      );
+    }
+
+    if (next !== null) {
+      next.dispatchEvent(
+        this.createMouseDomEvent(
+          'mouseover',
+          event,
+          this.findLayoutBoxForElement(next),
+          previous,
+          true,
+        ),
+      );
+    }
+
+    for (const element of [...nextEntering].reverse()) {
+      element.dispatchEvent(
+        this.createMouseDomEvent(
+          'mouseenter',
+          event,
+          this.findLayoutBoxForElement(element),
+          previous,
+          false,
+        ),
+      );
+    }
+  }
+
+  private getElementChain(element: Element | null): Element[] {
+    const chain = new Array<Element>();
+    let current = element;
+
+    while (current !== null) {
+      chain.push(current);
+      current = current.parentElement as Element | null;
+    }
+
+    return chain;
+  }
+
+  private findCommonAncestor(left: Element[], right: Element[]): Element | null {
+    let leftIndex = left.length - 1;
+    let rightIndex = right.length - 1;
+    let commonAncestor: Element | null = null;
+
+    while (leftIndex >= 0 && rightIndex >= 0 && left[leftIndex] === right[rightIndex]) {
+      commonAncestor = left[leftIndex]!;
+      leftIndex -= 1;
+      rightIndex -= 1;
+    }
+
+    return commonAncestor;
+  }
+
+  private findLayoutBoxForElement(element: Element): LayoutBox | null {
+    if (this.layoutRoot === null) {
+      return null;
+    }
+
+    for (const box of this.flattenBoxes(this.layoutRoot)) {
+      if (box.element === element) {
+        return box;
+      }
+    }
+
+    return null;
+  }
+
   /**
    * Manages focus transitions on mousedown.
    *
@@ -267,12 +389,22 @@ export class EventDispatcher {
   }
 
   private createMouseDomEvent(
-    type: 'click' | 'mousedown' | 'mouseup' | 'mousemove',
+    type:
+      | 'click'
+      | 'mousedown'
+      | 'mouseup'
+      | 'mousemove'
+      | 'mouseenter'
+      | 'mouseleave'
+      | 'mouseover'
+      | 'mouseout',
     event: TerminalMouseEvent,
     targetBox?: LayoutBox | null,
+    relatedTarget?: Element | null,
+    bubbles = true,
   ): MouseEvent {
     return new MouseEvent(type, {
-      bubbles: true,
+      bubbles,
       cancelable: true,
       clientX: event.column,
       clientY: event.row,
@@ -285,6 +417,7 @@ export class EventDispatcher {
       shiftKey: event.shift,
       button: this.mapMouseButton(event.button),
       buttons: this.mapButtons(event.button, type),
+      relatedTarget,
     });
   }
 
@@ -336,7 +469,15 @@ export class EventDispatcher {
 
   private mapButtons(
     button: TerminalMouseButton,
-    eventType: 'click' | 'mousedown' | 'mouseup' | 'mousemove',
+    eventType:
+      | 'click'
+      | 'mousedown'
+      | 'mouseup'
+      | 'mousemove'
+      | 'mouseenter'
+      | 'mouseleave'
+      | 'mouseover'
+      | 'mouseout',
   ): number {
     if (eventType === 'mouseup' || eventType === 'click') {
       return 0;

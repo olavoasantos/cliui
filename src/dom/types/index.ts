@@ -157,6 +157,7 @@ export interface Hooks {
     options?: boolean | EventListenerOptions,
   ): void;
   focusChange(previous: Element, next: Element): void;
+  hoverChange(previous: Element | null, next: Element | null): void;
 }
 
 export interface CustomElementConstructor {

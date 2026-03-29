@@ -214,7 +214,7 @@ export interface TerminalManagerOptions {
   /** Whether to use the terminal alternate screen buffer. */
   altScreen?: boolean;
 
-  /** Whether to enable mouse reporting mode 1006. */
+  /** Whether to enable terminal mouse reporting (any-motion + SGR coordinates). */
   mouse?: boolean;
 }
 
