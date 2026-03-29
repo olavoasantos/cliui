@@ -121,6 +121,10 @@ export class Terminal {
     this.inputReader = new InputReader(this.input);
     this.eventDispatcher = new EventDispatcher(this.document);
 
+    /* Body acts as the viewport — enable scroll so content that
+     * exceeds the terminal height can be scrolled rather than clipped. */
+    this.document.body.style.overflow = 'scroll';
+
     this.wireCaretListeners();
   }
 

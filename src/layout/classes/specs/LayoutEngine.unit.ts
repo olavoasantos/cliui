@@ -676,5 +676,31 @@ describe('LayoutEngine', () => {
         expect(child.height).toBeGreaterThanOrEqual(1);
       }
     });
+
+    it('clamps root body height to available height for viewport scroll', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const engine = new LayoutEngine(styleEngine);
+
+      body.style.overflow = 'scroll';
+
+      for (let i = 0; i < 5; i++) {
+        const child = document.createElement('div');
+        child.style.height = '5';
+        body.appendChild(child);
+      }
+
+      styleEngine.computeAll();
+      const box = engine.layout(body, 80, 10);
+
+      /* With overflow: scroll, the body should be clamped to viewport */
+      expect(box.height).toBe(10);
+      /* But scrollHeight should reflect the full content */
+      expect(box.scrollHeight).toBeGreaterThanOrEqual(25);
+      /* Children should not be shrunk */
+      for (const child of box.children) {
+        expect(child.height).toBe(5);
+      }
+    });
   });
 });

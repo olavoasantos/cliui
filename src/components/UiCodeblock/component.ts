@@ -187,7 +187,7 @@ export class UiCodeblock extends HTMLElement {
       contentEl.setAttribute('class', UI_CODEBLOCK_CONTENT_CLASS);
       contentEl.style.display = 'inline';
       contentEl.style.flexWrap = 'nowrap';
-      contentEl.style.whiteSpace = shouldWrap ? 'pre-wrap' : 'nowrap';
+      contentEl.style.whiteSpace = shouldWrap ? 'pre-wrap' : 'pre';
       contentEl.style.flexGrow = '1';
 
       if (tokens && tokens[i]) {

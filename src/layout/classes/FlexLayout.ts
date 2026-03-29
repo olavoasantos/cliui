@@ -178,6 +178,20 @@ export class FlexLayout {
       outerHeight = intrinsicContentHeight + verticalBorderPadding;
     }
 
+    /* When overflow is scroll and no explicit height is set, cap the
+     * box height to the available viewport height. Children are not
+     * shrunk (the flex sizing step used the intrinsic size), so
+     * content beyond the viewport is scrollable via scrollTop. */
+    const overflow = computedStyle.get('overflow');
+
+    if (overflow === 'scroll' && explicitHeight === null) {
+      const maxViewportHeight = _availableHeight - box.marginTop - box.marginBottom;
+
+      if (outerHeight > maxViewportHeight && maxViewportHeight > 0) {
+        outerHeight = maxViewportHeight;
+      }
+    }
+
     outerHeight = this.clampSize(outerHeight, minHeight, maxHeight);
 
     const contentHeight = Math.max(0, outerHeight - verticalBorderPadding);

@@ -254,7 +254,7 @@ describe('UiCodeblock', () => {
   });
 
   describe('wrapping', () => {
-    it('uses nowrap by default', () => {
+    it('uses pre (no wrapping, preserves whitespace) by default', () => {
       UiCodeblock.resetHighlighter();
 
       const {codeblock} = createCodeblock(undefined, 'long line here');
@@ -265,7 +265,7 @@ describe('UiCodeblock', () => {
         const inner = lineEl.childNodes[j] as import('../../../dom').Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
-          expect(inner.style.getPropertyValue('white-space')).toBe('nowrap');
+          expect(inner.style.getPropertyValue('white-space')).toBe('pre');
         }
       }
     });
@@ -372,6 +372,22 @@ describe('UiCodeblock', () => {
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
           expect(inner.style.getPropertyValue('flex-wrap')).toBe('nowrap');
+        }
+      }
+    });
+
+    it('preserves whitespace in content using white-space pre', () => {
+      UiCodeblock.resetHighlighter();
+
+      const {codeblock} = createCodeblock(undefined, '  indented  code  ');
+      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+
+      for (let j = 0; j < lineEl.childNodes.length; j++) {
+        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+
+        if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
+          /* Must use 'pre' not 'nowrap' — nowrap collapses whitespace */
+          expect(inner.style.getPropertyValue('white-space')).toBe('pre');
         }
       }
     });
