@@ -183,7 +183,7 @@ export class CaretManager {
   ): CaretOverlay | null {
     const graphemes = caret.target.getGraphemes();
     const scrollX = caret.target.getScrollOffset();
-    const scrollY = (caret.target as unknown as {scrollY?: number}).scrollY ?? 0;
+    const scrollY = box.scrollOffsetY ?? 0;
     const lines = computeVisualLines(graphemes, box.contentWidth, config.wordWrap);
     const cursorPos = caret.position;
 

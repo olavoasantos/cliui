@@ -78,18 +78,36 @@ export class UiTextarea extends HTMLElement {
     const value = this.getAttribute('value') ?? '';
 
     if (value.length > 0) {
-      this.textContent = value;
+      this.textContent = this.padToViewport(value, cols, rows);
       return;
     }
 
     const placeholder = this.getPlaceholder();
 
     if (placeholder.length > 0) {
-      this.textContent = placeholder;
+      this.textContent = this.padToViewport(placeholder, cols, rows);
       return;
     }
 
-    this.textContent = (' '.repeat(cols) + '\n').repeat(rows).trimEnd();
+    this.textContent = this.padToViewport('', cols, rows);
+  }
+
+  /**
+   * Pads text content to fill the full cols × rows viewport so the
+   * element maintains its intrinsic height before the editing system
+   * takes over.
+   */
+  private padToViewport(text: string, cols: number, rows: number): string {
+    const lines = text.split('\n');
+    const padded: string[] = [];
+
+    for (let row = 0; row < rows; row++) {
+      const line = lines[row] ?? '';
+      const padAmount = Math.max(0, cols - line.length);
+      padded.push(line + ' '.repeat(padAmount));
+    }
+
+    return padded.join('\n');
   }
 
   private getCols(): number {

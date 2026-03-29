@@ -348,7 +348,7 @@ export class Terminal {
   ): Editable {
     const syncValue = () => this.syncEditableValue(element, state, config);
     const syncRendering = () => this.syncEditableRendering(element, config);
-    const updateScroll = () => this.updateEditableScroll(state, config);
+    const updateScroll = () => this.updateEditableScroll(element, state, config);
 
     return {
       getGraphemes: () => state.graphemes,
@@ -427,9 +427,13 @@ export class Terminal {
   /**
    * Updates scroll offsets to keep the cursor visible within the viewport.
    */
-  private updateEditableScroll(state: EditableState, config: EditableConfiguration): void {
+  private updateEditableScroll(
+    element: Element,
+    state: EditableState,
+    config: EditableConfiguration,
+  ): void {
     if (config.multiLine) {
-      this.updateVerticalScroll(state, config);
+      this.updateVerticalScroll(element, state, config);
     } else {
       this.updateHorizontalScroll(state, config);
     }
@@ -474,7 +478,11 @@ export class Terminal {
   /**
    * Vertical scroll for multi-line editables.
    */
-  private updateVerticalScroll(state: EditableState, config: EditableConfiguration): void {
+  private updateVerticalScroll(
+    element: Element,
+    state: EditableState,
+    config: EditableConfiguration,
+  ): void {
     const lines = computeVisualLines(state.graphemes, state.resolvedWidth, config.wordWrap);
     let cursorLine = 0;
 
@@ -497,6 +505,8 @@ export class Terminal {
     } else if (cursorLine >= state.scrollY + viewportHeight) {
       state.scrollY = cursorLine - viewportHeight + 1;
     }
+
+    (element as unknown as {scrollTop?: number}).scrollTop = state.scrollY;
   }
 
   /**
@@ -513,14 +523,13 @@ export class Terminal {
     if (state.graphemes.length === 0 && !state.isFocused) {
       const placeholder = config.placeholder?.() ?? '';
 
-      if (placeholder.length > 0) {
+      if (config.multiLine) {
+        element.textContent = this.padToViewport(placeholder, width, height);
+      } else if (placeholder.length > 0) {
         element.textContent = this.truncateToWidth(placeholder, width);
-        return;
+      } else {
+        element.textContent = ' '.repeat(width);
       }
-
-      element.textContent = config.multiLine
-        ? (' '.repeat(width) + '\n').repeat(height).trimEnd()
-        : ' '.repeat(width);
       return;
     }
 
@@ -595,6 +604,23 @@ export class Terminal {
     }
 
     element.textContent = renderedLines.join('\n');
+  }
+
+  /**
+   * Pads text to fill a multi-line viewport (width × height), preserving
+   * existing content on each line.
+   */
+  private padToViewport(text: string, width: number, height: number): string {
+    const lines = text.length > 0 ? text.split('\n') : [];
+    const padded: string[] = [];
+
+    for (let row = 0; row < height; row++) {
+      const line = lines[row] ?? '';
+      const padAmount = Math.max(0, width - line.length);
+      padded.push(line + ' '.repeat(padAmount));
+    }
+
+    return padded.join('\n');
   }
 
   /**

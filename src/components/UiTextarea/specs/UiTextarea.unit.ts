@@ -57,11 +57,10 @@ describe('UiTextarea', () => {
     expect(config.multiLine).toBe(true);
   });
 
-  it('renders empty content with spaces by default', () => {
+  it('renders empty content padded to full viewport', () => {
     const {textarea} = createTextarea(undefined, {cols: '10', rows: '2'});
-    const expected = (' '.repeat(10) + '\n').repeat(2).trimEnd();
 
-    expect(textarea.textContent).toBe(expected);
+    expect(textarea.textContent).toBe(' '.repeat(10) + '\n' + ' '.repeat(10));
   });
 
   it('renders placeholder text when value is empty', () => {
@@ -70,10 +69,12 @@ describe('UiTextarea', () => {
     expect(textarea.textContent).toContain('Type here...');
   });
 
-  it('renders initial value from attribute', () => {
-    const {textarea} = createTextarea(undefined, {value: 'hello\nworld'});
+  it('renders initial value padded to viewport dimensions', () => {
+    const {textarea} = createTextarea(undefined, {value: 'hello\nworld', cols: '10', rows: '4'});
 
-    expect(textarea.textContent).toContain('hello\nworld');
+    expect(textarea.textContent).toContain('hello');
+    expect(textarea.textContent).toContain('world');
+    expect(textarea.textContent!.split('\n')).toHaveLength(4);
   });
 
   it('applies custom cols to intrinsic width config', () => {
