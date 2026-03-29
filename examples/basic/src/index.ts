@@ -1,5 +1,5 @@
 import {Terminal} from '@micra/terminal-dom';
-import {UiButton, UiInput, UiTextarea} from '@micra/terminal-dom/components';
+import {UiButton, UiInput, UiOption, UiSelect, UiTextarea} from '@micra/terminal-dom/components';
 
 process.stdin.setRawMode?.(true);
 process.stdin.resume();
@@ -16,6 +16,8 @@ const {document, window} = terminal;
 
 window.customElements.define(UiButton.tagName, UiButton);
 window.customElements.define(UiInput.tagName, UiInput);
+window.customElements.define(UiOption.tagName, UiOption);
+window.customElements.define(UiSelect.tagName, UiSelect);
 window.customElements.define(UiTextarea.tagName, UiTextarea);
 
 const style = document.createElement('style');
@@ -57,7 +59,7 @@ style.textContent = `
   .row {
     display: flex;
     flex-direction: row;
-    gap: 1;
+    gap: 2;
   }
 
   .label {
@@ -79,16 +81,8 @@ style.textContent = `
     background-color: #7c3aed;
   }
 
-  ui-button[variant="primary"]:hover {
-    background-color: #6d28d9;
-  }
-
   ui-button[variant="primary"]:focus {
     background-color: #6d28d9;
-  }
-
-  ui-button[variant="primary"]:active {
-    background-color: #5b21b6;
   }
 
   ui-button[variant="secondary"] {
@@ -96,16 +90,8 @@ style.textContent = `
     background-color: #334155;
   }
 
-  ui-button[variant="secondary"]:hover {
-    background-color: #3f4d61;
-  }
-
   ui-button[variant="secondary"]:focus {
     background-color: #475569;
-  }
-
-  ui-button[variant="secondary"]:active {
-    background-color: #1e293b;
   }
 
   /* ── Input styles ──────────────────────────────────────── */
@@ -129,6 +115,41 @@ style.textContent = `
   ui-textarea:focus {
     background-color: #334155;
   }
+
+  /* ── Select styles ─────────────────────────────────────── */
+
+  ui-select {
+    color: #e5e7eb;
+    background-color: #1e293b;
+    padding: 0 1;
+  }
+
+  ui-select:focus {
+    background-color: #334155;
+  }
+
+  ui-select .ui-select-listbox {
+    background-color: #1e293b;
+    border-style: single;
+    border-color: #475569;
+  }
+
+  ui-option {
+    color: #e5e7eb;
+  }
+
+  ui-option[highlighted] {
+    background-color: #7c3aed;
+    color: #ffffff;
+  }
+
+  ui-option[selected] {
+    font-weight: bold;
+  }
+
+  ui-option[disabled] {
+    color: #64748b;
+  }
 `;
 document.head.appendChild(style);
 
@@ -139,20 +160,20 @@ app.className = 'app';
 
 const title = document.createElement('div');
 title.className = 'title';
-title.textContent = 'ui-textarea + [EDITABLE] system test';
+title.textContent = 'Component showcase';
 
 const hint = document.createElement('div');
 hint.className = 'hint';
-hint.textContent = 'Tab to cycle. Type to edit. Arrow keys to navigate. Ctrl+Q to quit.';
+hint.textContent = 'Tab to cycle. Arrow keys to navigate. Enter/Space to activate. Ctrl+Q to quit.';
 
-/* ── Input section ─────────────────────────────────────── */
+/* ── Form section ──────────────────────────────────────── */
 
-const inputSection = document.createElement('div');
-inputSection.className = 'section';
+const formSection = document.createElement('div');
+formSection.className = 'section';
 
-const inputTitle = document.createElement('div');
-inputTitle.className = 'section-title';
-inputTitle.textContent = 'Single-line inputs';
+const formTitle = document.createElement('div');
+formTitle.className = 'section-title';
+formTitle.textContent = 'Form';
 
 const nameLabel = document.createElement('div');
 nameLabel.className = 'label';
@@ -163,70 +184,87 @@ nameInput.setAttribute('tabindex', '0');
 nameInput.setAttribute('width', '25');
 nameInput.setAttribute('placeholder', 'Enter your name');
 
-const emailLabel = document.createElement('div');
-emailLabel.className = 'label';
-emailLabel.textContent = 'Email:';
+const colorLabel = document.createElement('div');
+colorLabel.className = 'label';
+colorLabel.textContent = 'Favorite color:';
 
-const emailInput = document.createElement('ui-input') as InstanceType<typeof UiInput>;
-emailInput.setAttribute('tabindex', '1');
-emailInput.setAttribute('width', '25');
-emailInput.setAttribute('placeholder', 'you@example.com');
+const colorSelect = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
+colorSelect.setAttribute('tabindex', '1');
+colorSelect.setAttribute('value', 'blue');
 
-inputSection.appendChild(inputTitle);
-inputSection.appendChild(nameLabel);
-inputSection.appendChild(nameInput);
-inputSection.appendChild(emailLabel);
-inputSection.appendChild(emailInput);
+for (const [value, label] of [
+  ['red', 'Red'],
+  ['green', 'Green'],
+  ['blue', 'Blue'],
+  ['purple', 'Purple'],
+  ['orange', 'Orange'],
+]) {
+  const opt = document.createElement('ui-option') as InstanceType<typeof UiOption>;
+  opt.setAttribute('value', value!);
+  opt.textContent = label!;
+  colorSelect.appendChild(opt);
+}
 
-/* ── Textarea section ──────────────────────────────────── */
+const sizeLabel = document.createElement('div');
+sizeLabel.className = 'label';
+sizeLabel.textContent = 'Size:';
 
-const textareaSection = document.createElement('div');
-textareaSection.className = 'section';
+const sizeSelect = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
+sizeSelect.setAttribute('tabindex', '2');
+sizeSelect.setAttribute('value', 'medium');
 
-const textareaTitle = document.createElement('div');
-textareaTitle.className = 'section-title';
-textareaTitle.textContent = 'Multi-line textarea';
+for (const [value, label, disabled] of [
+  ['small', 'Small', false],
+  ['medium', 'Medium', false],
+  ['large', 'Large', false],
+  ['xl', 'Extra Large (out of stock)', true],
+]) {
+  const opt = document.createElement('ui-option') as InstanceType<typeof UiOption>;
+  opt.setAttribute('value', value as string);
+  opt.textContent = label as string;
+
+  if (disabled) opt.setAttribute('disabled', '');
+
+  sizeSelect.appendChild(opt);
+}
 
 const notesLabel = document.createElement('div');
 notesLabel.className = 'label';
-notesLabel.textContent = 'Notes (Enter for new lines, ArrowUp/Down to navigate):';
+notesLabel.textContent = 'Notes:';
 
 const notesTextarea = document.createElement('ui-textarea') as InstanceType<typeof UiTextarea>;
-notesTextarea.setAttribute('tabindex', '2');
-notesTextarea.setAttribute('cols', '40');
-notesTextarea.setAttribute('rows', '6');
-notesTextarea.setAttribute('placeholder', 'Type your notes here...');
+notesTextarea.setAttribute('tabindex', '3');
+notesTextarea.setAttribute('cols', '30');
+notesTextarea.setAttribute('rows', '3');
+notesTextarea.setAttribute('placeholder', 'Any additional notes...');
 
-textareaSection.appendChild(textareaTitle);
-textareaSection.appendChild(notesLabel);
-textareaSection.appendChild(notesTextarea);
+formSection.appendChild(formTitle);
+formSection.appendChild(nameLabel);
+formSection.appendChild(nameInput);
+formSection.appendChild(colorLabel);
+formSection.appendChild(colorSelect);
+formSection.appendChild(sizeLabel);
+formSection.appendChild(sizeSelect);
+formSection.appendChild(notesLabel);
+formSection.appendChild(notesTextarea);
 
 /* ── Button section ────────────────────────────────────── */
-
-const buttonSection = document.createElement('div');
-buttonSection.className = 'section';
-
-const buttonTitle = document.createElement('div');
-buttonTitle.className = 'section-title';
-buttonTitle.textContent = 'Actions';
 
 const buttonRow = document.createElement('div');
 buttonRow.className = 'row';
 
 const submitBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
 submitBtn.setAttribute('variant', 'primary');
-submitBtn.setAttribute('tabindex', '3');
+submitBtn.setAttribute('tabindex', '4');
 submitBtn.textContent = 'Submit';
 
 const resetBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
 resetBtn.setAttribute('variant', 'secondary');
-resetBtn.setAttribute('tabindex', '4');
+resetBtn.setAttribute('tabindex', '5');
 resetBtn.textContent = 'Reset';
 
 buttonRow.appendChild(submitBtn);
 buttonRow.appendChild(resetBtn);
-buttonSection.appendChild(buttonTitle);
-buttonSection.appendChild(buttonRow);
 
 /* ── Status ────────────────────────────────────────────── */
 
@@ -238,9 +276,8 @@ status.textContent = 'Status: ready';
 
 app.appendChild(title);
 app.appendChild(hint);
-app.appendChild(inputSection);
-app.appendChild(textareaSection);
-app.appendChild(buttonSection);
+app.appendChild(formSection);
+app.appendChild(buttonRow);
 app.appendChild(status);
 document.body.appendChild(app);
 
@@ -248,27 +285,26 @@ document.body.appendChild(app);
 
 submitBtn.addEventListener('click', () => {
   const name = nameInput.getAttribute('value') ?? '';
-  const email = emailInput.getAttribute('value') ?? '';
+  const color = colorSelect.getAttribute('value') ?? '';
+  const size = sizeSelect.getAttribute('value') ?? '';
   const notes = notesTextarea.getAttribute('value') ?? '';
-  const lineCount = notes.split('\n').length;
-  status.textContent = `Status: submitted name="${name}" email="${email}" notes=${lineCount} lines`;
+  status.textContent = `Status: submitted name="${name}" color=${color} size=${size} notes=${notes.length}ch`;
 });
 
 resetBtn.addEventListener('click', () => {
   nameInput.setAttribute('value', '');
-  emailInput.setAttribute('value', '');
+  colorSelect.setAttribute('value', 'blue');
+  sizeSelect.setAttribute('value', 'medium');
   notesTextarea.setAttribute('value', '');
   status.textContent = 'Status: reset';
 });
 
-nameInput.addEventListener('input', () => {
-  status.textContent = `Status: typing name="${nameInput.getAttribute('value') ?? ''}"`;
+colorSelect.addEventListener('input', () => {
+  status.textContent = `Status: color → ${colorSelect.getAttribute('value')}`;
 });
 
-notesTextarea.addEventListener('input', () => {
-  const val = notesTextarea.getAttribute('value') ?? '';
-  const lineCount = val.split('\n').length;
-  status.textContent = `Status: typing notes (${lineCount} lines, ${val.length} chars)`;
+sizeSelect.addEventListener('input', () => {
+  status.textContent = `Status: size → ${sizeSelect.getAttribute('value')}`;
 });
 
 document.setActiveElement(nameInput);
