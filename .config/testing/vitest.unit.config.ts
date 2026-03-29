@@ -7,9 +7,6 @@ export default mergeConfig(
     test: {
       include: ['**/*.unit.ts', '**/*.unit.tsx'],
       exclude: ['**/.testing/**', '**/build/**', '**/node_modules/**'],
-      passWithNoTests: true,
-      globals: false,
-      reporters: ['default'],
       coverage: {
         provider: 'v8',
         reporter: 'json-summary',

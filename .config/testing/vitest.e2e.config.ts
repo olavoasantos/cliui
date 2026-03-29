@@ -7,9 +7,6 @@ export default mergeConfig(
     test: {
       include: ['**/*.e2e.ts', '**/*.e2e.tsx'],
       exclude: ['**/.testing/**', '**/build/**', '**/node_modules/**'],
-      passWithNoTests: true,
-      globals: false,
-      reporters: ['default'],
     },
   }),
 );
