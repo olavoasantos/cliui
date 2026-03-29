@@ -221,6 +221,7 @@ export class UiInput extends HTMLElement implements Editable {
 
     const mouseEvent = event as import('../../dom').MouseEvent;
     const localX = mouseEvent.offsetX ?? 0;
+    const shift = mouseEvent.shiftKey ?? false;
 
     let currentWidth = 0;
     let targetGraphemeIndex = this.scrollOffset;
@@ -234,9 +235,17 @@ export class UiInput extends HTMLElement implements Editable {
       targetGraphemeIndex = i + 1;
     }
 
-    this.setCursorPosition(targetGraphemeIndex);
-    this.handleOverflow();
-    this.render();
+    if (this.activeCaret) {
+      if (shift) {
+        this.activeCaret.selectTo(targetGraphemeIndex);
+      } else {
+        this.activeCaret.moveTo(targetGraphemeIndex);
+      }
+    } else {
+      this.setCursorPosition(targetGraphemeIndex);
+      this.handleOverflow();
+      this.render();
+    }
   }
 
   private dispatchInputEvent(data: string | null, inputType: string): void {

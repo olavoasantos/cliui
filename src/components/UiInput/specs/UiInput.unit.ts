@@ -532,4 +532,61 @@ describe('UiInput', () => {
 
     expect(input.getAttribute('value')).toBe('abX');
   });
+
+  it('extends selection when shift-clicking', () => {
+    const {input} = createInput(undefined, {value: 'hello', width: '20'});
+
+    focusInput(input);
+
+    input.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        offsetX: 1,
+      }),
+    );
+
+    input.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        offsetX: 4,
+        shiftKey: true,
+      }),
+    );
+
+    const caret = input.getCaret();
+    expect(caret?.hasSelection()).toBe(true);
+    expect(caret?.getSelectedRange()).toEqual([1, 4]);
+  });
+
+  it('clears selection when clicking without shift', () => {
+    const {input} = createInput(undefined, {value: 'hello', width: '20'});
+
+    focusInput(input);
+
+    input.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        offsetX: 1,
+      }),
+    );
+
+    input.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        offsetX: 4,
+        shiftKey: true,
+      }),
+    );
+
+    input.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        offsetX: 2,
+      }),
+    );
+
+    const caret = input.getCaret();
+    expect(caret?.hasSelection()).toBe(false);
+    expect(caret?.position).toBe(2);
+  });
 });
