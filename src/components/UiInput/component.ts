@@ -218,6 +218,25 @@ export class UiInput extends HTMLElement implements Editable {
 
     const doc = this.ownerDocument as import('../../dom').Document;
     doc.setActiveElement(this);
+
+    const mouseEvent = event as import('../../dom').MouseEvent;
+    const localX = mouseEvent.offsetX ?? 0;
+
+    let currentWidth = 0;
+    let targetGraphemeIndex = this.scrollOffset;
+
+    for (let i = this.scrollOffset; i < this.graphemes.length; i++) {
+      const graphemeWidth = cellWidth(this.graphemes[i]!);
+
+      if (currentWidth + graphemeWidth / 2 >= localX) break;
+
+      currentWidth += graphemeWidth;
+      targetGraphemeIndex = i + 1;
+    }
+
+    this.setCursorPosition(targetGraphemeIndex);
+    this.handleOverflow();
+    this.render();
   }
 
   private dispatchInputEvent(data: string | null, inputType: string): void {

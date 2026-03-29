@@ -10,6 +10,8 @@ export class MouseEvent extends UIEvent {
   readonly screenY: number;
   readonly clientX: number;
   readonly clientY: number;
+  readonly offsetX: number;
+  readonly offsetY: number;
   readonly ctrlKey: boolean;
   readonly shiftKey: boolean;
   readonly altKey: boolean;
@@ -25,6 +27,8 @@ export class MouseEvent extends UIEvent {
     this.screenY = eventInitDict?.screenY ?? 0;
     this.clientX = eventInitDict?.clientX ?? 0;
     this.clientY = eventInitDict?.clientY ?? 0;
+    this.offsetX = eventInitDict?.offsetX ?? 0;
+    this.offsetY = eventInitDict?.offsetY ?? 0;
     this.ctrlKey = eventInitDict?.ctrlKey ?? false;
     this.shiftKey = eventInitDict?.shiftKey ?? false;
     this.altKey = eventInitDict?.altKey ?? false;

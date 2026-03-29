@@ -711,4 +711,162 @@ describe('EventDispatcher', () => {
     expect(listener.mock.calls[0]?.[0]?.deltaY).toBe(0);
     expect(region.scrollTop).toBe(2);
   });
+
+  it('populates offsetX and offsetY relative to the target content area', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const button = document.createElement('button');
+    document.body.appendChild(button);
+    const events: MouseEvent[] = [];
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 20,
+        height: 10,
+        children: [
+          createBox(document, {
+            element: button,
+            x: 2,
+            y: 1,
+            width: 10,
+            height: 3,
+            contentX: 3,
+            contentY: 2,
+            contentWidth: 8,
+            contentHeight: 1,
+          }),
+        ],
+      }),
+    );
+
+    button.addEventListener('mousedown', (event) => {
+      events.push(event as MouseEvent);
+    });
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'press',
+      button: 'left',
+      column: 7,
+      row: 2,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]?.offsetX).toBe(4);
+    expect(events[0]?.offsetY).toBe(0);
+    expect(events[0]?.clientX).toBe(7);
+    expect(events[0]?.clientY).toBe(2);
+  });
+
+  it('defaults offsetX and offsetY to zero when no layout box is hit', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const events: MouseEvent[] = [];
+
+    document.body.addEventListener('mousedown', (event) => {
+      events.push(event as MouseEvent);
+    });
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'press',
+      button: 'left',
+      column: 5,
+      row: 3,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]?.offsetX).toBe(0);
+    expect(events[0]?.offsetY).toBe(0);
+  });
+
+  it('focuses a tabindexed element on mousedown', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const input = document.createElement('input');
+    input.setAttribute('tabindex', '0');
+    document.body.appendChild(input);
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 20,
+        height: 10,
+        children: [
+          createBox(document, {
+            element: input,
+            x: 0,
+            y: 0,
+            width: 10,
+            height: 1,
+          }),
+        ],
+      }),
+    );
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'press',
+      button: 'left',
+      column: 3,
+      row: 0,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('blurs the active element when clicking a non-focusable area', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const input = document.createElement('input');
+    input.setAttribute('tabindex', '0');
+    document.body.appendChild(input);
+    document.setActiveElement(input);
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 20,
+        height: 10,
+        children: [
+          createBox(document, {
+            element: input,
+            x: 0,
+            y: 0,
+            width: 10,
+            height: 1,
+          }),
+        ],
+      }),
+    );
+
+    dispatcher.dispatch({
+      type: 'mouse',
+      eventType: 'press',
+      button: 'left',
+      column: 15,
+      row: 5,
+      ctrl: false,
+      alt: false,
+      shift: false,
+    });
+
+    expect(document.activeElement).toBe(document.body);
+  });
 });

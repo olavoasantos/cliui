@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 
-import {ClipboardEvent, Event, KeyboardEvent, Window} from '../../../dom';
+import {ClipboardEvent, Event, KeyboardEvent, MouseEvent, Window} from '../../../dom';
 import {Caret} from '../../../terminal/classes/Caret';
 import {handleCaretKeyDown} from '../../../terminal/classes/handleCaretKeyDown';
 import {UiInput} from '../component';
@@ -480,5 +480,56 @@ describe('UiInput', () => {
     input.dispatchEvent(new Event('mousedown'));
 
     expect(window.document.activeElement).toBe(input);
+  });
+
+  it('sets cursor position from mousedown offsetX', () => {
+    const {input} = createInput(undefined, {value: 'hello', width: '20'});
+
+    focusInput(input);
+
+    input.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        offsetX: 3,
+      }),
+    );
+
+    typeKey(input, 'X');
+
+    expect(input.getAttribute('value')).toBe('helXlo');
+  });
+
+  it('sets cursor to start when offsetX is zero', () => {
+    const {input} = createInput(undefined, {value: 'abc', width: '10'});
+
+    focusInput(input);
+
+    input.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        offsetX: 0,
+      }),
+    );
+
+    typeKey(input, 'X');
+
+    expect(input.getAttribute('value')).toBe('Xabc');
+  });
+
+  it('sets cursor to end when offsetX exceeds text length', () => {
+    const {input} = createInput(undefined, {value: 'ab', width: '10'});
+
+    focusInput(input);
+
+    input.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        offsetX: 8,
+      }),
+    );
+
+    typeKey(input, 'X');
+
+    expect(input.getAttribute('value')).toBe('abX');
   });
 });

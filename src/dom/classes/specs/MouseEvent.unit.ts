@@ -14,6 +14,8 @@ describe('MouseEvent', () => {
     expect(event.screenY).toBe(0);
     expect(event.clientX).toBe(0);
     expect(event.clientY).toBe(0);
+    expect(event.offsetX).toBe(0);
+    expect(event.offsetY).toBe(0);
     expect(event.ctrlKey).toBe(false);
     expect(event.shiftKey).toBe(false);
     expect(event.altKey).toBe(false);
@@ -32,6 +34,8 @@ describe('MouseEvent', () => {
       screenY: 200,
       clientX: 50,
       clientY: 75,
+      offsetX: 10,
+      offsetY: 15,
       ctrlKey: true,
       shiftKey: true,
       altKey: true,
@@ -45,6 +49,8 @@ describe('MouseEvent', () => {
     expect(event.screenY).toBe(200);
     expect(event.clientX).toBe(50);
     expect(event.clientY).toBe(75);
+    expect(event.offsetX).toBe(10);
+    expect(event.offsetY).toBe(15);
     expect(event.ctrlKey).toBe(true);
     expect(event.shiftKey).toBe(true);
     expect(event.altKey).toBe(true);

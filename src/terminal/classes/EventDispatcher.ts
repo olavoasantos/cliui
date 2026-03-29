@@ -118,7 +118,8 @@ export class EventDispatcher {
     switch (event.eventType) {
       case 'press':
         this.activeMousePress = {target, button: event.button};
-        target.dispatchEvent(this.createMouseDomEvent('mousedown', event));
+        this.handleMouseFocus(target);
+        target.dispatchEvent(this.createMouseDomEvent('mousedown', event, targetBox));
         return;
       case 'release': {
         const releasedButton =
@@ -128,7 +129,9 @@ export class EventDispatcher {
         const normalizedReleaseEvent =
           releasedButton === event.button ? event : {...event, button: releasedButton};
 
-        target.dispatchEvent(this.createMouseDomEvent('mouseup', normalizedReleaseEvent));
+        target.dispatchEvent(
+          this.createMouseDomEvent('mouseup', normalizedReleaseEvent, targetBox),
+        );
 
         if (
           this.activeMousePress !== null &&
@@ -136,10 +139,14 @@ export class EventDispatcher {
           this.isClickableButton(this.activeMousePress.button)
         ) {
           target.dispatchEvent(
-            this.createMouseDomEvent('click', {
-              ...normalizedReleaseEvent,
-              button: this.activeMousePress.button,
-            }),
+            this.createMouseDomEvent(
+              'click',
+              {
+                ...normalizedReleaseEvent,
+                button: this.activeMousePress.button,
+              },
+              targetBox,
+            ),
           );
         }
 
@@ -147,7 +154,7 @@ export class EventDispatcher {
         return;
       }
       case 'motion':
-        target.dispatchEvent(this.createMouseDomEvent('mousemove', event));
+        target.dispatchEvent(this.createMouseDomEvent('mousemove', event, targetBox));
         return;
       case 'wheel':
         if (targetBox !== null) {
@@ -244,9 +251,25 @@ export class EventDispatcher {
     );
   }
 
+  /**
+   * Manages focus transitions on mousedown.
+   *
+   * If the target has a `tabindex` attribute it receives focus.  Otherwise
+   * the currently active element is blurred (focus returns to the body),
+   * mirroring browser default behaviour.
+   */
+  private handleMouseFocus(target: Element): void {
+    if (target.hasAttribute('tabindex')) {
+      this.document.setActiveElement(target);
+    } else if (this.document.activeElement !== this.document.body) {
+      this.document.setActiveElement(null);
+    }
+  }
+
   private createMouseDomEvent(
     type: 'click' | 'mousedown' | 'mouseup' | 'mousemove',
     event: TerminalMouseEvent,
+    targetBox?: LayoutBox | null,
   ): MouseEvent {
     return new MouseEvent(type, {
       bubbles: true,
@@ -255,6 +278,8 @@ export class EventDispatcher {
       clientY: event.row,
       screenX: event.column,
       screenY: event.row,
+      offsetX: targetBox ? event.column - targetBox.contentX : 0,
+      offsetY: targetBox ? event.row - targetBox.contentY : 0,
       ctrlKey: event.ctrl,
       altKey: event.alt,
       shiftKey: event.shift,

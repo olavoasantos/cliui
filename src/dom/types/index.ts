@@ -38,6 +38,8 @@ export interface MouseEventInit extends UIEventInit {
   screenY?: number;
   clientX?: number;
   clientY?: number;
+  offsetX?: number;
+  offsetY?: number;
   ctrlKey?: boolean;
   shiftKey?: boolean;
   altKey?: boolean;
