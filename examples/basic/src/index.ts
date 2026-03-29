@@ -1,5 +1,5 @@
 import {Terminal} from '@micra/terminal-dom';
-import {UiButton, UiInput} from '@micra/terminal-dom/components';
+import {UiButton, UiInput, UiTextarea} from '@micra/terminal-dom/components';
 
 process.stdin.setRawMode?.(true);
 process.stdin.resume();
@@ -16,6 +16,7 @@ const {document, window} = terminal;
 
 window.customElements.define(UiButton.tagName, UiButton);
 window.customElements.define(UiInput.tagName, UiInput);
+window.customElements.define(UiTextarea.tagName, UiTextarea);
 
 const style = document.createElement('style');
 style.textContent = `
@@ -117,6 +118,17 @@ style.textContent = `
   ui-input:focus {
     background-color: #334155;
   }
+
+  /* ── Textarea styles ───────────────────────────────────── */
+
+  ui-textarea {
+    color: #e5e7eb;
+    background-color: #1e293b;
+  }
+
+  ui-textarea:focus {
+    background-color: #334155;
+  }
 `;
 document.head.appendChild(style);
 
@@ -127,11 +139,11 @@ app.className = 'app';
 
 const title = document.createElement('div');
 title.className = 'title';
-title.textContent = '[EDITABLE] system test';
+title.textContent = 'ui-textarea + [EDITABLE] system test';
 
 const hint = document.createElement('div');
 hint.className = 'hint';
-hint.textContent = 'Tab to cycle. Type to edit. Enter/Space to activate buttons. Ctrl+Q to quit.';
+hint.textContent = 'Tab to cycle. Type to edit. Arrow keys to navigate. Ctrl+Q to quit.';
 
 /* ── Input section ─────────────────────────────────────── */
 
@@ -140,7 +152,7 @@ inputSection.className = 'section';
 
 const inputTitle = document.createElement('div');
 inputTitle.className = 'section-title';
-inputTitle.textContent = 'Text inputs (system-managed via [EDITABLE])';
+inputTitle.textContent = 'Single-line inputs';
 
 const nameLabel = document.createElement('div');
 nameLabel.className = 'label';
@@ -160,35 +172,34 @@ emailInput.setAttribute('tabindex', '1');
 emailInput.setAttribute('width', '25');
 emailInput.setAttribute('placeholder', 'you@example.com');
 
-const limitLabel = document.createElement('div');
-limitLabel.className = 'label';
-limitLabel.textContent = 'Code (max 5):';
-
-const limitInput = document.createElement('ui-input') as InstanceType<typeof UiInput>;
-limitInput.setAttribute('tabindex', '2');
-limitInput.setAttribute('width', '10');
-limitInput.setAttribute('maxlength', '5');
-limitInput.setAttribute('placeholder', 'ABC');
-
-const readonlyLabel = document.createElement('div');
-readonlyLabel.className = 'label';
-readonlyLabel.textContent = 'Readonly:';
-
-const readonlyInput = document.createElement('ui-input') as InstanceType<typeof UiInput>;
-readonlyInput.setAttribute('tabindex', '3');
-readonlyInput.setAttribute('width', '20');
-readonlyInput.setAttribute('value', 'Cannot edit this');
-readonlyInput.setAttribute('readonly', '');
-
 inputSection.appendChild(inputTitle);
 inputSection.appendChild(nameLabel);
 inputSection.appendChild(nameInput);
 inputSection.appendChild(emailLabel);
 inputSection.appendChild(emailInput);
-inputSection.appendChild(limitLabel);
-inputSection.appendChild(limitInput);
-inputSection.appendChild(readonlyLabel);
-inputSection.appendChild(readonlyInput);
+
+/* ── Textarea section ──────────────────────────────────── */
+
+const textareaSection = document.createElement('div');
+textareaSection.className = 'section';
+
+const textareaTitle = document.createElement('div');
+textareaTitle.className = 'section-title';
+textareaTitle.textContent = 'Multi-line textarea';
+
+const notesLabel = document.createElement('div');
+notesLabel.className = 'label';
+notesLabel.textContent = 'Notes (Enter for new lines, ArrowUp/Down to navigate):';
+
+const notesTextarea = document.createElement('ui-textarea') as InstanceType<typeof UiTextarea>;
+notesTextarea.setAttribute('tabindex', '2');
+notesTextarea.setAttribute('cols', '40');
+notesTextarea.setAttribute('rows', '6');
+notesTextarea.setAttribute('placeholder', 'Type your notes here...');
+
+textareaSection.appendChild(textareaTitle);
+textareaSection.appendChild(notesLabel);
+textareaSection.appendChild(notesTextarea);
 
 /* ── Button section ────────────────────────────────────── */
 
@@ -197,19 +208,19 @@ buttonSection.className = 'section';
 
 const buttonTitle = document.createElement('div');
 buttonTitle.className = 'section-title';
-buttonTitle.textContent = 'Buttons';
+buttonTitle.textContent = 'Actions';
 
 const buttonRow = document.createElement('div');
 buttonRow.className = 'row';
 
 const submitBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
 submitBtn.setAttribute('variant', 'primary');
-submitBtn.setAttribute('tabindex', '4');
+submitBtn.setAttribute('tabindex', '3');
 submitBtn.textContent = 'Submit';
 
 const resetBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
 resetBtn.setAttribute('variant', 'secondary');
-resetBtn.setAttribute('tabindex', '5');
+resetBtn.setAttribute('tabindex', '4');
 resetBtn.textContent = 'Reset';
 
 buttonRow.appendChild(submitBtn);
@@ -228,6 +239,7 @@ status.textContent = 'Status: ready';
 app.appendChild(title);
 app.appendChild(hint);
 app.appendChild(inputSection);
+app.appendChild(textareaSection);
 app.appendChild(buttonSection);
 app.appendChild(status);
 document.body.appendChild(app);
@@ -237,14 +249,15 @@ document.body.appendChild(app);
 submitBtn.addEventListener('click', () => {
   const name = nameInput.getAttribute('value') ?? '';
   const email = emailInput.getAttribute('value') ?? '';
-  const code = limitInput.getAttribute('value') ?? '';
-  status.textContent = `Status: submitted name="${name}" email="${email}" code="${code}"`;
+  const notes = notesTextarea.getAttribute('value') ?? '';
+  const lineCount = notes.split('\n').length;
+  status.textContent = `Status: submitted name="${name}" email="${email}" notes=${lineCount} lines`;
 });
 
 resetBtn.addEventListener('click', () => {
   nameInput.setAttribute('value', '');
   emailInput.setAttribute('value', '');
-  limitInput.setAttribute('value', '');
+  notesTextarea.setAttribute('value', '');
   status.textContent = 'Status: reset';
 });
 
@@ -252,12 +265,10 @@ nameInput.addEventListener('input', () => {
   status.textContent = `Status: typing name="${nameInput.getAttribute('value') ?? ''}"`;
 });
 
-emailInput.addEventListener('input', () => {
-  status.textContent = `Status: typing email="${emailInput.getAttribute('value') ?? ''}"`;
-});
-
-nameInput.addEventListener('change', () => {
-  status.textContent = `Status: name committed "${nameInput.getAttribute('value') ?? ''}"`;
+notesTextarea.addEventListener('input', () => {
+  const val = notesTextarea.getAttribute('value') ?? '';
+  const lineCount = val.split('\n').length;
+  status.textContent = `Status: typing notes (${lineCount} lines, ${val.length} chars)`;
 });
 
 document.setActiveElement(nameInput);
