@@ -1,4 +1,5 @@
 export {UiButton} from './UiButton/component';
+export {UiCodeblock} from './UiCodeblock/component';
 export {UiDetails} from './UiDetails/component';
 export {UiInput} from './UiInput/component';
 export {UiOption} from './UiOption/component';

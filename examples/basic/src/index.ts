@@ -1,6 +1,7 @@
 import {Terminal} from '@micra/terminal-dom';
 import {
   UiButton,
+  UiCodeblock,
   UiDetails,
   UiInput,
   UiOption,
@@ -14,6 +15,11 @@ import {
   UiThead,
   UiTr,
 } from '@micra/terminal-dom/components';
+
+/* Load Shiki highlighter before starting the app */
+const jsLang = (await import('shiki/langs/javascript.mjs')).default;
+const nordTheme = (await import('shiki/themes/nord.mjs')).default;
+await UiCodeblock.loadHighlighter({langs: [jsLang], themes: [nordTheme]});
 
 process.stdin.setRawMode?.(true);
 process.stdin.resume();
@@ -29,6 +35,7 @@ const terminal = new Terminal({
 const {document, window} = terminal;
 
 window.customElements.define(UiButton.tagName, UiButton);
+window.customElements.define(UiCodeblock.tagName, UiCodeblock);
 window.customElements.define(UiDetails.tagName, UiDetails);
 window.customElements.define(UiInput.tagName, UiInput);
 window.customElements.define(UiOption.tagName, UiOption);
@@ -353,10 +360,40 @@ teamTable.appendChild(tfoot);
 tableDetails.appendChild(tableSummary);
 tableDetails.appendChild(teamTable);
 
+/* ── Code details ──────────────────────────────────────── */
+
+const codeDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+codeDetails.setAttribute('tabindex', '6');
+codeDetails.setAttribute('open', '');
+
+const codeSummary = document.createElement('ui-summary');
+codeSummary.textContent = 'Code example';
+
+const codeblock = document.createElement('ui-codeblock') as InstanceType<typeof UiCodeblock>;
+codeblock.setAttribute('language', 'javascript');
+codeblock.setAttribute('theme', 'nord');
+codeblock.setAttribute('line-numbers', '');
+codeblock.textContent = `import { Terminal } from '@micra/terminal-dom';
+
+const terminal = new Terminal({ altScreen: true, mouse: true, fps: 30 });
+const { document } = terminal;
+
+const box = document.createElement('div');
+box.style.borderStyle = 'rounded';
+box.style.borderColor = '#7c3aed';
+box.style.padding = '1';
+box.textContent = 'Hello, Terminal!';
+document.body.appendChild(box);
+
+await terminal.run();`;
+
+codeDetails.appendChild(codeSummary);
+codeDetails.appendChild(codeblock);
+
 /* ── Help details (collapsed) ──────────────────────────── */
 
 const helpDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
-helpDetails.setAttribute('tabindex', '6');
+helpDetails.setAttribute('tabindex', '7');
 
 const helpSummary = document.createElement('ui-summary');
 helpSummary.textContent = 'Help & shortcuts';
@@ -375,12 +412,12 @@ buttonRow.className = 'row';
 
 const submitBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
 submitBtn.setAttribute('variant', 'primary');
-submitBtn.setAttribute('tabindex', '7');
+submitBtn.setAttribute('tabindex', '8');
 submitBtn.textContent = 'Submit';
 
 const resetBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
 resetBtn.setAttribute('variant', 'secondary');
-resetBtn.setAttribute('tabindex', '8');
+resetBtn.setAttribute('tabindex', '9');
 resetBtn.textContent = 'Reset';
 
 buttonRow.appendChild(submitBtn);
@@ -398,6 +435,7 @@ app.appendChild(title);
 app.appendChild(hint);
 app.appendChild(formDetails);
 app.appendChild(tableDetails);
+app.appendChild(codeDetails);
 app.appendChild(helpDetails);
 app.appendChild(buttonRow);
 app.appendChild(status);
@@ -435,6 +473,10 @@ formDetails.addEventListener('toggle', () => {
 
 tableDetails.addEventListener('toggle', () => {
   status.textContent = `Status: table section ${tableDetails.isOpen() ? 'expanded' : 'collapsed'}`;
+});
+
+codeDetails.addEventListener('toggle', () => {
+  status.textContent = `Status: code section ${codeDetails.isOpen() ? 'expanded' : 'collapsed'}`;
 });
 
 helpDetails.addEventListener('toggle', () => {

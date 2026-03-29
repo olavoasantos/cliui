@@ -1,0 +1,5 @@
+ui-codeblock {
+  display: block;
+  overflow: scroll;
+  white-space: pre;
+}

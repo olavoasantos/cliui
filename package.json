@@ -64,6 +64,9 @@
     "type:check": "tsc --noEmit",
     "version:bump": "changeset"
   },
+  "dependencies": {
+    "shiki": "^4.0.2"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
     "@types/node": "^25.5.0",
