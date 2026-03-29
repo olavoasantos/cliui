@@ -183,4 +183,89 @@ describe('handleCaretKeyDown clipboard', () => {
     expect(handled).toBe(true);
     expect(editable.getGraphemes()).toEqual(['c']);
   });
+
+  it('pastes from clipboard with Ctrl+V', () => {
+    const editable = createEditable(['a', 'b']);
+    const caret = new Caret(editable);
+
+    caret.moveTo(1);
+
+    const handled = handleCaretKeyDown(caret, key('v', {ctrl: true}), {
+      onClipboardRead: () => 'XY',
+    });
+
+    expect(handled).toBe(true);
+    expect(editable.getGraphemes()).toEqual(['a', 'X', 'Y', 'b']);
+    expect(caret.position).toBe(3);
+  });
+
+  it('pastes from clipboard with Meta+V', () => {
+    const editable = createEditable(['a']);
+    const caret = new Caret(editable);
+
+    caret.moveTo(1);
+
+    const handled = handleCaretKeyDown(caret, key('v', {meta: true}), {
+      onClipboardRead: () => 'Z',
+    });
+
+    expect(handled).toBe(true);
+    expect(editable.getGraphemes()).toEqual(['a', 'Z']);
+  });
+
+  it('replaces selection on paste', () => {
+    const editable = createEditable(['a', 'b', 'c', 'd']);
+    const caret = new Caret(editable);
+
+    caret.moveTo(1);
+    caret.selectTo(3);
+
+    const handled = handleCaretKeyDown(caret, key('v', {ctrl: true}), {
+      onClipboardRead: () => 'X',
+    });
+
+    expect(handled).toBe(true);
+    expect(editable.getGraphemes()).toEqual(['a', 'X', 'd']);
+    expect(caret.hasSelection()).toBe(false);
+  });
+
+  it('does not paste when target is readonly', () => {
+    const editable = createReadonlyEditable(['a', 'b']);
+    const caret = new Caret(editable);
+    const onClipboardRead = vi.fn(() => 'X');
+
+    caret.moveTo(1);
+
+    const handled = handleCaretKeyDown(caret, key('v', {ctrl: true}), {onClipboardRead});
+
+    expect(handled).toBe(true);
+    expect(onClipboardRead).not.toHaveBeenCalled();
+    expect(editable.getGraphemes()).toEqual(['a', 'b']);
+  });
+
+  it('does not paste when clipboard is empty', () => {
+    const editable = createEditable(['a']);
+    const caret = new Caret(editable);
+
+    caret.moveTo(1);
+
+    const handled = handleCaretKeyDown(caret, key('v', {ctrl: true}), {
+      onClipboardRead: () => '',
+    });
+
+    expect(handled).toBe(true);
+    expect(editable.getGraphemes()).toEqual(['a']);
+  });
+
+  it('handles Ctrl+V without onClipboardRead callback', () => {
+    const editable = createEditable(['a']);
+    const caret = new Caret(editable);
+
+    caret.moveTo(1);
+
+    const handled = handleCaretKeyDown(caret, key('v', {ctrl: true}));
+
+    expect(handled).toBe(true);
+    expect(editable.getGraphemes()).toEqual(['a']);
+  });
 });

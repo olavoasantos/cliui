@@ -13,6 +13,14 @@ export interface CaretKeyDownOptions {
    * silently ignored.
    */
   onClipboardWrite?: (text: string) => void;
+
+  /**
+   * Callback invoked when the user triggers a clipboard paste (Ctrl+V /
+   * Meta+V).  Returns the current clipboard text.  When omitted, the
+   * paste keybinding is ignored (bracketed paste from the terminal
+   * emulator still works independently).
+   */
+  onClipboardRead?: () => string;
 }
 
 /**
@@ -94,6 +102,19 @@ export function handleCaretKeyDown(
     if (!target.isReadonly()) {
       caret.deleteSelection();
       target.updateScroll();
+    }
+
+    return true;
+  }
+
+  /* Clipboard paste: Ctrl+V or Meta+V */
+  if (key === 'v' && (ctrl || meta) && !alt && !shift) {
+    if (!target.isReadonly() && options?.onClipboardRead) {
+      const text = options.onClipboardRead();
+
+      if (text.length > 0) {
+        caret.insertText(text);
+      }
     }
 
     return true;

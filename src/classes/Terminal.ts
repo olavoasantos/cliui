@@ -61,6 +61,7 @@ export class Terminal {
   private readonly inputReader: InputReader;
   private readonly eventDispatcher: EventDispatcher;
   private readonly caretManager = new CaretManager();
+  private clipboardBuffer = '';
   private readonly boundResizeListener = (): void => {
     this.handleResize();
   };
@@ -149,8 +150,10 @@ export class Terminal {
           if (
             handleCaretKeyDown(caret, event as KeyboardEvent, {
               onClipboardWrite: (text) => {
+                this.clipboardBuffer = text;
                 this.writeToClipboard(text);
               },
+              onClipboardRead: () => this.clipboardBuffer,
             })
           ) {
             return;
