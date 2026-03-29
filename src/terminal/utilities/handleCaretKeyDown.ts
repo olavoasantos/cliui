@@ -86,8 +86,26 @@ export function handleCaretKeyDown(
     return true;
   }
 
-  /* Enter: insert newline in multi-line mode */
-  if (config?.multiLine && key === 'Enter' && !alt && !ctrl && !meta) {
+  /* Cmd+Up/Down: move to start/end of all content */
+  if (config && (key === 'ArrowUp' || key === 'ArrowDown') && meta && !alt && !ctrl) {
+    const pos = key === 'ArrowUp' ? 0 : target.getGraphemes().length;
+    shift ? caret.selectTo(pos) : caret.moveTo(pos);
+    return true;
+  }
+
+  /* Option+Up/Down: move to previous/next paragraph boundary */
+  if (config && (key === 'ArrowUp' || key === 'ArrowDown') && alt && !ctrl && !meta) {
+    const graphemes = target.getGraphemes();
+    const pos =
+      key === 'ArrowUp'
+        ? findParagraphBoundaryUp(graphemes, caret.position)
+        : findParagraphBoundaryDown(graphemes, caret.position);
+    shift ? caret.selectTo(pos) : caret.moveTo(pos);
+    return true;
+  }
+
+  /* Enter / Shift+Enter: insert newline in multi-line mode */
+  if (config?.multiLine && key === 'Enter' && !ctrl && !meta) {
     if (!target.isReadonly()) {
       caret.insertText('\n');
     }
@@ -321,6 +339,42 @@ function findWordBoundaryRight(target: Editable, position: number): number {
   }
 
   return index;
+}
+
+/**
+ * Finds the start of the previous paragraph (before the previous blank line).
+ * Moves up past any blank lines, then up past non-blank lines.
+ */
+function findParagraphBoundaryUp(graphemes: string[], position: number): number {
+  let i = position;
+
+  /* Move before the current newline if sitting on one */
+  if (i > 0 && graphemes[i - 1] === '\n') i--;
+
+  /* Skip blank lines upward */
+  while (i > 0 && graphemes[i - 1] === '\n') i--;
+
+  /* Skip non-newline content upward */
+  while (i > 0 && graphemes[i - 1] !== '\n') i--;
+
+  return i;
+}
+
+/**
+ * Finds the end of the next paragraph (after the next blank line).
+ * Moves down past non-blank content, then past any blank lines.
+ */
+function findParagraphBoundaryDown(graphemes: string[], position: number): number {
+  let i = position;
+  const len = graphemes.length;
+
+  /* Skip non-newline content downward */
+  while (i < len && graphemes[i] !== '\n') i++;
+
+  /* Skip newlines downward */
+  while (i < len && graphemes[i] === '\n') i++;
+
+  return i;
 }
 
 /**
