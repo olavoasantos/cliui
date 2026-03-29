@@ -119,10 +119,10 @@ style.textContent = `
   /* ── Select styles ─────────────────────────────────────── */
 
   ui-select {
-    display: inline;
     color: #e5e7eb;
     background-color: #1e293b;
     text-decoration: none;
+    width: 20;
   }
 
   ui-select:focus {

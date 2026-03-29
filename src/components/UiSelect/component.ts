@@ -6,12 +6,12 @@ import {
   UI_SELECT_LISTBOX_Z_INDEX,
   UI_SELECT_OBSERVED_ATTRIBUTES,
   UI_SELECT_TAG_NAME,
-  DEFAULT_UI_SELECT_WIDTH,
-  MIN_UI_SELECT_WIDTH,
 } from './constants';
 import {Event, HTMLElement, InputEvent} from '../../dom';
 
 import type {UiOption} from '../UiOption/component';
+
+const TYPEAHEAD_TIMEOUT = 500;
 
 /**
  * Built-in single-choice select custom element.
@@ -23,7 +23,7 @@ import type {UiOption} from '../UiOption/component';
  * Keyboard behavior follows macOS browser conventions:
  * - **Collapsed**: ArrowUp/Down changes selection, Enter/Space opens
  * - **Expanded**: ArrowUp/Down highlights, Enter/Space selects, Escape closes
- * - **Type-ahead**: typing a character jumps to the first matching option
+ * - **Type-ahead**: typing characters searches options by accumulated prefix
  *
  * Register with `window.customElements.define(UiSelect.tagName, UiSelect)`
  * before creating `<ui-select>` elements in a window.
@@ -51,8 +51,15 @@ export class UiSelect extends HTMLElement {
   /** Internal listbox wrapper for the dropdown overlay. */
   private listbox: import('../../dom').Element | null = null;
 
+  /** Accumulated type-ahead search string. */
+  private typeaheadBuffer = '';
+
+  /** Timer for clearing the type-ahead buffer. */
+  private typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
+
   /** Bound event handlers for cleanup. */
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
+  private readonly boundMouseDown = this.handleMouseDown.bind(this) as EventListener;
   private readonly boundClick = this.handleClick.bind(this) as EventListener;
   private readonly boundFocus = this.handleFocus.bind(this) as EventListener;
   private readonly boundBlur = this.handleBlur.bind(this) as EventListener;
@@ -68,6 +75,7 @@ export class UiSelect extends HTMLElement {
     this.syncTriggerText();
 
     this.addEventListener('keydown', this.boundKeyDown);
+    this.addEventListener('mousedown', this.boundMouseDown);
     this.addEventListener('click', this.boundClick);
     this.addEventListener('focus', this.boundFocus);
     this.addEventListener('blur', this.boundBlur);
@@ -76,6 +84,7 @@ export class UiSelect extends HTMLElement {
 
   disconnectedCallback(): void {
     this.removeEventListener('keydown', this.boundKeyDown);
+    this.removeEventListener('mousedown', this.boundMouseDown);
     this.removeEventListener('click', this.boundClick);
     this.removeEventListener('focus', this.boundFocus);
     this.removeEventListener('blur', this.boundBlur);
@@ -142,16 +151,10 @@ export class UiSelect extends HTMLElement {
 
   /* ── Private: DOM structure ─────────────────────────────── */
 
-  /**
-   * Creates the internal trigger and listbox elements. Moves
-   * `<ui-option>` children into the listbox wrapper.
-   */
   private buildInternals(): void {
     if (this.trigger) return;
 
     const doc = this.ownerDocument!;
-
-    /* Collect option children before mutating the tree */
     const options = this.getOptions();
 
     /* Create trigger as a flex row: [label (grows)] [indicator] */
@@ -175,24 +178,12 @@ export class UiSelect extends HTMLElement {
     this.listbox.setAttribute('class', 'ui-select-listbox');
     this.listbox.style.position = 'absolute';
     this.listbox.style.top = '1';
-    this.listbox.style.left = '-1';
     this.listbox.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
     this.listbox.style.display = 'none';
-    this.listbox.style.width = String(this.getWidth());
 
-    /* Ensure critical layout properties on self */
-    this.style.position = 'relative';
-    this.style.width = String(this.getWidth());
-    if (!this.style.padding) {
-      this.style.padding = '0 1';
-    }
-
-    /* Move options into listbox and set z-index + padding for stacking */
+    /* Move options into listbox and set z-index for stacking */
     for (const option of options) {
       option.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
-      if (!option.style.padding) {
-        option.style.padding = '0 1';
-      }
       this.listbox.appendChild(option);
     }
 
@@ -200,10 +191,12 @@ export class UiSelect extends HTMLElement {
     this.appendChild(this.trigger);
     this.appendChild(this.listbox);
 
+    /* Ensure critical layout properties on self */
+    this.style.position = 'relative';
+
     this.syncSelectedAttribute();
   }
 
-  /** Returns all `<ui-option>` children from the listbox. */
   private getOptions(): UiOption[] {
     const source = this.listbox ?? this;
     const options: UiOption[] = [];
@@ -225,7 +218,6 @@ export class UiSelect extends HTMLElement {
 
   /* ── Private: State ─────────────────────────────────────── */
 
-  /** Returns the index of the currently selected option, or -1. */
   private getSelectedIndex(): number {
     const value = this.getAttribute('value');
     const options = this.getOptions();
@@ -237,7 +229,6 @@ export class UiSelect extends HTMLElement {
     return options.length > 0 ? 0 : -1;
   }
 
-  /** Selects an option by index and dispatches events. */
   private selectIndex(index: number): void {
     const options = this.getOptions();
     if (index < 0 || index >= options.length) return;
@@ -253,7 +244,6 @@ export class UiSelect extends HTMLElement {
     }
   }
 
-  /** Sets the `selected` attribute on the matching option, removes from others. */
   private syncSelectedAttribute(): void {
     const value = this.getAttribute('value');
     const options = this.getOptions();
@@ -267,10 +257,6 @@ export class UiSelect extends HTMLElement {
     }
   }
 
-  /**
-   * Updates the trigger text to show the selected option's label,
-   * right-padded so the indicator sits at the right edge.
-   */
   private syncTriggerText(): void {
     if (!this.triggerLabel || !this.triggerIndicator) return;
 
@@ -295,7 +281,6 @@ export class UiSelect extends HTMLElement {
       : ` ${UI_SELECT_INDICATOR_DOWN}`;
   }
 
-  /** Updates the visual highlight in the listbox. */
   private syncHighlight(): void {
     const options = this.getOptions();
 
@@ -313,7 +298,6 @@ export class UiSelect extends HTMLElement {
   private showListbox(): void {
     if (!this.listbox) return;
     this.listbox.style.display = 'block';
-    this.listbox.style.width = String(this.getWidth());
     this.syncHighlight();
     this.syncTriggerText();
   }
@@ -364,9 +348,8 @@ export class UiSelect extends HTMLElement {
       return;
     }
 
-    /* Type-ahead: jump to first matching option */
     if (key.length === 1 && !this.isModifiedKey(event)) {
-      this.typeAhead(key);
+      this.typeAhead(key, false);
     }
   }
 
@@ -396,13 +379,11 @@ export class UiSelect extends HTMLElement {
       return;
     }
 
-    /* Type-ahead while expanded: move highlight to match */
     if (key.length === 1 && !this.isModifiedKey(event)) {
-      this.typeAheadHighlight(key);
+      this.typeAhead(key, true);
     }
   }
 
-  /** Changes selection directly when collapsed (browser behavior). */
   private navigateCollapsed(direction: number): void {
     const options = this.getOptions();
     const current = this.getSelectedIndex();
@@ -414,7 +395,6 @@ export class UiSelect extends HTMLElement {
     this.selectIndex(next);
   }
 
-  /** Moves the highlight when expanded (no wrap, skip disabled). */
   private navigateExpanded(direction: number): void {
     const options = this.getOptions();
     let next = this.highlightedIndex + direction;
@@ -431,46 +411,45 @@ export class UiSelect extends HTMLElement {
   }
 
   /**
-   * Type-ahead when collapsed: select the next option whose label
-   * starts with the typed character (case-insensitive).
+   * Buffered type-ahead: characters typed within TYPEAHEAD_TIMEOUT ms
+   * accumulate into a prefix string that is matched against option labels.
    */
-  private typeAhead(char: string): void {
-    const options = this.getOptions();
-    const current = this.getSelectedIndex();
-    const lower = char.toLowerCase();
+  private typeAhead(char: string, highlightOnly: boolean): void {
+    if (this.typeaheadTimer !== null) {
+      clearTimeout(this.typeaheadTimer);
+    }
 
-    for (let offset = 1; offset <= options.length; offset++) {
-      const index = (current + offset) % options.length;
+    this.typeaheadBuffer += char.toLowerCase();
+
+    this.typeaheadTimer = setTimeout(() => {
+      this.typeaheadBuffer = '';
+      this.typeaheadTimer = null;
+    }, TYPEAHEAD_TIMEOUT);
+
+    const options = this.getOptions();
+    const startIndex = highlightOnly ? this.highlightedIndex : this.getSelectedIndex();
+
+    /* Search from current+1, then wrap around */
+    for (let offset = 0; offset < options.length; offset++) {
+      const index = (startIndex + offset) % options.length;
       const option = options[index]!;
 
-      if (!option.isDisabled() && option.getLabel().toLowerCase().startsWith(lower)) {
-        this.selectIndex(index);
+      if (
+        !option.isDisabled() &&
+        option.getLabel().toLowerCase().startsWith(this.typeaheadBuffer)
+      ) {
+        if (highlightOnly) {
+          this.highlightedIndex = index;
+          this.syncHighlight();
+        } else {
+          this.selectIndex(index);
+        }
+
         return;
       }
     }
   }
 
-  /**
-   * Type-ahead when expanded: highlight the next option whose label
-   * starts with the typed character.
-   */
-  private typeAheadHighlight(char: string): void {
-    const options = this.getOptions();
-    const lower = char.toLowerCase();
-
-    for (let offset = 1; offset <= options.length; offset++) {
-      const index = (this.highlightedIndex + offset) % options.length;
-      const option = options[index]!;
-
-      if (!option.isDisabled() && option.getLabel().toLowerCase().startsWith(lower)) {
-        this.highlightedIndex = index;
-        this.syncHighlight();
-        return;
-      }
-    }
-  }
-
-  /** Checks if a keyboard event has Ctrl/Alt/Meta modifiers. */
   private isModifiedKey(event: Event): boolean {
     const ke = event as import('../../dom').KeyboardEvent;
     return !!(
@@ -482,6 +461,27 @@ export class UiSelect extends HTMLElement {
 
   /* ── Private: Mouse ─────────────────────────────────────── */
 
+  /**
+   * Prevents mousedown inside the dropdown from stealing focus away
+   * from the select, which would trigger blur → close before the
+   * click event can select the option.
+   */
+  private handleMouseDown(event: Event): void {
+    if (this.isDisabled()) return;
+    if (!this.isOpen()) return;
+
+    const target = event.target as import('../../dom').Element | null;
+    if (!target) return;
+
+    /* If the mousedown is on an option or inside the listbox, prevent
+     * the default focus-stealing behavior. */
+    const option = this.findOptionFromTarget(target);
+
+    if (option || this.isInsideListbox(target)) {
+      event.preventDefault();
+    }
+  }
+
   private handleClick(event: Event): void {
     if (this.isDisabled()) return;
 
@@ -490,11 +490,12 @@ export class UiSelect extends HTMLElement {
 
     /* Ensure focus on click so blur fires on tab-away */
     const doc = this.ownerDocument as import('../../dom').Document | null;
+
     if (doc && doc.activeElement !== (this as unknown as import('../../dom').Element)) {
       doc.setActiveElement(this as unknown as import('../../dom').Element);
     }
 
-    /* Walk up from target to find a ui-option ancestor */
+    /* Click on an option inside the listbox */
     if (this.isOpen()) {
       const option = this.findOptionFromTarget(target);
 
@@ -519,9 +520,6 @@ export class UiSelect extends HTMLElement {
     }
   }
 
-  /**
-   * Walks up from a click target to find the nearest `<ui-option>`.
-   */
   private findOptionFromTarget(target: import('../../dom').Element): UiOption | null {
     let current: import('../../dom').Element | null = target;
 
@@ -536,7 +534,18 @@ export class UiSelect extends HTMLElement {
     return null;
   }
 
-  /** Closes the dropdown when clicking outside the select. */
+  /** Checks if a target element is inside the listbox wrapper. */
+  private isInsideListbox(target: import('../../dom').Element): boolean {
+    let current: import('../../dom').Element | null = target;
+
+    while (current) {
+      if (current === this.listbox) return true;
+      current = current.parentElement as import('../../dom').Element | null;
+    }
+
+    return false;
+  }
+
   private handleDocumentClick(event: Event): void {
     const target = event.target as import('../../dom').Element | null;
     if (!target) return;
@@ -582,14 +591,6 @@ export class UiSelect extends HTMLElement {
   }
 
   /* ── Private: Utilities ─────────────────────────────────── */
-
-  private getWidth(): number {
-    const raw = this.getAttribute('width');
-    if (raw == null) return DEFAULT_UI_SELECT_WIDTH;
-    const parsed = Number.parseInt(raw, 10);
-    if (!Number.isFinite(parsed) || parsed < MIN_UI_SELECT_WIDTH) return DEFAULT_UI_SELECT_WIDTH;
-    return parsed;
-  }
 
   private ensureTabIndex(): void {
     if (!this.hasAttribute('tabindex')) {

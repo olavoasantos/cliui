@@ -378,5 +378,41 @@ describe('UiSelect', () => {
 
       expect(select.getAttribute('value')).toBe('banana');
     });
+
+    it('buffers characters typed within the timeout window', () => {
+      const data = [
+        {value: 'small', label: 'Small'},
+        {value: 'medium', label: 'Medium'},
+        {value: 'large', label: 'Large'},
+      ];
+      const {select} = createSelect(data, {value: 'small'});
+
+      keyDown(select, 's');
+      keyDown(select, 'm');
+
+      // "sm" should NOT match "Small" — it should keep looking
+      // and not find a match, staying on "Small" since no option starts with "sm"
+      // Actually "Small" starts with "s" but not "sm". No option starts with "sm".
+      // So it should stay on the current selection.
+      // Wait — there IS no option starting with "sm". But the user wants it to match.
+      // Actually the user said typing "s" then "m" should match "SMall".
+      // "Small".toLowerCase().startsWith("sm") = true!
+      expect(select.getAttribute('value')).toBe('small');
+    });
+
+    it('matches multi-character prefix against option labels', () => {
+      const data = [
+        {value: 'small', label: 'Small'},
+        {value: 'super', label: 'Super'},
+        {value: 'medium', label: 'Medium'},
+      ];
+      const {select} = createSelect(data, {value: 'medium'});
+
+      keyDown(select, 's');
+      keyDown(select, 'u');
+
+      // "su" matches "Super" (not "Small")
+      expect(select.getAttribute('value')).toBe('super');
+    });
   });
 });

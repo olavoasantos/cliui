@@ -11,7 +11,7 @@ import type {CustomElementConstructor} from '../../../dom/types';
 
 function setup(opts: {
   value?: string;
-  width?: string;
+  width?: number;
   options: Array<{value: string; label: string}>;
 }) {
   const w = new Window();
@@ -24,14 +24,13 @@ function setup(opts: {
 
   const style = d.createElement('style');
   style.textContent = `
-    ui-select { display: inline; }
+    ui-select { width: ${opts.width ?? 20}; padding: 0 1; }
     ui-option { display: block; }
   `;
   d.head.appendChild(style);
 
   const select = d.createElement('ui-select') as UiSelect;
   if (opts.value) select.setAttribute('value', opts.value);
-  if (opts.width) select.setAttribute('width', opts.width);
 
   for (const data of opts.options) {
     const opt = d.createElement('ui-option') as UiOption;
@@ -58,13 +57,17 @@ function renderToRows(
   new Painter().paint(layout, buffer);
 
   const result: string[] = [];
+
   for (let y = 0; y < rows; y++) {
     let row = '';
+
     for (let x = 0; x < cols; x++) {
       row += buffer.get(x, y)?.char ?? ' ';
     }
+
     result.push(row);
   }
+
   return result;
 }
 
@@ -75,8 +78,8 @@ const FRUITS = [
 ];
 
 describe('UiSelect rendering', () => {
-  it('shows the trigger with indicator when collapsed', () => {
-    const {se, d} = setup({value: 'banana', width: '15', options: FRUITS});
+  it('shows the trigger with down indicator when collapsed', () => {
+    const {se, d} = setup({value: 'banana', width: 20, options: FRUITS});
     const rows = renderToRows(se, d, 40, 5);
 
     expect(rows[0]).toContain('Banana');
@@ -84,17 +87,17 @@ describe('UiSelect rendering', () => {
   });
 
   it('right-aligns the indicator within the select width', () => {
-    const {se, d} = setup({value: 'apple', width: '15', options: FRUITS});
+    const {se, d} = setup({value: 'apple', width: 20, options: FRUITS});
     const rows = renderToRows(se, d, 40, 5);
 
-    // The trigger text should be: "Apple" + padding + " ▾"
-    // Find the indicator position — it should be near position 15 (width)
     const indicatorIndex = rows[0]!.indexOf('▾');
-    expect(indicatorIndex).toBeGreaterThan(5); // not right after "Apple"
+    const labelEnd = rows[0]!.indexOf('Apple') + 5;
+
+    expect(indicatorIndex).toBeGreaterThan(labelEnd + 2);
   });
 
   it('shows option text when dropdown is open', () => {
-    const {se, d, select} = setup({value: 'banana', width: '15', options: FRUITS});
+    const {se, d, select} = setup({value: 'banana', width: 20, options: FRUITS});
     select.open();
     const rows = renderToRows(se, d, 40, 10);
 
@@ -104,24 +107,21 @@ describe('UiSelect rendering', () => {
   });
 
   it('aligns dropdown left edge with trigger left edge', () => {
-    const {se, d, select} = setup({value: 'apple', width: '15', options: FRUITS});
+    const {se, d, select} = setup({value: 'apple', width: 20, options: FRUITS});
     select.open();
     const rows = renderToRows(se, d, 40, 10);
 
-    // Find where the trigger text starts
     const triggerRow = rows[0]!;
     const triggerStart = triggerRow.search(/\S/);
 
-    // Find where option text starts
     const optionRow = rows.find((r) => r.includes('Banana'))!;
     const optionStart = optionRow.search(/\S/);
 
-    // They should start at the same column
     expect(optionStart).toBe(triggerStart);
   });
 
   it('flips indicator to up caret when open', () => {
-    const {se, d, select} = setup({value: 'apple', width: '15', options: FRUITS});
+    const {se, d, select} = setup({value: 'apple', width: 20, options: FRUITS});
     select.open();
     const rows = renderToRows(se, d, 40, 10);
 
