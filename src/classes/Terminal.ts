@@ -126,6 +126,7 @@ export class Terminal {
     this.document.body.style.overflow = 'scroll';
 
     this.wireCaretListeners();
+    this.wireBodyScrollListener();
   }
 
   /**
@@ -639,6 +640,56 @@ export class Terminal {
   /**
    * Maps a mouse offsetX to a flat grapheme index for cursor positioning.
    */
+  /**
+   * Wires a body-level keydown listener that scrolls the viewport
+   * when arrow keys or Page Up/Down are pressed and not consumed
+   * by a focused editable element.
+   */
+  private wireBodyScrollListener(): void {
+    const SCROLL_LINE = 1;
+    const SCROLL_PAGE_FACTOR = 0.8;
+
+    this.document.body.addEventListener('keydown', ((event: Event) => {
+      const ke = event as KeyboardEvent;
+
+      /* Only scroll when no editable is focused */
+      const activeElement = this.document.activeElement;
+
+      if (activeElement && activeElement !== this.document.body) {
+        /* Check if the active element is an editable that handles arrow keys */
+        const config = this.getEditableConfig(activeElement);
+
+        if (config) return;
+      }
+
+      const body = this.document.body as typeof this.document.body & {scrollTop?: number};
+      const currentScroll = body.scrollTop ?? 0;
+      const pageHeight = Math.max(1, Math.floor(this.getRows() * SCROLL_PAGE_FACTOR));
+
+      let delta = 0;
+
+      switch (ke.key) {
+        case 'ArrowUp':
+          delta = -SCROLL_LINE;
+          break;
+        case 'ArrowDown':
+          delta = SCROLL_LINE;
+          break;
+        case 'PageUp':
+          delta = -pageHeight;
+          break;
+        case 'PageDown':
+          delta = pageHeight;
+          break;
+        default:
+          return;
+      }
+
+      body.scrollTop = Math.max(0, currentScroll + delta);
+      event.preventDefault();
+    }) as EventListener);
+  }
+
   /**
    * Updates resolved viewport dimensions for all active editables
    * from their layout boxes' content areas.

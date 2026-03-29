@@ -165,10 +165,7 @@ export class EventDispatcher {
         target.dispatchEvent(this.createMouseDomEvent('mousemove', event, targetBox));
         return;
       case 'wheel':
-        if (targetBox !== null) {
-          this.updateScrollOffset(targetBox, event);
-        }
-
+        this.updateScrollOffset(target, event);
         target.dispatchEvent(this.createWheelDomEvent(event));
         return;
     }
@@ -236,21 +233,58 @@ export class EventDispatcher {
     return flattened.map((entry) => entry.box);
   }
 
-  private updateScrollOffset(box: LayoutBox, event: TerminalMouseEvent): void {
-    if (box.computedStyle.get('overflow') !== 'scroll') {
-      return;
-    }
-
+  /**
+   * Walks up from the target element to find the nearest `overflow: scroll`
+   * ancestor and applies the wheel delta to its `scrollTop`.
+   */
+  private updateScrollOffset(target: Element, event: TerminalMouseEvent): void {
     const delta = this.mapWheelDelta(event.button).deltaY;
-    const maxScrollOffset = Math.max(
-      0,
-      (box.scrollHeight ?? box.contentHeight) - box.contentHeight,
-    );
-    const elementWithScroll = box.element as Element & {scrollTop?: number};
-    const currentScrollOffset = elementWithScroll.scrollTop ?? box.scrollOffsetY ?? 0;
-    const nextScrollOffset = Math.max(0, Math.min(maxScrollOffset, currentScrollOffset + delta));
 
-    elementWithScroll.scrollTop = nextScrollOffset;
+    if (delta === 0) return;
+
+    let current: Element | null = target;
+
+    while (current) {
+      const box = this.findBoxForElement(current);
+
+      if (box && box.computedStyle.get('overflow') === 'scroll') {
+        const maxScrollOffset = Math.max(
+          0,
+          (box.scrollHeight ?? box.contentHeight) - box.contentHeight,
+        );
+        const elementWithScroll = current as Element & {scrollTop?: number};
+        const currentScrollOffset = elementWithScroll.scrollTop ?? box.scrollOffsetY ?? 0;
+        const nextScrollOffset = Math.max(
+          0,
+          Math.min(maxScrollOffset, currentScrollOffset + delta),
+        );
+
+        elementWithScroll.scrollTop = nextScrollOffset;
+        return;
+      }
+
+      current = current.parentElement as Element | null;
+    }
+  }
+
+  /**
+   * Finds the layout box for a given element by searching the layout tree.
+   */
+  private findBoxForElement(target: Element): LayoutBox | null {
+    if (this.layoutRoot === null) return null;
+
+    const search = (box: LayoutBox): LayoutBox | null => {
+      if (box.element === target) return box;
+
+      for (const child of box.children) {
+        const found = search(child);
+        if (found) return found;
+      }
+
+      return null;
+    };
+
+    return search(this.layoutRoot);
   }
 
   private containsPoint(box: LayoutBox, column: number, row: number): boolean {
