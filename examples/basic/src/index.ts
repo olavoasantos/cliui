@@ -1,5 +1,12 @@
 import {Terminal} from '@micra/terminal-dom';
-import {UiButton, UiInput, UiOption, UiSelect, UiTextarea} from '@micra/terminal-dom/components';
+import {
+  UiButton,
+  UiDetails,
+  UiInput,
+  UiOption,
+  UiSelect,
+  UiTextarea,
+} from '@micra/terminal-dom/components';
 
 process.stdin.setRawMode?.(true);
 process.stdin.resume();
@@ -15,6 +22,7 @@ const terminal = new Terminal({
 const {document, window} = terminal;
 
 window.customElements.define(UiButton.tagName, UiButton);
+window.customElements.define(UiDetails.tagName, UiDetails);
 window.customElements.define(UiInput.tagName, UiInput);
 window.customElements.define(UiOption.tagName, UiOption);
 window.customElements.define(UiSelect.tagName, UiSelect);
@@ -150,6 +158,27 @@ style.textContent = `
   ui-option[disabled] {
     color: #64748b;
   }
+
+  /* ── Details styles ────────────────────────────────────── */
+
+  ui-details {
+    padding: 0 1;
+    border-style: rounded;
+    border-color: #475569;
+  }
+
+  ui-details:focus {
+    border-color: #7c3aed;
+  }
+
+  ui-details ui-summary {
+    color: #fbbf24;
+    font-weight: bold;
+  }
+
+  ui-details .ui-details-content {
+    color: #cbd5e1;
+  }
 `;
 document.head.appendChild(style);
 
@@ -166,21 +195,21 @@ const hint = document.createElement('div');
 hint.className = 'hint';
 hint.textContent = 'Tab to cycle. Arrow keys to navigate. Enter/Space to activate. Ctrl+Q to quit.';
 
-/* ── Form section ──────────────────────────────────────── */
+/* ── Details sections ──────────────────────────────────── */
 
-const formSection = document.createElement('div');
-formSection.className = 'section';
+const formDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+formDetails.setAttribute('tabindex', '0');
+formDetails.setAttribute('open', '');
 
-const formTitle = document.createElement('div');
-formTitle.className = 'section-title';
-formTitle.textContent = 'Form';
+const formSummary = document.createElement('ui-summary');
+formSummary.textContent = 'Form';
 
 const nameLabel = document.createElement('div');
 nameLabel.className = 'label';
 nameLabel.textContent = 'Name:';
 
 const nameInput = document.createElement('ui-input') as InstanceType<typeof UiInput>;
-nameInput.setAttribute('tabindex', '0');
+nameInput.setAttribute('tabindex', '1');
 nameInput.setAttribute('width', '25');
 nameInput.setAttribute('placeholder', 'Enter your name');
 
@@ -189,7 +218,7 @@ colorLabel.className = 'label';
 colorLabel.textContent = 'Favorite color:';
 
 const colorSelect = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
-colorSelect.setAttribute('tabindex', '1');
+colorSelect.setAttribute('tabindex', '2');
 colorSelect.setAttribute('value', 'blue');
 
 for (const [value, label] of [
@@ -210,7 +239,7 @@ sizeLabel.className = 'label';
 sizeLabel.textContent = 'Size:';
 
 const sizeSelect = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
-sizeSelect.setAttribute('tabindex', '2');
+sizeSelect.setAttribute('tabindex', '3');
 sizeSelect.setAttribute('value', 'medium');
 
 for (const [value, label, disabled] of [
@@ -233,34 +262,64 @@ notesLabel.className = 'label';
 notesLabel.textContent = 'Notes:';
 
 const notesTextarea = document.createElement('ui-textarea') as InstanceType<typeof UiTextarea>;
-notesTextarea.setAttribute('tabindex', '3');
+notesTextarea.setAttribute('tabindex', '4');
 notesTextarea.setAttribute('cols', '30');
 notesTextarea.setAttribute('rows', '3');
 notesTextarea.setAttribute('placeholder', 'Any additional notes...');
 
-formSection.appendChild(formTitle);
-formSection.appendChild(nameLabel);
-formSection.appendChild(nameInput);
-formSection.appendChild(colorLabel);
-formSection.appendChild(colorSelect);
-formSection.appendChild(sizeLabel);
-formSection.appendChild(sizeSelect);
-formSection.appendChild(notesLabel);
-formSection.appendChild(notesTextarea);
+formDetails.appendChild(formSummary);
+formDetails.appendChild(nameLabel);
+formDetails.appendChild(nameInput);
+formDetails.appendChild(colorLabel);
+formDetails.appendChild(colorSelect);
+formDetails.appendChild(sizeLabel);
+formDetails.appendChild(sizeSelect);
+formDetails.appendChild(notesLabel);
+formDetails.appendChild(notesTextarea);
 
-/* ── Button section ────────────────────────────────────── */
+/* ── Help details (collapsed by default) ───────────────── */
+
+const helpDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+helpDetails.setAttribute('tabindex', '5');
+
+const helpSummary = document.createElement('ui-summary');
+helpSummary.textContent = 'Help & shortcuts';
+
+const helpContent = document.createElement('div');
+helpContent.textContent =
+  'Tab/Shift+Tab: cycle focus  |  Enter/Space: activate  |  Arrows: navigate  |  Ctrl+Q: quit';
+
+helpDetails.appendChild(helpSummary);
+helpDetails.appendChild(helpContent);
+
+/* ── About details (collapsed by default) ──────────────── */
+
+const aboutDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+aboutDetails.setAttribute('tabindex', '6');
+
+const aboutSummary = document.createElement('ui-summary');
+aboutSummary.textContent = 'About this demo';
+
+const aboutContent = document.createElement('div');
+aboutContent.textContent =
+  '@micra/terminal-dom component showcase. Built-in components: button, input, select, textarea, details.';
+
+aboutDetails.appendChild(aboutSummary);
+aboutDetails.appendChild(aboutContent);
+
+/* ── Button row ────────────────────────────────────────── */
 
 const buttonRow = document.createElement('div');
 buttonRow.className = 'row';
 
 const submitBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
 submitBtn.setAttribute('variant', 'primary');
-submitBtn.setAttribute('tabindex', '4');
+submitBtn.setAttribute('tabindex', '7');
 submitBtn.textContent = 'Submit';
 
 const resetBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
 resetBtn.setAttribute('variant', 'secondary');
-resetBtn.setAttribute('tabindex', '5');
+resetBtn.setAttribute('tabindex', '8');
 resetBtn.textContent = 'Reset';
 
 buttonRow.appendChild(submitBtn);
@@ -276,7 +335,9 @@ status.textContent = 'Status: ready';
 
 app.appendChild(title);
 app.appendChild(hint);
-app.appendChild(formSection);
+app.appendChild(formDetails);
+app.appendChild(helpDetails);
+app.appendChild(aboutDetails);
 app.appendChild(buttonRow);
 app.appendChild(status);
 document.body.appendChild(app);
@@ -307,7 +368,19 @@ sizeSelect.addEventListener('input', () => {
   status.textContent = `Status: size → ${sizeSelect.getAttribute('value')}`;
 });
 
-document.setActiveElement(nameInput);
+formDetails.addEventListener('toggle', () => {
+  status.textContent = `Status: form section ${formDetails.isOpen() ? 'expanded' : 'collapsed'}`;
+});
+
+helpDetails.addEventListener('toggle', () => {
+  status.textContent = `Status: help section ${helpDetails.isOpen() ? 'expanded' : 'collapsed'}`;
+});
+
+aboutDetails.addEventListener('toggle', () => {
+  status.textContent = `Status: about section ${aboutDetails.isOpen() ? 'expanded' : 'collapsed'}`;
+});
+
+document.setActiveElement(formDetails);
 
 /* ── Quit handling ─────────────────────────────────────── */
 
