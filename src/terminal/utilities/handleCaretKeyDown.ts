@@ -1,5 +1,5 @@
 import {cellWidth} from '../../layout/utilities/cellWidth';
-import {computeVisualLines} from './computeVisualLines';
+import {computeVisualLines, findLineForCursor} from './computeVisualLines';
 import {Caret} from '../classes/Caret';
 
 import type {KeyboardEvent} from '../../dom/classes/KeyboardEvent';
@@ -333,22 +333,18 @@ function findCursorLinePosition(
 ): {lineIndex: number; columnCells: number} {
   const cursorPos = target.getCursorPosition();
   const graphemes = target.getGraphemes();
+  const lineIndex = findLineForCursor(lines, cursorPos, graphemes);
+  const line = lines[lineIndex]!;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!;
+  let columnCells = 0;
 
-    if (cursorPos >= line.start && (cursorPos < line.end || i === lines.length - 1)) {
-      let columnCells = 0;
-
-      for (let j = line.start; j < cursorPos && j < graphemes.length; j++) {
-        columnCells += cellWidth(graphemes[j]!);
-      }
-
-      return {lineIndex: i, columnCells};
+  for (let j = line.start; j < cursorPos && j < graphemes.length; j++) {
+    if (graphemes[j] !== '\n') {
+      columnCells += cellWidth(graphemes[j]!);
     }
   }
 
-  return {lineIndex: lines.length - 1, columnCells: 0};
+  return {lineIndex, columnCells};
 }
 
 /**
@@ -385,17 +381,11 @@ function getLineStart(
   cursorPos: number,
   width: number,
 ): number {
-  const lines = computeVisualLines(target.getGraphemes(), width, config.wordWrap);
+  const graphemes = target.getGraphemes();
+  const lines = computeVisualLines(graphemes, width, config.wordWrap);
+  const lineIndex = findLineForCursor(lines, cursorPos, graphemes);
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!;
-
-    if (cursorPos >= line.start && (cursorPos <= line.end || i === lines.length - 1)) {
-      return line.start;
-    }
-  }
-
-  return 0;
+  return lines[lineIndex]!.start;
 }
 
 /**
@@ -407,15 +397,9 @@ function getLineEnd(
   cursorPos: number,
   width: number,
 ): number {
-  const lines = computeVisualLines(target.getGraphemes(), width, config.wordWrap);
+  const graphemes = target.getGraphemes();
+  const lines = computeVisualLines(graphemes, width, config.wordWrap);
+  const lineIndex = findLineForCursor(lines, cursorPos, graphemes);
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!;
-
-    if (cursorPos >= line.start && (cursorPos <= line.end || i === lines.length - 1)) {
-      return line.end;
-    }
-  }
-
-  return target.getGraphemes().length;
+  return lines[lineIndex]!.end;
 }

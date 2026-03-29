@@ -7,7 +7,7 @@ import {cellWidth} from '../layout/utilities/cellWidth';
 import {Renderer} from '../renderer';
 import {CaretManager} from '../terminal/classes/CaretManager';
 import {EDITABLE} from '../terminal/constants/editable';
-import {computeVisualLines} from '../terminal/utilities/computeVisualLines';
+import {computeVisualLines, findLineForCursor} from '../terminal/utilities/computeVisualLines';
 import {handleCaretKeyDown} from '../terminal/utilities/handleCaretKeyDown';
 import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
 
@@ -485,19 +485,7 @@ export class Terminal {
     config: EditableConfiguration,
   ): void {
     const lines = computeVisualLines(state.graphemes, state.resolvedWidth, config.wordWrap);
-    let cursorLine = 0;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]!;
-
-      if (
-        state.cursorPosition >= line.start &&
-        (state.cursorPosition < line.end || i === lines.length - 1)
-      ) {
-        cursorLine = i;
-        break;
-      }
-    }
+    const cursorLine = findLineForCursor(lines, state.cursorPosition, state.graphemes);
 
     const viewportHeight = state.resolvedHeight;
 

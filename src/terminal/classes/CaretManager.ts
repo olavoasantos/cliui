@@ -1,5 +1,5 @@
 import {cellWidth} from '../../layout/utilities/cellWidth';
-import {computeVisualLines} from '../utilities/computeVisualLines';
+import {computeVisualLines, findLineForCursor} from '../utilities/computeVisualLines';
 import {EDITABLE} from '../constants/editable';
 import {Caret} from './Caret';
 
@@ -226,23 +226,17 @@ export class CaretManager {
     cursorPos: number,
     scrollX: number,
   ): {lineIndex: number; columnCells: number} {
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]!;
+    const lineIndex = findLineForCursor(lines, cursorPos, graphemes);
+    const line = lines[lineIndex]!;
+    let columnCells = 0;
+    const start = Math.max(line.start, line.start + scrollX);
 
-      if (cursorPos >= line.start && (cursorPos < line.end || i === lines.length - 1)) {
-        let columnCells = 0;
-        const start = Math.max(line.start, line.start + scrollX);
-
-        for (let j = start; j < cursorPos && j < graphemes.length; j++) {
-          if (graphemes[j] === '\n') continue;
-          columnCells += cellWidth(graphemes[j]!);
-        }
-
-        return {lineIndex: i, columnCells};
-      }
+    for (let j = start; j < cursorPos && j < graphemes.length; j++) {
+      if (graphemes[j] === '\n') continue;
+      columnCells += cellWidth(graphemes[j]!);
     }
 
-    return {lineIndex: lines.length - 1, columnCells: 0};
+    return {lineIndex, columnCells};
   }
 
   /**
