@@ -146,7 +146,13 @@ export class Terminal {
     this.document.body.addEventListener('keydown', ((event: Event) => {
       for (const caret of this.caretManager.getCarets()) {
         if (caret.target.getElement() === this.document.activeElement) {
-          if (handleCaretKeyDown(caret, event as KeyboardEvent)) {
+          if (
+            handleCaretKeyDown(caret, event as KeyboardEvent, {
+              onClipboardWrite: (text) => {
+                this.writeToClipboard(text);
+              },
+            })
+          ) {
             return;
           }
         }
@@ -162,6 +168,16 @@ export class Terminal {
       typeof (element as unknown as Partial<Editable>).getGraphemes === 'function' &&
       typeof (element as unknown as Partial<Editable>).getCursorPosition === 'function'
     );
+  }
+
+  /**
+   * Writes text to the system clipboard via the OSC 52 escape sequence.
+   *
+   * @param text - The text to copy to the clipboard.
+   */
+  private writeToClipboard(text: string): void {
+    const encoded = Buffer.from(text, 'utf8').toString('base64');
+    this.output.write(`\u001B]52;c;${encoded}\u0007`);
   }
 
   /**

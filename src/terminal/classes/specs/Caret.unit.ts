@@ -190,4 +190,43 @@ describe('Caret', () => {
       expect(caret.deleteSelection()).toBe(false);
     });
   });
+
+  describe('getSelectedText', () => {
+    it('returns empty string when there is no selection', () => {
+      const editable = createEditable(['a', 'b', 'c']);
+      const caret = new Caret(editable);
+
+      expect(caret.getSelectedText()).toBe('');
+    });
+
+    it('returns the selected graphemes joined as a string', () => {
+      const editable = createEditable(['h', 'e', 'l', 'l', 'o']);
+      const caret = new Caret(editable);
+
+      caret.moveTo(1);
+      caret.selectTo(4);
+
+      expect(caret.getSelectedText()).toBe('ell');
+    });
+
+    it('returns the full text when everything is selected', () => {
+      const editable = createEditable(['a', 'b', 'c']);
+      const caret = new Caret(editable);
+
+      caret.moveTo(0);
+      caret.selectTo(3);
+
+      expect(caret.getSelectedText()).toBe('abc');
+    });
+
+    it('works when selection direction is reversed', () => {
+      const editable = createEditable(['a', 'b', 'c', 'd']);
+      const caret = new Caret(editable);
+
+      caret.moveTo(3);
+      caret.selectTo(1);
+
+      expect(caret.getSelectedText()).toBe('bc');
+    });
+  });
 });

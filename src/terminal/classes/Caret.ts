@@ -121,6 +121,17 @@ export class Caret {
   }
 
   /**
+   * Returns the text content of the current selection.
+   * Returns an empty string when there is no selection.
+   */
+  getSelectedText(): string {
+    const range = this.getSelectedRange();
+    if (!range) return '';
+
+    return this.target.getGraphemes().slice(range[0], range[1]).join('');
+  }
+
+  /**
    * Replaces the current selection (or inserts at cursor) with text.
    * No-op if the target is readonly or disabled.
    */

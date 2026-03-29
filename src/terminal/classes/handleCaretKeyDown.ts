@@ -4,12 +4,28 @@ import type {KeyboardEvent} from '../../dom/classes/KeyboardEvent';
 import type {Editable} from '../types/Editable';
 
 /**
+ * Options for {@link handleCaretKeyDown}.
+ */
+export interface CaretKeyDownOptions {
+  /**
+   * Callback invoked when the user triggers a clipboard copy or cut.
+   * Receives the selected text.  When omitted, copy/cut keybindings are
+   * silently ignored.
+   */
+  onClipboardWrite?: (text: string) => void;
+}
+
+/**
  * Handles standard editing keyboard shortcuts for a caret.
  *
  * Returns `true` if the key was handled (caller should stop propagation),
  * `false` if the key should pass through to the component.
  */
-export function handleCaretKeyDown(caret: Caret, event: KeyboardEvent): boolean {
+export function handleCaretKeyDown(
+  caret: Caret,
+  event: KeyboardEvent,
+  options?: CaretKeyDownOptions,
+): boolean {
   const target = caret.target;
   const alt = (event as unknown as {altKey: boolean}).altKey;
   const ctrl = (event as unknown as {ctrlKey: boolean}).ctrlKey;
@@ -62,6 +78,24 @@ export function handleCaretKeyDown(caret: Caret, event: KeyboardEvent): boolean 
 
   if (key === 'b' && ctrl) {
     shift ? caret.selectTo(caret.position - 1) : caret.moveTo(caret.position - 1);
+    return true;
+  }
+
+  /* Clipboard copy: Ctrl+C or Meta+C (only when selection exists) */
+  if (key === 'c' && (ctrl || meta) && !alt && !shift && caret.hasSelection()) {
+    options?.onClipboardWrite?.(caret.getSelectedText());
+    return true;
+  }
+
+  /* Clipboard cut: Ctrl+X or Meta+X (only when selection exists) */
+  if (key === 'x' && (ctrl || meta) && !alt && !shift && caret.hasSelection()) {
+    options?.onClipboardWrite?.(caret.getSelectedText());
+
+    if (!target.isReadonly()) {
+      caret.deleteSelection();
+      target.updateScroll();
+    }
+
     return true;
   }
 
