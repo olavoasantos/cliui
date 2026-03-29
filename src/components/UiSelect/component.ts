@@ -151,20 +151,24 @@ export class UiSelect extends HTMLElement {
     /* Create trigger */
     this.trigger = doc.createElement('div');
     this.trigger.setAttribute('class', 'ui-select-trigger');
+    this.trigger.style.whiteSpace = 'pre';
 
     /* Create listbox */
     this.listbox = doc.createElement('div');
     this.listbox.setAttribute('class', 'ui-select-listbox');
     this.listbox.style.position = 'absolute';
     this.listbox.style.top = '1';
-    this.listbox.style.left = '0';
+    this.listbox.style.left = '-1';
     this.listbox.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
     this.listbox.style.display = 'none';
-    this.listbox.style.width = String(this.getWidth());
+    this.listbox.style.width = String(this.getWidth() + 2);
 
     /* Ensure critical layout properties on self */
     this.style.position = 'relative';
     this.style.width = String(this.getWidth());
+    if (!this.style.padding) {
+      this.style.padding = '0 1';
+    }
 
     /* Move options into listbox and set z-index for stacking */
     for (const option of options) {
@@ -297,7 +301,7 @@ export class UiSelect extends HTMLElement {
   private showListbox(): void {
     if (!this.listbox) return;
     this.listbox.style.display = 'block';
-    this.listbox.style.width = String(this.getWidth());
+    this.listbox.style.width = String(this.getWidth() + 2);
     this.syncHighlight();
     this.syncTriggerText();
   }
@@ -471,6 +475,12 @@ export class UiSelect extends HTMLElement {
 
     const target = event.target as import('../../dom').Element | null;
     if (!target) return;
+
+    /* Ensure focus on click so blur fires on tab-away */
+    const doc = this.ownerDocument as import('../../dom').Document | null;
+    if (doc && doc.activeElement !== (this as unknown as import('../../dom').Element)) {
+      doc.setActiveElement(this as unknown as import('../../dom').Element);
+    }
 
     /* Walk up from target to find a ui-option ancestor */
     if (this.isOpen()) {
