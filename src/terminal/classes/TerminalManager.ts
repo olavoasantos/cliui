@@ -38,7 +38,7 @@ export class TerminalManager {
   private mouse: boolean;
   private active = false;
   private capabilities: TerminalCapabilities = {
-    colorProfile: 'none',
+    colorProfile: 'truecolor',
     synchronizedOutput: false,
     unicodeWidth: false,
   };
