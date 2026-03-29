@@ -193,6 +193,10 @@ export class UiSelect extends HTMLElement {
 
     /* Ensure critical layout properties on self */
     this.style.position = 'relative';
+    this.style.display = 'block';
+    if (!this.style.padding) {
+      this.style.padding = '0 1';
+    }
 
     this.syncSelectedAttribute();
   }

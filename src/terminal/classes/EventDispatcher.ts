@@ -118,11 +118,17 @@ export class EventDispatcher {
     this.updateHoveredTarget(target, event);
 
     switch (event.eventType) {
-      case 'press':
+      case 'press': {
         this.activeMousePress = {target, button: event.button};
-        this.handleMouseFocus(target);
-        target.dispatchEvent(this.createMouseDomEvent('mousedown', event, targetBox));
+        const mouseDownEvent = this.createMouseDomEvent('mousedown', event, targetBox);
+        target.dispatchEvent(mouseDownEvent);
+
+        if (!mouseDownEvent.defaultPrevented) {
+          this.handleMouseFocus(target);
+        }
+
         return;
+      }
       case 'release': {
         const releasedButton =
           event.button === 'none' && this.activeMousePress !== null
@@ -381,9 +387,20 @@ export class EventDispatcher {
    * mirroring browser default behaviour.
    */
   private handleMouseFocus(target: Element): void {
-    if (target.hasAttribute('tabindex')) {
-      this.document.setActiveElement(target);
-    } else if (this.document.activeElement !== this.document.body) {
+    /* Walk up to find the nearest focusable ancestor */
+    let current: Element | null = target;
+
+    while (current) {
+      if (current.hasAttribute('tabindex')) {
+        this.document.setActiveElement(current);
+        return;
+      }
+
+      current = current.parentElement as Element | null;
+    }
+
+    /* No focusable ancestor found — blur to body */
+    if (this.document.activeElement !== this.document.body) {
       this.document.setActiveElement(null);
     }
   }
