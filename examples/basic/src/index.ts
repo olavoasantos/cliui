@@ -119,6 +119,7 @@ style.textContent = `
   /* ── Select styles ─────────────────────────────────────── */
 
   ui-select {
+    display: inline;
     color: #e5e7eb;
     background-color: #1e293b;
     padding: 0 1;
@@ -135,6 +136,7 @@ style.textContent = `
   }
 
   ui-option {
+    display: block;
     color: #e5e7eb;
   }
 

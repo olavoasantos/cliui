@@ -158,8 +158,13 @@ export class UiSelect extends HTMLElement {
     this.listbox.style.display = 'none';
     this.listbox.style.width = String(this.getWidth());
 
-    /* Move options into listbox */
+    /* Ensure critical layout properties on self */
+    this.style.position = 'relative';
+    this.style.width = String(this.getWidth());
+
+    /* Move options into listbox and set z-index for stacking */
     for (const option of options) {
+      option.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
       this.listbox.appendChild(option);
     }
 
