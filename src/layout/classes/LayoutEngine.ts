@@ -259,8 +259,8 @@ export class LayoutEngine {
    * content area using its `top` and `left` offsets.
    */
   private positionAbsoluteChild(box: LayoutBox, containingX: number, containingY: number): void {
-    const left = this.parseCellValue(box.computedStyle.get('left'));
-    const top = this.parseCellValue(box.computedStyle.get('top'));
+    const left = this.parseSignedCellValue(box.computedStyle.get('left'));
+    const top = this.parseSignedCellValue(box.computedStyle.get('top'));
 
     this.offsetBox(box, containingX + left, containingY + top);
   }
@@ -495,6 +495,19 @@ export class LayoutEngine {
     const parsed = parseInt(value, 10);
 
     return Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
+  }
+
+  /**
+   * Like parseCellValue but allows negative values (used for position offsets).
+   */
+  private parseSignedCellValue(value: string | undefined): number {
+    if (value === undefined || value === '' || value === 'auto') {
+      return 0;
+    }
+
+    const parsed = parseInt(value, 10);
+
+    return Number.isNaN(parsed) ? 0 : parsed;
   }
 
   /**

@@ -42,6 +42,12 @@ export class UiSelect extends HTMLElement {
   /** Internal trigger element showing the selected label. */
   private trigger: import('../../dom').Element | null = null;
 
+  /** Label span inside the trigger. */
+  private triggerLabel: import('../../dom').Element | null = null;
+
+  /** Indicator span inside the trigger. */
+  private triggerIndicator: import('../../dom').Element | null = null;
+
   /** Internal listbox wrapper for the dropdown overlay. */
   private listbox: import('../../dom').Element | null = null;
 
@@ -148,10 +154,21 @@ export class UiSelect extends HTMLElement {
     /* Collect option children before mutating the tree */
     const options = this.getOptions();
 
-    /* Create trigger */
+    /* Create trigger as a flex row: [label (grows)] [indicator] */
     this.trigger = doc.createElement('div');
     this.trigger.setAttribute('class', 'ui-select-trigger');
-    this.trigger.style.whiteSpace = 'pre';
+    this.trigger.style.display = 'flex';
+    this.trigger.style.flexDirection = 'row';
+
+    this.triggerLabel = doc.createElement('div');
+    this.triggerLabel.style.flexGrow = '1';
+    this.triggerLabel.style.whiteSpace = 'nowrap';
+
+    this.triggerIndicator = doc.createElement('div');
+    this.triggerIndicator.style.whiteSpace = 'pre';
+
+    this.trigger.appendChild(this.triggerLabel);
+    this.trigger.appendChild(this.triggerIndicator);
 
     /* Create listbox */
     this.listbox = doc.createElement('div');
@@ -161,7 +178,7 @@ export class UiSelect extends HTMLElement {
     this.listbox.style.left = '-1';
     this.listbox.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
     this.listbox.style.display = 'none';
-    this.listbox.style.width = String(this.getWidth() + 2);
+    this.listbox.style.width = String(this.getWidth());
 
     /* Ensure critical layout properties on self */
     this.style.position = 'relative';
@@ -170,9 +187,12 @@ export class UiSelect extends HTMLElement {
       this.style.padding = '0 1';
     }
 
-    /* Move options into listbox and set z-index for stacking */
+    /* Move options into listbox and set z-index + padding for stacking */
     for (const option of options) {
       option.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
+      if (!option.style.padding) {
+        option.style.padding = '0 1';
+      }
       this.listbox.appendChild(option);
     }
 
@@ -252,11 +272,10 @@ export class UiSelect extends HTMLElement {
    * right-padded so the indicator sits at the right edge.
    */
   private syncTriggerText(): void {
-    if (!this.trigger) return;
+    if (!this.triggerLabel || !this.triggerIndicator) return;
 
     const value = this.getAttribute('value');
     const options = this.getOptions();
-    const width = this.getWidth();
     let label = '';
 
     for (const option of options) {
@@ -270,17 +289,10 @@ export class UiSelect extends HTMLElement {
       label = options[0]!.getLabel();
     }
 
-    /* Pad label so indicator is right-aligned within the width */
-    const indicatorWidth = 2; /* space + indicator char */
-    const maxLabelWidth = width - indicatorWidth;
-
-    if (label.length > maxLabelWidth) {
-      label = label.slice(0, maxLabelWidth);
-    }
-
-    const padding = Math.max(0, maxLabelWidth - label.length);
-    const indicator = this.isOpen() ? UI_SELECT_INDICATOR_UP : UI_SELECT_INDICATOR_DOWN;
-    this.trigger.textContent = `${label}${' '.repeat(padding)} ${indicator}`;
+    this.triggerLabel.textContent = label;
+    this.triggerIndicator.textContent = this.isOpen()
+      ? ` ${UI_SELECT_INDICATOR_UP}`
+      : ` ${UI_SELECT_INDICATOR_DOWN}`;
   }
 
   /** Updates the visual highlight in the listbox. */
@@ -301,7 +313,7 @@ export class UiSelect extends HTMLElement {
   private showListbox(): void {
     if (!this.listbox) return;
     this.listbox.style.display = 'block';
-    this.listbox.style.width = String(this.getWidth() + 2);
+    this.listbox.style.width = String(this.getWidth());
     this.syncHighlight();
     this.syncTriggerText();
   }
