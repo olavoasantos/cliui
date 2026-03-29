@@ -1,0 +1,19 @@
+ui-button {
+  display: inline;
+  font-weight: bold;
+  padding: 0 1;
+  white-space: nowrap;
+  text-align: center;
+}
+
+ui-button[variant='secondary'] {
+  font-weight: normal;
+}
+
+ui-button[pressed] {
+  font-style: italic;
+}
+
+ui-button[disabled] {
+  opacity: 0.5;
+}
