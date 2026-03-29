@@ -298,6 +298,97 @@ describe('UiCodeblock', () => {
     });
   });
 
+  describe('inline layout', () => {
+    it('sets display inline on content elements so tokens flow horizontally', async () => {
+      const js = (await import('shiki/langs/javascript.mjs')).default;
+      const nord = (await import('shiki/themes/nord.mjs')).default;
+      await UiCodeblock.loadHighlighter({langs: [js], themes: [nord]});
+
+      const {codeblock} = createCodeblock(undefined, 'const x = 1;', {
+        language: 'javascript',
+        theme: 'nord',
+      });
+
+      /* Content div must be display: inline so token children flow as a row */
+      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+      let contentEl: import('../../../dom').Element | null = null;
+
+      for (let j = 0; j < lineEl.childNodes.length; j++) {
+        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+
+        if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
+          contentEl = inner;
+        }
+      }
+
+      expect(contentEl).not.toBeNull();
+      expect(contentEl!.style.getPropertyValue('display')).toBe('inline');
+    });
+
+    it('sets display inline on each token span', async () => {
+      const js = (await import('shiki/langs/javascript.mjs')).default;
+      const nord = (await import('shiki/themes/nord.mjs')).default;
+      await UiCodeblock.loadHighlighter({langs: [js], themes: [nord]});
+
+      const {codeblock} = createCodeblock(undefined, 'const x = 1;', {
+        language: 'javascript',
+        theme: 'nord',
+      });
+
+      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+
+      for (let j = 0; j < lineEl.childNodes.length; j++) {
+        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+
+        if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
+          for (let k = 0; k < inner.childNodes.length; k++) {
+            const span = inner.childNodes[k] as import('../../../dom').Element;
+
+            if (span.style) {
+              expect(span.style.getPropertyValue('display')).toBe('inline');
+            }
+          }
+        }
+      }
+    });
+
+    it('sets display inline on gutter elements', () => {
+      UiCodeblock.resetHighlighter();
+
+      const {codeblock} = createCodeblock(undefined, 'a\nb', {'line-numbers': true});
+      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+
+      for (let j = 0; j < lineEl.childNodes.length; j++) {
+        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+
+        if (inner.getAttribute?.('class') === UI_CODEBLOCK_GUTTER_CLASS) {
+          expect(inner.style.getPropertyValue('display')).toBe('inline');
+        }
+      }
+    });
+
+    it('uses flex-wrap nowrap on content so tokens do not wrap by default', async () => {
+      const js = (await import('shiki/langs/javascript.mjs')).default;
+      const nord = (await import('shiki/themes/nord.mjs')).default;
+      await UiCodeblock.loadHighlighter({langs: [js], themes: [nord]});
+
+      const {codeblock} = createCodeblock(undefined, 'const x = 1;', {
+        language: 'javascript',
+        theme: 'nord',
+      });
+
+      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+
+      for (let j = 0; j < lineEl.childNodes.length; j++) {
+        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+
+        if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
+          expect(inner.style.getPropertyValue('flex-wrap')).toBe('nowrap');
+        }
+      }
+    });
+  });
+
   describe('setCode', () => {
     it('re-renders with new code', () => {
       UiCodeblock.resetHighlighter();

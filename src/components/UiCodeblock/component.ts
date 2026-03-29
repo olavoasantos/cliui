@@ -175,6 +175,7 @@ export class UiCodeblock extends HTMLElement {
       if (showLineNumbers) {
         const gutter = doc.createElement('div');
         gutter.setAttribute('class', UI_CODEBLOCK_GUTTER_CLASS);
+        gutter.style.display = 'inline';
         gutter.style.width = String(gutterWidth + 1);
         gutter.style.whiteSpace = 'pre';
         gutter.style.opacity = '0.5';
@@ -184,12 +185,15 @@ export class UiCodeblock extends HTMLElement {
 
       const contentEl = doc.createElement('div');
       contentEl.setAttribute('class', UI_CODEBLOCK_CONTENT_CLASS);
+      contentEl.style.display = 'inline';
+      contentEl.style.flexWrap = 'nowrap';
       contentEl.style.whiteSpace = shouldWrap ? 'pre-wrap' : 'nowrap';
       contentEl.style.flexGrow = '1';
 
       if (tokens && tokens[i]) {
         for (const token of tokens[i]) {
           const span = doc.createElement('span');
+          span.style.display = 'inline';
           span.textContent = token.content;
 
           if (token.color) {
