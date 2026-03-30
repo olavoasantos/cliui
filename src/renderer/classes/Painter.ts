@@ -49,6 +49,15 @@ export class Painter {
     const textCell = this.createStyledCell(box.computedStyle);
     const contentClipRect = this.createChildClipRect(box, clipRect);
 
+    // Anchor elements propagate href to the cell hyperlink field
+    if (box.element.localName === 'a') {
+      const href = box.element.getAttribute('href');
+
+      if (href) {
+        textCell.hyperlink = href;
+      }
+    }
+
     this.paintBackground(metrics, textCell, buffer, clipRect);
     this.paintBorder(metrics, box.computedStyle, textCell, buffer, clipRect);
     this.paintText(box, textCell, buffer, contentClipRect);
