@@ -270,6 +270,39 @@ describe('TextLayout', () => {
     });
   });
 
+  describe('special Unicode break characters', () => {
+    it('does not break at non-breaking space', () => {
+      const lines = layout.measure('10\u00A0000', 80);
+
+      expect(lines).toHaveLength(1);
+      expect(lines[0]!.text).toBe('10\u00A0000');
+    });
+
+    it('keeps NBSP-connected text together when wrapping', () => {
+      // NBSP merged with adjacent text prevents break at that position
+      const lines = layout.measure('10\u00A0000', 80);
+
+      expect(lines).toHaveLength(1);
+      // The NBSP is preserved in the text
+      expect(lines[0]!.text.includes('\u00A0')).toBe(true);
+    });
+
+    it('breaks at zero-width space', () => {
+      const lines = layout.measure('alpha\u200Bbeta', 6);
+
+      expect(lines).toEqual([
+        {text: 'alpha', width: 5},
+        {text: 'beta', width: 4},
+      ]);
+    });
+
+    it('keeps text together when soft hyphen word fits', () => {
+      const lines = layout.measure('trans\u00ADatlantic', 80);
+
+      expect(lines).toHaveLength(1);
+    });
+  });
+
   describe('overflow-wrap and word-break', () => {
     it('breaks long words by default (overflow-wrap: break-word)', () => {
       const lines = layout.measure('abcdef', 3);

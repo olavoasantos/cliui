@@ -2,6 +2,7 @@ import {TEXT_LAYOUT_SEGMENTER} from '../constants/segmenter';
 import {WORD_SEGMENTER} from '../constants/wordSegmenter';
 import {KINSOKU_END, KINSOKU_START, LEFT_STICKY_PUNCTUATION} from '../constants/kinsoku';
 import {cellWidth} from './cellWidth';
+import {classifyBreakKind} from './classifyBreakKind';
 import {isAsciiText} from './isAsciiText';
 import {isCJK} from './isCJK';
 import {normalizeWhitespaceNormal} from './normalizeWhitespaceNormal';
@@ -82,8 +83,71 @@ function prepareFull(collapsed: string): PreparedText {
       continue;
     }
 
-    /* If there's a pending space, emit it as a space word. The layout
-       phase uses space words to decide where line breaks can happen. */
+    /* Check for special break characters (NBSP, ZWSP, soft-hyphen). */
+    if (segment.length === 1) {
+      const breakKind = classifyBreakKind(segment);
+
+      if (breakKind === 'glue') {
+        /* Glue characters (NBSP, NNBSP, word joiner) merge with adjacent
+           text — do not emit a space, just concatenate with next word. */
+        if (needsSpace) {
+          needsSpace = false;
+        }
+
+        /* Merge with the previous word if there is one. */
+        if (words.length > 0 && words[words.length - 1] !== ' ') {
+          words[words.length - 1] += segment;
+          widths[words.length - 1]! += cellWidth(segment);
+          graphemeWidths[words.length - 1] = null;
+          graphemes[words.length - 1] = null;
+        } else {
+          /* Glue at the start — store it, will merge with next word. */
+          if (needsSpace) {
+            words.push(' ');
+            widths.push(1);
+            graphemeWidths.push(null);
+            graphemes.push(null);
+            needsSpace = false;
+          }
+
+          words.push(segment);
+          widths.push(cellWidth(segment));
+          graphemeWidths.push(null);
+          graphemes.push(null);
+        }
+
+        continue;
+      }
+
+      if (breakKind === 'zero-width-break') {
+        /* ZWSP is a break opportunity with zero width. Emit pending
+           space if any, then continue — the break point is implicit
+           between the previous and next segments. */
+        if (needsSpace) {
+          words.push(' ');
+          widths.push(1);
+          graphemeWidths.push(null);
+          graphemes.push(null);
+          needsSpace = false;
+        }
+
+        /* Emit a zero-width space segment that acts as break opportunity. */
+        words.push(' ');
+        widths.push(0);
+        graphemeWidths.push(null);
+        graphemes.push(null);
+        continue;
+      }
+
+      if (breakKind === 'soft-hyphen') {
+        /* Soft hyphens are invisible — skip them. When a break occurs
+           at a soft-hyphen position, the layout phase would add a visible
+           hyphen. For now, treat as invisible content. */
+        continue;
+      }
+    }
+
+    /* If there's a pending space, emit it as a space word. */
     if (needsSpace) {
       words.push(' ');
       widths.push(1);
