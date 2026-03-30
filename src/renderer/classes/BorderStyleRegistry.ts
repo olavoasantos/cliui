@@ -1,37 +1,9 @@
 import {BORDER_CHARACTERS} from '../constants/borders';
+import {DECLARATION_TO_KEY} from '../constants/borderDeclarations';
+import {unquote} from '../utilities/unquote';
 
-import type {BorderCharacters} from '../constants/borders';
+import type {BorderCharacters} from '../types/BorderCharacters';
 import type {CSSAtRule} from '../../css/types';
-
-/** Property names allowed inside a `@border-style` at-rule. */
-const DECLARATION_TO_KEY: Record<string, keyof BorderCharacters> = {
-  top: 'top',
-  bottom: 'bottom',
-  left: 'left',
-  right: 'right',
-  'top-left': 'topLeft',
-  'top-right': 'topRight',
-  'bottom-left': 'bottomLeft',
-  'bottom-right': 'bottomRight',
-};
-
-/**
- * Strips surrounding quotes from a CSS value string.
- * `"★"` → `★`, `'☆'` → `☆`, `★` → `★`.
- */
-function unquote(value: string): string {
-  const trimmed = value.trim();
-
-  if (
-    trimmed.length >= 2 &&
-    ((trimmed[0] === '"' && trimmed[trimmed.length - 1] === '"') ||
-      (trimmed[0] === "'" && trimmed[trimmed.length - 1] === "'"))
-  ) {
-    return trimmed.slice(1, -1);
-  }
-
-  return trimmed;
-}
 
 /**
  * Registry of border character sets used by the renderer's `Painter`.

@@ -1,5 +1,3 @@
-import type {EditableConfiguration} from '../types/EditableConfiguration';
-
 /**
  * Symbol property key for the declarative editable configuration.
  *
@@ -8,8 +6,3 @@ import type {EditableConfiguration} from '../types/EditableConfiguration';
  * and manages all editing behavior automatically.
  */
 export const EDITABLE: unique symbol = Symbol('editable');
-
-/** Type helper for elements that carry the editable symbol. */
-export interface EditableElement {
-  [EDITABLE]: EditableConfiguration;
-}

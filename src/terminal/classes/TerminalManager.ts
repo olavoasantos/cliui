@@ -12,6 +12,8 @@ import {
   HIDE_CURSOR,
   SHOW_CURSOR,
 } from '../constants/controlSequences';
+import {SUPPORTED_MODE_RESPONSE} from '../constants/terminalManager';
+import {ESCAPE} from '../constants/escape';
 
 import type {
   TerminalCapabilities,
@@ -20,9 +22,6 @@ import type {
   TerminalManagerOptions,
   TerminalOutput,
 } from '../types';
-
-const ESC = '\u001B';
-const SUPPORTED_MODE_RESPONSE = new RegExp(`${ESC}\\[\\?(2026|2027);([0-4])\\$y`);
 
 /**
  * Manages terminal mode transitions required for interactive TUI rendering.
@@ -200,7 +199,7 @@ export class TerminalManager {
       };
 
       this.input.on?.('data', onData);
-      this.write(`${ESC}[?${mode}$p`);
+      this.write(`${ESCAPE}[?${mode}$p`);
     });
   }
 

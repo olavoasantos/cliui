@@ -1,5 +1,10 @@
 import {BRACKETED_PASTE_END, BRACKETED_PASTE_START} from '../constants/controlSequences';
 import {ESCAPE} from '../constants/escape';
+import {
+  CSI_SEQUENCE_REGEX,
+  MODE_RESPONSE_REGEX,
+  SGR_MOUSE_SEQUENCE_REGEX,
+} from '../constants/inputPatterns';
 import {CSI_FINAL_KEYS, CSI_TILDE_KEYS, SS3_FUNCTION_KEYS} from '../constants/keyMappings';
 
 import type {
@@ -9,12 +14,6 @@ import type {
   TerminalMouseEvent,
   TerminalReadableInput,
 } from '../types';
-
-const CSI_SEQUENCE_REGEX = new RegExp(String.raw`^\u001B\[([0-9;]*)([~A-Za-z])?`);
-const SGR_MOUSE_SEQUENCE_REGEX = new RegExp(
-  String.raw`^\u001B\[<([0-9]+);([0-9]+);([0-9]+)([Mm])?`,
-);
-const MODE_RESPONSE_REGEX = new RegExp(String.raw`^\u001B\[\?[0-9;]+\$y`);
 
 /**
  * Reads raw terminal bytes and parses them into structured input events.

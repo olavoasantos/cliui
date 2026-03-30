@@ -1,18 +1,12 @@
 import {LONGHAND_PROPERTIES, SHORTHAND_PROPERTIES} from '../constants/cssProperties';
 import {camelToKebab} from '../utilities/camelToKebab';
 import {expandShorthand} from '../utilities/expandShorthand';
-import {
-  getCSSStyleDeclarationStore,
-  setCSSStyleDeclarationStore,
-} from '../utilities/getCSSStyleDeclarationStore';
+import {getCSSStyleDeclarationStore} from '../utilities/getCSSStyleDeclarationStore';
+import {isCustomProperty} from '../utilities/isCustomProperty';
+import {setCSSStyleDeclarationStore} from '../utilities/setCSSStyleDeclarationStore';
 import {notifyCSSStyleDeclaration} from '../utilities/notifyCSSStyleDeclaration';
 
 import type {Element} from './Element';
-
-/** Returns whether a property name is a CSS custom property (`--*`). */
-function isCustomProperty(name: string): boolean {
-  return name.length > 2 && name[0] === '-' && name[1] === '-';
-}
 
 /**
  * A CSSStyleDeclaration-like object that stores CSS property values

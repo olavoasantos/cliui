@@ -1,7 +1,10 @@
-import {BEL, CSI, OSC} from '../constants/controlSequences';
-
-const ENABLE_SYNCHRONIZED_OUTPUT = `${CSI}?2026h`;
-const DISABLE_SYNCHRONIZED_OUTPUT = `${CSI}?2026l`;
+import {
+  BEL,
+  CSI,
+  DISABLE_SYNCHRONIZED_OUTPUT,
+  ENABLE_SYNCHRONIZED_OUTPUT,
+  OSC,
+} from '../constants/controlSequences';
 
 import type {Cell, ChangedRegion, RGBColor, UnderlineStyle} from '../types';
 import type {StyleState} from '../types/StyleState';

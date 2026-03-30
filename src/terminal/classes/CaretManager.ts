@@ -1,5 +1,6 @@
 import {cellWidth} from '../../layout/utilities/cellWidth';
-import {computeVisualLines, findLineForCursor} from '../utilities/computeVisualLines';
+import {computeVisualLines} from '../utilities/computeVisualLines';
+import {findLineForCursor} from '../utilities/findLineForCursor';
 import {EDITABLE} from '../constants/editable';
 import {Caret} from './Caret';
 

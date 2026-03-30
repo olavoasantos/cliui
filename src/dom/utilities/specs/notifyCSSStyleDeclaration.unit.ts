@@ -3,7 +3,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {HOOKS} from '../../constants';
 import {CSSStyleDeclaration} from '../../classes/CSSStyleDeclaration';
 import {Window} from '../../classes/Window';
-import {setCSSStyleDeclarationStore} from '../getCSSStyleDeclarationStore';
+import {setCSSStyleDeclarationStore} from '../setCSSStyleDeclarationStore';
 import {notifyCSSStyleDeclaration} from '../notifyCSSStyleDeclaration';
 
 describe('notifyCSSStyleDeclaration', () => {

@@ -1,22 +1,13 @@
 import {HOOKS} from '../constants';
+import {getMutationObserverStore} from '../utilities/getMutationObserverStore';
+import {notifyMutationObservers} from '../utilities/notifyMutationObservers';
 
 import type {Element} from './Element';
 import type {Node} from './Node';
 import type {Text} from './Text';
 import type {Window} from './Window';
 import type {Hooks, MutationObserverInit, MutationRecord} from '../types';
-
-interface MutationObserverStore {
-  installed: boolean;
-  observers: Set<MutationObserver>;
-}
-
-interface Observation {
-  target: Node;
-  options: MutationObserverInit;
-}
-
-const stores = new WeakMap<Window, MutationObserverStore>();
+import type {Observation} from '../types/Observation';
 
 /**
  * Observes DOM mutations and delivers batched mutation records in a microtask.
@@ -57,7 +48,7 @@ export class MutationObserver {
       this.observations.push({target, options: normalized});
     }
 
-    getStore(this.window).observers.add(this);
+    getMutationObserverStore(this.window).observers.add(this);
   }
 
   /**
@@ -67,7 +58,7 @@ export class MutationObserver {
     this.observations.length = 0;
 
     if (this.window !== null) {
-      getStore(this.window).observers.delete(this);
+      getMutationObserverStore(this.window).observers.delete(this);
     }
   }
 
@@ -125,7 +116,7 @@ export class MutationObserver {
   }
 
   private installHooks(window: Window): void {
-    const store = getStore(window);
+    const store = getMutationObserverStore(window);
 
     if (store.installed) {
       return;
@@ -142,7 +133,7 @@ export class MutationObserver {
 
     hooks.setAttribute = (element, name, value, ns, oldValue) => {
       previousSetAttribute?.(element, name, value, ns, oldValue);
-      notifyObservers(window, {
+      notifyMutationObservers(window, {
         type: 'attributes',
         target: element,
         addedNodes: [],
@@ -154,7 +145,7 @@ export class MutationObserver {
 
     hooks.removeAttribute = (element, name, ns, oldValue) => {
       previousRemoveAttribute?.(element, name, ns, oldValue);
-      notifyObservers(window, {
+      notifyMutationObservers(window, {
         type: 'attributes',
         target: element,
         addedNodes: [],
@@ -166,7 +157,7 @@ export class MutationObserver {
 
     hooks.setText = (text, data, oldValue) => {
       previousSetText?.(text, data, oldValue);
-      notifyObservers(window, {
+      notifyMutationObservers(window, {
         type: 'characterData',
         target: text,
         addedNodes: [],
@@ -178,7 +169,7 @@ export class MutationObserver {
 
     hooks.insertChild = (parent, node, index) => {
       previousInsertChild?.(parent, node, index);
-      notifyObservers(window, {
+      notifyMutationObservers(window, {
         type: 'childList',
         target: parent,
         addedNodes: [node],
@@ -190,7 +181,7 @@ export class MutationObserver {
 
     hooks.removeChild = (parent, node, index) => {
       previousRemoveChild?.(parent, node, index);
-      notifyObservers(window, {
+      notifyMutationObservers(window, {
         type: 'childList',
         target: parent,
         addedNodes: [],
@@ -281,27 +272,5 @@ export class MutationObserver {
     }
 
     return null;
-  }
-}
-
-function getStore(window: Window): MutationObserverStore {
-  let store = stores.get(window);
-
-  if (store === undefined) {
-    store = {
-      installed: false,
-      observers: new Set(),
-    };
-    stores.set(window, store);
-  }
-
-  return store;
-}
-
-function notifyObservers(window: Window, record: MutationRecord): void {
-  const store = getStore(window);
-
-  for (const observer of store.observers) {
-    observer.enqueue(record);
   }
 }

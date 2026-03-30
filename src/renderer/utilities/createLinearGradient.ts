@@ -1,12 +1,7 @@
 import {lerpColor} from './lerpColor';
 
 import type {RGBColor} from '../types';
-
-/** A color stop with a normalized position (0.0–1.0). */
-export interface ColorStop {
-  color: RGBColor;
-  position: number;
-}
+import type {ColorStop} from '../types/ColorStop';
 
 /**
  * Creates a function that samples a CSS `linear-gradient` at any `(x, y)`

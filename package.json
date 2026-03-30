@@ -56,6 +56,8 @@
     "test:integration:watch": "vitest --config=.config/testing/vitest.integration.config.ts",
     "test:integration": "vitest run --config=.config/testing/vitest.integration.config.ts",
     "test:performance": "vitest bench --run --config=.config/testing/vitest.bench.config.ts",
+    "test:performance:compare": "vitest bench --config=.config/testing/vitest.bench.config.ts --compare=./.testing/performance/reference.json",
+    "test:performance:record": "vitest bench --config=.config/testing/vitest.bench.config.ts --outputJson=./.testing/performance/reference.json",
     "test:performance:watch": "vitest bench --config=.config/testing/vitest.bench.config.ts",
     "test:unit:coverage": "vitest run --config=.config/testing/vitest.unit.config.ts --coverage",
     "test:unit:watch": "vitest --config=.config/testing/vitest.unit.config.ts",

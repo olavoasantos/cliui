@@ -1,10 +1,8 @@
 import {describe, expect, it} from 'vitest';
 
 import {CSSStyleDeclaration} from '../../classes/CSSStyleDeclaration';
-import {
-  getCSSStyleDeclarationStore,
-  setCSSStyleDeclarationStore,
-} from '../getCSSStyleDeclarationStore';
+import {getCSSStyleDeclarationStore} from '../getCSSStyleDeclarationStore';
+import {setCSSStyleDeclarationStore} from '../setCSSStyleDeclarationStore';
 
 describe('getCSSStyleDeclarationStore', () => {
   it('returns state that was previously stored', () => {

@@ -1,4 +1,5 @@
 import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../constants/terminal';
+import {EDITABLE_STATE} from '../constants/editableState';
 import {StyleEngine} from '../css';
 import {Event, InputEvent, Window} from '../dom';
 import {selfAndDescendants} from '../dom/utilities/selfAndDescendants';
@@ -7,55 +8,22 @@ import {cellWidth} from '../layout/utilities/cellWidth';
 import {Renderer} from '../renderer';
 import {CaretManager} from '../terminal/classes/CaretManager';
 import {EDITABLE} from '../terminal/constants/editable';
-import {computeVisualLines, findLineForCursor} from '../terminal/utilities/computeVisualLines';
+import {computeVisualLines} from '../terminal/utilities/computeVisualLines';
+import {findLineForCursor} from '../terminal/utilities/findLineForCursor';
 import {handleCaretKeyDown} from '../terminal/utilities/handleCaretKeyDown';
 import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
+import {resolveWindow} from '../utilities/resolveWindow';
+import {segmentGraphemes} from '../utilities/segmentGraphemes';
 
 import type {Document, Element} from '../dom';
 import type {KeyboardEvent} from '../dom/classes/KeyboardEvent';
 import type {TerminalFrameAware} from '../types/TerminalFrameAware';
+import type {EditableStateElement} from '../types/EditableStateElement';
 import type {TerminalOptions} from '../types';
 import type {Editable} from '../terminal/types/Editable';
 import type {EditableConfiguration} from '../terminal/types/EditableConfiguration';
 import type {EditableState} from '../terminal/types/EditableState';
 import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
-
-/** Symbol for storing system-managed editable state on elements. */
-const EDITABLE_STATE: unique symbol = Symbol('editableState');
-
-/** Type helper for elements carrying system-managed editable state. */
-interface EditableStateElement {
-  [EDITABLE_STATE]: EditableState;
-}
-
-/**
- * Resolves the `Window` instance for the terminal.
- *
- * Prefers an explicit instance from `options.window`, then falls back to
- * `globalThis.window` (populated by the default import's environment
- * polyfill), then creates a fresh `Window` as a last resort.
- */
-function resolveWindow(options: TerminalOptions): Window {
-  if (options.window) {
-    return options.window;
-  }
-
-  const globalWindow = (globalThis as Record<string, unknown>).window;
-
-  if (globalWindow != null && typeof globalWindow === 'object' && 'document' in globalWindow) {
-    return globalWindow as Window;
-  }
-
-  return new Window();
-}
-
-/**
- * Segments a string into an array of grapheme clusters.
- */
-function segmentGraphemes(text: string): string[] {
-  const segmenter = new Intl.Segmenter('en', {granularity: 'grapheme'});
-  return [...segmenter.segment(text)].map((s) => s.segment);
-}
 
 /**
  * Public entry point that wires the DOM, style, layout, renderer, and terminal

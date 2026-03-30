@@ -1,6 +1,6 @@
-import type {Editable} from '../types/Editable';
+import {DEFAULT_BLINK_INTERVAL} from '../constants/caret';
 
-const DEFAULT_BLINK_INTERVAL = 530;
+import type {Editable} from '../types/Editable';
 
 /**
  * A single caret instance tracking cursor position, blink state, and
