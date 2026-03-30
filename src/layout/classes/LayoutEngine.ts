@@ -76,7 +76,6 @@ export class LayoutEngine {
    */
   clearCache(): void {
     this.cache = new WeakMap<Element, LayoutBox>();
-    this.textCache.clear();
   }
 
   /**

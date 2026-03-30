@@ -150,11 +150,31 @@ describe('TextLayout', () => {
     });
 
     it('handles mixed ASCII and CJK text', () => {
+      // With word-boundary segmentation, CJK chars are individual break units
+      // "hi"(2) + " "(1) + "中"(2) = 5 ≤ 6, then "文"(2) overflows → break
       const lines = layout.measure('hi 中文', 6);
 
       expect(lines).toEqual([
-        {text: 'hi', width: 2},
-        {text: '中文', width: 4},
+        {text: 'hi 中', width: 5},
+        {text: '文', width: 2},
+      ]);
+    });
+
+    it('breaks CJK text at character boundaries with word segmenter', () => {
+      const lines = layout.measure('好的啦', 4);
+
+      expect(lines).toEqual([
+        {text: '好的', width: 4},
+        {text: '啦', width: 2},
+      ]);
+    });
+
+    it('wraps mixed CJK and Latin at optimal break points', () => {
+      const lines = layout.measure('hello 中文 world', 10);
+
+      expect(lines).toEqual([
+        {text: 'hello 中文', width: 10},
+        {text: 'world', width: 5},
       ]);
     });
 

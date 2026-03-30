@@ -26,4 +26,11 @@ export interface PreparedText {
    * {@link graphemeWidths}). `null` when the word is not breakable.
    */
   readonly graphemes: (string[] | null)[];
+
+  /**
+   * Whether the words array contains explicit `' '` space segments.
+   * When `false`, spaces between words are implicit and the layout
+   * walk joins consecutive words with spaces at break opportunities.
+   */
+  readonly hasExplicitSpaces: boolean;
 }

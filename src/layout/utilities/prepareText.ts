@@ -1,6 +1,8 @@
 import {TEXT_LAYOUT_SEGMENTER} from '../constants/segmenter';
+import {WORD_SEGMENTER} from '../constants/wordSegmenter';
 import {cellWidth} from './cellWidth';
 import {isAsciiText} from './isAsciiText';
+import {isCJK} from './isCJK';
 import {normalizeWhitespaceNormal} from './normalizeWhitespaceNormal';
 
 import type {PreparedText} from '../types/PreparedText';
@@ -14,8 +16,9 @@ import type {PreparedText} from '../types/PreparedText';
  * arithmetic — no `cellWidth` calls or string splitting needed.
  *
  * Uses a fast path for pure-ASCII text that avoids `cellWidth` and
- * `Intl.Segmenter` entirely, since every ASCII character is exactly 1
- * terminal cell wide.
+ * `Intl.Segmenter` entirely. Non-ASCII text uses `Intl.Segmenter` with
+ * word-boundary granularity and splits CJK segments into per-grapheme
+ * break units.
  *
  * @param text - Raw text content to prepare.
  * @returns A prepared text handle, or `null` if the text is empty after
@@ -26,13 +29,11 @@ export function prepareText(text: string): PreparedText | null {
 
   if (collapsed.length === 0) return null;
 
-  const splitWords = collapsed.split(' ');
-
   if (isAsciiText(collapsed)) {
-    return prepareAscii(splitWords);
+    return prepareAscii(collapsed.split(' '));
   }
 
-  return prepareFull(splitWords);
+  return prepareFull(collapsed);
 }
 
 /**
@@ -40,56 +41,82 @@ export function prepareText(text: string): PreparedText | null {
  * is its own grapheme — no `cellWidth` or segmenter needed.
  */
 function prepareAscii(splitWords: string[]): PreparedText {
-  const words: string[] = [];
+  const words: string[] = splitWords;
   const widths: number[] = [];
   const graphemeWidths: (number[] | null)[] = [];
   const graphemes: (string[] | null)[] = [];
 
-  for (const word of splitWords) {
-    words.push(word);
-    widths.push(word.length);
-
-    if (word.length > 1) {
-      const gWidths: number[] = [];
-      const gTexts: string[] = [];
-
-      for (let i = 0; i < word.length; i++) {
-        gTexts.push(word[i]!);
-        gWidths.push(1);
-      }
-
-      graphemeWidths.push(gWidths);
-      graphemes.push(gTexts);
-    } else {
-      graphemeWidths.push(null);
-      graphemes.push(null);
-    }
+  for (let i = 0; i < splitWords.length; i++) {
+    widths.push(splitWords[i]!.length);
+    graphemeWidths.push(null);
+    graphemes.push(null);
   }
 
-  return {words, widths, graphemeWidths, graphemes};
+  return {words, widths, graphemeWidths, graphemes, hasExplicitSpaces: false};
 }
 
 /**
- * Full path for non-ASCII text. Uses `cellWidth` for measurement and
- * `Intl.Segmenter` for grapheme cluster detection.
+ * Full path for non-ASCII text. Uses `Intl.Segmenter` for word-boundary
+ * detection, splits CJK segments into per-grapheme break units, and
+ * measures everything with `cellWidth`.
  */
-function prepareFull(splitWords: string[]): PreparedText {
+function prepareFull(collapsed: string): PreparedText {
   const words: string[] = [];
   const widths: number[] = [];
   const graphemeWidths: (number[] | null)[] = [];
   const graphemes: (string[] | null)[] = [];
 
-  for (const word of splitWords) {
-    const w = cellWidth(word);
-    words.push(word);
+  let needsSpace = false;
+
+  for (const seg of WORD_SEGMENTER.segment(collapsed)) {
+    const segment = seg.segment;
+
+    /* Space segments are break opportunities — we track them as a flag
+       and insert them into the word list when the next word arrives. */
+    if (segment === ' ') {
+      if (words.length > 0) {
+        needsSpace = true;
+      }
+
+      continue;
+    }
+
+    /* If there's a pending space, emit it as a space word. The layout
+       phase uses space words to decide where line breaks can happen. */
+    if (needsSpace) {
+      words.push(' ');
+      widths.push(1);
+      graphemeWidths.push(null);
+      graphemes.push(null);
+      needsSpace = false;
+    }
+
+    /* CJK text: split into per-grapheme break units so each character
+       can independently start a new line. */
+    if (isCJK(segment)) {
+      for (const g of TEXT_LAYOUT_SEGMENTER.segment(segment)) {
+        const grapheme = g.segment;
+        const w = cellWidth(grapheme);
+        words.push(grapheme);
+        widths.push(w);
+        graphemeWidths.push(null);
+        graphemes.push(null);
+      }
+
+      continue;
+    }
+
+    /* Regular non-ASCII word. */
+    const w = cellWidth(segment);
+    words.push(segment);
     widths.push(w);
 
     const gWidths: number[] = [];
     const gTexts: string[] = [];
 
-    for (const {segment} of TEXT_LAYOUT_SEGMENTER.segment(word)) {
-      gTexts.push(segment);
-      gWidths.push(cellWidth(segment));
+    for (const {segment: grapheme} of TEXT_LAYOUT_SEGMENTER.segment(segment)) {
+      gTexts.push(grapheme);
+      gWidths.push(cellWidth(grapheme));
     }
 
     if (gTexts.length > 1) {
@@ -101,5 +128,5 @@ function prepareFull(splitWords: string[]): PreparedText {
     }
   }
 
-  return {words, widths, graphemeWidths, graphemes};
+  return {words, widths, graphemeWidths, graphemes, hasExplicitSpaces: true};
 }
