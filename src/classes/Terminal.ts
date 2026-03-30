@@ -620,6 +620,9 @@ export class Terminal {
     this.document.body.addEventListener('keydown', ((event: Event) => {
       const ke = event as KeyboardEvent;
 
+      /* Skip if a component already consumed this event. */
+      if (event.defaultPrevented) return;
+
       /* Only scroll when no editable is focused */
       const activeElement = this.document.activeElement;
 
