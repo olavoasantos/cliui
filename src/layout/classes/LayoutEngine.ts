@@ -259,11 +259,24 @@ export class LayoutEngine {
     );
 
     for (const absoluteChild of absoluteChildren) {
-      this.positionAbsoluteChild(absoluteChild, box.contentX, box.contentY, element);
+      this.positionAbsoluteChild(absoluteChild, box.contentX, box.contentY);
     }
 
     box.children = childOrder;
     this.applyScrollState(element, box, measuredTextLines.length);
+
+    // After scroll is applied, reposition modal dialogs to viewport center.
+    // At this point all children (including dialogs) have been offset by
+    // -scrollY, so we can place modals directly at viewport coordinates.
+    for (const absoluteChild of absoluteChildren) {
+      if (
+        absoluteChild.element.localName === 'dialog' &&
+        absoluteChild.element.hasAttribute('modal')
+      ) {
+        this.centerInViewport(absoluteChild);
+      }
+    }
+
     this.cache.set(element, box);
 
     return box;
@@ -312,33 +325,25 @@ export class LayoutEngine {
   /**
    * Positions an absolutely positioned child relative to the containing box's
    * content area using its `top` and `left` offsets.
-   *
-   * Modal dialogs are viewport-centered: positioned at `scrollY + center`
-   * so that `applyScrollState`'s `-scrollY` offset lands them at the
-   * viewport center.
    */
-  private positionAbsoluteChild(
-    box: LayoutBox,
-    containingX: number,
-    containingY: number,
-    containingElement: Element,
-  ): void {
-    // Modal dialogs are centered in the viewport regardless of top/left
-    if (box.element.hasAttribute('modal') && box.element.localName === 'dialog') {
-      const scrollParent = containingElement as Element & {scrollTop?: number};
-      const scrollY = scrollParent.scrollTop ?? 0;
-      const centerX = Math.max(0, Math.floor((this.viewportColumns - box.width) / 2));
-      const centerY = Math.max(0, Math.floor((this.viewportRows - box.height) / 2)) + scrollY;
-
-      this.offsetBox(box, centerX, centerY);
-
-      return;
-    }
-
+  private positionAbsoluteChild(box: LayoutBox, containingX: number, containingY: number): void {
     const left = this.parseSignedCellValue(box.computedStyle.get('left'));
     const top = this.parseSignedCellValue(box.computedStyle.get('top'));
 
     this.offsetBox(box, containingX + left, containingY + top);
+  }
+
+  /**
+   * Repositions a layout box to be centered in the terminal viewport.
+   * Called after scroll offsets have been applied, so coordinates are
+   * viewport-relative.
+   */
+  private centerInViewport(box: LayoutBox): void {
+    const centerX = Math.max(0, Math.floor((this.viewportColumns - box.width) / 2));
+    const centerY = Math.max(0, Math.floor((this.viewportRows - box.height) / 2));
+
+    // Reset to origin then move to center
+    this.offsetBox(box, centerX - box.x, centerY - box.y);
   }
 
   /**
