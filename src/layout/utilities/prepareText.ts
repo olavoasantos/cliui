@@ -1,5 +1,6 @@
 import {TEXT_LAYOUT_SEGMENTER} from '../constants/segmenter';
 import {WORD_SEGMENTER} from '../constants/wordSegmenter';
+import {KINSOKU_END, KINSOKU_START, LEFT_STICKY_PUNCTUATION} from '../constants/kinsoku';
 import {cellWidth} from './cellWidth';
 import {isAsciiText} from './isAsciiText';
 import {isCJK} from './isCJK';
@@ -128,5 +129,102 @@ function prepareFull(collapsed: string): PreparedText {
     }
   }
 
+  applyPunctuationAttachment(words, widths, graphemeWidths, graphemes);
+
   return {words, widths, graphemeWidths, graphemes, hasExplicitSpaces: true};
+}
+
+/**
+ * Merges punctuation segments with adjacent words to prevent typographically
+ * incorrect line breaks. Modifies the arrays in-place.
+ *
+ * Pass 1: left-sticky and kinsoku-start punctuation merges backward.
+ * Pass 2: kinsoku-end (opening brackets/quotes) merges forward.
+ */
+function applyPunctuationAttachment(
+  words: string[],
+  widths: number[],
+  graphemeWidths: (number[] | null)[],
+  graphemes: (string[] | null)[],
+): void {
+  /* Pass 1: merge left-sticky / kinsoku-start backward. */
+  for (let i = words.length - 1; i > 0; i--) {
+    const word = words[i]!;
+
+    if (word === ' ') continue;
+
+    const firstChar = word[0]!;
+
+    if (!LEFT_STICKY_PUNCTUATION.has(firstChar) && !KINSOKU_START.has(firstChar)) continue;
+
+    /* Find the nearest preceding non-space segment. */
+    let target = -1;
+
+    for (let j = i - 1; j >= 0; j--) {
+      if (words[j] === ' ') continue;
+      target = j;
+      break;
+    }
+
+    if (target === -1) continue;
+
+    /* Merge everything from target to i (inclusive) into target. */
+    let mergedText = words[target]!;
+    let mergedWidth = widths[target]!;
+
+    for (let k = target + 1; k <= i; k++) {
+      mergedText += words[k]!;
+      mergedWidth += widths[k]!;
+    }
+
+    words[target] = mergedText;
+    widths[target] = mergedWidth;
+    graphemeWidths[target] = null;
+    graphemes[target] = null;
+    words.splice(target + 1, i - target);
+    widths.splice(target + 1, i - target);
+    graphemeWidths.splice(target + 1, i - target);
+    graphemes.splice(target + 1, i - target);
+    i = target;
+  }
+
+  /* Pass 2: merge kinsoku-end (opening brackets/quotes) forward. */
+  for (let i = 0; i < words.length - 1; i++) {
+    const word = words[i]!;
+
+    if (word === ' ') continue;
+
+    const lastChar = word[word.length - 1]!;
+
+    if (!KINSOKU_END.has(lastChar)) continue;
+
+    /* Find the nearest following non-space segment. */
+    let target = -1;
+
+    for (let j = i + 1; j < words.length; j++) {
+      if (words[j] === ' ') continue;
+      target = j;
+      break;
+    }
+
+    if (target === -1) continue;
+
+    /* Merge everything from i to target (inclusive) into i. */
+    let mergedText = word;
+    let mergedWidth = widths[i]!;
+
+    for (let k = i + 1; k <= target; k++) {
+      mergedText += words[k]!;
+      mergedWidth += widths[k]!;
+    }
+
+    words[i] = mergedText;
+    widths[i] = mergedWidth;
+    graphemeWidths[i] = null;
+    graphemes[i] = null;
+    words.splice(i + 1, target - i);
+    widths.splice(i + 1, target - i);
+    graphemeWidths.splice(i + 1, target - i);
+    graphemes.splice(i + 1, target - i);
+  }
 }

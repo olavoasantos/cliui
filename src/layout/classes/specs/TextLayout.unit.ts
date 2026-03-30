@@ -237,6 +237,39 @@ describe('TextLayout', () => {
     });
   });
 
+  describe('punctuation attachment', () => {
+    it('keeps CJK period attached to the preceding character', () => {
+      // 测(2) + 试(2) + 。(2) = 6 → "测试。" should stay together
+      const lines = layout.measure('测试。完了', 6);
+
+      expect(lines[0]!.text).toContain('试。');
+    });
+
+    it('keeps CJK comma attached to the preceding character', () => {
+      const lines = layout.measure('中文，测试', 6);
+
+      expect(lines[0]!.text).toContain('文，');
+    });
+
+    it('keeps opening CJK quote attached to the following character', () => {
+      const lines = layout.measure('说「你好」', 6);
+
+      expect(lines.some((l) => l.text.includes('「你'))).toBe(true);
+    });
+
+    it('keeps Latin period attached to the preceding word', () => {
+      const lines = layout.measure('hello. world', 80);
+
+      expect(lines[0]!.text).toBe('hello. world');
+    });
+
+    it('keeps closing bracket attached to the preceding word', () => {
+      const lines = layout.measure('hello) world', 7);
+
+      expect(lines[0]!.text).toBe('hello)');
+    });
+  });
+
   describe('overflow-wrap and word-break', () => {
     it('breaks long words by default (overflow-wrap: break-word)', () => {
       const lines = layout.measure('abcdef', 3);
