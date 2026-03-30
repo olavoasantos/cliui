@@ -45,7 +45,7 @@ export class TextLayout {
       case 'pre':
         return this.measurePre(text, effectiveWidth, textOverflow);
       case 'pre-wrap':
-        return this.measurePreWrap(text, effectiveWidth);
+        return this.measurePreWrap(text, effectiveWidth, options.tabSize ?? 8);
       case 'normal':
       default:
         return this.measureNormal(text, effectiveWidth, options);
@@ -89,7 +89,7 @@ export class TextLayout {
   /**
    * Measures `white-space: pre-wrap` text.
    */
-  private measurePreWrap(text: string, availableWidth: number): TextLine[] {
+  private measurePreWrap(text: string, availableWidth: number, tabSize: number): TextLine[] {
     const normalized = normalizeWhitespacePreWrap(text);
     const logicalLines = normalized.split('\n');
     const measuredLines: TextLine[] = [];
@@ -104,7 +104,14 @@ export class TextLayout {
       let currentWidth = 0;
 
       for (const {segment} of TEXT_LAYOUT_SEGMENTER.segment(logicalLine)) {
-        const graphemeWidth = cellWidth(segment);
+        let graphemeWidth: number;
+
+        if (segment === '\t') {
+          const remainder = currentWidth % tabSize;
+          graphemeWidth = remainder === 0 ? tabSize : tabSize - remainder;
+        } else {
+          graphemeWidth = cellWidth(segment);
+        }
 
         if (currentWidth + graphemeWidth > availableWidth && currentText.length > 0) {
           measuredLines.push({text: currentText, width: currentWidth});

@@ -159,6 +159,7 @@ export class LayoutEngine {
         'break-word',
       wordBreak:
         (resolvedStyle.get('word-break') as TextLayoutOptions['wordBreak'] | undefined) ?? 'normal',
+      tabSize: Number.parseInt(resolvedStyle.get('tab-size') ?? '8', 10) || 8,
     };
 
     for (const text of textLines) {

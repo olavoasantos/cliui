@@ -264,6 +264,47 @@ describe('TextLayout', () => {
     });
   });
 
+  describe('pre-wrap tab stops', () => {
+    it('advances tab to the next tab stop (default tab-size 8)', () => {
+      const lines = layout.measure('a\tb', 80, {whiteSpace: 'pre-wrap'});
+
+      // 'a'=1, tab to col 8 (7 cells advance), 'b' at col 8
+      expect(lines).toHaveLength(1);
+      expect(lines[0]!.width).toBe(9);
+    });
+
+    it('consecutive tabs advance to successive tab stops', () => {
+      const lines = layout.measure('a\t\tb', 80, {whiteSpace: 'pre-wrap'});
+
+      // 'a'=1 → tab to 8 → tab to 16 → 'b' at 17
+      expect(lines).toHaveLength(1);
+      expect(lines[0]!.width).toBe(17);
+    });
+
+    it('tab stops restart after hard breaks', () => {
+      const lines = layout.measure('a\tb\n\tc', 80, {whiteSpace: 'pre-wrap'});
+
+      expect(lines).toHaveLength(2);
+      expect(lines[0]!.width).toBe(9);
+      expect(lines[1]!.width).toBe(9);
+    });
+
+    it('respects custom tab-size', () => {
+      const lines = layout.measure('a\tb', 80, {whiteSpace: 'pre-wrap', tabSize: 4});
+
+      // 'a'=1, tab to col 4 (3 cells advance), 'b' → width 5
+      expect(lines).toHaveLength(1);
+      expect(lines[0]!.width).toBe(5);
+    });
+
+    it('tab at the start of a line advances to the first tab stop', () => {
+      const lines = layout.measure('\tb', 80, {whiteSpace: 'pre-wrap'});
+
+      expect(lines).toHaveLength(1);
+      expect(lines[0]!.width).toBe(9);
+    });
+  });
+
   describe('edge cases', () => {
     it('handles a single character', () => {
       const lines = layout.measure('x', 80);

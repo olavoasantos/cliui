@@ -9,5 +9,6 @@ export const INITIAL_VALUES: Record<string, string> = {
   'white-space': 'normal',
   'overflow-wrap': 'break-word',
   'word-break': 'normal',
+  'tab-size': '8',
   opacity: '1',
 };

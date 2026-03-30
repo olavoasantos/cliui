@@ -30,6 +30,9 @@ export interface TextLayoutOptions {
 
   /** Controls word-breaking behavior for all text. */
   wordBreak?: 'normal' | 'break-all';
+
+  /** Number of spaces per tab stop in `pre-wrap` mode. */
+  tabSize?: number;
 }
 
 /**
