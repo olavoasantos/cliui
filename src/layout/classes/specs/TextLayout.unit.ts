@@ -217,6 +217,33 @@ describe('TextLayout', () => {
     });
   });
 
+  describe('overflow-wrap and word-break', () => {
+    it('breaks long words by default (overflow-wrap: break-word)', () => {
+      const lines = layout.measure('abcdef', 3);
+
+      expect(lines).toEqual([
+        {text: 'abc', width: 3},
+        {text: 'def', width: 3},
+      ]);
+    });
+
+    it('does not break long words when overflow-wrap is normal', () => {
+      const lines = layout.measure('abcdef', 3, {overflowWrap: 'normal'});
+
+      expect(lines).toEqual([{text: 'abcdef', width: 6}]);
+    });
+
+    it('overflow-wrap: normal still wraps at word boundaries', () => {
+      const lines = layout.measure('hi bye now', 5, {overflowWrap: 'normal'});
+
+      expect(lines).toEqual([
+        {text: 'hi', width: 2},
+        {text: 'bye', width: 3},
+        {text: 'now', width: 3},
+      ]);
+    });
+  });
+
   describe('white-space modes', () => {
     it('preserves spaces and newlines for pre', () => {
       const lines = layout.measure('a  b\n c', 10, {whiteSpace: 'pre'});

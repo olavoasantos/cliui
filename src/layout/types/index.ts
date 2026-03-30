@@ -24,6 +24,12 @@ export interface TextLayoutOptions {
 
   /** Overflow behavior for unwrapped text. */
   textOverflow?: 'clip' | 'ellipsis';
+
+  /** Controls whether long words may break at grapheme boundaries. */
+  overflowWrap?: 'normal' | 'break-word';
+
+  /** Controls word-breaking behavior for all text. */
+  wordBreak?: 'normal' | 'break-all';
 }
 
 /**

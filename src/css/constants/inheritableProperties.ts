@@ -7,5 +7,7 @@ export const INHERITABLE_PROPERTIES = new Set([
   'text-decoration-color',
   'text-align',
   'white-space',
+  'overflow-wrap',
+  'word-break',
   'opacity',
 ]);

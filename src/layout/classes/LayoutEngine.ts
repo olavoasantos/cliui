@@ -154,10 +154,16 @@ export class LayoutEngine {
       textOverflow:
         (resolvedStyle.get('text-overflow') as TextLayoutOptions['textOverflow'] | undefined) ??
         'clip',
+      overflowWrap:
+        (resolvedStyle.get('overflow-wrap') as TextLayoutOptions['overflowWrap'] | undefined) ??
+        'break-word',
+      wordBreak:
+        (resolvedStyle.get('word-break') as TextLayoutOptions['wordBreak'] | undefined) ?? 'normal',
     };
 
     for (const text of textLines) {
       const whiteSpaceMode = textOptions.whiteSpace ?? 'normal';
+      const canBreakWords = (textOptions.overflowWrap ?? 'break-word') === 'break-word';
       let measured;
 
       if (whiteSpaceMode === 'normal') {
@@ -171,7 +177,7 @@ export class LayoutEngine {
           }
         }
 
-        measured = prepared ? layoutPreparedText(prepared, contentWidth) : [];
+        measured = prepared ? layoutPreparedText(prepared, contentWidth, canBreakWords) : [];
       } else {
         measured = this.textLayout.measure(text, contentWidth, textOptions);
       }

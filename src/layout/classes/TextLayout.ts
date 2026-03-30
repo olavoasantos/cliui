@@ -48,21 +48,27 @@ export class TextLayout {
         return this.measurePreWrap(text, effectiveWidth);
       case 'normal':
       default:
-        return this.measureNormal(text, effectiveWidth);
+        return this.measureNormal(text, effectiveWidth, options);
     }
   }
 
   /**
    * Measures `white-space: normal` text using the two-phase architecture.
    */
-  private measureNormal(text: string, availableWidth: number): TextLine[] {
+  private measureNormal(
+    text: string,
+    availableWidth: number,
+    options: TextLayoutOptions,
+  ): TextLine[] {
     const prepared = prepareText(text);
 
     if (prepared === null) {
       return [];
     }
 
-    return layoutPreparedText(prepared, availableWidth);
+    const canBreakWords = (options.overflowWrap ?? 'break-word') === 'break-word';
+
+    return layoutPreparedText(prepared, availableWidth, canBreakWords);
   }
 
   /**

@@ -12,7 +12,11 @@ import type {TextLine} from '../types';
  * @param availableWidth - The maximum terminal cell width per line.
  * @returns An array of text lines.
  */
-export function layoutPreparedText(prepared: PreparedText, availableWidth: number): TextLine[] {
+export function layoutPreparedText(
+  prepared: PreparedText,
+  availableWidth: number,
+  canBreakWords = true,
+): TextLine[] {
   const {words, widths, graphemeWidths, graphemes} = prepared;
   const lines: TextLine[] = [];
 
@@ -27,11 +31,14 @@ export function layoutPreparedText(prepared: PreparedText, availableWidth: numbe
       if (wordWidth <= availableWidth) {
         currentText = word;
         currentWidth = wordWidth;
-      } else {
+      } else if (canBreakWords) {
         breakWord(i, availableWidth, lines, graphemeWidths, graphemes, words, widths, (t, w) => {
           currentText = t;
           currentWidth = w;
         });
+      } else {
+        currentText = word;
+        currentWidth = wordWidth;
       }
     } else {
       const projectedWidth = currentWidth + 1 + wordWidth;
@@ -47,11 +54,14 @@ export function layoutPreparedText(prepared: PreparedText, availableWidth: numbe
         if (wordWidth <= availableWidth) {
           currentText = word;
           currentWidth = wordWidth;
-        } else {
+        } else if (canBreakWords) {
           breakWord(i, availableWidth, lines, graphemeWidths, graphemes, words, widths, (t, w) => {
             currentText = t;
             currentWidth = w;
           });
+        } else {
+          currentText = word;
+          currentWidth = wordWidth;
         }
       }
     }

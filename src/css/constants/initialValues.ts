@@ -7,5 +7,7 @@ export const INITIAL_VALUES: Record<string, string> = {
   'text-decoration-color': '',
   'text-align': 'left',
   'white-space': 'normal',
+  'overflow-wrap': 'break-word',
+  'word-break': 'normal',
   opacity: '1',
 };

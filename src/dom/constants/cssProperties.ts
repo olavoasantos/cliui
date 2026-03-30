@@ -12,6 +12,8 @@ export const LONGHAND_PROPERTIES = new Set([
   'text-overflow',
   'white-space',
   'overflow',
+  'overflow-wrap',
+  'word-break',
   'opacity',
   'width',
   'height',
