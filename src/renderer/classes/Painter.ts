@@ -32,8 +32,8 @@ export class Painter {
     const flattened = this.flattenBoxes(list);
 
     flattened.sort((left, right) => {
-      if (left.box.zIndex !== right.box.zIndex) {
-        return left.box.zIndex - right.box.zIndex;
+      if (left.stackingZ !== right.stackingZ) {
+        return left.stackingZ - right.stackingZ;
       }
 
       return left.order - right.order;
@@ -71,26 +71,35 @@ export class Painter {
 
   private flattenBoxes(
     boxes: LayoutBox[],
-  ): Array<{box: LayoutBox; clipRect: ClipRect | null; order: number}> {
-    const flattened: Array<{box: LayoutBox; clipRect: ClipRect | null; order: number}> = [];
+  ): Array<{box: LayoutBox; clipRect: ClipRect | null; order: number; stackingZ: number}> {
+    const flattened: Array<{
+      box: LayoutBox;
+      clipRect: ClipRect | null;
+      order: number;
+      stackingZ: number;
+    }> = [];
     let order = 0;
 
-    const visit = (box: LayoutBox, clipRect: ClipRect | null): void => {
+    const visit = (box: LayoutBox, clipRect: ClipRect | null, parentStackingZ: number): void => {
       // Absolute-positioned elements escape their parent's overflow clip
       const effectiveClip = box.computedStyle.get('position') === 'absolute' ? null : clipRect;
 
-      flattened.push({box, clipRect: effectiveClip, order});
+      // Children inherit their parent's stacking z-index so they sort
+      // together and paint in document order within the same stacking context.
+      const stackingZ = box.zIndex !== 0 ? box.zIndex : parentStackingZ;
+
+      flattened.push({box, clipRect: effectiveClip, order, stackingZ});
       order += 1;
 
       const childClipRect = this.createChildClipRect(box, effectiveClip);
 
       for (const child of box.children) {
-        visit(child, childClipRect);
+        visit(child, childClipRect, stackingZ);
       }
     };
 
     for (const box of boxes) {
-      visit(box, null);
+      visit(box, null, 0);
     }
 
     return flattened;
