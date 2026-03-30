@@ -88,4 +88,17 @@ mark {
 code, kbd, samp, var {
   opacity: 0.8;
 }
+
+/* ── Dialog ───────────────────────────────────────────── */
+
+dialog {
+  display: none;
+  position: absolute;
+  border-style: single;
+  padding: 1 2;
+}
+
+dialog[open] {
+  display: block;
+}
 `;

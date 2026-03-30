@@ -30,6 +30,7 @@ export {CustomElementRegistryImplementation as CustomElementRegistry} from './cl
 export {MutationObserver} from './classes/MutationObserver';
 export {HTMLElement} from './classes/HTMLElement';
 export {HTMLBodyElement} from './classes/HTMLBodyElement';
+export {HTMLDialogElement} from './classes/HTMLDialogElement';
 export {HTMLHeadElement} from './classes/HTMLHeadElement';
 export {HTMLHtmlElement} from './classes/HTMLHtmlElement';
 export {HTMLTemplateElement} from './classes/HTMLTemplateElement';

@@ -1,6 +1,7 @@
 import {NamespaceURI} from '../constants';
 import {setupElement} from './setupElement';
 import {Element} from '../classes/Element';
+import {HTMLDialogElement} from '../classes/HTMLDialogElement';
 import {HTMLStyleElement} from '../classes/HTMLStyleElement';
 import {HTMLTemplateElement} from '../classes/HTMLTemplateElement';
 import {SVGElement} from '../classes/SVGElement';
@@ -19,6 +20,8 @@ export function createElement(ownerDocument: Document, name: string, namespace?:
     element = new HTMLTemplateElement();
   } else if (lowerName === 'style') {
     element = new HTMLStyleElement();
+  } else if (lowerName === 'dialog') {
+    element = new HTMLDialogElement();
   } else {
     const CustomElement = ownerDocument.defaultView.customElements.get(name);
     element = CustomElement ? (new CustomElement() as unknown as Element) : new Element();
