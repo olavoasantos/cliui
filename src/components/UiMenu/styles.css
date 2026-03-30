@@ -1,0 +1,10 @@
+ui-menu {
+  display: none;
+  position: absolute;
+  border-style: single;
+  padding: 0;
+}
+
+ui-menu[open] {
+  display: block;
+}

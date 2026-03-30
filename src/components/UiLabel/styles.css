@@ -1,0 +1,7 @@
+ui-label {
+  display: block;
+}
+
+ui-label:disabled {
+  opacity: 0.5;
+}

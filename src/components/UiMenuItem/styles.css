@@ -1,0 +1,12 @@
+ui-menu-item {
+  display: block;
+  padding: 0 1;
+}
+
+ui-menu-item[highlighted] {
+  font-weight: bold;
+}
+
+ui-menu-item:disabled {
+  opacity: 0.5;
+}
