@@ -250,6 +250,21 @@ describe('UiDetails', () => {
 
       expect(details.isOpen()).toBe(false);
     });
+
+    it('does not toggle when Enter bubbles from a child element', () => {
+      const {details, window} = createDetails();
+      details.setAttribute('open', '');
+
+      const child = window.document.createElement('div');
+      details.appendChild(child);
+
+      /* Simulate Enter keydown originating from the child (event.target = child) */
+      const event = new KeyboardEvent('keydown', {key: 'Enter', bubbles: true});
+      child.dispatchEvent(event);
+
+      /* Details should remain open — the Enter was not on the details itself */
+      expect(details.isOpen()).toBe(true);
+    });
   });
 
   describe('mouse activation', () => {

@@ -213,6 +213,11 @@ export class UiDetails extends HTMLElement {
   private handleKeyDown(event: Event): void {
     if (this.isDisabled()) return;
 
+    /* Only toggle when the details element itself has focus — ignore
+       keydown events that bubble up from focused children (e.g. a
+       textarea pressing Enter to insert a newline). */
+    if (event.target !== this) return;
+
     const key = (event as import('../../dom').KeyboardEvent).key;
 
     if (key === 'Enter' || key === ' ') {
