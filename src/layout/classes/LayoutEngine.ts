@@ -162,29 +162,50 @@ export class LayoutEngine {
     };
 
     for (const text of textLines) {
-      const whiteSpaceMode = textOptions.whiteSpace ?? 'normal';
-      const canBreakWords = (textOptions.overflowWrap ?? 'break-word') === 'break-word';
-      let measured;
+      // Split on hard breaks injected by <br> elements
+      const segments = text.includes('\n') ? text.split('\n') : [text];
 
-      if (whiteSpaceMode === 'normal') {
-        let prepared = this.textCache.get(text);
+      for (let segIdx = 0; segIdx < segments.length; segIdx++) {
+        const segment = segments[segIdx]!;
 
-        if (!prepared) {
-          prepared = prepareText(text) ?? undefined;
-
-          if (prepared) {
-            this.textCache.set(text, prepared);
+        // Empty segment from consecutive <br> or leading/trailing <br>: emit a blank line
+        if (segment.length === 0) {
+          // Always emit blank line for <br> breaks (segIdx > 0 means after a \n split)
+          // Also emit for leading <br> when there was preceding text in measuredTextLines
+          if (segIdx > 0 || measuredTextLines.length > 0) {
+            measuredTextLines.push('');
+          } else if (segments.length > 1) {
+            // Leading <br> before any content — emit a blank first line
+            measuredTextLines.push('');
           }
+
+          continue;
         }
 
-        measured = prepared ? layoutPreparedText(prepared, contentWidth, canBreakWords) : [];
-      } else {
-        measured = this.textLayout.measure(text, contentWidth, textOptions);
-      }
+        const whiteSpaceMode = textOptions.whiteSpace ?? 'normal';
+        const canBreakWords = (textOptions.overflowWrap ?? 'break-word') === 'break-word';
+        let measured;
 
-      for (const line of measured) {
-        if (line.text.length > 0 || measured.length === 1) {
-          measuredTextLines.push(line.text);
+        if (whiteSpaceMode === 'normal') {
+          let prepared = this.textCache.get(segment);
+
+          if (!prepared) {
+            prepared = prepareText(segment) ?? undefined;
+
+            if (prepared) {
+              this.textCache.set(segment, prepared);
+            }
+          }
+
+          measured = prepared ? layoutPreparedText(prepared, contentWidth, canBreakWords) : [];
+        } else {
+          measured = this.textLayout.measure(segment, contentWidth, textOptions);
+        }
+
+        for (const line of measured) {
+          if (line.text.length > 0 || measured.length === 1) {
+            measuredTextLines.push(line.text);
+          }
         }
       }
     }
@@ -334,19 +355,38 @@ export class LayoutEngine {
    */
   private collectChildren(element: Element, childElements: Element[], textLines: string[]): void {
     let child = (element as unknown as {[CHILD]: Node | undefined})[CHILD];
+    let pendingText = '';
 
     while (child) {
       if (child.nodeType === NodeType.ELEMENT_NODE) {
-        childElements.push(child as unknown as Element);
+        const el = child as unknown as Element;
+        const tag = el.localName;
+
+        if (tag === 'br') {
+          pendingText += '\n';
+        } else if (tag === 'wbr') {
+          pendingText += '\u200B';
+        } else {
+          if (pendingText.length > 0) {
+            textLines.push(pendingText);
+            pendingText = '';
+          }
+
+          childElements.push(el);
+        }
       } else if (child.nodeType === NodeType.TEXT_NODE) {
         const text = (child as unknown as CharacterData).data;
 
         if (text.length > 0) {
-          textLines.push(text);
+          pendingText += text;
         }
       }
 
       child = (child as unknown as {[NEXT]: Node | undefined})[NEXT];
+    }
+
+    if (pendingText.length > 0) {
+      textLines.push(pendingText);
     }
   }
 
