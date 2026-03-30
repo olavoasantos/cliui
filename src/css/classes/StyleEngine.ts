@@ -1,4 +1,5 @@
 import {CHILD, HOOKS, NEXT, NodeType} from '../../dom/constants';
+import {USER_AGENT_STYLESHEET} from '../constants/userAgentStylesheet';
 import {collectStyleElements} from '../utilities/collectStyleElements';
 import {hasLayoutChange} from '../utilities/hasLayoutChange';
 import {walkElements} from '../utilities/walkElements';
@@ -66,6 +67,7 @@ export class StyleEngine {
   attach(document: Document): void {
     this.document = document;
     this.stylesheetsDirty = true;
+    this.injectUserAgentStylesheet(document);
     this.wireHooks(document.defaultView);
   }
 
@@ -227,6 +229,31 @@ export class StyleEngine {
     const body = this.document.body;
     if (body) {
       this.computeElement(body, null);
+    }
+  }
+
+  /**
+   * Injects the user-agent stylesheet as the first `<style>` element in
+   * `<head>`, giving it the lowest cascade priority.  Skips injection
+   * when the element is already present (idempotent for re-attach).
+   */
+  private injectUserAgentStylesheet(document: Document): void {
+    const marker = 'data-ua-stylesheet';
+
+    if (document.head.querySelector(`[${marker}]`) != null) {
+      return;
+    }
+
+    const style = document.createElement('style');
+    style.setAttribute(marker, '');
+    style.textContent = USER_AGENT_STYLESHEET;
+
+    const firstChild = document.head.firstChild;
+
+    if (firstChild) {
+      document.head.insertBefore(style, firstChild);
+    } else {
+      document.head.appendChild(style);
     }
   }
 

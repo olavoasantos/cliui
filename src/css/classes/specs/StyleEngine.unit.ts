@@ -169,7 +169,8 @@ describe('StyleEngine', () => {
       const computed = engine.getComputedStyle(child);
 
       expect(computed.has('padding-top')).toBe(false);
-      expect(computed.has('display')).toBe(false);
+      // display does not inherit: child must not receive parent's 'flex'
+      expect(computed.get('display')).not.toBe('flex');
     });
   });
 

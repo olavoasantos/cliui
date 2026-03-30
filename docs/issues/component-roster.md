@@ -10,7 +10,7 @@
 
 ### COMP-1: User-agent stylesheet for semantic HTML elements
 
-**Priority:** High  
+**Priority:** High
 **Depends on:** —
 
 #### Problem
@@ -30,6 +30,7 @@ Create a user-agent stylesheet that is automatically injected into every `Docume
 `span`, `a`, `strong`, `em`, `b`, `i`, `u`, `s`, `code`, `kbd`, `samp`, `var`, `mark`, `q`, `cite`, `abbr`, `time`, `br`, `wbr`
 
 **Text styling defaults:**
+
 - `strong`, `b` → `font-weight: bold`
 - `em`, `i` → `font-style: italic`
 - `u` → `text-decoration: underline`
@@ -42,6 +43,7 @@ Create a user-agent stylesheet that is automatically injected into every `Docume
 - `hr` → 1-row border element
 
 **Layout defaults:**
+
 - `ul`, `ol` → `padding-left: 2` (indentation for list items)
 - `blockquote` → `padding-left: 2`
 - `br` → forces a line break (needs special handling in text layout or as a zero-height block)
@@ -65,7 +67,7 @@ Create a user-agent stylesheet that is automatically injected into every `Docume
 
 ### COMP-2: `<a>` hyperlink element with OSC 8 support
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** COMP-1
 
 #### Problem
@@ -95,7 +97,7 @@ The `<a>` element should render as a clickable hyperlink in the terminal. The re
 
 ### COMP-3: `<br>` and `<wbr>` line break elements
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** COMP-1
 
 #### Problem
@@ -121,7 +123,7 @@ Handle `<br>` in `LayoutEngine.collectChildren()` — when a `<br>` element is e
 
 ### COMP-4: `<hr>` horizontal rule element
 
-**Priority:** Low  
+**Priority:** Low
 **Depends on:** COMP-1
 
 #### Problem
@@ -148,7 +150,7 @@ Handle in the UA stylesheet and/or a minimal `HTMLHRElement`. The element should
 
 ### COMP-5: `<ui-label>` form label component
 
-**Priority:** High  
+**Priority:** High
 **Depends on:** —
 
 #### Problem
@@ -177,7 +179,7 @@ Simple custom element. When clicked, find the element matching the `for` attribu
 
 ### COMP-6: `<ui-fieldset>` and `<ui-form>` form grouping components
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** —
 
 #### Problem
@@ -204,7 +206,7 @@ Forms need structural grouping. `<ui-fieldset>` groups related fields with an op
 
 ### COMP-7: `<ui-optgroup>` option group component
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** —
 
 #### Problem
@@ -230,7 +232,7 @@ Custom element that renders its `label` attribute as a styled non-interactive he
 
 ### COMP-8: `<ui-meter>` gauge component
 
-**Priority:** Low  
+**Priority:** Low
 **Depends on:** —
 
 #### Problem
@@ -255,7 +257,7 @@ Custom element with `value`, `min`, `max`, `low`, `high`, `optimum` attributes. 
 
 ### COMP-9: `<dialog>` platform dialog element
 
-**Priority:** High  
+**Priority:** High
 **Depends on:** COMP-1
 
 #### Problem
@@ -302,7 +304,7 @@ Higher-level components (`ui-confirmation`, `ui-prompt`, `ui-alert`) should comp
 
 ### COMP-10: `<ui-alert>` inline alert component
 
-**Priority:** High  
+**Priority:** High
 **Depends on:** —
 
 #### Problem
@@ -329,7 +331,7 @@ Custom element with `variant` attribute (`info`, `success`, `warning`, `error`).
 
 ### COMP-11: `<ui-badge>` inline badge component
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** —
 
 #### Problem
@@ -354,7 +356,7 @@ Inline custom element with `variant` attribute for color presets. Renders as a c
 
 ### COMP-12: `<ui-toast>` notification toast component
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** —
 
 #### Problem
@@ -379,7 +381,7 @@ Custom element with `variant` and `duration` attributes. Positions itself absolu
 
 ### COMP-13: `<ui-confirmation>` confirmation dialog component
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** COMP-9
 
 #### Problem
@@ -405,7 +407,7 @@ Custom element that internally creates a `<dialog>` (via `document.createElement
 
 ### COMP-14: `<ui-prompt>` text prompt dialog component
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** COMP-9
 
 #### Problem
@@ -431,7 +433,7 @@ Custom element that internally creates a `<dialog>` with an embedded input field
 
 ### COMP-15: `<ui-statusline>` status bar component
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** —
 
 #### Problem
@@ -456,7 +458,7 @@ Custom element that uses `position: absolute; bottom: 0; left: 0; width: 100%`. 
 
 ### COMP-16: `<ui-skeleton>` loading placeholder component
 
-**Priority:** Low  
+**Priority:** Low
 **Depends on:** —
 
 #### Problem
@@ -482,7 +484,7 @@ Custom element with `width` and `height` attributes. Renders dim block character
 
 ### COMP-17: `<ui-list>` interactive list component
 
-**Priority:** High  
+**Priority:** High
 **Depends on:** —
 
 #### Problem
@@ -508,7 +510,7 @@ Custom element that manages a list of child elements. Arrow keys move a highligh
 
 ### COMP-18: `<ui-tree>` tree view component
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** —
 
 #### Problem
@@ -535,7 +537,7 @@ Custom element with `<ui-tree-item>` children. Each item has an optional `expand
 
 ### COMP-19: `<ui-log>` scrollable log viewer component
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** —
 
 #### Problem
@@ -561,7 +563,7 @@ Custom element with `overflow: scroll`. Auto-scrolls to bottom when new children
 
 ### COMP-20: `<ui-markdown>` Markdown renderer component
 
-**Priority:** Low  
+**Priority:** Low
 **Depends on:** COMP-1
 
 #### Problem
@@ -587,7 +589,7 @@ Custom element that parses its `textContent` as Markdown and renders it using se
 
 ### COMP-21: `<ui-diff>` diff viewer component
 
-**Priority:** Low  
+**Priority:** Low
 **Depends on:** —
 
 #### Problem
@@ -614,7 +616,7 @@ Custom element that accepts diff text (unified diff format) and renders it with 
 
 ### COMP-22: `<ui-tabs>` tabbed container component
 
-**Priority:** High  
+**Priority:** High
 **Depends on:** —
 
 #### Problem
@@ -642,7 +644,7 @@ Custom element with `<ui-tab>` children for tab headers and `<ui-tab-panel>` chi
 
 ### COMP-23: `<ui-card>` content card component
 
-**Priority:** Medium  
+**Priority:** Medium
 **Depends on:** —
 
 #### Problem
@@ -666,7 +668,7 @@ Custom element with a border, optional `header` and `footer` slot-like regions. 
 
 ### COMP-24: `<ui-menu>` and `<ui-dropdown>` menu components
 
-**Priority:** High  
+**Priority:** High
 **Depends on:** —
 
 #### Problem
@@ -695,7 +697,7 @@ Dropdown menus triggered by a button or keybinding, with keyboard-navigable menu
 
 ### COMP-25: `<ui-breadcrumbs>` navigation breadcrumbs component
 
-**Priority:** Low  
+**Priority:** Low
 **Depends on:** —
 
 #### Problem
@@ -719,7 +721,7 @@ Custom element with `<ui-breadcrumb>` children. Renders segments inline with a s
 
 ### COMP-26: `<ui-paginator>` pagination component
 
-**Priority:** Low  
+**Priority:** Low
 **Depends on:** —
 
 #### Problem
@@ -744,7 +746,7 @@ Custom element with `page`, `total-pages` attributes. Renders `< 1 2 3 ... 10 >`
 
 ### COMP-27: `<ui-sidebar>` resizable sidebar component
 
-**Priority:** Low  
+**Priority:** Low
 **Depends on:** —
 
 #### Problem
@@ -768,7 +770,7 @@ Custom element with `width`, `collapsed` attributes. Renders as a fixed-width pa
 
 ### COMP-28: `<ui-toolbar>` toolbar component
 
-**Priority:** Low  
+**Priority:** Low
 **Depends on:** —
 
 #### Problem
