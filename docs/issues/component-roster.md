@@ -253,36 +253,48 @@ Custom element with `value`, `min`, `max`, `low`, `high`, `optimum` attributes. 
 
 ---
 
-### COMP-9: `<ui-dialog>` modal dialog component
+### COMP-9: `<dialog>` platform dialog element
 
 **Priority:** High  
-**Depends on:** —
+**Depends on:** COMP-1
 
 #### Problem
 
-Terminal apps need modal dialogs for confirmations, alerts, and forms. A dialog should render as an overlay on top of existing content, trap focus within itself, and close on Escape.
+Terminal apps need modal dialogs for confirmations, alerts, and forms. The HTML `<dialog>` element has well-defined semantics — `open` attribute, `showModal()`, `close(returnValue)`, focus trapping, Escape to close — and belongs in the DOM layer as platform vocabulary, not as a `ui-*` component.
+
+Higher-level components (`ui-confirmation`, `ui-prompt`, `ui-alert`) should compose a `<dialog>` internally rather than reimplementing modal behavior from scratch.
 
 #### Approach
 
-Custom element with `open` attribute. When open:
-1. Renders with `position: absolute` centered in the viewport.
-2. Traps Tab/Shift+Tab focus cycling within the dialog's focusable children.
-3. Closes on Escape (dispatches a `close` event).
-4. Provides `showModal()` and `close()` methods.
-
-A backdrop element fills the background behind the dialog.
+1. Add `HTMLDialogElement` class to the DOM layer with:
+   - `open` attribute (reflects the open/closed state)
+   - `showModal()` — opens the dialog, traps focus, adds to a "top layer" rendering context
+   - `show()` — opens non-modally (no focus trap, no backdrop)
+   - `close(returnValue?)` — closes the dialog, restores previous focus, dispatches `close` event
+   - `returnValue` property — the string passed to `close()`
+   - Escape key closes modal dialogs (dispatches `cancel` then `close`)
+2. Register `'dialog'` in `createElement()` to map to the new class.
+3. Add UA stylesheet rules: `dialog { display: none; position: absolute; }` `dialog[open] { display: block; }`.
+4. Focus trapping: Tab/Shift+Tab cycles within the dialog's focusable descendants when modal.
+5. Backdrop: when `showModal()` is used, a backdrop element is painted behind the dialog (full-viewport dim overlay).
 
 #### Files to create or modify
 
-- `src/components/UiDialog/` — component folder.
-- **Reference:** `src/components/UiDetails/` for open/close state management. `.ignore/references/huh/` for form dialog patterns.
+- `src/dom/classes/HTMLDialogElement.ts` — the dialog DOM class with `showModal()`, `show()`, `close()`, focus trapping, Escape handling.
+- `src/dom/utilities/createElement.ts` — map `'dialog'` to `HTMLDialogElement`.
+- `src/css/constants/userAgentStylesheet.ts` — add `dialog` default styles (hidden when not open, centered when open).
+- `src/dom/classes/specs/HTMLDialogElement.unit.ts` — unit tests.
+- `src/dom/classes/specs/HTMLDialogElement.integration.ts` — integration tests with focus trapping and event dispatch.
+- **Reference:** `.ignore/references/happy-dom/` for the `HTMLDialogElement` API shape. `src/components/UiDetails/` for open/close state management pattern.
 
 #### Expected outcomes
 
-- `dialog.showModal()` opens the dialog centered with a backdrop.
+- `dialog.showModal()` opens the dialog centered with focus trapped inside.
 - Tab cycles focus within the dialog only.
-- Escape closes the dialog.
-- `close` event fires when dismissed.
+- Escape closes the dialog, dispatching `cancel` then `close` events.
+- `dialog.close('ok')` sets `returnValue` and dispatches `close`.
+- `<dialog>` is hidden by default, shown when `open` attribute is present.
+- Higher-level `ui-confirmation`, `ui-prompt` components can compose this element.
 
 ---
 
@@ -296,6 +308,8 @@ A backdrop element fills the background behind the dialog.
 #### Problem
 
 Terminal apps need inline alerts for success, warning, error, and info messages. An alert is a non-interactive, styled block with an icon/indicator and a message.
+
+Note: this is an **inline** alert, not a modal. For modal alerts, compose a `<dialog>` (COMP-9) with alert content.
 
 #### Approach
 
@@ -370,21 +384,22 @@ Custom element with `variant` and `duration` attributes. Positions itself absolu
 
 #### Problem
 
-A specialized dialog for yes/no confirmations. Wraps `<ui-dialog>` with a message, confirm button, and cancel button.
+A specialized dialog for yes/no confirmations. Composes a platform `<dialog>` element with a message, confirm button, and cancel button.
 
 #### Approach
 
-Custom element that internally creates a `<ui-dialog>` with a message and two buttons. Provides `confirm()` returning a Promise that resolves to `true` (confirmed) or `false` (cancelled).
+Custom element that internally creates a `<dialog>` (via `document.createElement('dialog')`) with a message and two buttons. Opens with `showModal()`. Provides `confirm()` returning a Promise that resolves to `true` (confirmed) or `false` (cancelled). Focus trapping, Escape handling, and backdrop are inherited from the `<dialog>` element.
 
 #### Files to create or modify
 
 - `src/components/UiConfirmation/` — component folder.
-- **Reference:** `src/components/UiDialog/` (COMP-9) as the underlying dialog.
+- **Reference:** `src/dom/classes/HTMLDialogElement.ts` (COMP-9) for the underlying dialog.
 
 #### Expected outcomes
 
-- `const ok = await confirmation.confirm()` — shows dialog, waits for user choice.
+- `const ok = await confirmation.confirm()` — shows modal dialog, waits for user choice.
 - Enter confirms, Escape cancels.
+- Focus is trapped within the dialog while open.
 
 ---
 
@@ -395,21 +410,22 @@ Custom element that internally creates a `<ui-dialog>` with a message and two bu
 
 #### Problem
 
-A specialized dialog for text input. Wraps `<ui-dialog>` with a message, a `<ui-input>`, and confirm/cancel buttons.
+A specialized dialog for text input. Composes a platform `<dialog>` element with a message, a `<ui-input>`, and confirm/cancel buttons.
 
 #### Approach
 
-Custom element that internally creates a dialog with an embedded input field. Provides `prompt(message)` returning a Promise that resolves to the entered string or `null` on cancel.
+Custom element that internally creates a `<dialog>` with an embedded input field. Opens with `showModal()`. Provides `prompt(message)` returning a Promise that resolves to the entered string or `null` on cancel. Focus trapping and Escape handling are inherited from `<dialog>`.
 
 #### Files to create or modify
 
 - `src/components/UiPrompt/` — component folder.
-- **Reference:** `src/components/UiDialog/` (COMP-9), `src/components/UiInput/`.
+- **Reference:** `src/dom/classes/HTMLDialogElement.ts` (COMP-9), `src/components/UiInput/`.
 
 #### Expected outcomes
 
-- `const name = await prompt.prompt('Enter name:')` — shows dialog with input field.
+- `const name = await prompt.prompt('Enter name:')` — shows modal dialog with input field.
 - Enter confirms with current value, Escape cancels with `null`.
+- Focus starts on the input field.
 
 ---
 
