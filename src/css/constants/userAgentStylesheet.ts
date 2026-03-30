@@ -46,7 +46,6 @@ pre {
 hr {
   display: block;
   height: 1;
-  border-style: single;
 }
 
 /* ── Inline elements ──────────────────────────────────── */

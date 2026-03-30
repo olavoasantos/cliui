@@ -115,7 +115,7 @@ describe('StyleEngine UA stylesheet integration', () => {
     expect(linkStyle.get('text-decoration')).toBe('underline');
   });
 
-  it('hr renders as a bordered block with height 1', () => {
+  it('hr renders as a block with height 1', () => {
     const window = new Window();
     const document = window.document;
     const engine = new StyleEngine();
@@ -129,6 +129,5 @@ describe('StyleEngine UA stylesheet integration', () => {
     const hrStyle = engine.getComputedStyle(hr);
     expect(hrStyle.get('display')).toBe('block');
     expect(hrStyle.get('height')).toBe('1');
-    expect(hrStyle.get('border-style')).toBe('single');
   });
 });

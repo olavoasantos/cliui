@@ -60,7 +60,13 @@ export class Painter {
 
     this.paintBackground(metrics, textCell, buffer, clipRect);
     this.paintBorder(metrics, box.computedStyle, textCell, buffer, clipRect);
-    this.paintText(box, textCell, buffer, contentClipRect);
+
+    // <hr> elements fill their content row with horizontal line characters
+    if (box.element.localName === 'hr') {
+      this.paintHorizontalRule(box, textCell, buffer, clipRect);
+    } else {
+      this.paintText(box, textCell, buffer, contentClipRect);
+    }
   }
 
   private flattenBoxes(
@@ -216,6 +222,25 @@ export class Painter {
         {...borderCell, char: characters.right, fg: fgAt(metrics.outerWidth - 1, ly)},
         clipRect,
       );
+    }
+  }
+
+  /**
+   * Paints a horizontal rule (`<hr>`) by filling the content row with
+   * horizontal line characters (`─`).
+   */
+  private paintHorizontalRule(
+    box: LayoutBox,
+    textCell: Cell,
+    buffer: CellBuffer,
+    clipRect: ClipRect | null,
+  ): void {
+    const y = box.contentY;
+
+    if (y >= box.contentY + box.contentHeight) return;
+
+    for (let x = box.contentX; x < box.contentX + box.contentWidth; x++) {
+      this.writeCell(buffer, x, y, {...textCell, char: '─'}, clipRect);
     }
   }
 

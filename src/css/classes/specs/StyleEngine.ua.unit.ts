@@ -109,7 +109,7 @@ describe('StyleEngine — user-agent stylesheet', () => {
       expect(engine.getComputedStyle(pre).get('white-space')).toBe('pre');
     });
 
-    it('applies border-style to hr for a horizontal rule', () => {
+    it('applies height: 1 and block display to hr', () => {
       const {document, engine} = createEnv();
       const hr = document.createElement('hr');
       document.body.appendChild(hr);
@@ -117,7 +117,6 @@ describe('StyleEngine — user-agent stylesheet', () => {
 
       expect(computed.get('display')).toBe('block');
       expect(computed.get('height')).toBe('1');
-      expect(computed.get('border-style')).toBe('single');
     });
   });
 
