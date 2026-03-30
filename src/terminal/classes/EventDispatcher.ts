@@ -99,15 +99,17 @@ export class EventDispatcher {
   }
 
   private dispatchKeyEvent(event: TerminalKeyEvent): void {
-    if (event.key === 'Tab') {
+    const target = this.document.activeElement ?? this.document.body;
+    const keydown = this.createKeyboardEvent('keydown', event);
+
+    target.dispatchEvent(keydown);
+
+    // Only perform default Tab focus cycling if no handler prevented it
+    if (event.key === 'Tab' && !keydown.defaultPrevented) {
       this.document.focusNext(event.shift);
     }
 
-    const target = this.document.activeElement ?? this.document.body;
-    const keydown = this.createKeyboardEvent('keydown', event);
     const keyup = this.createKeyboardEvent('keyup', event);
-
-    target.dispatchEvent(keydown);
     target.dispatchEvent(keyup);
   }
 
