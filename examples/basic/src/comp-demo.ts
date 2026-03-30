@@ -267,8 +267,6 @@ document.body.appendChild(dialog);
 
 /* Modal dialog */
 const modalDialog = document.createElement('dialog');
-modalDialog.style.top = '5';
-modalDialog.style.left = '10';
 modalDialog.style.zIndex = '10';
 const modalMsg = document.createElement('p');
 modalMsg.textContent = 'MODAL dialog. Focus is trapped here. Press Escape or click buttons.';

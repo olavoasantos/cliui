@@ -30,6 +30,8 @@ export class LayoutEngine {
   private readonly textLayout = new TextLayout();
   private cache = new WeakMap<Element, LayoutBox>();
   private textCache = new Map<string, PreparedText>();
+  private viewportColumns = 0;
+  private viewportRows = 0;
 
   /**
    * Creates a new layout engine backed by the given style engine.
@@ -55,6 +57,9 @@ export class LayoutEngine {
    * @returns A fully positioned {@link LayoutBox} tree.
    */
   layout(root: Element, columns: number, rows: number): LayoutBox {
+    this.viewportColumns = columns;
+    this.viewportRows = rows;
+
     const dirtySet = this.styleEngine.getLayoutDirtyElements();
 
     if (dirtySet.size > 0) {
@@ -287,6 +292,12 @@ export class LayoutEngine {
     }
 
     for (const child of box.children) {
+      // Top-level absolute elements (e.g. dialogs on body) should not scroll
+      // with the body — they are positioned relative to the viewport.
+      if (child.computedStyle.get('position') === 'absolute' && element.localName === 'body') {
+        continue;
+      }
+
       this.offsetBox(child, 0, -scrollOffsetY);
     }
   }
@@ -309,6 +320,18 @@ export class LayoutEngine {
    * content area using its `top` and `left` offsets.
    */
   private positionAbsoluteChild(box: LayoutBox, containingX: number, containingY: number): void {
+    // Modal dialogs are centered in the viewport regardless of top/left
+    if (box.element.hasAttribute('modal') && box.element.localName === 'dialog') {
+      const scrollParent = box.element.parentElement as Element & {scrollTop?: number};
+      const scrollY = scrollParent?.scrollTop ?? 0;
+      const centerX = Math.max(0, Math.floor((this.viewportColumns - box.width) / 2));
+      const centerY = Math.max(0, Math.floor((this.viewportRows - box.height) / 2)) + scrollY;
+
+      this.offsetBox(box, centerX, centerY);
+
+      return;
+    }
+
     const left = this.parseSignedCellValue(box.computedStyle.get('left'));
     const top = this.parseSignedCellValue(box.computedStyle.get('top'));
 
