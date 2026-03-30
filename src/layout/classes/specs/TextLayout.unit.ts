@@ -192,7 +192,32 @@ describe('TextLayout', () => {
 
       expect(lines).toEqual([{text: 'hell…', width: 5}]);
     });
+  });
 
+  describe('trailing whitespace hanging', () => {
+    it('does not break when trailing space would hang past the line edge', () => {
+      const lines = layout.measure('Hello world', 5);
+
+      expect(lines).toEqual([
+        {text: 'Hello', width: 5},
+        {text: 'world', width: 5},
+      ]);
+    });
+
+    it('trailing space after last word does not add to reported width', () => {
+      const lines = layout.measure('Hello ', 5);
+
+      expect(lines).toEqual([{text: 'Hello', width: 5}]);
+    });
+
+    it('space between words does not count toward line width for break decisions', () => {
+      const lines = layout.measure('ab cd', 5);
+
+      expect(lines).toEqual([{text: 'ab cd', width: 5}]);
+    });
+  });
+
+  describe('white-space modes', () => {
     it('preserves spaces and newlines for pre', () => {
       const lines = layout.measure('a  b\n c', 10, {whiteSpace: 'pre'});
 
