@@ -252,8 +252,6 @@ dialogStatus.textContent = 'Dialog status: idle';
 
 /* Non-modal dialog */
 const dialog = document.createElement('dialog');
-dialog.style.top = '5';
-dialog.style.left = '10';
 dialog.style.zIndex = '10';
 const dialogMsg = document.createElement('p');
 dialogMsg.textContent = 'This is a non-modal dialog. Click Close to dismiss.';
@@ -290,6 +288,10 @@ document.body.appendChild(modalDialog);
 
 /* Dialog event handlers */
 showBtn.addEventListener('click', () => {
+  // Position the non-modal dialog near the current scroll position
+  const scrollY = (document.body as any).scrollTop ?? 0;
+  dialog.style.top = String(scrollY + 2);
+  dialog.style.left = '10';
   (dialog as any).show();
   dialogStatus.textContent = 'Dialog status: non-modal dialog opened';
 });
