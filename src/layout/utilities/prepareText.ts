@@ -1,6 +1,7 @@
 import {TEXT_LAYOUT_SEGMENTER} from '../constants/segmenter';
 import {cellWidth} from './cellWidth';
 import {isAsciiText} from './isAsciiText';
+import {normalizeWhitespaceNormal} from './normalizeWhitespaceNormal';
 
 import type {PreparedText} from '../types/PreparedText';
 
@@ -21,7 +22,7 @@ import type {PreparedText} from '../types/PreparedText';
  *   whitespace collapsing.
  */
 export function prepareText(text: string): PreparedText | null {
-  const collapsed = text.replace(/\s+/g, ' ').trim();
+  const collapsed = normalizeWhitespaceNormal(text);
 
   if (collapsed.length === 0) return null;
 

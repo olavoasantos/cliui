@@ -1,6 +1,8 @@
 import {TEXT_LAYOUT_SEGMENTER} from '../constants/segmenter';
 import {cellWidth} from '../utilities/cellWidth';
 import {layoutPreparedText} from '../utilities/layoutPreparedText';
+import {normalizeWhitespaceNormal} from '../utilities/normalizeWhitespaceNormal';
+import {normalizeWhitespacePreWrap} from '../utilities/normalizeWhitespacePreWrap';
 import {prepareText} from '../utilities/prepareText';
 
 import type {TextLayoutOptions, TextLine} from '../types';
@@ -37,7 +39,9 @@ export class TextLayout {
 
     switch (whiteSpace) {
       case 'nowrap':
-        return [this.truncateIfNeeded(this.collapseWhitespace(text), effectiveWidth, textOverflow)];
+        return [
+          this.truncateIfNeeded(normalizeWhitespaceNormal(text), effectiveWidth, textOverflow),
+        ];
       case 'pre':
         return this.measurePre(text, effectiveWidth, textOverflow);
       case 'pre-wrap':
@@ -80,7 +84,8 @@ export class TextLayout {
    * Measures `white-space: pre-wrap` text.
    */
   private measurePreWrap(text: string, availableWidth: number): TextLine[] {
-    const logicalLines = text.split('\n');
+    const normalized = normalizeWhitespacePreWrap(text);
+    const logicalLines = normalized.split('\n');
     const measuredLines: TextLine[] = [];
 
     for (const logicalLine of logicalLines) {
@@ -160,12 +165,5 @@ export class TextLayout {
     }
 
     return {text: clippedText, width: clippedWidth};
-  }
-
-  /**
-   * Collapses whitespace according to `white-space: normal|nowrap` semantics.
-   */
-  private collapseWhitespace(text: string): string {
-    return text.replace(/\s+/g, ' ').trim();
   }
 }
