@@ -5,6 +5,8 @@ import {cellWidth} from './cellWidth';
 import {classifyBreakKind} from './classifyBreakKind';
 import {isAsciiText} from './isAsciiText';
 import {isCJK} from './isCJK';
+import {mergeNumericRuns} from './mergeNumericRuns';
+import {mergeUrlRuns} from './mergeUrlRuns';
 import {normalizeWhitespaceNormal} from './normalizeWhitespaceNormal';
 
 import type {PreparedText} from '../types/PreparedText';
@@ -193,6 +195,8 @@ function prepareFull(collapsed: string): PreparedText {
     }
   }
 
+  mergeUrlRuns(words, widths, graphemeWidths, graphemes);
+  mergeNumericRuns(words, widths, graphemeWidths, graphemes);
   applyPunctuationAttachment(words, widths, graphemeWidths, graphemes);
 
   return {words, widths, graphemeWidths, graphemes, hasExplicitSpaces: true};
