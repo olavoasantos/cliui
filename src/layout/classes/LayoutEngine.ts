@@ -259,7 +259,7 @@ export class LayoutEngine {
     );
 
     for (const absoluteChild of absoluteChildren) {
-      this.positionAbsoluteChild(absoluteChild, box.contentX, box.contentY);
+      this.positionAbsoluteChild(absoluteChild, box.contentX, box.contentY, element);
     }
 
     box.children = childOrder;
@@ -292,12 +292,6 @@ export class LayoutEngine {
     }
 
     for (const child of box.children) {
-      // Top-level absolute elements (e.g. dialogs on body) should not scroll
-      // with the body — they are positioned relative to the viewport.
-      if (child.computedStyle.get('position') === 'absolute' && element.localName === 'body') {
-        continue;
-      }
-
       this.offsetBox(child, 0, -scrollOffsetY);
     }
   }
@@ -318,12 +312,21 @@ export class LayoutEngine {
   /**
    * Positions an absolutely positioned child relative to the containing box's
    * content area using its `top` and `left` offsets.
+   *
+   * Modal dialogs are viewport-centered: positioned at `scrollY + center`
+   * so that `applyScrollState`'s `-scrollY` offset lands them at the
+   * viewport center.
    */
-  private positionAbsoluteChild(box: LayoutBox, containingX: number, containingY: number): void {
+  private positionAbsoluteChild(
+    box: LayoutBox,
+    containingX: number,
+    containingY: number,
+    containingElement: Element,
+  ): void {
     // Modal dialogs are centered in the viewport regardless of top/left
     if (box.element.hasAttribute('modal') && box.element.localName === 'dialog') {
-      const scrollParent = box.element.parentElement as Element & {scrollTop?: number};
-      const scrollY = scrollParent?.scrollTop ?? 0;
+      const scrollParent = containingElement as Element & {scrollTop?: number};
+      const scrollY = scrollParent.scrollTop ?? 0;
       const centerX = Math.max(0, Math.floor((this.viewportColumns - box.width) / 2));
       const centerY = Math.max(0, Math.floor((this.viewportRows - box.height) / 2)) + scrollY;
 
