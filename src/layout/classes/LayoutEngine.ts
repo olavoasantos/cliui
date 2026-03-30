@@ -1,6 +1,10 @@
 import {CHILD, NEXT, NodeType} from '../../dom/constants';
 import {FlexLayout} from './FlexLayout';
 import {TextLayout} from './TextLayout';
+import {layoutPreparedText} from '../utilities/layoutPreparedText';
+import {prepareText} from '../utilities/prepareText';
+
+import type {PreparedText} from '../types/PreparedText';
 
 import type {Node} from '../../dom/classes/Node';
 import type {Element} from '../../dom/classes/Element';
@@ -25,6 +29,7 @@ export class LayoutEngine {
   private readonly flexLayout = new FlexLayout();
   private readonly textLayout = new TextLayout();
   private cache = new WeakMap<Element, LayoutBox>();
+  private textCache = new Map<string, PreparedText>();
 
   /**
    * Creates a new layout engine backed by the given style engine.
@@ -71,6 +76,7 @@ export class LayoutEngine {
    */
   clearCache(): void {
     this.cache = new WeakMap<Element, LayoutBox>();
+    this.textCache.clear();
   }
 
   /**
@@ -151,7 +157,24 @@ export class LayoutEngine {
     };
 
     for (const text of textLines) {
-      const measured = this.textLayout.measure(text, contentWidth, textOptions);
+      const whiteSpaceMode = textOptions.whiteSpace ?? 'normal';
+      let measured;
+
+      if (whiteSpaceMode === 'normal') {
+        let prepared = this.textCache.get(text);
+
+        if (!prepared) {
+          prepared = prepareText(text) ?? undefined;
+
+          if (prepared) {
+            this.textCache.set(text, prepared);
+          }
+        }
+
+        measured = prepared ? layoutPreparedText(prepared, contentWidth) : [];
+      } else {
+        measured = this.textLayout.measure(text, contentWidth, textOptions);
+      }
 
       for (const line of measured) {
         if (line.text.length > 0 || measured.length === 1) {

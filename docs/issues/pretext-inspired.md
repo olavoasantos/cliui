@@ -99,7 +99,7 @@ Most terminal UI text is ASCII. The upcoming segmentation improvements (PTX-3+) 
 
 Our `split(' ')` approach in `prepareText()` produces incorrect line breaks for non-ASCII scripts:
 
-- **CJK text** — Chinese/Japanese/Korean characters should break between *any* two characters, not only at spaces.
+- **CJK text** — Chinese/Japanese/Korean characters should break between _any_ two characters, not only at spaces.
 - **Thai/Khmer/Myanmar** — these scripts have no spaces between words; `Intl.Segmenter` with `granularity: 'word'` is required.
 - **Mixed-script text** — e.g. `"Hello 世界 test"` should allow breaks around CJK characters.
 

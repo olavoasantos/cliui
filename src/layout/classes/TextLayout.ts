@@ -1,14 +1,20 @@
 import {TEXT_LAYOUT_SEGMENTER} from '../constants/segmenter';
 import {cellWidth} from '../utilities/cellWidth';
+import {layoutPreparedText} from '../utilities/layoutPreparedText';
+import {prepareText} from '../utilities/prepareText';
 
 import type {TextLayoutOptions, TextLine} from '../types';
 
 /**
  * Measures text and performs word wrapping for terminal layout.
  *
- * Supports the milestone text layout modes: `white-space: normal`, `nowrap`,
- * `pre`, and `pre-wrap`, plus `text-overflow: clip | ellipsis` for unwrapped
- * content.
+ * For `white-space: normal`, uses a two-phase prepare/layout architecture:
+ * the prepare phase (whitespace collapsing, word splitting, cell-width
+ * measurement) runs once per text content change, and the layout phase
+ * (pure arithmetic on cached widths) runs on every width change.
+ *
+ * Supports `white-space: normal`, `nowrap`, `pre`, and `pre-wrap`, plus
+ * `text-overflow: clip | ellipsis` for unwrapped content.
  */
 export class TextLayout {
   /**
@@ -43,63 +49,16 @@ export class TextLayout {
   }
 
   /**
-   * Measures `white-space: normal` text.
+   * Measures `white-space: normal` text using the two-phase architecture.
    */
   private measureNormal(text: string, availableWidth: number): TextLine[] {
-    const collapsed = this.collapseWhitespace(text);
+    const prepared = prepareText(text);
 
-    if (collapsed.length === 0) {
+    if (prepared === null) {
       return [];
     }
 
-    const words = collapsed.split(' ');
-    const lines: TextLine[] = [];
-
-    let currentText = '';
-    let currentWidth = 0;
-
-    for (const word of words) {
-      const wordWidth = cellWidth(word);
-
-      if (currentText.length === 0) {
-        if (wordWidth <= availableWidth) {
-          currentText = word;
-          currentWidth = wordWidth;
-        } else {
-          this.breakWord(word, availableWidth, lines, (nextText, nextWidth) => {
-            currentText = nextText;
-            currentWidth = nextWidth;
-          });
-        }
-      } else {
-        const projectedWidth = currentWidth + 1 + wordWidth;
-
-        if (projectedWidth <= availableWidth) {
-          currentText += ' ' + word;
-          currentWidth = projectedWidth;
-        } else {
-          lines.push({text: currentText, width: currentWidth});
-          currentText = '';
-          currentWidth = 0;
-
-          if (wordWidth <= availableWidth) {
-            currentText = word;
-            currentWidth = wordWidth;
-          } else {
-            this.breakWord(word, availableWidth, lines, (nextText, nextWidth) => {
-              currentText = nextText;
-              currentWidth = nextWidth;
-            });
-          }
-        }
-      }
-    }
-
-    if (currentText.length > 0 || lines.length === 0) {
-      lines.push({text: currentText, width: currentWidth});
-    }
-
-    return lines;
+    return layoutPreparedText(prepared, availableWidth);
   }
 
   /**
@@ -208,34 +167,5 @@ export class TextLayout {
    */
   private collapseWhitespace(text: string): string {
     return text.replace(/\s+/g, ' ').trim();
-  }
-
-  /**
-   * Breaks a word that exceeds `availableWidth` into multiple lines at
-   * grapheme boundaries.
-   */
-  private breakWord(
-    word: string,
-    availableWidth: number,
-    lines: TextLine[],
-    setCurrent: (text: string, width: number) => void,
-  ): void {
-    let lineText = '';
-    let lineWidth = 0;
-
-    for (const {segment} of TEXT_LAYOUT_SEGMENTER.segment(word)) {
-      const graphemeWidth = cellWidth(segment);
-
-      if (lineWidth + graphemeWidth > availableWidth && lineText.length > 0) {
-        lines.push({text: lineText, width: lineWidth});
-        lineText = '';
-        lineWidth = 0;
-      }
-
-      lineText += segment;
-      lineWidth += graphemeWidth;
-    }
-
-    setCurrent(lineText, lineWidth);
   }
 }
