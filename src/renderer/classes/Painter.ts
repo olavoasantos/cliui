@@ -76,10 +76,13 @@ export class Painter {
     let order = 0;
 
     const visit = (box: LayoutBox, clipRect: ClipRect | null): void => {
-      flattened.push({box, clipRect, order});
+      // Absolute-positioned elements escape their parent's overflow clip
+      const effectiveClip = box.computedStyle.get('position') === 'absolute' ? null : clipRect;
+
+      flattened.push({box, clipRect: effectiveClip, order});
       order += 1;
 
-      const childClipRect = this.createChildClipRect(box, clipRect);
+      const childClipRect = this.createChildClipRect(box, effectiveClip);
 
       for (const child of box.children) {
         visit(child, childClipRect);
