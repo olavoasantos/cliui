@@ -1206,4 +1206,68 @@ describe('FlexLayout', () => {
       expect(result.height).toBe(4);
     });
   });
+
+  describe('shrink-wrap container width recomputation', () => {
+    it('recomputes width after flex sizing for absolute row containers', () => {
+      const el = document.createElement('div');
+      const c1 = childBox(document.createElement('span'), {
+        width: 10,
+        height: 2,
+        computedStyle: style({'flex-basis': '5', 'flex-grow': '0', 'flex-shrink': '0'}),
+      });
+      const c2 = childBox(document.createElement('span'), {
+        width: 10,
+        height: 2,
+        computedStyle: style({'flex-basis': '5', 'flex-grow': '0', 'flex-shrink': '0'}),
+      });
+
+      const result = layout.layout(
+        el,
+        style({'flex-direction': 'row', position: 'absolute', 'justify-content': 'space-between'}),
+        [c1, c2],
+        [],
+        80,
+        24,
+        0,
+        0,
+      );
+
+      // Container should shrink-wrap to flexed children (5+5=10),
+      // not the pre-flex intrinsic width (10+10=20).
+      // justify-content: space-between should have zero free space.
+      expect(c1.x).toBe(0);
+      expect(c2.x).toBe(5);
+      expect(result.contentWidth).toBe(10);
+    });
+
+    it('does not recompute for block containers with auto width', () => {
+      const el = document.createElement('div');
+      const c1 = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'flex-grow': '1'}),
+      });
+      const c2 = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'flex-grow': '1'}),
+      });
+
+      const result = layout.layout(
+        el,
+        style({'flex-direction': 'row'}),
+        [c1, c2],
+        [],
+        20,
+        24,
+        0,
+        0,
+      );
+
+      // Block container fills available width regardless of children sizes
+      expect(result.width).toBe(20);
+      expect(c1.width).toBe(10);
+      expect(c2.width).toBe(10);
+    });
+  });
 });

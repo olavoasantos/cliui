@@ -703,4 +703,62 @@ describe('LayoutEngine', () => {
       }
     });
   });
+
+  describe('stretch re-layout', () => {
+    it('reflows nested children when a row-direction child is stretched', () => {
+      const {document, styleEngine} = createEnv();
+      const layoutEngine = new LayoutEngine(styleEngine);
+
+      addStyle(
+        document,
+        `
+        .row {
+          display: flex;
+          flex-direction: row;
+          align-items: stretch;
+          width: 20;
+          height: 10;
+        }
+        .col {
+          display: flex;
+          flex-direction: column;
+          width: 10;
+        }
+        .inner {
+          display: flex;
+          flex-grow: 1;
+        }
+      `,
+      );
+
+      const row = document.createElement('div');
+
+      row.className = 'row';
+
+      const col = document.createElement('div');
+
+      col.className = 'col';
+
+      const inner = document.createElement('div');
+
+      inner.className = 'inner';
+      col.appendChild(inner);
+      row.appendChild(col);
+      document.body.appendChild(row);
+
+      styleEngine.computeAll();
+
+      const result = layoutEngine.layout(document.body, 40, 20);
+      const rowBox = result.children[0]!;
+      const colBox = rowBox.children[0]!;
+      const innerBox = colBox.children[0]!;
+
+      // The column child should be stretched to the row's height (10)
+      expect(colBox.height).toBe(10);
+
+      // After re-layout, the inner child with flex-grow:1 should fill
+      // the stretched column's content height
+      expect(innerBox.height).toBe(10);
+    });
+  });
 });

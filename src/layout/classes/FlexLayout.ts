@@ -98,7 +98,7 @@ export class FlexLayout {
 
     outerWidth = this.clampSize(outerWidth, minWidth, maxWidth);
 
-    const contentWidth = Math.max(0, outerWidth - horizontalBorderPadding);
+    let contentWidth = Math.max(0, outerWidth - horizontalBorderPadding);
     const contentX = x + box.marginLeft + box.borderLeft + box.paddingLeft;
     const contentY = y + box.marginTop + box.borderTop + box.paddingTop;
     const textHeight = textLines.length > 0 ? textLines.length : 0;
@@ -154,6 +154,31 @@ export class FlexLayout {
       lines = [
         {children, crossSize: isRowDirection ? this.maxChildHeight(children) : contentWidth},
       ];
+    }
+
+    /* For shrink-wrap containers (absolute/inline without explicit width) in
+     * row direction, recompute the container width from post-flex children
+     * sizes.  Without this, flex-basis values smaller than the intrinsic width
+     * leave false free space that justify-content would distribute — Yoga
+     * avoids this by zeroing remainingFreeSpace in FitContent mode. */
+    if (
+      isRowDirection &&
+      !isWrapEnabled &&
+      explicitWidth === null &&
+      (isAbsolute || computedStyle.get('display') === 'inline')
+    ) {
+      const flexedIntrinsic = this.resolveIntrinsicContentWidth(
+        children,
+        textLines,
+        flexDirection,
+        computedStyle,
+      );
+      let newOuterWidth =
+        boxSizing === 'border-box' ? flexedIntrinsic + horizontalBorderPadding : flexedIntrinsic;
+
+      newOuterWidth = Math.min(newOuterWidth, availableWidth - horizontalMargin);
+      outerWidth = this.clampSize(newOuterWidth, minWidth, maxWidth);
+      contentWidth = Math.max(0, outerWidth - horizontalBorderPadding);
     }
 
     const intrinsicContentHeight =
@@ -450,7 +475,12 @@ export class FlexLayout {
     let perAutoMargin = 0;
 
     if (autoMarginCount > 0) {
-      const totalChildSize = orderedChildren.reduce((sum, c) => sum + c.height, 0);
+      let totalChildSize = 0;
+
+      for (let i = 0; i < orderedChildren.length; i += 1) {
+        totalChildSize += orderedChildren[i]!.height;
+      }
+
       const baseGapSpace = Math.max(0, orderedChildren.length - 1) * gap;
       const freeSpace = Math.max(0, availableMainSize - totalChildSize - baseGapSpace);
 
@@ -513,7 +543,12 @@ export class FlexLayout {
     let perAutoMargin = 0;
 
     if (autoMarginCount > 0) {
-      const totalChildSize = orderedChildren.reduce((sum, c) => sum + c.width, 0);
+      let totalChildSize = 0;
+
+      for (let i = 0; i < orderedChildren.length; i += 1) {
+        totalChildSize += orderedChildren[i]!.width;
+      }
+
       const baseGapSpace = Math.max(0, orderedChildren.length - 1) * gap;
       const freeSpace = Math.max(0, availableMainSize - totalChildSize - baseGapSpace);
 
@@ -655,10 +690,11 @@ export class FlexLayout {
     gap: number,
   ): {startOffset: number; betweenSpace: number} {
     const justifyContent = computedStyle.get('justify-content') ?? 'flex-start';
-    const totalChildrenSize = children.reduce(
-      (sum, child) => sum + this.getMainSize(child, isRowDirection),
-      0,
-    );
+    let totalChildrenSize = 0;
+
+    for (let i = 0; i < children.length; i += 1) {
+      totalChildrenSize += this.getMainSize(children[i]!, isRowDirection);
+    }
     const baseGapSpace = Math.max(0, children.length - 1) * gap;
     const freeSpace = Math.max(0, availableMainSize - totalChildrenSize - baseGapSpace);
 
@@ -750,241 +786,345 @@ export class FlexLayout {
    * Applies `flex-grow`, `flex-shrink`, and `flex-basis` along the current
    * main axis using a two-pass approach inspired by Yoga.
    *
-   * **Pass 1** detects items whose min/max constraints would trigger and
-   * freezes them at their clamped sizes, removing their flex factors from the
-   * distribution pool.
-   *
-   * **Pass 2** distributes remaining free space (or overflow) among unfrozen
-   * items.
-   *
-   * Fractional total grow/shrink factors are floored to 1 so that items with
-   * sub-unit factors do not over-distribute space.
+   * When no children have min/max constraints (the common case), a streamlined
+   * single-pass fast path runs instead, avoiding the overhead of constraint
+   * detection, `.filter()` allocations, and redundant Map lookups.
    */
   private applyFlexSizing(
     children: LayoutBox[],
     isRowDirection: boolean,
     availableMainSize: number,
   ): void {
-    if (children.length === 0) {
+    const childCount = children.length;
+
+    if (childCount === 0) {
       return;
     }
 
-    const childStates = children.map((child) => {
+    const minProp = isRowDirection ? 'min-width' : 'min-height';
+    const maxProp = isRowDirection ? 'max-width' : 'max-height';
+
+    let hasConstraints = false;
+    let totalBaseSize = 0;
+    let totalGrow = 0;
+
+    const states: Array<{
+      child: LayoutBox;
+      baseSize: number;
+      grow: number;
+      shrink: number;
+      min: number | null;
+      max: number | null;
+      targetSize: number;
+      frozen: boolean;
+    }> = new Array(childCount);
+
+    for (let i = 0; i < childCount; i += 1) {
+      const child = children[i]!;
       const baseSize = this.resolveFlexBasis(child, isRowDirection);
       const grow = this.parseFlexFactor(child.computedStyle.get('flex-grow'), 0);
       const shrink = this.parseFlexFactor(child.computedStyle.get('flex-shrink'), 1);
+      const min = this.parseDimension(child.computedStyle.get(minProp));
+      const max = this.parseDimension(child.computedStyle.get(maxProp));
 
-      return {child, baseSize, grow, shrink, targetSize: baseSize, frozen: false};
-    });
+      if (min !== null || max !== null) {
+        hasConstraints = true;
+      }
 
-    const totalBaseSize = childStates.reduce((sum, state) => sum + state.baseSize, 0);
+      totalBaseSize += baseSize;
+      totalGrow += grow;
+
+      states[i] = {child, baseSize, grow, shrink, min, max, targetSize: baseSize, frozen: false};
+    }
+
     const freeSpace = availableMainSize - totalBaseSize;
 
     if (freeSpace > 0) {
-      let totalGrow = childStates.reduce((sum, state) => sum + state.grow, 0);
+      const originalGrowSum = totalGrow;
 
-      // Floor fractional total grow to 1 (Yoga behavior).
       if (totalGrow > 0 && totalGrow < 1) {
         totalGrow = 1;
       }
 
       if (totalGrow > 0) {
-        this.distributeGrowSpace(childStates, freeSpace, totalGrow, isRowDirection);
+        if (hasConstraints) {
+          this.distributeGrowConstrained(states, freeSpace, totalGrow);
+        } else {
+          this.distributeGrowFast(states, freeSpace, totalGrow, originalGrowSum);
+        }
       }
     } else if (freeSpace < 0) {
-      const shrinkWeights = childStates.map((state) => state.shrink * state.baseSize);
-      let totalShrinkWeight = shrinkWeights.reduce((sum, weight) => sum + weight, 0);
+      let totalShrinkWeight = 0;
 
-      // Floor fractional total shrink weight to 1 (Yoga behavior).
+      for (let i = 0; i < childCount; i += 1) {
+        const s = states[i]!;
+
+        totalShrinkWeight += s.shrink * s.baseSize;
+      }
+
+      const originalShrinkWeight = totalShrinkWeight;
+
       if (totalShrinkWeight > 0 && totalShrinkWeight < 1) {
         totalShrinkWeight = 1;
       }
 
       if (totalShrinkWeight > 0) {
-        this.distributeShrinkSpace(
-          childStates,
-          shrinkWeights,
-          freeSpace,
-          totalShrinkWeight,
-          isRowDirection,
-        );
+        if (hasConstraints) {
+          this.distributeShrinkConstrained(states, freeSpace, totalShrinkWeight);
+        } else {
+          this.distributeShrinkFast(states, freeSpace, totalShrinkWeight, originalShrinkWeight);
+        }
       }
     }
 
-    for (const state of childStates) {
-      this.setMainSize(state.child, isRowDirection, state.targetSize);
+    if (hasConstraints) {
+      for (let i = 0; i < childCount; i += 1) {
+        const s = states[i]!;
+
+        this.setMainSizeClamped(s.child, isRowDirection, s.targetSize, s.min, s.max);
+      }
+    } else {
+      for (let i = 0; i < childCount; i += 1) {
+        this.setMainSizeUnclamped(states[i]!.child, isRowDirection, states[i]!.targetSize);
+      }
     }
   }
 
   /**
-   * Two-pass grow distribution. Pass 1 freezes items whose min/max constraints
-   * trigger. Pass 2 redistributes remaining space to unfrozen items.
+   * Single-pass grow distribution for the common case where no children have
+   * min/max constraints. Avoids the overhead of constraint scanning, array
+   * filtering, and redundant clamping.
    */
-  private distributeGrowSpace(
-    childStates: Array<{
-      child: LayoutBox;
+  private distributeGrowFast(
+    states: Array<{baseSize: number; grow: number; targetSize: number}>,
+    freeSpace: number,
+    totalGrow: number,
+    originalGrowSum: number,
+  ): void {
+    const intendedTotal = Math.round((freeSpace * originalGrowSum) / totalGrow);
+    let remainder = intendedTotal;
+    let lastGrowIdx = -1;
+
+    for (let i = states.length - 1; i >= 0; i -= 1) {
+      if (states[i]!.grow > 0) {
+        lastGrowIdx = i;
+        break;
+      }
+    }
+
+    for (let i = 0; i < states.length; i += 1) {
+      const s = states[i]!;
+
+      if (s.grow === 0) {
+        continue;
+      }
+
+      const extra = i === lastGrowIdx ? remainder : Math.round((freeSpace * s.grow) / totalGrow);
+
+      s.targetSize = s.baseSize + extra;
+      remainder -= extra;
+    }
+  }
+
+  /**
+   * Two-pass grow distribution for children with min/max constraints.
+   * Pass 1 freezes constrained items. Pass 2 redistributes remaining space
+   * to unfrozen items using pre-parsed min/max values.
+   */
+  private distributeGrowConstrained(
+    states: Array<{
       baseSize: number;
       grow: number;
+      min: number | null;
+      max: number | null;
       targetSize: number;
       frozen: boolean;
     }>,
     freeSpace: number,
     totalGrow: number,
-    isRowDirection: boolean,
   ): void {
-    // Pass 1: detect constrained items
     let frozenDelta = 0;
     let remainingGrow = totalGrow;
 
-    for (const state of childStates) {
-      if (state.grow === 0) {
+    for (const s of states) {
+      if (s.grow === 0) {
         continue;
       }
 
-      const proposed = state.baseSize + (freeSpace * state.grow) / totalGrow;
-      const min = this.parseDimension(
-        state.child.computedStyle.get(isRowDirection ? 'min-width' : 'min-height'),
-      );
-      const max = this.parseDimension(
-        state.child.computedStyle.get(isRowDirection ? 'max-width' : 'max-height'),
-      );
-      const clamped = this.clampSize(proposed, min, max);
+      const proposed = s.baseSize + (freeSpace * s.grow) / totalGrow;
+      const clamped = this.clampSize(proposed, s.min, s.max);
 
       if (clamped !== proposed) {
-        state.targetSize = clamped;
-        state.frozen = true;
-        frozenDelta += clamped - state.baseSize;
-        remainingGrow -= state.grow;
+        s.targetSize = clamped;
+        s.frozen = true;
+        frozenDelta += clamped - s.baseSize;
+        remainingGrow -= s.grow;
       }
     }
 
-    // Pass 2: distribute remaining space to unfrozen items
     const remainingFreeSpace = freeSpace - frozenDelta;
 
     if (remainingGrow > 0 && remainingFreeSpace > 0) {
-      const unfrozen = childStates.filter((s) => !s.frozen && s.grow > 0);
-      const unfrozenGrowSum = unfrozen.reduce((sum, s) => sum + s.grow, 0);
+      let unfrozenGrowSum = 0;
+      let lastUnfrozen = -1;
+
+      for (let i = 0; i < states.length; i += 1) {
+        const s = states[i]!;
+
+        if (!s.frozen && s.grow > 0) {
+          unfrozenGrowSum += s.grow;
+          lastUnfrozen = i;
+        }
+      }
+
       const intendedTotal = Math.round((remainingFreeSpace * unfrozenGrowSum) / remainingGrow);
       let remainder = intendedTotal;
 
-      for (let index = 0; index < unfrozen.length; index += 1) {
-        const state = unfrozen[index]!;
-        const extra =
-          index === unfrozen.length - 1
-            ? remainder
-            : Math.round((remainingFreeSpace * state.grow) / remainingGrow);
+      for (let i = 0; i < states.length; i += 1) {
+        const s = states[i]!;
 
-        state.targetSize = state.baseSize + extra;
+        if (s.frozen || s.grow === 0) {
+          continue;
+        }
+
+        const extra =
+          i === lastUnfrozen
+            ? remainder
+            : Math.round((remainingFreeSpace * s.grow) / remainingGrow);
+
+        s.targetSize = s.baseSize + extra;
         remainder -= extra;
       }
     }
 
-    // Final clamp for unfrozen items
-    for (const state of childStates) {
-      if (!state.frozen) {
-        const min = this.parseDimension(
-          state.child.computedStyle.get(isRowDirection ? 'min-width' : 'min-height'),
-        );
-        const max = this.parseDimension(
-          state.child.computedStyle.get(isRowDirection ? 'max-width' : 'max-height'),
-        );
-
-        state.targetSize = this.clampSize(state.targetSize, min, max);
+    for (const s of states) {
+      if (!s.frozen) {
+        s.targetSize = this.clampSize(s.targetSize, s.min, s.max);
       }
     }
   }
 
   /**
-   * Two-pass shrink distribution. Pass 1 freezes items whose min/max
-   * constraints trigger. Pass 2 redistributes remaining overflow to unfrozen
-   * items.
+   * Single-pass shrink distribution for the common case where no children have
+   * min/max constraints.
    */
-  private distributeShrinkSpace(
-    childStates: Array<{
-      child: LayoutBox;
-      baseSize: number;
-      shrink: number;
-      targetSize: number;
-      frozen: boolean;
-    }>,
-    shrinkWeights: number[],
+  private distributeShrinkFast(
+    states: Array<{baseSize: number; shrink: number; targetSize: number}>,
     freeSpace: number,
     totalShrinkWeight: number,
-    isRowDirection: boolean,
+    originalShrinkWeight: number,
   ): void {
-    // Pass 1: detect constrained items
-    let frozenDelta = 0;
-    let remainingShrinkWeight = totalShrinkWeight;
+    const intendedReduction = Math.round((-freeSpace * originalShrinkWeight) / totalShrinkWeight);
+    let remainingOverflow = intendedReduction;
+    let lastShrinkIdx = -1;
 
-    for (let index = 0; index < childStates.length; index += 1) {
-      const state = childStates[index]!;
-      const weight = shrinkWeights[index]!;
+    for (let i = states.length - 1; i >= 0; i -= 1) {
+      const s = states[i]!;
+
+      if (s.shrink * s.baseSize > 0) {
+        lastShrinkIdx = i;
+        break;
+      }
+    }
+
+    for (let i = 0; i < states.length; i += 1) {
+      const s = states[i]!;
+      const weight = s.shrink * s.baseSize;
 
       if (weight === 0) {
         continue;
       }
 
-      const proposed = state.baseSize + (freeSpace * weight) / totalShrinkWeight;
-      const min = this.parseDimension(
-        state.child.computedStyle.get(isRowDirection ? 'min-width' : 'min-height'),
-      );
-      const max = this.parseDimension(
-        state.child.computedStyle.get(isRowDirection ? 'max-width' : 'max-height'),
-      );
-      const clamped = this.clampSize(proposed, min, max);
+      const reduction =
+        i === lastShrinkIdx
+          ? remainingOverflow
+          : Math.round((-freeSpace * weight) / totalShrinkWeight);
+
+      s.targetSize = Math.max(0, s.baseSize - reduction);
+      remainingOverflow -= reduction;
+    }
+  }
+
+  /**
+   * Two-pass shrink distribution for children with min/max constraints.
+   * Pass 1 freezes constrained items. Pass 2 redistributes remaining overflow
+   * to unfrozen items using pre-parsed min/max values.
+   */
+  private distributeShrinkConstrained(
+    states: Array<{
+      baseSize: number;
+      shrink: number;
+      min: number | null;
+      max: number | null;
+      targetSize: number;
+      frozen: boolean;
+    }>,
+    freeSpace: number,
+    totalShrinkWeight: number,
+  ): void {
+    let frozenDelta = 0;
+    let remainingShrinkWeight = totalShrinkWeight;
+
+    for (const s of states) {
+      const weight = s.shrink * s.baseSize;
+
+      if (weight === 0) {
+        continue;
+      }
+
+      const proposed = s.baseSize + (freeSpace * weight) / totalShrinkWeight;
+      const clamped = this.clampSize(proposed, s.min, s.max);
 
       if (clamped !== proposed) {
-        state.targetSize = clamped;
-        state.frozen = true;
-        frozenDelta += clamped - state.baseSize;
+        s.targetSize = clamped;
+        s.frozen = true;
+        frozenDelta += clamped - s.baseSize;
         remainingShrinkWeight -= weight;
       }
     }
 
-    // Pass 2: distribute remaining overflow to unfrozen items
     const remainingFreeSpace = freeSpace - frozenDelta;
 
     if (remainingShrinkWeight > 0 && remainingFreeSpace < 0) {
-      const unfrozen: Array<{state: (typeof childStates)[0]; weight: number}> = [];
+      let unfrozenWeightSum = 0;
+      let lastUnfrozen = -1;
 
-      for (let index = 0; index < childStates.length; index += 1) {
-        const state = childStates[index]!;
-        const weight = shrinkWeights[index]!;
+      for (let i = 0; i < states.length; i += 1) {
+        const s = states[i]!;
+        const weight = s.shrink * s.baseSize;
 
-        if (!state.frozen && weight > 0) {
-          unfrozen.push({state, weight});
+        if (!s.frozen && weight > 0) {
+          unfrozenWeightSum += weight;
+          lastUnfrozen = i;
         }
       }
 
-      const unfrozenWeightSum = unfrozen.reduce((sum, u) => sum + u.weight, 0);
       const intendedReduction = Math.round(
         (-remainingFreeSpace * unfrozenWeightSum) / remainingShrinkWeight,
       );
       let remainingOverflow = intendedReduction;
 
-      for (let index = 0; index < unfrozen.length; index += 1) {
-        const {state, weight} = unfrozen[index]!;
+      for (let i = 0; i < states.length; i += 1) {
+        const s = states[i]!;
+        const weight = s.shrink * s.baseSize;
+
+        if (s.frozen || weight === 0) {
+          continue;
+        }
+
         const reduction =
-          index === unfrozen.length - 1
+          i === lastUnfrozen
             ? remainingOverflow
             : Math.round((-remainingFreeSpace * weight) / remainingShrinkWeight);
 
-        state.targetSize = Math.max(0, state.baseSize - reduction);
+        s.targetSize = Math.max(0, s.baseSize - reduction);
         remainingOverflow -= reduction;
       }
     }
 
-    // Final clamp for unfrozen items
-    for (const state of childStates) {
-      if (!state.frozen) {
-        const min = this.parseDimension(
-          state.child.computedStyle.get(isRowDirection ? 'min-width' : 'min-height'),
-        );
-        const max = this.parseDimension(
-          state.child.computedStyle.get(isRowDirection ? 'max-width' : 'max-height'),
-        );
-
-        state.targetSize = this.clampSize(state.targetSize, min, max);
+    for (const s of states) {
+      if (!s.frozen) {
+        s.targetSize = this.clampSize(s.targetSize, s.min, s.max);
       }
     }
   }
@@ -992,24 +1132,28 @@ export class FlexLayout {
   /**
    * Resolves a child's flex base size on the current main axis.
    *
-   * The result is floored to the child's main-axis padding + border so the
-   * flex basis never collapses below the box-model insets (matches Yoga).
+   * When flex-basis is `auto`, the result is the child's existing main-axis
+   * dimension which already includes padding + border — no floor is needed.
+   * For explicit basis values the result is floored to the child's main-axis
+   * padding + border so the flex basis never collapses below the box-model
+   * insets (matches Yoga).
    */
   private resolveFlexBasis(child: LayoutBox, isRowDirection: boolean): number {
     const basis = child.computedStyle.get('flex-basis');
-    let baseSize: number;
 
     if (basis === undefined || basis === '' || basis === 'auto') {
-      baseSize = this.getMainSize(child, isRowDirection);
-    } else {
-      const parsed = this.parseDimension(basis);
+      return this.getMainSize(child, isRowDirection);
+    }
 
-      baseSize = parsed ?? this.getMainSize(child, isRowDirection);
+    const parsed = this.parseDimension(basis);
+
+    if (parsed === null) {
+      return this.getMainSize(child, isRowDirection);
     }
 
     const paddingAndBorder = this.mainAxisPaddingAndBorder(child.computedStyle, isRowDirection);
 
-    return Math.max(baseSize, paddingAndBorder);
+    return Math.max(parsed, paddingAndBorder);
   }
 
   /**
@@ -1089,16 +1233,16 @@ export class FlexLayout {
   }
 
   /**
-   * Sets a layout box size on the main axis while preserving its box-model
-   * insets.
+   * Sets a layout box size on the main axis using pre-parsed min/max
+   * constraints, preserving its box-model insets.
    */
-  private setMainSize(box: LayoutBox, isRowDirection: boolean, size: number): void {
-    const min = this.parseDimension(
-      box.computedStyle.get(isRowDirection ? 'min-width' : 'min-height'),
-    );
-    const max = this.parseDimension(
-      box.computedStyle.get(isRowDirection ? 'max-width' : 'max-height'),
-    );
+  private setMainSizeClamped(
+    box: LayoutBox,
+    isRowDirection: boolean,
+    size: number,
+    min: number | null,
+    max: number | null,
+  ): void {
     const clampedSize = this.clampSize(size, min, max);
 
     if (isRowDirection) {
@@ -1113,6 +1257,26 @@ export class FlexLayout {
 
     box.height = clampedSize;
     box.contentHeight = Math.max(0, clampedSize - verticalInset);
+  }
+
+  /**
+   * Sets a layout box size on the main axis without min/max clamping,
+   * preserving its box-model insets. Used on the fast path when no children
+   * have constraints.
+   */
+  private setMainSizeUnclamped(box: LayoutBox, isRowDirection: boolean, size: number): void {
+    if (isRowDirection) {
+      const horizontalInset = box.width - box.contentWidth;
+
+      box.width = size;
+      box.contentWidth = Math.max(0, size - horizontalInset);
+      return;
+    }
+
+    const verticalInset = box.height - box.contentHeight;
+
+    box.height = size;
+    box.contentHeight = Math.max(0, size - verticalInset);
   }
 
   /**

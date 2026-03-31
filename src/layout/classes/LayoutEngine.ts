@@ -258,6 +258,10 @@ export class LayoutEngine {
       y,
     );
 
+    // Re-layout children whose cross-axis was stretched so their nested
+    // content (text wrapping, grandchildren) reflows at the new size.
+    this.relayoutStretchedChildren(inFlowChildren, resolvedStyle, incremental, dirtySet);
+
     for (const absoluteChild of absoluteChildren) {
       this.positionAbsoluteChild(
         absoluteChild,
@@ -465,6 +469,86 @@ export class LayoutEngine {
    */
   private isDimensionDefined(value: string | undefined): boolean {
     return value !== undefined && value !== '' && value !== 'auto';
+  }
+
+  /**
+   * Re-lays-out children whose cross-axis dimension was changed by
+   * `align-items: stretch` so their nested content (text wrapping,
+   * grandchildren) reflows at the new size.
+   *
+   * For row-direction containers the cross axis is vertical, so a child
+   * whose height was stretched needs its own layout re-run with the new
+   * available height. For column-direction containers the cross axis is
+   * horizontal; children were already laid out with the parent's content
+   * width, so stretch is a no-op that does not require re-layout.
+   */
+  private relayoutStretchedChildren(
+    inFlowChildren: LayoutBox[],
+    parentStyle: ComputedStyle,
+    incremental: boolean,
+    dirtySet: ReadonlySet<Element>,
+  ): void {
+    const flexDirection = parentStyle.get('flex-direction') ?? 'column';
+    const isRowDirection = flexDirection === 'row' || flexDirection === 'row-reverse';
+
+    if (!isRowDirection) {
+      return;
+    }
+
+    const alignItems = parentStyle.get('align-items') ?? 'flex-start';
+
+    for (const childBox of inFlowChildren) {
+      const selfAlign = childBox.computedStyle.get('align-self');
+      const effectiveAlign =
+        selfAlign !== undefined && selfAlign !== '' && selfAlign !== 'auto'
+          ? selfAlign
+          : alignItems;
+
+      if (effectiveAlign !== 'stretch') {
+        continue;
+      }
+
+      // Stretch only applies when the child has no explicit cross-axis dimension
+      const childHeight = childBox.computedStyle.get('height');
+
+      if (childHeight !== undefined && childHeight !== '' && childHeight !== 'auto') {
+        continue;
+      }
+
+      // Only re-layout if the child has its own children that could reflow
+      if (childBox.children.length === 0) {
+        continue;
+      }
+
+      // Save the FlexLayout-applied position before re-layout
+      const posX = childBox.x;
+      const posY = childBox.y;
+
+      // Re-layout the child with its stretched dimensions as available space.
+      // - Available width = childBox.width (same as parent's content width,
+      //   which the child was originally laid out with).
+      // - Available height = childBox.height (the new stretched height).
+      const reBox = this.layoutElement(
+        childBox.element,
+        childBox.width,
+        childBox.height,
+        0,
+        0,
+        incremental,
+        dirtySet,
+      );
+
+      // Replace internal layout state with the reflowed version while
+      // keeping the outer dimensions and position from FlexLayout.
+      childBox.children = reBox.children;
+      childBox.textLines = reBox.textLines;
+
+      // The re-laid-out children are positioned relative to (0, 0).
+      // Shift them to the FlexLayout-applied position.
+      for (const grandchild of childBox.children) {
+        this.offsetBox(grandchild, posX, posY);
+      }
+    }
   }
 
   /**
