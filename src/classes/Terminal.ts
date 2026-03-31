@@ -2,7 +2,7 @@ import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../constants/terminal'
 import {EDITABLE_STATE} from '../constants/editableState';
 import {StyleEngine} from '../css';
 import {Event, InputEvent, Window} from '../dom';
-import {selfAndDescendants} from '../dom/utilities/selfAndDescendants';
+import {CHILD, NEXT, PARENT} from '../dom/constants';
 import {LayoutEngine} from '../layout';
 import {graphemeWidth} from '../layout/utilities/graphemeWidth';
 import {Renderer} from '../renderer';
@@ -17,6 +17,7 @@ import {segmentGraphemes} from '../utilities/segmentGraphemes';
 
 import type {Document, Element} from '../dom';
 import type {KeyboardEvent} from '../dom/classes/KeyboardEvent';
+import type {Node as DomNode} from '../dom/classes/Node';
 import type {TerminalFrameAware} from '../types/TerminalFrameAware';
 import type {EditableStateElement} from '../types/EditableStateElement';
 import type {TerminalOptions} from '../types';
@@ -24,6 +25,12 @@ import type {Editable} from '../terminal/types/Editable';
 import type {EditableConfiguration} from '../terminal/types/EditableConfiguration';
 import type {EditableState} from '../terminal/types/EditableState';
 import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
+
+type FrameAwareLinkedNode = DomNode & {
+  [CHILD]?: DomNode;
+  [NEXT]?: DomNode;
+  [PARENT]?: DomNode | null;
+};
 
 /**
  * Public entry point that wires the DOM, style, layout, renderer, and terminal
@@ -811,28 +818,42 @@ export class Terminal {
     const now = Date.now();
 
     this.advanceFrameAwareNodes(now);
-    this.caretManager.tick(now);
 
-    if (columns !== this.renderer.cols || rows !== this.renderer.rows) {
+    const caretChanged = this.caretManager.tick(now);
+    const resized = columns !== this.renderer.cols || rows !== this.renderer.rows;
+    const hasStyleChanges = this.styleEngine.getDirtyElements().size > 0;
+    const hasLayoutChanges = this.styleEngine.getLayoutDirtyElements().size > 0;
+
+    if (!resized && !hasStyleChanges && !hasLayoutChanges && !caretChanged) {
+      return;
+    }
+
+    if (resized) {
       this.renderer.resize(columns, rows);
       this.layoutEngine.clearCache();
       this.styleEngine.markAllDirty();
       this.output.write('\u001B[2J\u001B[H');
     }
 
-    if (this.styleEngine.getDirtyElements().size > 0) {
+    if (hasStyleChanges || resized) {
       this.styleEngine.recomputeDirty();
     }
 
     const layout = this.layoutEngine.layout(this.document.body, columns, rows);
     this.eventDispatcher.setLayoutRoot(layout);
-    this.resolveEditableViewports(layout);
+
+    const carets = this.caretManager.getCarets();
+
+    if (carets.size > 0) {
+      this.resolveEditableViewports(layout);
+    }
+
     const capabilities = this.terminalManager.getCapabilities();
 
     this.renderer.setSynchronizedOutputEnabled(capabilities.synchronizedOutput);
     this.renderer.setColorProfile(capabilities.colorProfile);
 
-    const caretOverlays = this.caretManager.getOverlays(layout);
+    const caretOverlays = carets.size > 0 ? this.caretManager.getOverlays(layout) : [];
     const output = this.renderer.render(layout, caretOverlays);
 
     if (output.length > 0) {
@@ -841,9 +862,40 @@ export class Terminal {
   }
 
   private advanceFrameAwareNodes(timestamp: number): void {
-    for (const node of selfAndDescendants(this.document.body)) {
+    const root = this.document.body as unknown as FrameAwareLinkedNode;
+    let node: FrameAwareLinkedNode | null = root;
+
+    while (node !== null) {
+      const next = this.getNextFrameAwareNode(node, root);
+
       (node as Partial<TerminalFrameAware>).onTerminalFrame?.(timestamp);
+      node = next;
     }
+  }
+
+  private getNextFrameAwareNode(
+    node: FrameAwareLinkedNode,
+    root: FrameAwareLinkedNode,
+  ): FrameAwareLinkedNode | null {
+    const child = node[CHILD] as FrameAwareLinkedNode | undefined;
+
+    if (child) {
+      return child;
+    }
+
+    let current: FrameAwareLinkedNode | null = node;
+
+    while (current !== null && current !== root) {
+      const sibling = current[NEXT] as FrameAwareLinkedNode | undefined;
+
+      if (sibling) {
+        return sibling;
+      }
+
+      current = (current[PARENT] as FrameAwareLinkedNode | null | undefined) ?? null;
+    }
+
+    return null;
   }
 
   private getColumns(): number {

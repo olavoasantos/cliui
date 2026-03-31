@@ -10,7 +10,17 @@ type TerminalInternals = {
   output: NodeJS.WriteStream;
   input: TerminalReadableInput;
   fps: number;
-  renderer: {cols: number; rows: number};
+  renderer: {
+    cols: number;
+    rows: number;
+    render(layout: unknown, overlays?: unknown[]): string;
+  };
+  layoutEngine: {
+    layout(root: unknown, columns: number, rows: number): unknown;
+  };
+  caretManager: {
+    tick(timestamp: number): boolean;
+  };
   terminalManager: {
     start(): void;
     stop(): void;
@@ -20,6 +30,7 @@ type TerminalInternals = {
     start(listener: (event: unknown) => void): void;
     stop(): void;
   };
+  renderFrame(): void;
 };
 
 function createOutput(overrides: Partial<NodeJS.WriteStream> = {}) {
@@ -151,5 +162,40 @@ describe('Terminal', () => {
     expect((terminal as unknown as {loop: NodeJS.Timeout | null}).loop).toBeNull();
     expect(vi.getTimerCount()).toBe(0);
     expect(input.pause).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips layout and rendering when a frame has no changes to process', () => {
+    const output = createOutput();
+    const input = createInput();
+    const terminal = new Terminal({output: output.stream, input});
+    const internals = terminal as unknown as TerminalInternals;
+
+    terminal.document.body.textContent = 'steady frame';
+    internals.renderFrame();
+
+    const layoutSpy = vi.spyOn(internals.layoutEngine, 'layout');
+    const renderSpy = vi.spyOn(internals.renderer, 'render');
+
+    internals.renderFrame();
+
+    expect(layoutSpy).not.toHaveBeenCalled();
+    expect(renderSpy).not.toHaveBeenCalled();
+  });
+
+  it('renders when caret blinking changes even if the DOM is otherwise unchanged', () => {
+    const output = createOutput();
+    const input = createInput();
+    const terminal = new Terminal({output: output.stream, input});
+    const internals = terminal as unknown as TerminalInternals;
+
+    terminal.document.body.textContent = 'caret frame';
+    internals.renderFrame();
+
+    vi.spyOn(internals.caretManager, 'tick').mockReturnValue(true);
+    const renderSpy = vi.spyOn(internals.renderer, 'render');
+
+    internals.renderFrame();
+
+    expect(renderSpy).toHaveBeenCalledOnce();
   });
 });

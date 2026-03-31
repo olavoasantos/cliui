@@ -7,6 +7,17 @@ import type {TerminalReadableInput} from '../../terminal/types';
 
 type TerminalBenchInternals = {
   renderFrame(): void;
+  styleEngine: {
+    markAllDirty(): void;
+  };
+  layoutEngine: {
+    clearCache(): void;
+  };
+  renderer: {
+    cols: number;
+    rows: number;
+    resize(cols: number, rows: number): void;
+  };
 };
 
 type BenchScenario = {
@@ -115,19 +126,25 @@ function populateDocument(terminal: Terminal): Element[] {
 }
 
 function createInitialRenderScenario(): BenchScenario {
+  const output = createOutput();
   const terminal = new Terminal({
-    output: createOutput(),
+    output,
     input: createInput(),
     altScreen: false,
     mouse: false,
     fps: 60,
   });
+  const internals = terminal as unknown as TerminalBenchInternals;
 
   populateDocument(terminal);
 
   return {
     terminal,
-    mutate() {},
+    mutate() {
+      internals.styleEngine.markAllDirty();
+      internals.layoutEngine.clearCache();
+      internals.renderer.resize(output.columns, output.rows);
+    },
   };
 }
 
@@ -157,15 +174,36 @@ function createIncrementalRenderScenario(): BenchScenario {
   };
 }
 
+function createSettledRenderScenario(): BenchScenario {
+  const terminal = new Terminal({
+    output: createOutput(),
+    input: createInput(),
+    altScreen: false,
+    mouse: false,
+    fps: 60,
+  });
+  const internals = terminal as unknown as TerminalBenchInternals;
+
+  populateDocument(terminal);
+  internals.renderFrame();
+
+  return {
+    terminal,
+    mutate() {},
+  };
+}
+
 const INITIAL_RENDER_SCENARIOS = Array.from({length: 8}, () => createInitialRenderScenario());
 const INCREMENTAL_RENDER_SCENARIOS = Array.from({length: 8}, () =>
   createIncrementalRenderScenario(),
 );
+const SETTLED_RENDER_SCENARIOS = Array.from({length: 8}, () => createSettledRenderScenario());
 let initialScenarioIndex = 0;
 let incrementalScenarioIndex = 0;
+let settledScenarioIndex = 0;
 
 describe('Terminal', () => {
-  bench('renders an initial frame for a styled dashboard document', () => {
+  bench('renders a fully invalidated styled dashboard frame', () => {
     const scenario = INITIAL_RENDER_SCENARIOS[initialScenarioIndex]!;
     const terminal = scenario.terminal as unknown as TerminalBenchInternals;
 
@@ -179,6 +217,15 @@ describe('Terminal', () => {
     const terminal = scenario.terminal as unknown as TerminalBenchInternals;
 
     incrementalScenarioIndex = (incrementalScenarioIndex + 1) % INCREMENTAL_RENDER_SCENARIOS.length;
+    scenario.mutate();
+    terminal.renderFrame();
+  });
+
+  bench('rerenders an unchanged styled dashboard frame after settling', () => {
+    const scenario = SETTLED_RENDER_SCENARIOS[settledScenarioIndex]!;
+    const terminal = scenario.terminal as unknown as TerminalBenchInternals;
+
+    settledScenarioIndex = (settledScenarioIndex + 1) % SETTLED_RENDER_SCENARIOS.length;
     scenario.mutate();
     terminal.renderFrame();
   });
