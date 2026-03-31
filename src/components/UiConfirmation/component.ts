@@ -68,12 +68,14 @@ export class UiConfirmation extends HTMLElement {
     btnRow.style.flexDirection = 'row';
     btnRow.style.gap = '2';
 
-    const confirmBtn = doc.createElement('div');
+    const confirmBtn = doc.createElement('ui-button');
     confirmBtn.setAttribute('class', 'ui-confirmation-confirm');
+    confirmBtn.setAttribute('variant', 'primary');
     confirmBtn.setAttribute('tabindex', '0');
 
-    const cancelBtn = doc.createElement('div');
+    const cancelBtn = doc.createElement('ui-button');
     cancelBtn.setAttribute('class', 'ui-confirmation-cancel');
+    cancelBtn.setAttribute('variant', 'secondary');
     cancelBtn.setAttribute('tabindex', '1');
 
     btnRow.appendChild(confirmBtn);

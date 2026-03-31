@@ -89,12 +89,14 @@ export class UiPrompt extends HTMLElement {
     btnRow.style.flexDirection = 'row';
     btnRow.style.gap = '2';
 
-    const confirmBtn = doc.createElement('div');
+    const confirmBtn = doc.createElement('ui-button');
     confirmBtn.setAttribute('class', 'ui-prompt-confirm');
+    confirmBtn.setAttribute('variant', 'primary');
     confirmBtn.setAttribute('tabindex', '1');
 
-    const cancelBtn = doc.createElement('div');
+    const cancelBtn = doc.createElement('ui-button');
     cancelBtn.setAttribute('class', 'ui-prompt-cancel');
+    cancelBtn.setAttribute('variant', 'secondary');
     cancelBtn.setAttribute('tabindex', '2');
 
     btnRow.appendChild(confirmBtn);
