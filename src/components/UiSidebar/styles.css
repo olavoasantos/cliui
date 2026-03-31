@@ -1,0 +1,7 @@
+ui-sidebar {
+  display: block;
+}
+
+ui-sidebar[collapsed] {
+  display: none;
+}
