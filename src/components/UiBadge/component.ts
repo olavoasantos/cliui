@@ -1,20 +1,16 @@
 import styles from './styles.css?inline';
 
-import {
-  DEFAULT_UI_BADGE_VARIANT,
-  UI_BADGE_OBSERVED_ATTRIBUTES,
-  UI_BADGE_TAG_NAME,
-} from './constants';
+import {DEFAULT_UI_BADGE_TONE, UI_BADGE_OBSERVED_ATTRIBUTES, UI_BADGE_TAG_NAME} from './constants';
 import {HTMLElement} from '../../dom';
 
-import type {UiBadgeVariant} from './types';
+import type {UiBadgeTone} from './types';
 
 /**
  * Built-in terminal inline badge custom element.
  *
  * Displays a short status label with a colored background. Supports
- * `default`, `info`, `success`, `warning`, and `error` variants via
- * the `variant` attribute. Styling is applied through CSS attribute
+ * `default`, `info`, `success`, `warning`, and `error` tones via
+ * the `tone` attribute. Styling is applied through CSS attribute
  * selectors.
  *
  * Register with `window.customElements.define(UiBadge.tagName, UiBadge)`
@@ -25,9 +21,9 @@ export class UiBadge extends HTMLElement {
   static readonly styles = styles;
   static readonly tagName = UI_BADGE_TAG_NAME;
 
-  /** Returns the current variant, falling back to the default. */
-  getVariant(): UiBadgeVariant {
-    const raw = this.getAttribute('variant');
+  /** Returns the current tone, falling back to the default. */
+  getTone(): UiBadgeTone {
+    const raw = this.getAttribute('tone');
 
     if (
       raw === 'default' ||
@@ -39,6 +35,6 @@ export class UiBadge extends HTMLElement {
       return raw;
     }
 
-    return DEFAULT_UI_BADGE_VARIANT;
+    return DEFAULT_UI_BADGE_TONE;
   }
 }

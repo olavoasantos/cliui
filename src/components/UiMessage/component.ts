@@ -1,21 +1,21 @@
 import styles from './styles.css?inline';
 
 import {
-  DEFAULT_UI_MESSAGE_VARIANT,
+  DEFAULT_UI_MESSAGE_TONE,
   UI_MESSAGE_ICONS,
   UI_MESSAGE_OBSERVED_ATTRIBUTES,
   UI_MESSAGE_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
 
-import type {UiMessageVariant} from './types';
+import type {UiMessageTone} from './types';
 
 /**
  * Built-in terminal inline message custom element.
  *
- * Displays a non-interactive, styled message block with a variant-specific
+ * Displays a non-interactive, styled message block with a tone-specific
  * icon prefix and colored border. Supports `info`, `success`, `warning`,
- * and `error` variants.
+ * and `error` tones.
  *
  * Register with `window.customElements.define(UiMessage.tagName, UiMessage)`
  * before creating `<ui-message>` elements in a window.
@@ -43,20 +43,20 @@ export class UiMessage extends HTMLElement {
   ): void {
     if (oldValue === newValue) return;
 
-    if (name === 'variant') {
+    if (name === 'tone') {
       this.syncIcon();
     }
   }
 
-  /** Returns the current variant, falling back to the default. */
-  getVariant(): UiMessageVariant {
-    const raw = this.getAttribute('variant');
+  /** Returns the current tone, falling back to the default. */
+  getTone(): UiMessageTone {
+    const raw = this.getAttribute('tone');
 
     if (raw === 'info' || raw === 'success' || raw === 'warning' || raw === 'error') {
       return raw;
     }
 
-    return DEFAULT_UI_MESSAGE_VARIANT;
+    return DEFAULT_UI_MESSAGE_TONE;
   }
 
   /* ── Private ────────────────────────────────────────────── */
@@ -98,6 +98,6 @@ export class UiMessage extends HTMLElement {
   private syncIcon(): void {
     if (!this.iconEl) return;
 
-    this.iconEl.textContent = UI_MESSAGE_ICONS[this.getVariant()];
+    this.iconEl.textContent = UI_MESSAGE_ICONS[this.getTone()];
   }
 }

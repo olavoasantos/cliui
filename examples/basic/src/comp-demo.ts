@@ -115,16 +115,16 @@ style.textContent = `
   ui-menu { background-color: #1e293b; border-color: #475569; width: 20; }
   ui-menu-item[highlighted] { background-color: #7c3aed; color: #ffffff; }
 
-  ui-message[variant='info'] { border-color: #60a5fa; color: #60a5fa; }
-  ui-message[variant='success'] { border-color: #4ade80; color: #4ade80; }
-  ui-message[variant='warning'] { border-color: #facc15; color: #facc15; }
-  ui-message[variant='error'] { border-color: #f87171; color: #f87171; }
+  ui-message[tone='info'] { border-color: #60a5fa; color: #60a5fa; }
+  ui-message[tone='success'] { border-color: #4ade80; color: #4ade80; }
+  ui-message[tone='warning'] { border-color: #facc15; color: #facc15; }
+  ui-message[tone='error'] { border-color: #f87171; color: #f87171; }
 
-  ui-badge { font-weight: bold; }
-  ui-badge[variant='info'] { background-color: #3b82f6; color: #ffffff; }
-  ui-badge[variant='success'] { background-color: #22c55e; color: #ffffff; }
-  ui-badge[variant='warning'] { background-color: #eab308; color: #000000; }
-  ui-badge[variant='error'] { background-color: #ef4444; color: #ffffff; }
+  ui-badge { font-weight: bold; padding: 0 1; }
+  ui-badge[tone='info'] { background-color: #3b82f6; color: #ffffff; }
+  ui-badge[tone='success'] { background-color: #22c55e; color: #ffffff; }
+  ui-badge[tone='warning'] { background-color: #eab308; color: #000000; }
+  ui-badge[tone='error'] { background-color: #ef4444; color: #ffffff; }
 
   ui-toast { background-color: #1e293b; border-style: single; border-color: #475569; }
 
@@ -374,14 +374,14 @@ s7.container.appendChild(optgroupStatus);
 /* ── COMP-10: Message ──────────────────────────────────── */
 
 const s10 = section('COMP-10: <ui-message>');
-for (const [variant, text] of [
+for (const [tone, text] of [
   ['info', 'Info: This is an informational message.'],
   ['success', 'Success: Operation completed.'],
   ['warning', 'Warning: Disk usage above 80%.'],
   ['error', 'Error: Connection refused.'],
 ] as const) {
   const msg = document.createElement('ui-message');
-  msg.setAttribute('variant', variant);
+  msg.setAttribute('tone', tone);
   msg.textContent = text;
   s10.container.appendChild(msg);
 }
@@ -391,14 +391,14 @@ for (const [variant, text] of [
 const s11 = section('COMP-11: <ui-badge>');
 const badgeRow = document.createElement('div');
 badgeRow.className = 'row';
-for (const [variant, text] of [
+for (const [tone, text] of [
   ['info', 'INFO'],
   ['success', 'ACTIVE'],
   ['warning', 'BETA'],
   ['error', 'CRITICAL'],
 ] as const) {
   const badge = document.createElement('ui-badge');
-  badge.setAttribute('variant', variant);
+  badge.setAttribute('tone', tone);
   badge.textContent = text;
   badgeRow.appendChild(badge);
 }
@@ -407,12 +407,12 @@ s11.container.appendChild(badgeRow);
 const badgeInline = document.createElement('p');
 badgeInline.appendChild(document.createTextNode('Server status: '));
 const statusBadge = document.createElement('ui-badge');
-statusBadge.setAttribute('variant', 'success');
+statusBadge.setAttribute('tone', 'success');
 statusBadge.textContent = 'ONLINE';
 badgeInline.appendChild(statusBadge);
 badgeInline.appendChild(document.createTextNode('  Alerts: '));
 const alertBadge = document.createElement('ui-badge');
-alertBadge.setAttribute('variant', 'error');
+alertBadge.setAttribute('tone', 'error');
 alertBadge.textContent = '3';
 badgeInline.appendChild(alertBadge);
 s11.container.appendChild(badgeInline);
@@ -432,7 +432,7 @@ toastContainer.style.display = 'block';
 
 let toastCount = 0;
 
-for (const [variant, label, duration] of [
+for (const [tone, label, duration] of [
   ['info', 'Info (3s)', '3000'],
   ['success', 'Success (2s)', '2000'],
   ['warning', 'Warning (4s)', '4000'],
@@ -445,10 +445,10 @@ for (const [variant, label, duration] of [
   btn.addEventListener('click', () => {
     toastCount++;
     const toast = document.createElement('ui-toast') as InstanceType<typeof UiToast>;
-    toast.setAttribute('variant', variant);
+    toast.setAttribute('tone', tone);
     toast.setAttribute('duration', duration);
     toast.style.top = String(toastCount - 1);
-    toast.textContent = `Toast #${toastCount}: ${variant} (${Number(duration) / 1000}s)`;
+    toast.textContent = `Toast #${toastCount}: ${tone} (${Number(duration) / 1000}s)`;
     toastContainer.appendChild(toast);
   });
   toastBtnRow.appendChild(btn);

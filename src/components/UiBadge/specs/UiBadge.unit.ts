@@ -19,27 +19,27 @@ describe('UiBadge', () => {
     expect(window.customElements.get('ui-badge')).toBe(UiBadge);
   });
 
-  it('defaults to default variant', () => {
+  it('defaults to default tone', () => {
     const {document} = createEnv();
     const badge = document.createElement('ui-badge') as UiBadge;
 
-    expect(badge.getVariant()).toBe('default');
+    expect(badge.getTone()).toBe('default');
   });
 
-  it('reads variant from attribute', () => {
+  it('reads tone from attribute', () => {
     const {document} = createEnv();
     const badge = document.createElement('ui-badge') as UiBadge;
-    badge.setAttribute('variant', 'success');
+    badge.setAttribute('tone', 'success');
 
-    expect(badge.getVariant()).toBe('success');
+    expect(badge.getTone()).toBe('success');
   });
 
-  it('falls back to default for invalid variant', () => {
+  it('falls back to default for invalid tone', () => {
     const {document} = createEnv();
     const badge = document.createElement('ui-badge') as UiBadge;
-    badge.setAttribute('variant', 'invalid');
+    badge.setAttribute('tone', 'invalid');
 
-    expect(badge.getVariant()).toBe('default');
+    expect(badge.getTone()).toBe('default');
   });
 
   it('renders text content inline', () => {

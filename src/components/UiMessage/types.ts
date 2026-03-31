@@ -1,2 +1,2 @@
-/** Supported visual variants for the built-in message component. */
-export type UiMessageVariant = 'info' | 'success' | 'warning' | 'error';
+/** Supported semantic tones for the built-in message component. */
+export type UiMessageTone = 'info' | 'success' | 'warning' | 'error';

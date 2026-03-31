@@ -19,34 +19,34 @@ describe('UiMessage', () => {
     expect(window.customElements.get('ui-message')).toBe(UiMessage);
   });
 
-  it('defaults to info variant', () => {
+  it('defaults to info tone', () => {
     const {document} = createEnv();
     const alert = document.createElement('ui-message') as UiMessage;
     document.body.appendChild(alert);
 
-    expect(alert.getVariant()).toBe('info');
+    expect(alert.getTone()).toBe('info');
   });
 
-  it('reads variant from attribute', () => {
+  it('reads tone from attribute', () => {
     const {document} = createEnv();
     const alert = document.createElement('ui-message') as UiMessage;
-    alert.setAttribute('variant', 'error');
+    alert.setAttribute('tone', 'error');
     document.body.appendChild(alert);
 
-    expect(alert.getVariant()).toBe('error');
+    expect(alert.getTone()).toBe('error');
   });
 
-  it('renders icon prefix matching the variant', () => {
+  it('renders icon prefix matching the tone', () => {
     const {document} = createEnv();
 
-    for (const [variant, icon] of [
+    for (const [tone, icon] of [
       ['info', 'ℹ'],
       ['success', '✓'],
       ['warning', '⚠'],
       ['error', '✗'],
     ] as const) {
       const alert = document.createElement('ui-message');
-      alert.setAttribute('variant', variant);
+      alert.setAttribute('tone', tone);
       alert.textContent = 'Test message';
       document.body.appendChild(alert);
 
@@ -58,10 +58,10 @@ describe('UiMessage', () => {
     }
   });
 
-  it('updates icon when variant changes', () => {
+  it('updates icon when tone changes', () => {
     const {document} = createEnv();
     const alert = document.createElement('ui-message') as UiMessage;
-    alert.setAttribute('variant', 'info');
+    alert.setAttribute('tone', 'info');
     alert.textContent = 'Message';
     document.body.appendChild(alert);
 
@@ -70,7 +70,7 @@ describe('UiMessage', () => {
 
     expect(iconEl?.textContent).toBe('ℹ');
 
-    alert.setAttribute('variant', 'error');
+    alert.setAttribute('tone', 'error');
 
     expect(iconEl?.textContent).toBe('✗');
   });

@@ -20,19 +20,19 @@ describe('UiToast', () => {
     expect(window.customElements.get('ui-toast')).toBe(UiToast);
   });
 
-  it('defaults to info variant', () => {
+  it('defaults to info tone', () => {
     const {document} = createEnv();
     const toast = document.createElement('ui-toast') as UiToast;
 
-    expect(toast.getVariant()).toBe('info');
+    expect(toast.getTone()).toBe('info');
   });
 
-  it('reads variant from attribute', () => {
+  it('reads tone from attribute', () => {
     const {document} = createEnv();
     const toast = document.createElement('ui-toast') as UiToast;
-    toast.setAttribute('variant', 'error');
+    toast.setAttribute('tone', 'error');
 
-    expect(toast.getVariant()).toBe('error');
+    expect(toast.getTone()).toBe('error');
   });
 
   it('returns default duration when not set', () => {

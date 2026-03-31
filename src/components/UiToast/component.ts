@@ -2,21 +2,22 @@ import styles from './styles.css?inline';
 
 import {
   DEFAULT_UI_TOAST_DURATION,
-  DEFAULT_UI_TOAST_VARIANT,
+  DEFAULT_UI_TOAST_TONE,
   UI_TOAST_OBSERVED_ATTRIBUTES,
   UI_TOAST_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
 
 import type {TerminalFrameAware} from '../../types/TerminalFrameAware';
-import type {UiToastVariant} from './types';
+import type {UiToastTone} from './types';
 
 /**
  * Built-in terminal toast notification custom element.
  *
  * Displays a temporary message that auto-removes itself from the DOM
  * after `duration` milliseconds. Supports `info`, `success`, `warning`,
- * and `error` variants via the `variant` attribute.
+ * and `error` tones via the `tone` attribute. An optional `title`
+ * attribute renders a bold prefix before the message content.
  *
  * Implements `TerminalFrameAware` so the terminal render loop drives
  * the countdown timer. Multiple toasts stack naturally as block-level
@@ -33,15 +34,15 @@ export class UiToast extends HTMLElement implements TerminalFrameAware {
   /** Timestamp (ms) when the toast was first ticked. */
   private startTimestamp: number | null = null;
 
-  /** Returns the current variant, falling back to the default. */
-  getVariant(): UiToastVariant {
-    const raw = this.getAttribute('variant');
+  /** Returns the current tone, falling back to the default. */
+  getTone(): UiToastTone {
+    const raw = this.getAttribute('tone');
 
     if (raw === 'info' || raw === 'success' || raw === 'warning' || raw === 'error') {
       return raw;
     }
 
-    return DEFAULT_UI_TOAST_VARIANT;
+    return DEFAULT_UI_TOAST_TONE;
   }
 
   /** Returns the configured duration in milliseconds. */

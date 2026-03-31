@@ -1,2 +1,2 @@
-/** Supported visual variants for the built-in badge component. */
-export type UiBadgeVariant = 'default' | 'info' | 'success' | 'warning' | 'error';
+/** Supported semantic tones for the built-in badge component. */
+export type UiBadgeTone = 'default' | 'info' | 'success' | 'warning' | 'error';

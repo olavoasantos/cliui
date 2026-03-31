@@ -60,13 +60,19 @@ export class UiTextarea extends HTMLElement {
         this.ensureTabIndex();
       }
     }
+
+    if (name === 'value' || name === 'placeholder') {
+      this.renderInitial();
+    }
   }
 
   /* ── Private ────────────────────────────────────────────── */
 
   /**
-   * Renders initial content before the element receives focus and the
-   * editing system takes over rendering.
+   * Renders content from the current value or placeholder.
+   *
+   * Called on connect and whenever the `value` or `placeholder`
+   * attribute changes programmatically (e.g. via form reset).
    */
   private renderInitial(): void {
     if (!this.hasAttribute('disabled')) {

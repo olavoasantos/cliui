@@ -192,6 +192,7 @@ export class UiSelect extends HTMLElement {
         header.setAttribute('class', 'ui-optgroup-label');
         header.style.display = 'block';
         header.style.fontWeight = 'bold';
+        header.style.paddingLeft = '1';
         header.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
         header.textContent = child.getAttribute('label') ?? '';
         this.listbox.appendChild(header);
