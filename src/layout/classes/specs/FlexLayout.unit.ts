@@ -930,8 +930,9 @@ describe('FlexLayout', () => {
 
       layout.layout(el, style({'flex-direction': 'row'}), [c1, c2], [], 20, 24, 0, 0);
 
+      // Two-pass: c1 frozen at max=6, remaining 10 redistributed to c2
       expect(c1.width).toBe(6);
-      expect(c2.width).toBe(10);
+      expect(c2.width).toBe(14);
     });
   });
 
@@ -971,6 +972,238 @@ describe('FlexLayout', () => {
 
       expect(result.contentWidth).toBe(0);
       expect(result.contentHeight).toBe(0);
+    });
+  });
+
+  describe('two-pass flex resolution', () => {
+    it('redistributes freed space when max-width freezes an item during grow', () => {
+      const el = document.createElement('div');
+      const c1 = childBox(document.createElement('span'), {
+        width: 5,
+        height: 2,
+        computedStyle: style({'flex-grow': '1', 'max-width': '6'}),
+      });
+      const c2 = childBox(document.createElement('span'), {
+        width: 5,
+        height: 2,
+        computedStyle: style({'flex-grow': '1'}),
+      });
+
+      layout.layout(el, style({'flex-direction': 'row'}), [c1, c2], [], 20, 24, 0, 0);
+
+      // c1: base=5, proposed=10, clamped to 6. c2 gets remaining 14.
+      expect(c1.width).toBe(6);
+      expect(c2.width).toBe(14);
+    });
+
+    it('redistributes freed space when min-width freezes an item during shrink', () => {
+      const el = document.createElement('div');
+      const c1 = childBox(document.createElement('span'), {
+        width: 10,
+        height: 2,
+        contentWidth: 10,
+        contentHeight: 2,
+        computedStyle: style({'flex-shrink': '1', 'min-width': '9'}),
+      });
+      const c2 = childBox(document.createElement('span'), {
+        width: 10,
+        height: 2,
+        contentWidth: 10,
+        contentHeight: 2,
+        computedStyle: style({'flex-shrink': '1'}),
+      });
+
+      layout.layout(el, style({'flex-direction': 'row'}), [c1, c2], [], 12, 24, 0, 0);
+
+      // overflow=8. c1: proposed reduction=4, clamped to min=9 (reduction=1).
+      // c2 absorbs remaining overflow: 10-7=3.
+      expect(c1.width).toBe(9);
+      expect(c2.width).toBe(3);
+    });
+  });
+
+  describe('flex factor flooring', () => {
+    it('floors fractional total grow factor to 1 to limit distribution', () => {
+      const el = document.createElement('div');
+      const c1 = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'flex-grow': '0.5'}),
+      });
+
+      layout.layout(el, style({'flex-direction': 'row'}), [c1], [], 20, 24, 0, 0);
+
+      // total grow=0.5 floored to 1 → distributes 0.5/1 * 16 = 8
+      expect(c1.width).toBe(12);
+    });
+  });
+
+  describe('flex-basis floor to padding+border', () => {
+    it('floors flex-basis to padding+border on the main axis', () => {
+      const el = document.createElement('div');
+      const c1 = childBox(document.createElement('span'), {
+        width: 0,
+        height: 2,
+        contentWidth: 0,
+        contentHeight: 2,
+        computedStyle: style({
+          'flex-basis': '0',
+          'flex-grow': '0',
+          'flex-shrink': '0',
+          'padding-left': '2',
+          'padding-right': '2',
+          'border-style': 'single',
+        }),
+      });
+
+      layout.layout(el, style({'flex-direction': 'row'}), [c1], [], 20, 24, 0, 0);
+
+      // padding(2+2) + border(1+1) = 6
+      expect(c1.width).toBe(6);
+    });
+  });
+
+  describe('auto margins', () => {
+    it('centers a single child with margin-left and margin-right auto in row', () => {
+      const el = document.createElement('div');
+      const child = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'margin-left': 'auto', 'margin-right': 'auto'}),
+      });
+
+      layout.layout(el, style({'flex-direction': 'row'}), [child], [], 20, 24, 0, 0);
+
+      // free=16, 2 auto margins → 8 each. child starts at 8.
+      expect(child.x).toBe(8);
+    });
+
+    it('pushes child to end with margin-left auto in row', () => {
+      const el = document.createElement('div');
+      const child = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'margin-left': 'auto'}),
+      });
+
+      layout.layout(el, style({'flex-direction': 'row'}), [child], [], 20, 24, 0, 0);
+
+      // free=16, 1 auto margin → all 16 to margin-left.
+      expect(child.x).toBe(16);
+    });
+
+    it('distributes auto margins among multiple children in row', () => {
+      const el = document.createElement('div');
+      const c1 = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'margin-right': 'auto'}),
+      });
+      const c2 = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'margin-left': 'auto'}),
+      });
+
+      layout.layout(el, style({'flex-direction': 'row'}), [c1, c2], [], 20, 24, 0, 0);
+
+      // free=12, 2 auto margins → 6 each.
+      // c1 at 0, margin-right adds 6, margin-left adds 6, c2 at 16.
+      expect(c1.x).toBe(0);
+      expect(c2.x).toBe(16);
+    });
+
+    it('centers a child with cross-axis auto margins', () => {
+      const el = document.createElement('div');
+      const child = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'margin-top': 'auto', 'margin-bottom': 'auto'}),
+      });
+
+      layout.layout(el, style({'flex-direction': 'row', height: '10'}), [child], [], 20, 24, 0, 0);
+
+      // Cross axis=height=10, child=2, free=8 → centered at 4.
+      expect(child.y).toBe(4);
+    });
+
+    it('pushes child to cross-axis end with start auto margin', () => {
+      const el = document.createElement('div');
+      const child = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'margin-top': 'auto'}),
+      });
+
+      layout.layout(el, style({'flex-direction': 'row', height: '10'}), [child], [], 20, 24, 0, 0);
+
+      // Cross free=8, auto on start → pushed to end.
+      expect(child.y).toBe(8);
+    });
+
+    it('auto margins bypass justify-content', () => {
+      const el = document.createElement('div');
+      const child = childBox(document.createElement('span'), {
+        width: 4,
+        height: 2,
+        computedStyle: style({'margin-left': 'auto', 'margin-right': 'auto'}),
+      });
+
+      layout.layout(
+        el,
+        style({'flex-direction': 'row', 'justify-content': 'flex-end'}),
+        [child],
+        [],
+        20,
+        24,
+        0,
+        0,
+      );
+
+      // Auto margins override justify-content. Centered at 8.
+      expect(child.x).toBe(8);
+    });
+
+    it('centers a child with auto margins in column direction', () => {
+      const el = document.createElement('div');
+      const child = childBox(document.createElement('span'), {
+        width: 10,
+        height: 2,
+        computedStyle: style({'margin-top': 'auto', 'margin-bottom': 'auto'}),
+      });
+
+      layout.layout(el, style({height: '10'}), [child], [], 20, 24, 0, 0);
+
+      // Column direction, main=vertical. free=8, 2 auto margins → 4 each.
+      expect(child.y).toBe(4);
+    });
+  });
+
+  describe('wrap-reverse', () => {
+    it('reverses the cross-axis order of wrapped lines', () => {
+      const el = document.createElement('div');
+      const c1 = childBox(document.createElement('span'), {width: 4, height: 2});
+      const c2 = childBox(document.createElement('span'), {width: 4, height: 3});
+      const c3 = childBox(document.createElement('span'), {width: 4, height: 1});
+
+      const result = layout.layout(
+        el,
+        style({'flex-direction': 'row', 'flex-wrap': 'wrap-reverse'}),
+        [c1, c2, c3],
+        [],
+        10,
+        24,
+        0,
+        0,
+      );
+
+      // Normal wrap: line1=[c1,c2] (height 3), line2=[c3] (height 1).
+      // wrap-reverse: line2 on top, line1 on bottom.
+      expect(c3.y).toBe(0);
+      expect(c3.x).toBe(0);
+      expect(c1.y).toBe(1);
+      expect(c2.y).toBe(1);
+      expect(result.height).toBe(4);
     });
   });
 });

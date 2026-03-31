@@ -60,7 +60,9 @@ export class FlexLayout {
     const zIndex = this.parseInteger(computedStyle.get('z-index')) ?? 0;
     const flexDirection = computedStyle.get('flex-direction') ?? 'column';
     const isRowDirection = flexDirection === 'row' || flexDirection === 'row-reverse';
-    const isWrapEnabled = computedStyle.get('flex-wrap') === 'wrap';
+    const flexWrap = computedStyle.get('flex-wrap') ?? 'nowrap';
+    const isWrapEnabled = flexWrap === 'wrap' || flexWrap === 'wrap-reverse';
+    const isWrapReverse = flexWrap === 'wrap-reverse';
     const isAbsolute = computedStyle.get('position') === 'absolute';
 
     const horizontalBorderPadding =
@@ -197,6 +199,10 @@ export class FlexLayout {
     const contentHeight = Math.max(0, outerHeight - verticalBorderPadding);
 
     if (isWrapEnabled && isRowDirection) {
+      if (isWrapReverse) {
+        lines.reverse();
+      }
+
       this.positionWrappedRows(lines, computedStyle, contentX, contentY, contentWidth, lineGap);
     } else {
       this.positionChildren(
@@ -437,22 +443,48 @@ export class FlexLayout {
     reverse: boolean,
   ): void {
     const orderedChildren = this.iterateChildren(children, reverse);
-    const {startOffset, betweenSpace} = this.resolveMainAxisSpacing(
-      computedStyle,
-      orderedChildren,
-      availableMainSize,
-      false,
-      gap,
-    );
+    const autoMarginCount = this.countMainAxisAutoMargins(orderedChildren, false);
+
+    let startOffset: number;
+    let betweenSpace: number;
+    let perAutoMargin = 0;
+
+    if (autoMarginCount > 0) {
+      const totalChildSize = orderedChildren.reduce((sum, c) => sum + c.height, 0);
+      const baseGapSpace = Math.max(0, orderedChildren.length - 1) * gap;
+      const freeSpace = Math.max(0, availableMainSize - totalChildSize - baseGapSpace);
+
+      perAutoMargin = Math.floor(freeSpace / autoMarginCount);
+      startOffset = 0;
+      betweenSpace = 0;
+    } else {
+      ({startOffset, betweenSpace} = this.resolveMainAxisSpacing(
+        computedStyle,
+        orderedChildren,
+        availableMainSize,
+        false,
+        gap,
+      ));
+    }
+
     let cursorY = contentY + startOffset;
 
     for (let index = 0; index < orderedChildren.length; index += 1) {
       const child = orderedChildren[index]!;
+
+      if (perAutoMargin > 0 && child.computedStyle.get('margin-top') === 'auto') {
+        cursorY += perAutoMargin;
+      }
+
       const childX =
         contentX + this.resolveCrossAxisOffset(child, computedStyle, availableCrossSize, true);
 
       this.offsetBox(child, childX, cursorY);
       cursorY += child.height;
+
+      if (perAutoMargin > 0 && child.computedStyle.get('margin-bottom') === 'auto') {
+        cursorY += perAutoMargin;
+      }
 
       if (index < orderedChildren.length - 1) {
         cursorY += gap + betweenSpace;
@@ -474,22 +506,48 @@ export class FlexLayout {
     reverse: boolean,
   ): void {
     const orderedChildren = this.iterateChildren(children, reverse);
-    const {startOffset, betweenSpace} = this.resolveMainAxisSpacing(
-      computedStyle,
-      orderedChildren,
-      availableMainSize,
-      true,
-      gap,
-    );
+    const autoMarginCount = this.countMainAxisAutoMargins(orderedChildren, true);
+
+    let startOffset: number;
+    let betweenSpace: number;
+    let perAutoMargin = 0;
+
+    if (autoMarginCount > 0) {
+      const totalChildSize = orderedChildren.reduce((sum, c) => sum + c.width, 0);
+      const baseGapSpace = Math.max(0, orderedChildren.length - 1) * gap;
+      const freeSpace = Math.max(0, availableMainSize - totalChildSize - baseGapSpace);
+
+      perAutoMargin = Math.floor(freeSpace / autoMarginCount);
+      startOffset = 0;
+      betweenSpace = 0;
+    } else {
+      ({startOffset, betweenSpace} = this.resolveMainAxisSpacing(
+        computedStyle,
+        orderedChildren,
+        availableMainSize,
+        true,
+        gap,
+      ));
+    }
+
     let cursorX = contentX + startOffset;
 
     for (let index = 0; index < orderedChildren.length; index += 1) {
       const child = orderedChildren[index]!;
+
+      if (perAutoMargin > 0 && child.computedStyle.get('margin-left') === 'auto') {
+        cursorX += perAutoMargin;
+      }
+
       const childY =
         contentY + this.resolveCrossAxisOffset(child, computedStyle, availableCrossSize, false);
 
       this.offsetBox(child, cursorX, childY);
       cursorX += child.width;
+
+      if (perAutoMargin > 0 && child.computedStyle.get('margin-right') === 'auto') {
+        cursorX += perAutoMargin;
+      }
 
       if (index < orderedChildren.length - 1) {
         cursorX += gap + betweenSpace;
@@ -638,6 +696,10 @@ export class FlexLayout {
 
   /**
    * Resolves cross-axis offset and optional stretching for a child.
+   *
+   * Cross-axis auto margins take priority over alignment. When both cross-axis
+   * margins are auto the child is centered; when only one is auto the child is
+   * pushed to the opposite edge.
    */
   private resolveCrossAxisOffset(
     child: LayoutBox,
@@ -645,6 +707,22 @@ export class FlexLayout {
     availableCrossSize: number,
     isColumnDirection: boolean,
   ): number {
+    const crossStartProp = isColumnDirection ? 'margin-left' : 'margin-top';
+    const crossEndProp = isColumnDirection ? 'margin-right' : 'margin-bottom';
+    const hasAutoStart = child.computedStyle.get(crossStartProp) === 'auto';
+    const hasAutoEnd = child.computedStyle.get(crossEndProp) === 'auto';
+
+    if (hasAutoStart || hasAutoEnd) {
+      const childCrossSize = this.getCrossSize(child, !isColumnDirection);
+      const freeSpace = Math.max(0, availableCrossSize - childCrossSize);
+
+      if (hasAutoStart && hasAutoEnd) {
+        return Math.floor(freeSpace / 2);
+      }
+
+      return hasAutoStart ? freeSpace : 0;
+    }
+
     const parentAlign = computedStyle.get('align-items') ?? 'flex-start';
     const childAlign = child.computedStyle.get('align-self');
     const align =
@@ -670,7 +748,17 @@ export class FlexLayout {
 
   /**
    * Applies `flex-grow`, `flex-shrink`, and `flex-basis` along the current
-   * main axis.
+   * main axis using a two-pass approach inspired by Yoga.
+   *
+   * **Pass 1** detects items whose min/max constraints would trigger and
+   * freezes them at their clamped sizes, removing their flex factors from the
+   * distribution pool.
+   *
+   * **Pass 2** distributes remaining free space (or overflow) among unfrozen
+   * items.
+   *
+   * Fractional total grow/shrink factors are floored to 1 so that items with
+   * sub-unit factors do not over-distribute space.
    */
   private applyFlexSizing(
     children: LayoutBox[],
@@ -686,52 +774,40 @@ export class FlexLayout {
       const grow = this.parseFlexFactor(child.computedStyle.get('flex-grow'), 0);
       const shrink = this.parseFlexFactor(child.computedStyle.get('flex-shrink'), 1);
 
-      return {
-        child,
-        baseSize,
-        grow,
-        shrink,
-        targetSize: baseSize,
-      };
+      return {child, baseSize, grow, shrink, targetSize: baseSize, frozen: false};
     });
+
     const totalBaseSize = childStates.reduce((sum, state) => sum + state.baseSize, 0);
     const freeSpace = availableMainSize - totalBaseSize;
 
     if (freeSpace > 0) {
-      const totalGrow = childStates.reduce((sum, state) => sum + state.grow, 0);
+      let totalGrow = childStates.reduce((sum, state) => sum + state.grow, 0);
+
+      // Floor fractional total grow to 1 (Yoga behavior).
+      if (totalGrow > 0 && totalGrow < 1) {
+        totalGrow = 1;
+      }
 
       if (totalGrow > 0) {
-        let remainder = freeSpace;
-
-        for (let index = 0; index < childStates.length; index += 1) {
-          const state = childStates[index]!;
-          const extra =
-            index === childStates.length - 1
-              ? remainder
-              : Math.round((freeSpace * state.grow) / totalGrow);
-
-          state.targetSize = state.baseSize + extra;
-          remainder -= extra;
-        }
+        this.distributeGrowSpace(childStates, freeSpace, totalGrow, isRowDirection);
       }
     } else if (freeSpace < 0) {
       const shrinkWeights = childStates.map((state) => state.shrink * state.baseSize);
-      const totalShrinkWeight = shrinkWeights.reduce((sum, weight) => sum + weight, 0);
+      let totalShrinkWeight = shrinkWeights.reduce((sum, weight) => sum + weight, 0);
+
+      // Floor fractional total shrink weight to 1 (Yoga behavior).
+      if (totalShrinkWeight > 0 && totalShrinkWeight < 1) {
+        totalShrinkWeight = 1;
+      }
 
       if (totalShrinkWeight > 0) {
-        let remainingOverflow = -freeSpace;
-
-        for (let index = 0; index < childStates.length; index += 1) {
-          const state = childStates[index]!;
-          const weight = shrinkWeights[index]!;
-          const reduction =
-            index === childStates.length - 1
-              ? remainingOverflow
-              : Math.round((-freeSpace * weight) / totalShrinkWeight);
-
-          state.targetSize = Math.max(0, state.baseSize - reduction);
-          remainingOverflow -= reduction;
-        }
+        this.distributeShrinkSpace(
+          childStates,
+          shrinkWeights,
+          freeSpace,
+          totalShrinkWeight,
+          isRowDirection,
+        );
       }
     }
 
@@ -741,18 +817,199 @@ export class FlexLayout {
   }
 
   /**
+   * Two-pass grow distribution. Pass 1 freezes items whose min/max constraints
+   * trigger. Pass 2 redistributes remaining space to unfrozen items.
+   */
+  private distributeGrowSpace(
+    childStates: Array<{
+      child: LayoutBox;
+      baseSize: number;
+      grow: number;
+      targetSize: number;
+      frozen: boolean;
+    }>,
+    freeSpace: number,
+    totalGrow: number,
+    isRowDirection: boolean,
+  ): void {
+    // Pass 1: detect constrained items
+    let frozenDelta = 0;
+    let remainingGrow = totalGrow;
+
+    for (const state of childStates) {
+      if (state.grow === 0) {
+        continue;
+      }
+
+      const proposed = state.baseSize + (freeSpace * state.grow) / totalGrow;
+      const min = this.parseDimension(
+        state.child.computedStyle.get(isRowDirection ? 'min-width' : 'min-height'),
+      );
+      const max = this.parseDimension(
+        state.child.computedStyle.get(isRowDirection ? 'max-width' : 'max-height'),
+      );
+      const clamped = this.clampSize(proposed, min, max);
+
+      if (clamped !== proposed) {
+        state.targetSize = clamped;
+        state.frozen = true;
+        frozenDelta += clamped - state.baseSize;
+        remainingGrow -= state.grow;
+      }
+    }
+
+    // Pass 2: distribute remaining space to unfrozen items
+    const remainingFreeSpace = freeSpace - frozenDelta;
+
+    if (remainingGrow > 0 && remainingFreeSpace > 0) {
+      const unfrozen = childStates.filter((s) => !s.frozen && s.grow > 0);
+      const unfrozenGrowSum = unfrozen.reduce((sum, s) => sum + s.grow, 0);
+      const intendedTotal = Math.round((remainingFreeSpace * unfrozenGrowSum) / remainingGrow);
+      let remainder = intendedTotal;
+
+      for (let index = 0; index < unfrozen.length; index += 1) {
+        const state = unfrozen[index]!;
+        const extra =
+          index === unfrozen.length - 1
+            ? remainder
+            : Math.round((remainingFreeSpace * state.grow) / remainingGrow);
+
+        state.targetSize = state.baseSize + extra;
+        remainder -= extra;
+      }
+    }
+
+    // Final clamp for unfrozen items
+    for (const state of childStates) {
+      if (!state.frozen) {
+        const min = this.parseDimension(
+          state.child.computedStyle.get(isRowDirection ? 'min-width' : 'min-height'),
+        );
+        const max = this.parseDimension(
+          state.child.computedStyle.get(isRowDirection ? 'max-width' : 'max-height'),
+        );
+
+        state.targetSize = this.clampSize(state.targetSize, min, max);
+      }
+    }
+  }
+
+  /**
+   * Two-pass shrink distribution. Pass 1 freezes items whose min/max
+   * constraints trigger. Pass 2 redistributes remaining overflow to unfrozen
+   * items.
+   */
+  private distributeShrinkSpace(
+    childStates: Array<{
+      child: LayoutBox;
+      baseSize: number;
+      shrink: number;
+      targetSize: number;
+      frozen: boolean;
+    }>,
+    shrinkWeights: number[],
+    freeSpace: number,
+    totalShrinkWeight: number,
+    isRowDirection: boolean,
+  ): void {
+    // Pass 1: detect constrained items
+    let frozenDelta = 0;
+    let remainingShrinkWeight = totalShrinkWeight;
+
+    for (let index = 0; index < childStates.length; index += 1) {
+      const state = childStates[index]!;
+      const weight = shrinkWeights[index]!;
+
+      if (weight === 0) {
+        continue;
+      }
+
+      const proposed = state.baseSize + (freeSpace * weight) / totalShrinkWeight;
+      const min = this.parseDimension(
+        state.child.computedStyle.get(isRowDirection ? 'min-width' : 'min-height'),
+      );
+      const max = this.parseDimension(
+        state.child.computedStyle.get(isRowDirection ? 'max-width' : 'max-height'),
+      );
+      const clamped = this.clampSize(proposed, min, max);
+
+      if (clamped !== proposed) {
+        state.targetSize = clamped;
+        state.frozen = true;
+        frozenDelta += clamped - state.baseSize;
+        remainingShrinkWeight -= weight;
+      }
+    }
+
+    // Pass 2: distribute remaining overflow to unfrozen items
+    const remainingFreeSpace = freeSpace - frozenDelta;
+
+    if (remainingShrinkWeight > 0 && remainingFreeSpace < 0) {
+      const unfrozen: Array<{state: (typeof childStates)[0]; weight: number}> = [];
+
+      for (let index = 0; index < childStates.length; index += 1) {
+        const state = childStates[index]!;
+        const weight = shrinkWeights[index]!;
+
+        if (!state.frozen && weight > 0) {
+          unfrozen.push({state, weight});
+        }
+      }
+
+      const unfrozenWeightSum = unfrozen.reduce((sum, u) => sum + u.weight, 0);
+      const intendedReduction = Math.round(
+        (-remainingFreeSpace * unfrozenWeightSum) / remainingShrinkWeight,
+      );
+      let remainingOverflow = intendedReduction;
+
+      for (let index = 0; index < unfrozen.length; index += 1) {
+        const {state, weight} = unfrozen[index]!;
+        const reduction =
+          index === unfrozen.length - 1
+            ? remainingOverflow
+            : Math.round((-remainingFreeSpace * weight) / remainingShrinkWeight);
+
+        state.targetSize = Math.max(0, state.baseSize - reduction);
+        remainingOverflow -= reduction;
+      }
+    }
+
+    // Final clamp for unfrozen items
+    for (const state of childStates) {
+      if (!state.frozen) {
+        const min = this.parseDimension(
+          state.child.computedStyle.get(isRowDirection ? 'min-width' : 'min-height'),
+        );
+        const max = this.parseDimension(
+          state.child.computedStyle.get(isRowDirection ? 'max-width' : 'max-height'),
+        );
+
+        state.targetSize = this.clampSize(state.targetSize, min, max);
+      }
+    }
+  }
+
+  /**
    * Resolves a child's flex base size on the current main axis.
+   *
+   * The result is floored to the child's main-axis padding + border so the
+   * flex basis never collapses below the box-model insets (matches Yoga).
    */
   private resolveFlexBasis(child: LayoutBox, isRowDirection: boolean): number {
     const basis = child.computedStyle.get('flex-basis');
+    let baseSize: number;
 
     if (basis === undefined || basis === '' || basis === 'auto') {
-      return this.getMainSize(child, isRowDirection);
+      baseSize = this.getMainSize(child, isRowDirection);
+    } else {
+      const parsed = this.parseDimension(basis);
+
+      baseSize = parsed ?? this.getMainSize(child, isRowDirection);
     }
 
-    const parsed = this.parseDimension(basis);
+    const paddingAndBorder = this.mainAxisPaddingAndBorder(child.computedStyle, isRowDirection);
 
-    return parsed ?? this.getMainSize(child, isRowDirection);
+    return Math.max(baseSize, paddingAndBorder);
   }
 
   /**
@@ -766,6 +1023,55 @@ export class FlexLayout {
     const parsed = Number.parseFloat(value);
 
     return Number.isNaN(parsed) ? fallback : Math.max(0, parsed);
+  }
+
+  /**
+   * Computes the main-axis padding + border for a child element.
+   *
+   * Used to floor flex-basis so it never collapses below the box-model insets.
+   */
+  private mainAxisPaddingAndBorder(computedStyle: ComputedStyle, isRowDirection: boolean): number {
+    const borderStyle = computedStyle.get('border-style');
+    const hasBorder = borderStyle !== undefined && borderStyle !== 'none' && borderStyle !== '';
+    const borderWidth = hasBorder ? 1 : 0;
+
+    if (isRowDirection) {
+      return (
+        borderWidth +
+        this.parseCellValue(computedStyle.get('padding-left')) +
+        this.parseCellValue(computedStyle.get('padding-right')) +
+        borderWidth
+      );
+    }
+
+    return (
+      borderWidth +
+      this.parseCellValue(computedStyle.get('padding-top')) +
+      this.parseCellValue(computedStyle.get('padding-bottom')) +
+      borderWidth
+    );
+  }
+
+  /**
+   * Counts the total number of auto margins along the main axis across all
+   * children. Each child can contribute 0, 1, or 2 auto margins.
+   */
+  private countMainAxisAutoMargins(children: LayoutBox[], isRowDirection: boolean): number {
+    let count = 0;
+    const startProp = isRowDirection ? 'margin-left' : 'margin-top';
+    const endProp = isRowDirection ? 'margin-right' : 'margin-bottom';
+
+    for (const child of children) {
+      if (child.computedStyle.get(startProp) === 'auto') {
+        count += 1;
+      }
+
+      if (child.computedStyle.get(endProp) === 'auto') {
+        count += 1;
+      }
+    }
+
+    return count;
   }
 
   /**

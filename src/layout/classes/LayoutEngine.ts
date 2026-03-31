@@ -259,7 +259,14 @@ export class LayoutEngine {
     );
 
     for (const absoluteChild of absoluteChildren) {
-      this.positionAbsoluteChild(absoluteChild, box.contentX, box.contentY);
+      this.positionAbsoluteChild(
+        absoluteChild,
+        box.contentX,
+        box.contentY,
+        box.contentWidth,
+        box.contentHeight,
+        resolvedStyle,
+      );
     }
 
     box.children = childOrder;
@@ -324,13 +331,140 @@ export class LayoutEngine {
 
   /**
    * Positions an absolutely positioned child relative to the containing box's
-   * content area using its `top` and `left` offsets.
+   * content area. Supports `top`, `left`, `right`, and `bottom` insets.
+   *
+   * When both opposing insets are defined without an explicit dimension, the
+   * child is resized to fill the remaining space (size-from-insets). When no
+   * insets are defined the child defaults to the content area start.
    */
-  private positionAbsoluteChild(box: LayoutBox, containingX: number, containingY: number): void {
-    const left = this.parseSignedCellValue(box.computedStyle.get('left'));
-    const top = this.parseSignedCellValue(box.computedStyle.get('top'));
+  private positionAbsoluteChild(
+    box: LayoutBox,
+    containingX: number,
+    containingY: number,
+    containingWidth: number,
+    containingHeight: number,
+    parentStyle: ComputedStyle,
+  ): void {
+    const leftVal = box.computedStyle.get('left');
+    const rightVal = box.computedStyle.get('right');
+    const topVal = box.computedStyle.get('top');
+    const bottomVal = box.computedStyle.get('bottom');
 
-    this.offsetBox(box, containingX + left, containingY + top);
+    const hasLeft = this.isInsetDefined(leftVal);
+    const hasRight = this.isInsetDefined(rightVal);
+    const hasTop = this.isInsetDefined(topVal);
+    const hasBottom = this.isInsetDefined(bottomVal);
+
+    const hasExplicitWidth = this.isDimensionDefined(box.computedStyle.get('width'));
+    const hasExplicitHeight = this.isDimensionDefined(box.computedStyle.get('height'));
+
+    // Size from opposing insets
+    if (hasLeft && hasRight && !hasExplicitWidth) {
+      const l = this.parseSignedCellValue(leftVal);
+      const r = this.parseSignedCellValue(rightVal);
+      const derivedWidth = Math.max(0, containingWidth - l - r);
+      const inset = box.width - box.contentWidth;
+
+      box.width = derivedWidth;
+      box.contentWidth = Math.max(0, derivedWidth - inset);
+    }
+
+    if (hasTop && hasBottom && !hasExplicitHeight) {
+      const t = this.parseSignedCellValue(topVal);
+      const b = this.parseSignedCellValue(bottomVal);
+      const derivedHeight = Math.max(0, containingHeight - t - b);
+      const inset = box.height - box.contentHeight;
+
+      box.height = derivedHeight;
+      box.contentHeight = Math.max(0, derivedHeight - inset);
+    }
+
+    // Horizontal positioning
+    let dx: number;
+
+    if (hasLeft) {
+      dx = containingX + this.parseSignedCellValue(leftVal);
+    } else if (hasRight) {
+      dx = containingX + containingWidth - box.width - this.parseSignedCellValue(rightVal);
+    } else {
+      dx = containingX + this.resolveAbsoluteAxisOffset(box, parentStyle, containingWidth, true);
+    }
+
+    // Vertical positioning
+    let dy: number;
+
+    if (hasTop) {
+      dy = containingY + this.parseSignedCellValue(topVal);
+    } else if (hasBottom) {
+      dy = containingY + containingHeight - box.height - this.parseSignedCellValue(bottomVal);
+    } else {
+      dy = containingY + this.resolveAbsoluteAxisOffset(box, parentStyle, containingHeight, false);
+    }
+
+    this.offsetBox(box, dx, dy);
+  }
+
+  /**
+   * Resolves the offset for an absolutely positioned child along a given
+   * physical axis when no insets are defined. Uses justify-content (main axis)
+   * or align-items (cross axis) from the parent.
+   */
+  private resolveAbsoluteAxisOffset(
+    child: LayoutBox,
+    parentStyle: ComputedStyle,
+    containerSize: number,
+    isHorizontal: boolean,
+  ): number {
+    const flexDirection = parentStyle.get('flex-direction') ?? 'column';
+    const isParentRow = flexDirection === 'row' || flexDirection === 'row-reverse';
+    const isMainAxis = isHorizontal === isParentRow;
+    const childSize = isHorizontal ? child.width : child.height;
+    const freeSpace = Math.max(0, containerSize - childSize);
+
+    if (isMainAxis) {
+      const justify = parentStyle.get('justify-content') ?? 'flex-start';
+
+      switch (justify) {
+        case 'flex-end':
+          return freeSpace;
+        case 'center':
+        case 'space-around':
+        case 'space-evenly':
+          return Math.floor(freeSpace / 2);
+        default:
+          return 0;
+      }
+    }
+
+    const align = parentStyle.get('align-items') ?? 'flex-start';
+    const childAlign = child.computedStyle.get('align-self');
+    const effectiveAlign =
+      childAlign !== undefined && childAlign !== '' && childAlign !== 'auto' ? childAlign : align;
+
+    switch (effectiveAlign) {
+      case 'flex-end':
+        return freeSpace;
+      case 'center':
+        return Math.floor(freeSpace / 2);
+      default:
+        return 0;
+    }
+  }
+
+  /**
+   * Tests whether a CSS inset value (`top`, `left`, `right`, `bottom`) is
+   * explicitly defined (not `auto`, empty, or absent).
+   */
+  private isInsetDefined(value: string | undefined): boolean {
+    return value !== undefined && value !== '' && value !== 'auto';
+  }
+
+  /**
+   * Tests whether a CSS dimension value (`width`, `height`) is explicitly
+   * defined (not `auto`, empty, or absent).
+   */
+  private isDimensionDefined(value: string | undefined): boolean {
+    return value !== undefined && value !== '' && value !== 'auto';
   }
 
   /**
