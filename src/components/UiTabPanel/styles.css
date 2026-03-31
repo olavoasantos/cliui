@@ -1,7 +1,0 @@
-ui-tab-panel {
-  display: block;
-}
-
-ui-tab-panel[hidden] {
-  display: none;
-}

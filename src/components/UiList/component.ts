@@ -27,6 +27,7 @@ export class UiList extends HTMLElement {
 
   private highlightIndex = 0;
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
+  private readonly boundClick = this.handleClick.bind(this) as EventListener;
 
   connectedCallback(): void {
     if (!this.hasAttribute('tabindex')) {
@@ -35,10 +36,12 @@ export class UiList extends HTMLElement {
 
     this.syncHighlight();
     this.addEventListener('keydown', this.boundKeyDown);
+    this.addEventListener('click', this.boundClick);
   }
 
   disconnectedCallback(): void {
     this.removeEventListener('keydown', this.boundKeyDown);
+    this.removeEventListener('click', this.boundClick);
   }
 
   /** Returns the current selection mode. */
@@ -128,6 +131,65 @@ export class UiList extends HTMLElement {
 
         this.dispatchEvent(new Event('select', {bubbles: true}));
       }
+    }
+  }
+
+  private handleClick(event: Event): void {
+    const target = event.target as import('../../dom').Element | null;
+
+    if (!target) return;
+
+    // Find which child item was clicked
+    const allChildren = Array.from(
+      {length: this.children.length},
+      (_, i) => this.children[i] as Element,
+    );
+    let clickedIndex = -1;
+
+    for (let i = 0; i < allChildren.length; i++) {
+      let current: import('../../dom').Element | null = target;
+
+      while (current && current !== (this as unknown as import('../../dom').Element)) {
+        if (current === allChildren[i]) {
+          clickedIndex = i;
+          break;
+        }
+
+        current = current.parentElement as import('../../dom').Element | null;
+      }
+
+      if (clickedIndex >= 0) break;
+    }
+
+    if (clickedIndex < 0) return;
+
+    const child = allChildren[clickedIndex] as Element;
+
+    if (child.hasAttribute('disabled')) return;
+
+    this.highlightIndex = clickedIndex;
+    this.syncHighlight();
+
+    // Select the clicked item
+    const items = this.getItems();
+    const item = items[this.highlightIndex];
+
+    if (item) {
+      if (this.getMode() === 'multi') {
+        if (item.hasAttribute('selected')) {
+          item.removeAttribute('selected');
+        } else {
+          item.setAttribute('selected', '');
+        }
+      } else {
+        for (const i of items) {
+          i.removeAttribute('selected');
+        }
+
+        item.setAttribute('selected', '');
+      }
+
+      this.dispatchEvent(new Event('select', {bubbles: true}));
     }
   }
 }

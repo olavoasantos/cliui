@@ -3,6 +3,7 @@ ui-menu {
   position: absolute;
   border-style: single;
   padding: 0;
+  z-index: 100;
 }
 
 ui-menu[open] {

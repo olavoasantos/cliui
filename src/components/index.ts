@@ -1,4 +1,4 @@
-export {UiAlert} from './UiAlert/component';
+export {UiMessage} from './UiMessage/component';
 export {UiButton} from './UiButton/component';
 export {UiCodeblock} from './UiCodeblock/component';
 export {UiDetails} from './UiDetails/component';
@@ -13,7 +13,6 @@ export {UiProgress} from './UiProgress/component';
 export {UiSelect} from './UiSelect/component';
 export {UiSpinner} from './UiSpinner/component';
 export {UiTab} from './UiTab/component';
-export {UiTabPanel} from './UiTabPanel/component';
 export {UiTable} from './UiTable/component';
 export {UiTabs} from './UiTabs/component';
 export {UiTbody} from './UiTbody/component';

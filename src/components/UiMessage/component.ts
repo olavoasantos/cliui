@@ -1,32 +1,29 @@
 import styles from './styles.css?inline';
 
 import {
-  DEFAULT_UI_ALERT_VARIANT,
-  UI_ALERT_ICONS,
-  UI_ALERT_OBSERVED_ATTRIBUTES,
-  UI_ALERT_TAG_NAME,
+  DEFAULT_UI_MESSAGE_VARIANT,
+  UI_MESSAGE_ICONS,
+  UI_MESSAGE_OBSERVED_ATTRIBUTES,
+  UI_MESSAGE_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
 
-import type {UiAlertVariant} from './types';
+import type {UiMessageVariant} from './types';
 
 /**
- * Built-in terminal inline alert custom element.
+ * Built-in terminal inline message custom element.
  *
  * Displays a non-interactive, styled message block with a variant-specific
  * icon prefix and colored border. Supports `info`, `success`, `warning`,
  * and `error` variants.
  *
- * This is an **inline** (non-modal) alert. For modal alerts, compose a
- * `<dialog>` element with alert content instead.
- *
- * Register with `window.customElements.define(UiAlert.tagName, UiAlert)`
- * before creating `<ui-alert>` elements in a window.
+ * Register with `window.customElements.define(UiMessage.tagName, UiMessage)`
+ * before creating `<ui-message>` elements in a window.
  */
-export class UiAlert extends HTMLElement {
-  static override readonly observedAttributes = UI_ALERT_OBSERVED_ATTRIBUTES;
+export class UiMessage extends HTMLElement {
+  static override readonly observedAttributes = UI_MESSAGE_OBSERVED_ATTRIBUTES;
   static readonly styles = styles;
-  static readonly tagName = UI_ALERT_TAG_NAME;
+  static readonly tagName = UI_MESSAGE_TAG_NAME;
 
   /** Internal icon element. */
   private iconEl: import('../../dom').Element | null = null;
@@ -52,14 +49,14 @@ export class UiAlert extends HTMLElement {
   }
 
   /** Returns the current variant, falling back to the default. */
-  getVariant(): UiAlertVariant {
+  getVariant(): UiMessageVariant {
     const raw = this.getAttribute('variant');
 
     if (raw === 'info' || raw === 'success' || raw === 'warning' || raw === 'error') {
       return raw;
     }
 
-    return DEFAULT_UI_ALERT_VARIANT;
+    return DEFAULT_UI_MESSAGE_VARIANT;
   }
 
   /* ── Private ────────────────────────────────────────────── */
@@ -69,7 +66,6 @@ export class UiAlert extends HTMLElement {
 
     const doc = this.ownerDocument!;
 
-    // Collect existing children
     const children: import('../../dom').Node[] = [];
 
     for (let i = this.childNodes.length - 1; i >= 0; i--) {
@@ -77,7 +73,6 @@ export class UiAlert extends HTMLElement {
       this.removeChild(this.childNodes[i]!);
     }
 
-    // Build row: [icon] [message]
     const row = doc.createElement('div');
     row.style.display = 'flex';
     row.style.flexDirection = 'row';
@@ -103,6 +98,6 @@ export class UiAlert extends HTMLElement {
   private syncIcon(): void {
     if (!this.iconEl) return;
 
-    this.iconEl.textContent = UI_ALERT_ICONS[this.getVariant()];
+    this.iconEl.textContent = UI_MESSAGE_ICONS[this.getVariant()];
   }
 }

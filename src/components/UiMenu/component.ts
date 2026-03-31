@@ -24,13 +24,16 @@ export class UiMenu extends HTMLElement {
 
   private highlightIndex = 0;
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
+  private readonly boundClick = this.handleClick.bind(this) as EventListener;
 
   connectedCallback(): void {
     this.addEventListener('keydown', this.boundKeyDown);
+    this.addEventListener('click', this.boundClick);
   }
 
   disconnectedCallback(): void {
     this.removeEventListener('keydown', this.boundKeyDown);
+    this.removeEventListener('click', this.boundClick);
   }
 
   /** Opens the menu and sets focus for keyboard navigation. */
@@ -113,6 +116,34 @@ export class UiMenu extends HTMLElement {
     } else if (key === 'Escape') {
       event.preventDefault();
       this.close();
+    }
+  }
+
+  private handleClick(event: Event): void {
+    const target = event.target as import('../../dom').Element | null;
+
+    if (!target) return;
+
+    // Walk up from click target to find a menu item
+    let current: import('../../dom').Element | null = target;
+
+    while (current && current !== (this as unknown as import('../../dom').Element)) {
+      if (current.localName === 'ui-menu-item' && !current.hasAttribute('disabled')) {
+        // Find the index among non-disabled items
+        const items = this.getItems();
+        const idx = items.indexOf(current as unknown as UiMenuItem);
+
+        if (idx >= 0) {
+          this.highlightIndex = idx;
+          this.syncHighlight();
+          this.dispatchEvent(new Event('select', {bubbles: true}));
+          this.close();
+        }
+
+        return;
+      }
+
+      current = current.parentElement as import('../../dom').Element | null;
     }
   }
 }

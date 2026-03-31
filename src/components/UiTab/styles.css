@@ -1,13 +1,7 @@
 ui-tab {
-  display: inline;
-  padding: 0 2;
-  white-space: nowrap;
+  display: block;
 }
 
-ui-tab[selected] {
-  font-weight: bold;
-}
-
-ui-tab:disabled {
-  opacity: 0.5;
+ui-tab[hidden] {
+  display: none;
 }

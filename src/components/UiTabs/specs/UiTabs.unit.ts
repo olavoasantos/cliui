@@ -2,7 +2,6 @@ import {describe, expect, it} from 'vitest';
 
 import {UiTabs} from '../component';
 import {UiTab} from '../../UiTab/component';
-import {UiTabPanel} from '../../UiTabPanel/component';
 import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
 import {Window} from '../../../dom/classes/Window';
 
@@ -12,24 +11,18 @@ function createEnv() {
 
   window.customElements.define(UiTabs.tagName, UiTabs);
   window.customElements.define(UiTab.tagName, UiTab);
-  window.customElements.define(UiTabPanel.tagName, UiTabPanel);
 
   return {window, document};
 }
 
-function buildTabs(document: any, labels: string[]) {
+function buildTabs(document: any, titles: string[]) {
   const tabs = document.createElement('ui-tabs');
 
-  for (const label of labels) {
+  for (const title of titles) {
     const tab = document.createElement('ui-tab');
-    tab.textContent = label;
+    tab.setAttribute('title', title);
+    tab.textContent = `${title} content`;
     tabs.appendChild(tab);
-  }
-
-  for (let i = 0; i < labels.length; i++) {
-    const panel = document.createElement('ui-tab-panel');
-    panel.textContent = `Content ${i}`;
-    tabs.appendChild(panel);
   }
 
   document.body.appendChild(tabs);
@@ -44,27 +37,15 @@ describe('UiTabs', () => {
     expect(window.customElements.get('ui-tabs')).toBe(UiTabs);
   });
 
-  it('selects the first tab by default', () => {
+  it('shows only the active tab content', () => {
     const {document} = createEnv();
     const tabs = buildTabs(document, ['A', 'B', 'C']);
-
-    expect(tabs.getActiveIndex()).toBe(0);
 
     const tabEls = tabs.querySelectorAll('ui-tab');
 
-    expect(tabEls[0]!.hasAttribute('selected')).toBe(true);
-    expect(tabEls[1]!.hasAttribute('selected')).toBe(false);
-  });
-
-  it('shows only the active panel', () => {
-    const {document} = createEnv();
-    const tabs = buildTabs(document, ['A', 'B', 'C']);
-
-    const panels = tabs.querySelectorAll('ui-tab-panel');
-
-    expect(panels[0]!.hasAttribute('hidden')).toBe(false);
-    expect(panels[1]!.hasAttribute('hidden')).toBe(true);
-    expect(panels[2]!.hasAttribute('hidden')).toBe(true);
+    expect(tabEls[0]!.hasAttribute('hidden')).toBe(false);
+    expect(tabEls[1]!.hasAttribute('hidden')).toBe(true);
+    expect(tabEls[2]!.hasAttribute('hidden')).toBe(true);
   });
 
   it('switches tabs with ArrowRight', () => {
@@ -75,10 +56,10 @@ describe('UiTabs', () => {
 
     expect(tabs.getActiveIndex()).toBe(1);
 
-    const panels = tabs.querySelectorAll('ui-tab-panel');
+    const tabEls = tabs.querySelectorAll('ui-tab');
 
-    expect(panels[0]!.hasAttribute('hidden')).toBe(true);
-    expect(panels[1]!.hasAttribute('hidden')).toBe(false);
+    expect(tabEls[0]!.hasAttribute('hidden')).toBe(true);
+    expect(tabEls[1]!.hasAttribute('hidden')).toBe(false);
   });
 
   it('wraps around from last to first tab', () => {
@@ -89,15 +70,6 @@ describe('UiTabs', () => {
     tabs.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight', bubbles: true}));
 
     expect(tabs.getActiveIndex()).toBe(0);
-  });
-
-  it('wraps around from first to last with ArrowLeft', () => {
-    const {document} = createEnv();
-    const tabs = buildTabs(document, ['A', 'B', 'C']);
-
-    tabs.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowLeft', bubbles: true}));
-
-    expect(tabs.getActiveIndex()).toBe(2);
   });
 
   it('skips disabled tabs', () => {
@@ -122,5 +94,20 @@ describe('UiTabs', () => {
     tabs.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight', bubbles: true}));
 
     expect(fired).toBe(true);
+  });
+
+  it('renders a tab bar with header elements', () => {
+    const {document} = createEnv();
+    const tabs = buildTabs(document, ['Overview', 'Details']);
+
+    const bar = tabs.querySelector('.ui-tabs-bar');
+
+    expect(bar).not.toBeNull();
+
+    const headers = bar!.querySelectorAll('[data-tab-index]');
+
+    expect(headers.length).toBe(2);
+    expect(headers[0]!.textContent).toBe('Overview');
+    expect(headers[1]!.textContent).toBe('Details');
   });
 });

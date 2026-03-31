@@ -20,13 +20,16 @@ export class UiLabel extends HTMLElement {
   static readonly styles = styles;
   static readonly tagName = UI_LABEL_TAG_NAME;
 
+  private readonly boundMouseDown = this.handleMouseDown.bind(this) as EventListener;
   private readonly boundClick = this.handleClick.bind(this) as EventListener;
 
   connectedCallback(): void {
+    this.addEventListener('mousedown', this.boundMouseDown);
     this.addEventListener('click', this.boundClick);
   }
 
   disconnectedCallback(): void {
+    this.removeEventListener('mousedown', this.boundMouseDown);
     this.removeEventListener('click', this.boundClick);
   }
 
@@ -43,6 +46,14 @@ export class UiLabel extends HTMLElement {
   }
 
   /* ── Private ────────────────────────────────────────────── */
+
+  private handleMouseDown(event: Event): void {
+    // Prevent EventDispatcher from focusing an ancestor on mousedown;
+    // the click handler will focus the target input instead.
+    if (this.getAttribute('for') && !this.hasAttribute('disabled')) {
+      event.preventDefault();
+    }
+  }
 
   private handleClick(_event: Event): void {
     if (this.hasAttribute('disabled')) return;

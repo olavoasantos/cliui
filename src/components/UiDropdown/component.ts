@@ -21,6 +21,7 @@ export class UiDropdown extends HTMLElement {
   static readonly tagName = UI_DROPDOWN_TAG_NAME;
 
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
+  private readonly boundClick = this.handleDropdownClick.bind(this) as EventListener;
 
   connectedCallback(): void {
     if (!this.hasAttribute('tabindex')) {
@@ -28,10 +29,12 @@ export class UiDropdown extends HTMLElement {
     }
 
     this.addEventListener('keydown', this.boundKeyDown);
+    this.addEventListener('click', this.boundClick);
   }
 
   disconnectedCallback(): void {
     this.removeEventListener('keydown', this.boundKeyDown);
+    this.removeEventListener('click', this.boundClick);
   }
 
   /** Finds the child `<ui-menu>` element. */
@@ -61,6 +64,26 @@ export class UiDropdown extends HTMLElement {
       if (menu) {
         menu.open();
       }
+    }
+  }
+
+  private handleDropdownClick(event: Event): void {
+    if (this.hasAttribute('disabled')) return;
+
+    // Only open if the click was on the dropdown itself, not on the menu
+    const target = event.target as import('../../dom').Element | null;
+    let current: import('../../dom').Element | null = target;
+
+    while (current && current !== (this as unknown as import('../../dom').Element)) {
+      if (current.localName === 'ui-menu') return; // Click inside menu, let menu handle it
+
+      current = current.parentElement as import('../../dom').Element | null;
+    }
+
+    const menu = this.getMenu();
+
+    if (menu) {
+      menu.open();
     }
   }
 }
