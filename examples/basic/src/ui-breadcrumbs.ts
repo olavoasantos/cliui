@@ -1,5 +1,5 @@
 import {UiBreadcrumbs, UiBreadcrumb} from '@micra/terminal-dom/components';
-import {createDemo, createShell, createSection} from './_helpers';
+import {createDemo, createShell, createSection} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
 window.customElements.define(UiBreadcrumbs.tagName, UiBreadcrumbs);

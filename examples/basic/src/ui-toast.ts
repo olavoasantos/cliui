@@ -1,5 +1,5 @@
 import {UiToast, UiButton} from '@micra/terminal-dom/components';
-import {createDemo, createShell, createSection, createStatus} from './_helpers';
+import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
 window.customElements.define(UiToast.tagName, UiToast);
