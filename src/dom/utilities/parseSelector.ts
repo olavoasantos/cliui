@@ -6,8 +6,15 @@ const ELEMENT_SELECTOR_TEST = /[a-z]/;
 const TOKENIZER =
   /\s*?([>\s+~]?)\s*?(?:(?:\[\s*([^\]=]+)(?:=(["'])(.*?)\3)?\s*\])|([#.]?)([^\s#.[>:+~]+)|:(\w+)(?:\((.*?)\))?)/gi;
 
+/** Parsed selector cache to prevent redundant RegExp execution */
+const PARSED_SELECTOR_CACHE = new Map<string, SelectorPart[]>();
+
 /** Parses a CSS selector string into a structured selector AST. */
 export function parseSelector(selector: string) {
+  if (PARSED_SELECTOR_CACHE.has(selector)) {
+    return PARSED_SELECTOR_CACHE.get(selector)!;
+  }
+
   let part: SelectorPart = {combinator: SelectorCombinator.Inner, matchers: []};
   const parts = [part];
   let token: RegExpExecArray | null;
@@ -43,6 +50,13 @@ export function parseSelector(selector: string) {
       value: token[4] ?? token[6] ?? token[8],
     });
   }
+
+  // Cap cache size to prevent memory leaks in extreme cases
+  if (PARSED_SELECTOR_CACHE.size > 1000) {
+    const firstKey = PARSED_SELECTOR_CACHE.keys().next().value;
+    if (firstKey) PARSED_SELECTOR_CACHE.delete(firstKey);
+  }
+  PARSED_SELECTOR_CACHE.set(selector, parts);
 
   return parts;
 }
