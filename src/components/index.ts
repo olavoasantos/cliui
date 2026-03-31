@@ -11,6 +11,7 @@ export {UiList} from './UiList/component';
 export {UiMenu} from './UiMenu/component';
 export {UiMenuItem} from './UiMenuItem/component';
 export {UiOption} from './UiOption/component';
+export {UiOptgroup} from './UiOptgroup/component';
 export {UiProgress} from './UiProgress/component';
 export {UiSelect} from './UiSelect/component';
 export {UiSpinner} from './UiSpinner/component';

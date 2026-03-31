@@ -155,7 +155,6 @@ export class UiSelect extends HTMLElement {
     if (this.trigger) return;
 
     const doc = this.ownerDocument!;
-    const options = this.getOptions();
 
     /* Create trigger as a flex row: [label (grows)] [indicator] */
     this.trigger = doc.createElement('div');
@@ -183,10 +182,49 @@ export class UiSelect extends HTMLElement {
     this.listbox.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
     this.listbox.style.display = 'none';
 
-    /* Move options into listbox and set z-index for stacking */
-    for (const option of options) {
-      option.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
-      this.listbox.appendChild(option);
+    /* Move children (options and optgroups) into listbox */
+    const topLevelChildren = this.collectTopLevelChildren();
+
+    for (const child of topLevelChildren) {
+      if (child.localName === 'ui-optgroup') {
+        /* Render group header label */
+        const header = doc.createElement('div');
+        header.setAttribute('class', 'ui-optgroup-label');
+        header.style.display = 'block';
+        header.style.fontWeight = 'bold';
+        header.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
+        header.textContent = child.getAttribute('label') ?? '';
+        this.listbox.appendChild(header);
+
+        /* Move child options out of the optgroup into the listbox */
+        const groupOptions: import('../../dom').Element[] = [];
+
+        for (let i = 0; i < child.childNodes.length; i++) {
+          const grandchild = child.childNodes[i];
+
+          if (
+            grandchild &&
+            'localName' in grandchild &&
+            (grandchild as import('../../dom').Element).localName === 'ui-option'
+          ) {
+            groupOptions.push(grandchild as import('../../dom').Element);
+          }
+        }
+
+        for (const option of groupOptions) {
+          option.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
+          option.style.paddingLeft = '2';
+          this.listbox.appendChild(option);
+        }
+
+        /* Remove the now-empty optgroup from the select */
+        if (child.parentNode) {
+          child.parentNode.removeChild(child);
+        }
+      } else {
+        child.style.zIndex = String(UI_SELECT_LISTBOX_Z_INDEX);
+        this.listbox.appendChild(child);
+      }
     }
 
     /* Attach internals */
@@ -221,6 +259,29 @@ export class UiSelect extends HTMLElement {
     }
 
     return options;
+  }
+
+  /**
+   * Collects direct children that are either ui-option or ui-optgroup
+   * elements, before they are moved into the listbox.
+   */
+  private collectTopLevelChildren(): import('../../dom').Element[] {
+    const children: import('../../dom').Element[] = [];
+
+    for (let i = 0; i < this.childNodes.length; i++) {
+      const child = this.childNodes[i];
+
+      if (
+        child &&
+        'localName' in child &&
+        ((child as import('../../dom').Element).localName === 'ui-option' ||
+          (child as import('../../dom').Element).localName === 'ui-optgroup')
+      ) {
+        children.push(child as import('../../dom').Element);
+      }
+    }
+
+    return children;
   }
 
   /* ── Private: State ─────────────────────────────────────── */
