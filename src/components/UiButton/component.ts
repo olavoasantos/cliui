@@ -112,6 +112,19 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
   }
 
   /**
+   * Suppresses click events while the button is disabled so that
+   * no listeners — including those registered before the element
+   * connected — observe the event.
+   */
+  override dispatchEvent(event: Event): boolean {
+    if (this.isDisabled() && event.type === 'click') {
+      return false;
+    }
+
+    return super.dispatchEvent(event);
+  }
+
+  /**
    * Advances the Enter-key pressed flash timer.
    *
    * @param _timestamp - Current frame timestamp in milliseconds.
@@ -165,11 +178,10 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
     }
   }
 
-  private handleClick(event: Event): void {
-    if (this.isDisabled()) {
-      event.stopImmediatePropagation();
-      event.preventDefault();
-    }
+  private handleClick(_event: Event): void {
+    /* Click suppression for disabled state is handled by the
+       dispatchEvent override. This handler is retained for
+       future non-disabled click behavior if needed. */
   }
 
   private handleBlur(): void {
