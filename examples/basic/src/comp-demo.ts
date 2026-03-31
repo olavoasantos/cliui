@@ -78,6 +78,12 @@ style.textContent = `
 
   ui-menu { background-color: #1e293b; border-color: #475569; width: 20; }
   ui-menu-item[highlighted] { background-color: #7c3aed; color: #ffffff; }
+
+  /* ── Message variants ────── */
+  ui-message[variant='info'] { border-color: #60a5fa; color: #60a5fa; }
+  ui-message[variant='success'] { border-color: #4ade80; color: #4ade80; }
+  ui-message[variant='warning'] { border-color: #facc15; color: #facc15; }
+  ui-message[variant='error'] { border-color: #f87171; color: #f87171; }
 `;
 document.head.appendChild(style);
 
