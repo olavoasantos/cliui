@@ -1,4 +1,5 @@
 export {UiMessage} from './UiMessage/component';
+export {UiBadge} from './UiBadge/component';
 export {UiButton} from './UiButton/component';
 export {UiCodeblock} from './UiCodeblock/component';
 export {UiDetails} from './UiDetails/component';

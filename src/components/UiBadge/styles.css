@@ -1,0 +1,24 @@
+ui-badge {
+  display: inline;
+  padding: 0 1;
+}
+
+ui-badge[variant='info'] {
+  background-color: blue;
+  color: white;
+}
+
+ui-badge[variant='success'] {
+  background-color: green;
+  color: white;
+}
+
+ui-badge[variant='warning'] {
+  background-color: yellow;
+  color: black;
+}
+
+ui-badge[variant='error'] {
+  background-color: red;
+  color: white;
+}
