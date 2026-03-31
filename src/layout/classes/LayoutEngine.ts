@@ -12,6 +12,7 @@ import type {CharacterData} from '../../dom/classes/CharacterData';
 import type {StyleEngine} from '../../css/classes/StyleEngine';
 import type {ComputedStyle} from '../../css/types';
 import type {LayoutBox, TextLayoutOptions} from '../types';
+import type {FlexChildBasis} from '../types/FlexChildBasis';
 
 /**
  * Top-level layout engine that takes a DOM tree and computed styles, runs
@@ -140,9 +141,9 @@ export class LayoutEngine {
 
     // Collect text lines and child elements
     const textLines: string[] = [];
-    const childElements: Element[] = [];
+    const allChildElements: Element[] = [];
 
-    this.collectChildren(element, childElements, textLines);
+    this.collectChildren(element, allChildElements, textLines);
 
     // Determine content dimensions for text measurement and percentage resolution
     const contentWidth = this.estimateContentWidth(resolvedStyle, availableWidth);
@@ -215,19 +216,31 @@ export class LayoutEngine {
       }
     }
 
-    // Layout child elements recursively
-    const inFlowChildren: LayoutBox[] = [];
-    const absoluteChildren: LayoutBox[] = [];
-    const childOrder: LayoutBox[] = [];
+    // --- Two-phase layout ---
 
-    for (const child of childElements) {
+    const flexDirection = resolvedStyle.get('flex-direction') ?? 'column';
+    const isRowDirection = flexDirection === 'row' || flexDirection === 'row-reverse';
+
+    // Collect text and child elements
+    const childElements = allChildElements;
+    const inFlowElements: Element[] = [];
+    const absoluteElements: Element[] = [];
+
+    const intrinsicBoxes: Array<LayoutBox | null> = new Array(childElements.length);
+    const childBases: FlexChildBasis[] = [];
+    const inFlowIndices: number[] = [];
+    const absoluteIndices: number[] = [];
+
+    for (let i = 0; i < childElements.length; i += 1) {
+      const child = childElements[i]!;
       const childStyle = this.styleEngine.getComputedStyle(child);
 
       if (childStyle.get('display') === 'none') {
+        intrinsicBoxes[i] = null;
         continue;
       }
 
-      const childBox = this.layoutElement(
+      const intrinsicBox = this.layoutElement(
         child,
         contentWidth,
         contentHeight,
@@ -237,30 +250,117 @@ export class LayoutEngine {
         dirtySet,
       );
 
-      childOrder.push(childBox);
+      intrinsicBoxes[i] = intrinsicBox;
 
-      if (childBox.computedStyle.get('position') === 'absolute') {
-        absoluteChildren.push(childBox);
+      if (childStyle.get('position') === 'absolute') {
+        absoluteIndices.push(i);
+        absoluteElements.push(child);
       } else {
-        inFlowChildren.push(childBox);
+        inFlowIndices.push(i);
+        inFlowElements.push(child);
+
+        childBases.push({
+          intrinsicMainSize: isRowDirection ? intrinsicBox.width : intrinsicBox.height,
+          intrinsicCrossSize: isRowDirection ? intrinsicBox.height : intrinsicBox.width,
+          computedStyle: intrinsicBox.computedStyle,
+        });
       }
     }
 
-    // Use FlexLayout to compute the final box
-    const box = this.flexLayout.layout(
+    // Compute resolved flex sizes
+    const sizing = this.flexLayout.computeSizes(
+      element,
+      resolvedStyle,
+      childBases,
+      measuredTextLines,
+      availableWidth,
+      availableHeight,
+    );
+
+    // Phase 2: Layout each in-flow child at its resolved dimensions.
+    // Skip re-layout when the resolved dimensions match the intrinsic ones.
+    const inFlowChildren: LayoutBox[] = new Array(inFlowElements.length);
+
+    for (let i = 0; i < inFlowElements.length; i += 1) {
+      const resolved = sizing.resolvedChildren[i]!;
+      const childIdx = inFlowIndices[i]!;
+      const intrinsicBox = intrinsicBoxes[childIdx]!;
+      const resolvedWidth = isRowDirection ? resolved.mainSize : resolved.crossSize;
+      const resolvedHeight = isRowDirection ? resolved.crossSize : resolved.mainSize;
+
+      if (resolvedWidth === intrinsicBox.width && resolvedHeight === intrinsicBox.height) {
+        // Dimensions match — reuse the intrinsic layout
+        inFlowChildren[i] = intrinsicBox;
+      } else {
+        // Dimensions changed by flex — re-layout at the resolved size
+        inFlowChildren[i] = this.layoutElement(
+          inFlowElements[i]!,
+          resolvedWidth,
+          resolvedHeight,
+          0,
+          0,
+          incremental,
+          dirtySet,
+        );
+      }
+    }
+
+    // Force resolved dimensions on children. A child's own layoutElement
+    // produces content-based dimensions, but flex grow/shrink/stretch at
+    // THIS level determines the final size. Without this, a flex-grown
+    // empty child would stay at height 0 instead of filling its slot.
+    for (let i = 0; i < inFlowChildren.length; i += 1) {
+      const resolved = sizing.resolvedChildren[i]!;
+      const child = inFlowChildren[i]!;
+      const resolvedW = isRowDirection ? resolved.mainSize : resolved.crossSize;
+      const resolvedH = isRowDirection ? resolved.crossSize : resolved.mainSize;
+
+      if (child.width !== resolvedW) {
+        const inset = child.width - child.contentWidth;
+
+        child.width = resolvedW;
+        child.contentWidth = Math.max(0, resolvedW - inset);
+      }
+
+      if (child.height !== resolvedH) {
+        const inset = child.height - child.contentHeight;
+
+        child.height = resolvedH;
+        child.contentHeight = Math.max(0, resolvedH - inset);
+      }
+    }
+
+    // Position children
+    const box = this.flexLayout.position(
       element,
       resolvedStyle,
       inFlowChildren,
       measuredTextLines,
-      availableWidth,
-      availableHeight,
+      sizing.context,
       x,
       y,
     );
 
-    // Re-layout children whose cross-axis was stretched so their nested
-    // content (text wrapping, grandchildren) reflows at the new size.
-    this.relayoutStretchedChildren(inFlowChildren, resolvedStyle, incremental, dirtySet);
+    // Build final child order (in-flow + absolute, in DOM order)
+    const absoluteChildren: LayoutBox[] = [];
+    const childOrder: LayoutBox[] = [];
+    let inFlowCursor = 0;
+    let absoluteCursor = 0;
+
+    for (let i = 0; i < childElements.length; i += 1) {
+      if (intrinsicBoxes[i] === null) {
+        continue;
+      }
+
+      if (absoluteCursor < absoluteIndices.length && absoluteIndices[absoluteCursor] === i) {
+        absoluteChildren.push(intrinsicBoxes[i]!);
+        childOrder.push(intrinsicBoxes[i]!);
+        absoluteCursor += 1;
+      } else if (inFlowCursor < inFlowIndices.length && inFlowIndices[inFlowCursor] === i) {
+        childOrder.push(inFlowChildren[inFlowCursor]!);
+        inFlowCursor += 1;
+      }
+    }
 
     for (const absoluteChild of absoluteChildren) {
       this.positionAbsoluteChild(
@@ -277,8 +377,6 @@ export class LayoutEngine {
     this.applyScrollState(element, box, measuredTextLines.length);
 
     // After scroll is applied, reposition modal dialogs to viewport center.
-    // At this point all children (including dialogs) have been offset by
-    // -scrollY, so we can place modals directly at viewport coordinates.
     for (const absoluteChild of absoluteChildren) {
       if (
         absoluteChild.element.localName === 'dialog' &&
@@ -469,86 +567,6 @@ export class LayoutEngine {
    */
   private isDimensionDefined(value: string | undefined): boolean {
     return value !== undefined && value !== '' && value !== 'auto';
-  }
-
-  /**
-   * Re-lays-out children whose cross-axis dimension was changed by
-   * `align-items: stretch` so their nested content (text wrapping,
-   * grandchildren) reflows at the new size.
-   *
-   * For row-direction containers the cross axis is vertical, so a child
-   * whose height was stretched needs its own layout re-run with the new
-   * available height. For column-direction containers the cross axis is
-   * horizontal; children were already laid out with the parent's content
-   * width, so stretch is a no-op that does not require re-layout.
-   */
-  private relayoutStretchedChildren(
-    inFlowChildren: LayoutBox[],
-    parentStyle: ComputedStyle,
-    incremental: boolean,
-    dirtySet: ReadonlySet<Element>,
-  ): void {
-    const flexDirection = parentStyle.get('flex-direction') ?? 'column';
-    const isRowDirection = flexDirection === 'row' || flexDirection === 'row-reverse';
-
-    if (!isRowDirection) {
-      return;
-    }
-
-    const alignItems = parentStyle.get('align-items') ?? 'flex-start';
-
-    for (const childBox of inFlowChildren) {
-      const selfAlign = childBox.computedStyle.get('align-self');
-      const effectiveAlign =
-        selfAlign !== undefined && selfAlign !== '' && selfAlign !== 'auto'
-          ? selfAlign
-          : alignItems;
-
-      if (effectiveAlign !== 'stretch') {
-        continue;
-      }
-
-      // Stretch only applies when the child has no explicit cross-axis dimension
-      const childHeight = childBox.computedStyle.get('height');
-
-      if (childHeight !== undefined && childHeight !== '' && childHeight !== 'auto') {
-        continue;
-      }
-
-      // Only re-layout if the child has its own children that could reflow
-      if (childBox.children.length === 0) {
-        continue;
-      }
-
-      // Save the FlexLayout-applied position before re-layout
-      const posX = childBox.x;
-      const posY = childBox.y;
-
-      // Re-layout the child with its stretched dimensions as available space.
-      // - Available width = childBox.width (same as parent's content width,
-      //   which the child was originally laid out with).
-      // - Available height = childBox.height (the new stretched height).
-      const reBox = this.layoutElement(
-        childBox.element,
-        childBox.width,
-        childBox.height,
-        0,
-        0,
-        incremental,
-        dirtySet,
-      );
-
-      // Replace internal layout state with the reflowed version while
-      // keeping the outer dimensions and position from FlexLayout.
-      childBox.children = reBox.children;
-      childBox.textLines = reBox.textLines;
-
-      // The re-laid-out children are positioned relative to (0, 0).
-      // Shift them to the FlexLayout-applied position.
-      for (const grandchild of childBox.children) {
-        this.offsetBox(grandchild, posX, posY);
-      }
-    }
   }
 
   /**

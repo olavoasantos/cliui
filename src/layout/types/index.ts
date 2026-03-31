@@ -90,3 +90,8 @@ export interface LayoutBox {
   /** The z-index for layer ordering. */
   zIndex: number;
 }
+
+export type {FlexChildBasis} from './FlexChildBasis';
+export type {FlexContext} from './FlexContext';
+export type {FlexResolvedChild} from './FlexResolvedChild';
+export type {FlexSizingResult} from './FlexSizingResult';

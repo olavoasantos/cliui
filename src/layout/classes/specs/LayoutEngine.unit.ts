@@ -761,4 +761,81 @@ describe('LayoutEngine', () => {
       expect(innerBox.height).toBe(10);
     });
   });
+
+  describe('two-phase layout: children at resolved flex sizes', () => {
+    it('reflows text wrapping when a child is flex-grown wider', () => {
+      const {document, styleEngine} = createEnv();
+      const layoutEngine = new LayoutEngine(styleEngine);
+
+      addStyle(
+        document,
+        `
+        .row { display: flex; flex-direction: row; width: 30; }
+        .grow { flex-grow: 1; }
+      `,
+      );
+
+      const row = document.createElement('div');
+
+      row.className = 'row';
+
+      const child = document.createElement('div');
+
+      child.className = 'grow';
+      child.textContent = 'a b c d e f g h';
+      row.appendChild(child);
+      document.body.appendChild(row);
+
+      styleEngine.computeAll();
+
+      const result = layoutEngine.layout(document.body, 40, 20);
+      const rowBox = result.children[0]!;
+      const childBox = rowBox.children[0]!;
+
+      // Child should flex-grow to fill the full 30-cell row.
+      // With 30 cells of width, the text fits on one line.
+      expect(childBox.width).toBe(30);
+      expect(childBox.textLines).toEqual(['a b c d e f g h']);
+    });
+
+    it('reflows nested flex containers when parent is flex-grown', () => {
+      const {document, styleEngine} = createEnv();
+      const layoutEngine = new LayoutEngine(styleEngine);
+
+      addStyle(
+        document,
+        `
+        .row { display: flex; flex-direction: row; width: 20; }
+        .grow { flex-grow: 1; display: flex; flex-direction: row; }
+        .inner { flex-grow: 1; }
+      `,
+      );
+
+      const row = document.createElement('div');
+
+      row.className = 'row';
+
+      const outer = document.createElement('div');
+
+      outer.className = 'grow';
+
+      const inner = document.createElement('div');
+
+      inner.className = 'inner';
+      outer.appendChild(inner);
+      row.appendChild(outer);
+      document.body.appendChild(row);
+
+      styleEngine.computeAll();
+
+      const result = layoutEngine.layout(document.body, 40, 20);
+      const rowBox = result.children[0]!;
+      const outerBox = rowBox.children[0]!;
+      const innerBox = outerBox.children[0]!;
+
+      // Outer flex-grows to 20, inner flex-grows to fill outer
+      expect(outerBox.width).toBe(20);
+      expect(innerBox.width).toBe(20);
+    });
+  });
 });

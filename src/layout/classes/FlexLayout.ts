@@ -3,7 +3,11 @@ import type {Element} from '../../dom/classes/Element';
 import type {ComputedStyle} from '../../css/types';
 import type {LayoutBox} from '../types';
 import type {BoxModel} from '../types/BoxModel';
+import type {FlexChildBasis} from '../types/FlexChildBasis';
+import type {FlexContext} from '../types/FlexContext';
 import type {FlexLine} from '../types/FlexLine';
+import type {FlexResolvedChild} from '../types/FlexResolvedChild';
+import type {FlexSizingResult} from '../types/FlexSizingResult';
 
 /**
  * Computes flexbox layout for terminal UI elements.
@@ -20,21 +24,16 @@ export class FlexLayout {
    * Computes the layout for an element and its children, producing a
    * {@link LayoutBox} tree.
    *
-   * Children are expected to be pre-laid-out {@link LayoutBox} objects with
-   * positions relative to origin (0, 0). This method positions them within the
-   * element's content area according to the resolved flex direction and adjusts
-   * them to absolute coordinates.
+   * This is a compatibility bridge that delegates to {@link computeSizes} and
+   * {@link position}. New code should call those two methods directly to
+   * enable two-phase layout.
    *
    * @param element - The DOM element being laid out.
    * @param computedStyle - The element's resolved CSS property map.
-   * @param children - Pre-computed layout boxes for each child element,
-   *   positioned relative to (0, 0).
+   * @param children - Pre-computed layout boxes for each child element.
    * @param textLines - Measured text lines for text content within this element.
-   * @param availableWidth - The maximum width in terminal cells available to
-   *   this element (from the parent's content area or terminal dimensions).
-   * @param _availableHeight - The maximum height in terminal cells available to
-   *   this element (from the parent's content area or terminal dimensions).
-   *   Reserved for Phase 2 vertical constraint solving.
+   * @param availableWidth - The maximum width in terminal cells.
+   * @param availableHeight - The maximum height in terminal cells.
    * @param x - The x offset where this element's margin edge begins.
    * @param y - The y offset where this element's margin edge begins.
    * @returns A fully positioned {@link LayoutBox} for this element.
@@ -45,10 +44,84 @@ export class FlexLayout {
     children: LayoutBox[],
     textLines: string[],
     availableWidth: number,
-    _availableHeight: number,
+    availableHeight: number,
     x: number,
     y: number,
   ): LayoutBox {
+    const flexDirection = computedStyle.get('flex-direction') ?? 'column';
+    const isRow = flexDirection === 'row' || flexDirection === 'row-reverse';
+
+    const childBases: FlexChildBasis[] = new Array(children.length);
+
+    for (let i = 0; i < children.length; i += 1) {
+      const child = children[i]!;
+
+      childBases[i] = {
+        intrinsicMainSize: isRow ? child.width : child.height,
+        intrinsicCrossSize: isRow ? child.height : child.width,
+        computedStyle: child.computedStyle,
+      };
+    }
+
+    const sizing = this.computeSizes(
+      element,
+      computedStyle,
+      childBases,
+      textLines,
+      availableWidth,
+      availableHeight,
+    );
+
+    // Apply resolved sizes to existing LayoutBoxes
+    for (let i = 0; i < children.length; i += 1) {
+      const resolved = sizing.resolvedChildren[i]!;
+      const child = children[i]!;
+
+      if (isRow) {
+        this.setMainSizeUnclamped(child, true, resolved.mainSize);
+
+        if (resolved.stretched) {
+          this.setCrossSizeUnclamped(child, true, resolved.crossSize);
+        }
+      } else {
+        this.setMainSizeUnclamped(child, false, resolved.mainSize);
+
+        if (resolved.stretched) {
+          this.setCrossSizeUnclamped(child, false, resolved.crossSize);
+        }
+      }
+    }
+
+    return this.position(element, computedStyle, children, textLines, sizing.context, x, y);
+  }
+
+  /**
+   * Phase 1: Computes resolved flex dimensions for all children without
+   * positioning them.
+   *
+   * Takes intrinsic child measurements ({@link FlexChildBasis}) and returns
+   * the final main-axis and cross-axis size each child should have after flex
+   * grow/shrink distribution and stretch resolution.
+   *
+   * The returned {@link FlexSizingResult.context} must be passed to
+   * {@link position} for the positioning phase.
+   *
+   * @param element - The DOM element being laid out.
+   * @param computedStyle - The element's resolved CSS property map.
+   * @param childBases - Intrinsic measurements for each in-flow child.
+   * @param textLines - Measured text lines for text content within this element.
+   * @param availableWidth - The maximum width in terminal cells.
+   * @param availableHeight - The maximum height in terminal cells.
+   * @returns Resolved dimensions per child and the context for positioning.
+   */
+  computeSizes(
+    _element: Element,
+    computedStyle: ComputedStyle,
+    childBases: FlexChildBasis[],
+    textLines: string[],
+    availableWidth: number,
+    availableHeight: number,
+  ): FlexSizingResult {
     const box = this.parseBoxModel(computedStyle);
     const boxSizing = computedStyle.get('box-sizing') ?? 'border-box';
     const explicitWidth = this.parseDimension(computedStyle.get('width'));
@@ -71,19 +144,18 @@ export class FlexLayout {
       box.borderTop + box.paddingTop + box.paddingBottom + box.borderBottom;
     const horizontalMargin = box.marginLeft + box.marginRight;
 
+    // --- Resolve container width ---
+
     let outerWidth: number;
 
     if (explicitWidth !== null) {
-      if (boxSizing === 'border-box') {
-        outerWidth = explicitWidth;
-      } else {
-        outerWidth = explicitWidth + horizontalBorderPadding;
-      }
+      outerWidth =
+        boxSizing === 'border-box' ? explicitWidth : explicitWidth + horizontalBorderPadding;
     } else if (isAbsolute || computedStyle.get('display') === 'inline') {
-      outerWidth = this.resolveIntrinsicContentWidth(
-        children,
+      outerWidth = this.resolveIntrinsicContentWidthFromBases(
+        childBases,
         textLines,
-        flexDirection,
+        isRowDirection,
         computedStyle,
       );
 
@@ -99,9 +171,7 @@ export class FlexLayout {
     outerWidth = this.clampSize(outerWidth, minWidth, maxWidth);
 
     let contentWidth = Math.max(0, outerWidth - horizontalBorderPadding);
-    const contentX = x + box.marginLeft + box.borderLeft + box.paddingLeft;
-    const contentY = y + box.marginTop + box.borderTop + box.paddingTop;
-    const textHeight = textLines.length > 0 ? textLines.length : 0;
+
     const explicitContentHeight =
       explicitHeight === null
         ? null
@@ -110,7 +180,7 @@ export class FlexLayout {
           : explicitHeight;
     const availableContentHeight =
       explicitContentHeight ??
-      Math.max(0, _availableHeight - box.marginTop - box.marginBottom - verticalBorderPadding);
+      Math.max(0, availableHeight - box.marginTop - box.marginBottom - verticalBorderPadding);
 
     const mainGap = isRowDirection
       ? this.parseCellValue(computedStyle.get('column-gap'))
@@ -119,60 +189,126 @@ export class FlexLayout {
       ? this.parseCellValue(computedStyle.get('row-gap'))
       : this.parseCellValue(computedStyle.get('column-gap'));
     const availableMainSize = isRowDirection ? contentWidth : availableContentHeight;
+    const textHeight = textLines.length > 0 ? textLines.length : 0;
 
-    /* When the main axis is column and the height is not explicitly
-     * constrained, use the intrinsic children height as the available
-     * main size for flex sizing. This prevents flex-shrink from
-     * squeezing content to fit the viewport — mirroring browser
-     * behavior where the body overflows vertically. */
-    const childrenIntrinsicHeight =
-      this.sumChildrenHeight(children) + Math.max(0, children.length - 1) * mainGap + textHeight;
-    const flexSizingMainSize =
-      !isRowDirection && explicitHeight === null
-        ? Math.max(availableMainSize, childrenIntrinsicHeight)
-        : availableMainSize;
+    // --- Compute flex basis per child ---
 
-    let lines: FlexLine[];
+    const baseSizes = new Array<number>(childBases.length);
 
-    if (isWrapEnabled && isRowDirection) {
-      lines = this.buildRowWrapLines(children, contentWidth, mainGap);
-
-      for (const line of lines) {
-        this.applyFlexSizing(
-          line.children,
-          true,
-          Math.max(0, contentWidth - Math.max(0, line.children.length - 1) * mainGap),
-        );
-        line.crossSize = this.maxChildHeight(line.children);
-      }
-    } else {
-      this.applyFlexSizing(
-        children,
-        isRowDirection,
-        Math.max(0, flexSizingMainSize - Math.max(0, children.length - 1) * mainGap),
-      );
-      lines = [
-        {children, crossSize: isRowDirection ? this.maxChildHeight(children) : contentWidth},
-      ];
+    for (let i = 0; i < childBases.length; i += 1) {
+      baseSizes[i] = this.resolveFlexBasisFromBasis(childBases[i]!, isRowDirection);
     }
 
-    /* For shrink-wrap containers (absolute/inline without explicit width) in
-     * row direction, recompute the container width from post-flex children
-     * sizes.  Without this, flex-basis values smaller than the intrinsic width
-     * leave false free space that justify-content would distribute — Yoga
-     * avoids this by zeroing remainingFreeSpace in FitContent mode. */
+    // --- Column direction: avoid shrinking below intrinsic height ---
+
+    let childrenIntrinsicMainSize = 0;
+
+    for (let i = 0; i < baseSizes.length; i += 1) {
+      childrenIntrinsicMainSize += isRowDirection
+        ? baseSizes[i]!
+        : childBases[i]!.intrinsicMainSize;
+    }
+
+    childrenIntrinsicMainSize +=
+      Math.max(0, childBases.length - 1) * mainGap + (isRowDirection ? 0 : textHeight);
+
+    const flexSizingMainSize =
+      !isRowDirection && explicitHeight === null
+        ? Math.max(availableMainSize, childrenIntrinsicMainSize)
+        : availableMainSize;
+
+    // --- Build flex lines and apply flex sizing ---
+
+    const resolvedMainSizes = [...baseSizes];
+    const lineChildIndices: number[][] = [];
+    const lineCrossSizes: number[] = [];
+
+    if (isWrapEnabled && isRowDirection) {
+      // Build wrapped lines
+      const lines = this.buildWrapLinesFromBases(baseSizes, contentWidth, mainGap);
+
+      for (const line of lines) {
+        lineChildIndices.push(line);
+
+        const lineAvailable = Math.max(0, contentWidth - Math.max(0, line.length - 1) * mainGap);
+
+        this.applyFlexSizingOnIndices(
+          childBases,
+          resolvedMainSizes,
+          line,
+          isRowDirection,
+          lineAvailable,
+        );
+
+        let maxCross = 0;
+
+        for (const idx of line) {
+          const cross = childBases[idx]!.intrinsicCrossSize;
+
+          if (cross > maxCross) {
+            maxCross = cross;
+          }
+        }
+
+        lineCrossSizes.push(maxCross);
+      }
+    } else {
+      const allIndices: number[] = new Array(childBases.length);
+
+      for (let i = 0; i < childBases.length; i += 1) {
+        allIndices[i] = i;
+      }
+
+      lineChildIndices.push(allIndices);
+
+      const lineAvailable = Math.max(
+        0,
+        flexSizingMainSize - Math.max(0, childBases.length - 1) * mainGap,
+      );
+
+      this.applyFlexSizingOnIndices(
+        childBases,
+        resolvedMainSizes,
+        allIndices,
+        isRowDirection,
+        lineAvailable,
+      );
+
+      if (isRowDirection) {
+        let maxCross = 0;
+
+        for (const basis of childBases) {
+          if (basis.intrinsicCrossSize > maxCross) {
+            maxCross = basis.intrinsicCrossSize;
+          }
+        }
+
+        lineCrossSizes.push(maxCross);
+      } else {
+        lineCrossSizes.push(contentWidth);
+      }
+    }
+
+    // --- FitContent: recompute width for shrink-wrap containers ---
+
     if (
       isRowDirection &&
       !isWrapEnabled &&
       explicitWidth === null &&
       (isAbsolute || computedStyle.get('display') === 'inline')
     ) {
-      const flexedIntrinsic = this.resolveIntrinsicContentWidth(
-        children,
-        textLines,
-        flexDirection,
-        computedStyle,
-      );
+      let flexedSum = 0;
+
+      for (const size of resolvedMainSizes) {
+        flexedSum += size;
+      }
+
+      const gap =
+        childBases.length > 0
+          ? this.parseCellValue(computedStyle.get('column-gap')) *
+            Math.max(0, childBases.length - 1)
+          : 0;
+      const flexedIntrinsic = Math.max(this.maxTextWidth(textLines), flexedSum + gap);
       let newOuterWidth =
         boxSizing === 'border-box' ? flexedIntrinsic + horizontalBorderPadding : flexedIntrinsic;
 
@@ -181,38 +317,102 @@ export class FlexLayout {
       contentWidth = Math.max(0, outerWidth - horizontalBorderPadding);
     }
 
-    const intrinsicContentHeight =
-      isWrapEnabled && isRowDirection
-        ? Math.max(
-            textHeight,
-            this.sumLineCrossSizes(lines) + Math.max(0, lines.length - 1) * lineGap,
-          )
-        : isRowDirection
-          ? Math.max(textHeight, this.maxChildHeight(children))
-          : this.sumChildrenHeight(children) +
-            Math.max(0, children.length - 1) * mainGap +
-            textHeight;
+    // --- Resolve cross-axis sizes (stretch detection) ---
+
+    const alignItems = computedStyle.get('align-items') ?? 'flex-start';
+    const resolvedChildren: FlexResolvedChild[] = new Array(childBases.length);
+
+    for (let i = 0; i < childBases.length; i += 1) {
+      const basis = childBases[i]!;
+      let crossSize = basis.intrinsicCrossSize;
+      let stretched = false;
+
+      // Find which line this child is on
+      const lineCrossSize = this.findLineCrossSize(i, lineChildIndices, lineCrossSizes);
+
+      // Determine effective alignment
+      const selfAlign = basis.computedStyle.get('align-self');
+      const effectiveAlign =
+        selfAlign !== undefined && selfAlign !== '' && selfAlign !== 'auto'
+          ? selfAlign
+          : alignItems;
+
+      if (effectiveAlign === 'stretch') {
+        // Only stretch if no explicit cross-axis dimension
+        const crossDimProp = isRowDirection ? 'height' : 'width';
+        const explicitCross = basis.computedStyle.get(crossDimProp);
+        const hasExplicitCross =
+          explicitCross !== undefined && explicitCross !== '' && explicitCross !== 'auto';
+
+        // Only stretch if no cross-axis auto margins
+        const crossStartProp = isRowDirection ? 'margin-top' : 'margin-left';
+        const crossEndProp = isRowDirection ? 'margin-bottom' : 'margin-right';
+        const hasAutoMargin =
+          basis.computedStyle.get(crossStartProp) === 'auto' ||
+          basis.computedStyle.get(crossEndProp) === 'auto';
+
+        if (!hasExplicitCross && !hasAutoMargin && lineCrossSize > crossSize) {
+          // Clamp to child's cross-axis min/max
+          const minCross = this.parseDimension(
+            basis.computedStyle.get(isRowDirection ? 'min-height' : 'min-width'),
+          );
+          const maxCross = this.parseDimension(
+            basis.computedStyle.get(isRowDirection ? 'max-height' : 'max-width'),
+          );
+
+          crossSize = this.clampSize(lineCrossSize, minCross, maxCross);
+          stretched = crossSize !== basis.intrinsicCrossSize;
+        }
+      }
+
+      resolvedChildren[i] = {
+        mainSize: resolvedMainSizes[i]!,
+        crossSize,
+        stretched,
+      };
+    }
+
+    // --- Compute container height ---
+
+    let intrinsicContentHeight: number;
+
+    if (isWrapEnabled && isRowDirection) {
+      let totalLineCross = 0;
+
+      for (const cs of lineCrossSizes) {
+        totalLineCross += cs;
+      }
+
+      intrinsicContentHeight = Math.max(
+        textHeight,
+        totalLineCross + Math.max(0, lineCrossSizes.length - 1) * lineGap,
+      );
+    } else if (isRowDirection) {
+      intrinsicContentHeight = Math.max(textHeight, lineCrossSizes[0] ?? 0);
+    } else {
+      let totalMainSizes = 0;
+
+      for (const s of resolvedMainSizes) {
+        totalMainSizes += s;
+      }
+
+      intrinsicContentHeight =
+        totalMainSizes + Math.max(0, childBases.length - 1) * mainGap + textHeight;
+    }
 
     let outerHeight: number;
 
     if (explicitHeight !== null) {
-      if (boxSizing === 'border-box') {
-        outerHeight = explicitHeight;
-      } else {
-        outerHeight = explicitHeight + verticalBorderPadding;
-      }
+      outerHeight =
+        boxSizing === 'border-box' ? explicitHeight : explicitHeight + verticalBorderPadding;
     } else {
       outerHeight = intrinsicContentHeight + verticalBorderPadding;
     }
 
-    /* When overflow is scroll and no explicit height is set, cap the
-     * box height to the available viewport height. Children are not
-     * shrunk (the flex sizing step used the intrinsic size), so
-     * content beyond the viewport is scrollable via scrollTop. */
     const overflow = computedStyle.get('overflow');
 
     if (overflow === 'scroll' && explicitHeight === null) {
-      const maxViewportHeight = _availableHeight - box.marginTop - box.marginBottom;
+      const maxViewportHeight = availableHeight - box.marginTop - box.marginBottom;
 
       if (outerHeight > maxViewportHeight && maxViewportHeight > 0) {
         outerHeight = maxViewportHeight;
@@ -223,26 +423,89 @@ export class FlexLayout {
 
     const contentHeight = Math.max(0, outerHeight - verticalBorderPadding);
 
-    if (isWrapEnabled && isRowDirection) {
-      if (isWrapReverse) {
+    return {
+      resolvedChildren,
+      context: {
+        outerWidth,
+        outerHeight,
+        contentWidth,
+        contentHeight,
+        boxModel: box,
+        horizontalMargin,
+        horizontalBorderPadding,
+        verticalBorderPadding,
+        flexDirection,
+        isRowDirection,
+        isWrapEnabled,
+        isWrapReverse,
+        mainGap,
+        lineGap,
+        zIndex,
+        lineChildIndices,
+        lineCrossSizes,
+      },
+    };
+  }
+
+  /**
+   * Phase 2: Positions fully-laid-out children within the container and returns
+   * the final {@link LayoutBox}.
+   *
+   * @param element - The DOM element being laid out.
+   * @param computedStyle - The element's resolved CSS property map.
+   * @param children - Fully laid-out child boxes at their resolved sizes.
+   * @param textLines - Measured text lines for text content.
+   * @param ctx - The {@link FlexContext} from {@link computeSizes}.
+   * @param x - The x offset where this element's margin edge begins.
+   * @param y - The y offset where this element's margin edge begins.
+   * @returns A fully positioned {@link LayoutBox}.
+   */
+  position(
+    element: Element,
+    computedStyle: ComputedStyle,
+    children: LayoutBox[],
+    textLines: string[],
+    ctx: FlexContext,
+    x: number,
+    y: number,
+  ): LayoutBox {
+    const contentX =
+      x + ctx.boxModel.marginLeft + ctx.boxModel.borderLeft + ctx.boxModel.paddingLeft;
+    const contentY = y + ctx.boxModel.marginTop + ctx.boxModel.borderTop + ctx.boxModel.paddingTop;
+
+    if (ctx.isWrapEnabled && ctx.isRowDirection) {
+      const lines: FlexLine[] = ctx.lineChildIndices.map((indices, lineIdx) => ({
+        children: indices.map((i) => children[i]!),
+        crossSize: ctx.lineCrossSizes[lineIdx]!,
+      }));
+
+      if (ctx.isWrapReverse) {
         lines.reverse();
       }
 
-      this.positionWrappedRows(lines, computedStyle, contentX, contentY, contentWidth, lineGap);
+      this.positionWrappedRows(
+        lines,
+        computedStyle,
+        contentX,
+        contentY,
+        ctx.contentWidth,
+        ctx.lineGap,
+      );
     } else {
       this.positionChildren(
         children,
         computedStyle,
         contentX,
         contentY,
-        flexDirection,
-        isRowDirection ? contentWidth : contentHeight,
-        isRowDirection ? contentHeight : contentWidth,
-        mainGap,
+        ctx.flexDirection,
+        ctx.isRowDirection ? ctx.contentWidth : ctx.contentHeight,
+        ctx.isRowDirection ? ctx.contentHeight : ctx.contentWidth,
+        ctx.mainGap,
       );
     }
-    const totalWidth = outerWidth + horizontalMargin;
-    const totalHeight = outerHeight + box.marginTop + box.marginBottom;
+
+    const totalWidth = ctx.outerWidth + ctx.horizontalMargin;
+    const totalHeight = ctx.outerHeight + ctx.boxModel.marginTop + ctx.boxModel.marginBottom;
 
     return {
       element,
@@ -252,40 +515,13 @@ export class FlexLayout {
       height: totalHeight,
       contentX,
       contentY,
-      contentWidth,
-      contentHeight,
+      contentWidth: ctx.contentWidth,
+      contentHeight: ctx.contentHeight,
       computedStyle,
       textLines: textLines.length > 0 ? textLines : undefined,
       children,
-      zIndex,
+      zIndex: ctx.zIndex,
     };
-  }
-
-  /**
-   * Resolves the intrinsic content width used to shrink-wrap absolute boxes.
-   */
-  private resolveIntrinsicContentWidth(
-    children: LayoutBox[],
-    textLines: string[],
-    flexDirection: string,
-    computedStyle: ComputedStyle,
-  ): number {
-    const textWidth = this.maxTextWidth(textLines);
-    const isRowDirection = flexDirection === 'row' || flexDirection === 'row-reverse';
-
-    if (children.length === 0) {
-      return textWidth;
-    }
-
-    if (isRowDirection) {
-      const gap = this.parseCellValue(computedStyle.get('column-gap'));
-      return Math.max(
-        textWidth,
-        this.sumChildrenWidth(children) + Math.max(0, children.length - 1) * gap,
-      );
-    }
-
-    return Math.max(textWidth, this.maxChildWidth(children));
   }
 
   /**
@@ -598,39 +834,6 @@ export class FlexLayout {
   }
 
   /**
-   * Builds wrapped lines for row-direction layout.
-   */
-  private buildRowWrapLines(
-    children: LayoutBox[],
-    availableWidth: number,
-    gap: number,
-  ): FlexLine[] {
-    const lines: FlexLine[] = [];
-    let currentChildren: LayoutBox[] = [];
-    let currentWidth = 0;
-
-    for (const child of children) {
-      const childWidth = this.resolveFlexBasis(child, true);
-      const nextWidth = currentChildren.length === 0 ? childWidth : currentWidth + gap + childWidth;
-
-      if (currentChildren.length > 0 && nextWidth > availableWidth) {
-        lines.push({children: currentChildren, crossSize: this.maxChildHeight(currentChildren)});
-        currentChildren = [child];
-        currentWidth = childWidth;
-      } else {
-        currentChildren.push(child);
-        currentWidth = nextWidth;
-      }
-    }
-
-    if (currentChildren.length > 0) {
-      lines.push({children: currentChildren, crossSize: this.maxChildHeight(currentChildren)});
-    }
-
-    return lines;
-  }
-
-  /**
    * Positions wrapped row lines and stacks them vertically.
    */
   private positionWrappedRows(
@@ -664,19 +867,6 @@ export class FlexLayout {
         cursorY += lineGap;
       }
     }
-  }
-
-  /**
-   * Computes the total cross-axis size occupied by wrapped lines.
-   */
-  private sumLineCrossSizes(lines: FlexLine[]): number {
-    let total = 0;
-
-    for (const line of lines) {
-      total += line.crossSize;
-    }
-
-    return total;
   }
 
   /**
@@ -779,114 +969,6 @@ export class FlexLayout {
       case 'flex-start':
       default:
         return 0;
-    }
-  }
-
-  /**
-   * Applies `flex-grow`, `flex-shrink`, and `flex-basis` along the current
-   * main axis using a two-pass approach inspired by Yoga.
-   *
-   * When no children have min/max constraints (the common case), a streamlined
-   * single-pass fast path runs instead, avoiding the overhead of constraint
-   * detection, `.filter()` allocations, and redundant Map lookups.
-   */
-  private applyFlexSizing(
-    children: LayoutBox[],
-    isRowDirection: boolean,
-    availableMainSize: number,
-  ): void {
-    const childCount = children.length;
-
-    if (childCount === 0) {
-      return;
-    }
-
-    const minProp = isRowDirection ? 'min-width' : 'min-height';
-    const maxProp = isRowDirection ? 'max-width' : 'max-height';
-
-    let hasConstraints = false;
-    let totalBaseSize = 0;
-    let totalGrow = 0;
-
-    const states: Array<{
-      child: LayoutBox;
-      baseSize: number;
-      grow: number;
-      shrink: number;
-      min: number | null;
-      max: number | null;
-      targetSize: number;
-      frozen: boolean;
-    }> = new Array(childCount);
-
-    for (let i = 0; i < childCount; i += 1) {
-      const child = children[i]!;
-      const baseSize = this.resolveFlexBasis(child, isRowDirection);
-      const grow = this.parseFlexFactor(child.computedStyle.get('flex-grow'), 0);
-      const shrink = this.parseFlexFactor(child.computedStyle.get('flex-shrink'), 1);
-      const min = this.parseDimension(child.computedStyle.get(minProp));
-      const max = this.parseDimension(child.computedStyle.get(maxProp));
-
-      if (min !== null || max !== null) {
-        hasConstraints = true;
-      }
-
-      totalBaseSize += baseSize;
-      totalGrow += grow;
-
-      states[i] = {child, baseSize, grow, shrink, min, max, targetSize: baseSize, frozen: false};
-    }
-
-    const freeSpace = availableMainSize - totalBaseSize;
-
-    if (freeSpace > 0) {
-      const originalGrowSum = totalGrow;
-
-      if (totalGrow > 0 && totalGrow < 1) {
-        totalGrow = 1;
-      }
-
-      if (totalGrow > 0) {
-        if (hasConstraints) {
-          this.distributeGrowConstrained(states, freeSpace, totalGrow);
-        } else {
-          this.distributeGrowFast(states, freeSpace, totalGrow, originalGrowSum);
-        }
-      }
-    } else if (freeSpace < 0) {
-      let totalShrinkWeight = 0;
-
-      for (let i = 0; i < childCount; i += 1) {
-        const s = states[i]!;
-
-        totalShrinkWeight += s.shrink * s.baseSize;
-      }
-
-      const originalShrinkWeight = totalShrinkWeight;
-
-      if (totalShrinkWeight > 0 && totalShrinkWeight < 1) {
-        totalShrinkWeight = 1;
-      }
-
-      if (totalShrinkWeight > 0) {
-        if (hasConstraints) {
-          this.distributeShrinkConstrained(states, freeSpace, totalShrinkWeight);
-        } else {
-          this.distributeShrinkFast(states, freeSpace, totalShrinkWeight, originalShrinkWeight);
-        }
-      }
-    }
-
-    if (hasConstraints) {
-      for (let i = 0; i < childCount; i += 1) {
-        const s = states[i]!;
-
-        this.setMainSizeClamped(s.child, isRowDirection, s.targetSize, s.min, s.max);
-      }
-    } else {
-      for (let i = 0; i < childCount; i += 1) {
-        this.setMainSizeUnclamped(states[i]!.child, isRowDirection, states[i]!.targetSize);
-      }
     }
   }
 
@@ -1138,24 +1220,6 @@ export class FlexLayout {
    * padding + border so the flex basis never collapses below the box-model
    * insets (matches Yoga).
    */
-  private resolveFlexBasis(child: LayoutBox, isRowDirection: boolean): number {
-    const basis = child.computedStyle.get('flex-basis');
-
-    if (basis === undefined || basis === '' || basis === 'auto') {
-      return this.getMainSize(child, isRowDirection);
-    }
-
-    const parsed = this.parseDimension(basis);
-
-    if (parsed === null) {
-      return this.getMainSize(child, isRowDirection);
-    }
-
-    const paddingAndBorder = this.mainAxisPaddingAndBorder(child.computedStyle, isRowDirection);
-
-    return Math.max(parsed, paddingAndBorder);
-  }
-
   /**
    * Parses a flex factor with a fallback default.
    */
@@ -1233,36 +1297,8 @@ export class FlexLayout {
   }
 
   /**
-   * Sets a layout box size on the main axis using pre-parsed min/max
-   * constraints, preserving its box-model insets.
-   */
-  private setMainSizeClamped(
-    box: LayoutBox,
-    isRowDirection: boolean,
-    size: number,
-    min: number | null,
-    max: number | null,
-  ): void {
-    const clampedSize = this.clampSize(size, min, max);
-
-    if (isRowDirection) {
-      const horizontalInset = box.width - box.contentWidth;
-
-      box.width = clampedSize;
-      box.contentWidth = Math.max(0, clampedSize - horizontalInset);
-      return;
-    }
-
-    const verticalInset = box.height - box.contentHeight;
-
-    box.height = clampedSize;
-    box.contentHeight = Math.max(0, clampedSize - verticalInset);
-  }
-
-  /**
    * Sets a layout box size on the main axis without min/max clamping,
-   * preserving its box-model insets. Used on the fast path when no children
-   * have constraints.
+   * preserving its box-model insets. Used by the compatibility bridge.
    */
   private setMainSizeUnclamped(box: LayoutBox, isRowDirection: boolean, size: number): void {
     if (isRowDirection) {
@@ -1307,55 +1343,234 @@ export class FlexLayout {
   }
 
   /**
-   * Computes the total width occupied by all children.
+   * Resolves intrinsic content width from {@link FlexChildBasis} values
+   * (used by {@link computeSizes} for shrink-wrap containers).
    */
-  private sumChildrenWidth(children: LayoutBox[]): number {
-    let total = 0;
+  private resolveIntrinsicContentWidthFromBases(
+    childBases: FlexChildBasis[],
+    textLines: string[],
+    isRowDirection: boolean,
+    computedStyle: ComputedStyle,
+  ): number {
+    const textWidth = this.maxTextWidth(textLines);
 
-    for (const child of children) {
-      total += child.width;
+    if (childBases.length === 0) {
+      return textWidth;
     }
 
-    return total;
+    if (isRowDirection) {
+      const gap = this.parseCellValue(computedStyle.get('column-gap'));
+      let total = 0;
+
+      for (const basis of childBases) {
+        total += basis.intrinsicMainSize;
+      }
+
+      return Math.max(textWidth, total + Math.max(0, childBases.length - 1) * gap);
+    }
+
+    let maxCross = 0;
+
+    for (const basis of childBases) {
+      if (basis.intrinsicCrossSize > maxCross) {
+        maxCross = basis.intrinsicCrossSize;
+      }
+    }
+
+    return Math.max(textWidth, maxCross);
   }
 
   /**
-   * Computes the widest child width.
+   * Resolves flex basis from a {@link FlexChildBasis}.
    */
-  private maxChildWidth(children: LayoutBox[]): number {
-    let maxWidth = 0;
+  private resolveFlexBasisFromBasis(basis: FlexChildBasis, isRowDirection: boolean): number {
+    const basisValue = basis.computedStyle.get('flex-basis');
 
-    for (const child of children) {
-      maxWidth = Math.max(maxWidth, child.width);
+    if (basisValue === undefined || basisValue === '' || basisValue === 'auto') {
+      return basis.intrinsicMainSize;
     }
 
-    return maxWidth;
+    const parsed = this.parseDimension(basisValue);
+
+    if (parsed === null) {
+      return basis.intrinsicMainSize;
+    }
+
+    const paddingAndBorder = this.mainAxisPaddingAndBorder(basis.computedStyle, isRowDirection);
+
+    return Math.max(parsed, paddingAndBorder);
   }
 
   /**
-   * Computes the total height occupied by all children.
+   * Builds wrapped line indices from flex basis sizes.
    */
-  private sumChildrenHeight(children: LayoutBox[]): number {
-    let total = 0;
+  private buildWrapLinesFromBases(
+    baseSizes: number[],
+    availableWidth: number,
+    gap: number,
+  ): number[][] {
+    const lines: number[][] = [];
+    let currentLine: number[] = [];
+    let currentWidth = 0;
 
-    for (const child of children) {
-      total += child.height;
+    for (let i = 0; i < baseSizes.length; i += 1) {
+      const childWidth = baseSizes[i]!;
+      const nextWidth = currentLine.length === 0 ? childWidth : currentWidth + gap + childWidth;
+
+      if (currentLine.length > 0 && nextWidth > availableWidth) {
+        lines.push(currentLine);
+        currentLine = [i];
+        currentWidth = childWidth;
+      } else {
+        currentLine.push(i);
+        currentWidth = nextWidth;
+      }
     }
 
-    return total;
+    if (currentLine.length > 0) {
+      lines.push(currentLine);
+    }
+
+    return lines;
   }
 
   /**
-   * Computes the tallest child height.
+   * Applies flex sizing on a subset of children identified by indices.
+   * Writes resolved main sizes into the `resolvedMainSizes` array.
    */
-  private maxChildHeight(children: LayoutBox[]): number {
-    let maxHeight = 0;
-
-    for (const child of children) {
-      maxHeight = Math.max(maxHeight, child.height);
+  private applyFlexSizingOnIndices(
+    childBases: FlexChildBasis[],
+    resolvedMainSizes: number[],
+    indices: number[],
+    isRowDirection: boolean,
+    availableMainSize: number,
+  ): void {
+    if (indices.length === 0) {
+      return;
     }
 
-    return maxHeight;
+    const minProp = isRowDirection ? 'min-width' : 'min-height';
+    const maxProp = isRowDirection ? 'max-width' : 'max-height';
+
+    let hasConstraints = false;
+    let totalBaseSize = 0;
+    let totalGrow = 0;
+
+    const states: Array<{
+      idx: number;
+      baseSize: number;
+      grow: number;
+      shrink: number;
+      min: number | null;
+      max: number | null;
+      targetSize: number;
+      frozen: boolean;
+    }> = new Array(indices.length);
+
+    for (let i = 0; i < indices.length; i += 1) {
+      const idx = indices[i]!;
+      const basis = childBases[idx]!;
+      const baseSize = resolvedMainSizes[idx]!;
+      const grow = this.parseFlexFactor(basis.computedStyle.get('flex-grow'), 0);
+      const shrink = this.parseFlexFactor(basis.computedStyle.get('flex-shrink'), 1);
+      const min = this.parseDimension(basis.computedStyle.get(minProp));
+      const max = this.parseDimension(basis.computedStyle.get(maxProp));
+
+      if (min !== null || max !== null) {
+        hasConstraints = true;
+      }
+
+      totalBaseSize += baseSize;
+      totalGrow += grow;
+
+      states[i] = {idx, baseSize, grow, shrink, min, max, targetSize: baseSize, frozen: false};
+    }
+
+    const freeSpace = availableMainSize - totalBaseSize;
+
+    if (freeSpace > 0) {
+      const originalGrowSum = totalGrow;
+
+      if (totalGrow > 0 && totalGrow < 1) {
+        totalGrow = 1;
+      }
+
+      if (totalGrow > 0) {
+        if (hasConstraints) {
+          this.distributeGrowConstrained(states, freeSpace, totalGrow);
+        } else {
+          this.distributeGrowFast(states, freeSpace, totalGrow, originalGrowSum);
+        }
+      }
+    } else if (freeSpace < 0) {
+      let totalShrinkWeight = 0;
+
+      for (const s of states) {
+        totalShrinkWeight += s.shrink * s.baseSize;
+      }
+
+      const originalShrinkWeight = totalShrinkWeight;
+
+      if (totalShrinkWeight > 0 && totalShrinkWeight < 1) {
+        totalShrinkWeight = 1;
+      }
+
+      if (totalShrinkWeight > 0) {
+        if (hasConstraints) {
+          this.distributeShrinkConstrained(states, freeSpace, totalShrinkWeight);
+        } else {
+          this.distributeShrinkFast(states, freeSpace, totalShrinkWeight, originalShrinkWeight);
+        }
+      }
+    }
+
+    // Write resolved sizes back
+    for (const s of states) {
+      const min = s.min;
+      const max = s.max;
+
+      resolvedMainSizes[s.idx] =
+        min !== null || max !== null ? this.clampSize(s.targetSize, min, max) : s.targetSize;
+    }
+  }
+
+  /**
+   * Finds the cross size of the flex line containing the given child index.
+   */
+  private findLineCrossSize(
+    childIndex: number,
+    lineChildIndices: number[][],
+    lineCrossSizes: number[],
+  ): number {
+    for (let i = 0; i < lineChildIndices.length; i += 1) {
+      const line = lineChildIndices[i]!;
+
+      for (const idx of line) {
+        if (idx === childIndex) {
+          return lineCrossSizes[i]!;
+        }
+      }
+    }
+
+    return 0;
+  }
+
+  /**
+   * Sets a layout box's cross-axis size without min/max clamping.
+   */
+  private setCrossSizeUnclamped(box: LayoutBox, isRowDirection: boolean, size: number): void {
+    if (isRowDirection) {
+      const verticalInset = box.height - box.contentHeight;
+
+      box.height = size;
+      box.contentHeight = Math.max(0, size - verticalInset);
+      return;
+    }
+
+    const horizontalInset = box.width - box.contentWidth;
+
+    box.width = size;
+    box.contentWidth = Math.max(0, size - horizontalInset);
   }
 
   /**
