@@ -18,6 +18,7 @@ import {segmentGraphemes} from '../utilities/segmentGraphemes';
 import type {Document, Element} from '../dom';
 import type {KeyboardEvent} from '../dom/classes/KeyboardEvent';
 import type {Node as DomNode} from '../dom/classes/Node';
+import type {LayoutBox} from '../layout/types';
 import type {TerminalFrameAware} from '../types/TerminalFrameAware';
 import type {EditableStateElement} from '../types/EditableStateElement';
 import type {TerminalOptions} from '../types';
@@ -57,6 +58,7 @@ export class Terminal {
   private readonly inputReader: InputReader;
   private readonly eventDispatcher: EventDispatcher;
   private readonly caretManager = new CaretManager();
+  private readonly trackedScrollOffsets = new Map<Element, number>();
   private clipboardBuffer = '';
   private readonly boundResizeListener = (): void => {
     this.handleResize();
@@ -663,8 +665,14 @@ export class Terminal {
           return;
       }
 
-      body.scrollTop = Math.max(0, currentScroll + delta);
+      const nextScroll = Math.max(0, currentScroll + delta);
+
+      body.scrollTop = nextScroll;
       event.preventDefault();
+
+      if (nextScroll !== currentScroll) {
+        this.renderFrame();
+      }
     }) as EventListener);
   }
 
@@ -672,7 +680,7 @@ export class Terminal {
    * Updates resolved viewport dimensions for all active editables
    * from their layout boxes' content areas.
    */
-  private resolveEditableViewports(layoutRoot: import('../layout/types').LayoutBox | null): void {
+  private resolveEditableViewports(layoutRoot: LayoutBox | null): void {
     if (!layoutRoot) return;
 
     for (const caret of this.caretManager.getCarets()) {
@@ -692,10 +700,7 @@ export class Terminal {
   /**
    * Finds the layout box for a DOM element by walking the layout tree.
    */
-  private findLayoutBox(
-    box: import('../layout/types').LayoutBox,
-    element: Element,
-  ): import('../layout/types').LayoutBox | null {
+  private findLayoutBox(box: LayoutBox, element: Element): LayoutBox | null {
     if (box.element === element) return box;
 
     for (const child of box.children) {
@@ -823,8 +828,9 @@ export class Terminal {
     const resized = columns !== this.renderer.cols || rows !== this.renderer.rows;
     const hasStyleChanges = this.styleEngine.getDirtyElements().size > 0;
     const hasLayoutChanges = this.styleEngine.getLayoutDirtyElements().size > 0;
+    const hasScrollChanges = this.hasTrackedScrollChanges();
 
-    if (!resized && !hasStyleChanges && !hasLayoutChanges && !caretChanged) {
+    if (!resized && !hasStyleChanges && !hasLayoutChanges && !hasScrollChanges && !caretChanged) {
       return;
     }
 
@@ -841,6 +847,7 @@ export class Terminal {
 
     const layout = this.layoutEngine.layout(this.document.body, columns, rows);
     this.eventDispatcher.setLayoutRoot(layout);
+    this.syncTrackedScrollOffsets(layout);
 
     const carets = this.caretManager.getCarets();
 
@@ -858,6 +865,42 @@ export class Terminal {
 
     if (output.length > 0) {
       this.output.write(output);
+    }
+  }
+
+  private hasTrackedScrollChanges(): boolean {
+    for (const [element, previousScrollOffset] of this.trackedScrollOffsets) {
+      const currentScrollOffset = (element as Element & {scrollTop?: number}).scrollTop ?? 0;
+
+      if (currentScrollOffset !== previousScrollOffset) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private syncTrackedScrollOffsets(layoutRoot: LayoutBox | null): void {
+    this.trackedScrollOffsets.clear();
+
+    if (layoutRoot === null) {
+      return;
+    }
+
+    const pending = [layoutRoot];
+
+    while (pending.length > 0) {
+      const box = pending.pop()!;
+
+      if (box.computedStyle.get('overflow') === 'scroll') {
+        const scrollableElement = box.element as Element & {scrollTop?: number};
+
+        this.trackedScrollOffsets.set(box.element, scrollableElement.scrollTop ?? 0);
+      }
+
+      for (let index = box.children.length - 1; index >= 0; index -= 1) {
+        pending.push(box.children[index]!);
+      }
     }
   }
 

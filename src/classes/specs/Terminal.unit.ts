@@ -1,7 +1,7 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../../constants/terminal';
-import {Window} from '../../dom';
+import {KeyboardEvent, Window} from '../../dom';
 import {Terminal} from '../Terminal';
 
 import type {TerminalReadableInput} from '../../terminal/types';
@@ -180,6 +180,54 @@ describe('Terminal', () => {
 
     expect(layoutSpy).not.toHaveBeenCalled();
     expect(renderSpy).not.toHaveBeenCalled();
+  });
+
+  it('renders when tracked scroll offsets change even if the DOM is otherwise unchanged', () => {
+    const output = createOutput();
+    const input = createInput();
+    const terminal = new Terminal({output: output.stream, input});
+    const internals = terminal as unknown as TerminalInternals;
+
+    terminal.document.body.textContent = Array.from(
+      {length: 20},
+      (_, index) => `line ${index}`,
+    ).join('\n');
+    internals.renderFrame();
+
+    const renderSpy = vi.spyOn(internals.renderer, 'render');
+    (terminal.document.body as typeof terminal.document.body & {scrollTop?: number}).scrollTop = 1;
+
+    internals.renderFrame();
+
+    expect(renderSpy).toHaveBeenCalledOnce();
+  });
+
+  it('rerenders immediately when keyboard scrolling updates the body viewport', () => {
+    const output = createOutput();
+    const input = createInput();
+    const terminal = new Terminal({output: output.stream, input});
+    const internals = terminal as unknown as TerminalInternals;
+
+    terminal.document.body.textContent = Array.from(
+      {length: 20},
+      (_, index) => `line ${index}`,
+    ).join('\n');
+    internals.renderFrame();
+
+    const renderFrameSpy = vi.spyOn(internals, 'renderFrame');
+
+    terminal.document.body.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: 'ArrowDown',
+      }),
+    );
+
+    expect(renderFrameSpy).toHaveBeenCalledOnce();
+    expect(
+      (terminal.document.body as typeof terminal.document.body & {scrollTop?: number}).scrollTop,
+    ).toBe(1);
   });
 
   it('renders when caret blinking changes even if the DOM is otherwise unchanged', () => {
