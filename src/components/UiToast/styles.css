@@ -1,0 +1,17 @@
+ui-toast {
+  display: block;
+  position: absolute;
+  padding: 0 1;
+}
+
+ui-toast[variant='success'] {
+  color: green;
+}
+
+ui-toast[variant='warning'] {
+  color: yellow;
+}
+
+ui-toast[variant='error'] {
+  color: red;
+}

@@ -26,3 +26,4 @@ export {UiTfoot} from './UiTfoot/component';
 export {UiTh} from './UiTh/component';
 export {UiThead} from './UiThead/component';
 export {UiTr} from './UiTr/component';
+export {UiToast} from './UiToast/component';
