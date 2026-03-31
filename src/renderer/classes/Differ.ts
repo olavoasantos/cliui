@@ -1,6 +1,20 @@
 import type {Cell, ChangedRegion} from '../types';
 import {CellBuffer} from './CellBuffer';
 
+/** Shared immutable empty cell used for out-of-bounds reads during diffing. */
+const EMPTY_CELL: Readonly<Cell> = Object.freeze({
+  char: ' ',
+  fg: null,
+  bg: null,
+  bold: false,
+  italic: false,
+  underline: 'none' as const,
+  underlineColor: null,
+  strikethrough: false,
+  faint: false,
+  hyperlink: null,
+});
+
 /**
  * Computes row-local changed runs between two cell buffers.
  *
@@ -17,6 +31,9 @@ export class Differ {
    * treated as empty cells so buffer growth and shrinkage still produce clear
    * operations where needed.
    *
+   * Rows where neither buffer has been modified since the last dirty-flag
+   * reset are skipped entirely.
+   *
    * @param previous - Previously rendered buffer.
    * @param current - Newly rendered buffer.
    * @returns Consecutive changed regions grouped by row.
@@ -27,11 +44,15 @@ export class Differ {
     const cols = Math.max(previous.cols, current.cols);
 
     for (let y = 0; y < rows; y += 1) {
+      if (!previous.isRowDirty(y) && !current.isRowDirty(y)) {
+        continue;
+      }
+
       let activeRegion: ChangedRegion | null = null;
 
       for (let x = 0; x < cols; x += 1) {
-        const previousCell = previous.get(x, y) ?? this.createEmptyCell();
-        const currentCell = current.get(x, y) ?? this.createEmptyCell();
+        const previousCell = previous.getRef(x, y) ?? EMPTY_CELL;
+        const currentCell = current.getRef(x, y) ?? EMPTY_CELL;
 
         if (this.areCellsEqual(previousCell, currentCell)) {
           if (activeRegion !== null) {
@@ -61,7 +82,7 @@ export class Differ {
     return regions;
   }
 
-  private areCellsEqual(left: Cell, right: Cell): boolean {
+  private areCellsEqual(left: Readonly<Cell>, right: Readonly<Cell>): boolean {
     return (
       left.char === right.char &&
       this.areColorsEqual(left.fg, right.fg) &&
@@ -82,20 +103,5 @@ export class Differ {
     }
 
     return left.r === right.r && left.g === right.g && left.b === right.b;
-  }
-
-  private createEmptyCell(): Cell {
-    return {
-      char: ' ',
-      fg: null,
-      bg: null,
-      bold: false,
-      italic: false,
-      underline: 'none',
-      underlineColor: null,
-      strikethrough: false,
-      faint: false,
-      hyperlink: null,
-    };
   }
 }

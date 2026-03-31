@@ -10,6 +10,36 @@ import type {Cell, ChangedRegion, RGBColor, UnderlineStyle} from '../types';
 import type {StyleState} from '../types/StyleState';
 import type {TerminalColorProfile} from '../../terminal/types';
 
+/** ANSI 16 palette colors (shared across all instances, never mutated). */
+const ANSI16_COLORS: ReadonlyArray<{r: number; g: number; b: number}> = [
+  {r: 0, g: 0, b: 0},
+  {r: 128, g: 0, b: 0},
+  {r: 0, g: 128, b: 0},
+  {r: 128, g: 128, b: 0},
+  {r: 0, g: 0, b: 128},
+  {r: 128, g: 0, b: 128},
+  {r: 0, g: 128, b: 128},
+  {r: 192, g: 192, b: 192},
+  {r: 128, g: 128, b: 128},
+  {r: 255, g: 0, b: 0},
+  {r: 0, g: 255, b: 0},
+  {r: 255, g: 255, b: 0},
+  {r: 0, g: 0, b: 255},
+  {r: 255, g: 0, b: 255},
+  {r: 0, g: 255, b: 255},
+  {r: 255, g: 255, b: 255},
+];
+
+/** Foreground ANSI 16 code offsets. */
+const ANSI16_FG_CODES: ReadonlyArray<number> = [
+  30, 31, 32, 33, 34, 35, 36, 37, 90, 91, 92, 93, 94, 95, 96, 97,
+];
+
+/** Background ANSI 16 code offsets. */
+const ANSI16_BG_CODES: ReadonlyArray<number> = [
+  40, 41, 42, 43, 44, 45, 46, 47, 100, 101, 102, 103, 104, 105, 106, 107,
+];
+
 /**
  * Serializes changed cell regions into ANSI terminal escape sequences.
  *
@@ -20,6 +50,9 @@ import type {TerminalColorProfile} from '../../terminal/types';
 export class ANSIWriter {
   private synchronizedOutputEnabled = false;
   private colorProfile: TerminalColorProfile = 'truecolor';
+
+  /** Reusable style state mutated in place during write(). */
+  private state: StyleState = this.createDefaultState();
 
   /**
    * Enables or disables synchronized output wrapping.
@@ -47,7 +80,9 @@ export class ANSIWriter {
    */
   write(regions: ChangedRegion[]): string {
     let output = '';
-    let state = this.createDefaultState();
+    const state = this.state;
+
+    this.resetState(state);
 
     for (const region of regions) {
       output += `${CSI}${region.y + 1};${region.x + 1}H`;
@@ -55,14 +90,14 @@ export class ANSIWriter {
       for (const cell of region.cells) {
         output += this.serializeHyperlink(state.hyperlink, cell.hyperlink);
 
-        const sgrCodes = this.getSgrCodes(state, cell);
+        const sgr = this.buildSgrString(state, cell);
 
-        if (sgrCodes.length > 0) {
-          output += `${CSI}${sgrCodes.join(';')}m`;
+        if (sgr.length > 0) {
+          output += `${CSI}${sgr}m`;
         }
 
         output += cell.char;
-        state = this.createStateFromCell(cell);
+        this.updateState(state, cell);
       }
     }
 
@@ -77,73 +112,67 @@ export class ANSIWriter {
     return `${ENABLE_SYNCHRONIZED_OUTPUT}${output}${DISABLE_SYNCHRONIZED_OUTPUT}`;
   }
 
-  private getSgrCodes(previous: StyleState, current: Cell): string[] {
-    const codes: string[] = [];
+  /**
+   * Builds an SGR parameter string directly without allocating an array.
+   */
+  private buildSgrString(previous: StyleState, current: Readonly<Cell>): string {
+    let sgr = '';
 
     if (previous.bold !== current.bold || previous.faint !== current.faint) {
       if (previous.bold || previous.faint) {
-        codes.push('22');
+        sgr += '22';
       }
 
       if (current.bold) {
-        codes.push('1');
+        sgr += sgr.length > 0 ? ';1' : '1';
       }
 
       if (current.faint) {
-        codes.push('2');
+        sgr += sgr.length > 0 ? ';2' : '2';
       }
     }
 
     if (previous.italic !== current.italic) {
-      codes.push(current.italic ? '3' : '23');
+      const code = current.italic ? '3' : '23';
+      sgr += sgr.length > 0 ? `;${code}` : code;
     }
 
     if (previous.underline !== current.underline) {
-      if (current.underline === 'none') {
-        codes.push('24');
-      } else {
-        codes.push(this.getUnderlineCode(current.underline));
-      }
+      const code = current.underline === 'none' ? '24' : this.getUnderlineCode(current.underline);
+      sgr += sgr.length > 0 ? `;${code}` : code;
     }
 
     const previousUnderlineColor = this.resolveColorForProfile(previous.underlineColor);
     const currentUnderlineColor = this.resolveColorForProfile(current.underlineColor);
 
     if (!this.areColorsEqual(previousUnderlineColor, currentUnderlineColor)) {
-      if (currentUnderlineColor === null) {
-        codes.push('59');
-      } else {
-        codes.push(this.getColorCode('58', currentUnderlineColor));
-      }
+      const code =
+        currentUnderlineColor === null ? '59' : this.getColorCode('58', currentUnderlineColor);
+      sgr += sgr.length > 0 ? `;${code}` : code;
     }
 
     if (previous.strikethrough !== current.strikethrough) {
-      codes.push(current.strikethrough ? '9' : '29');
+      const code = current.strikethrough ? '9' : '29';
+      sgr += sgr.length > 0 ? `;${code}` : code;
     }
 
     const previousForeground = this.resolveColorForProfile(previous.fg);
     const currentForeground = this.resolveColorForProfile(current.fg);
 
     if (!this.areColorsEqual(previousForeground, currentForeground)) {
-      if (currentForeground === null) {
-        codes.push('39');
-      } else {
-        codes.push(this.getColorCode('38', currentForeground));
-      }
+      const code = currentForeground === null ? '39' : this.getColorCode('38', currentForeground);
+      sgr += sgr.length > 0 ? `;${code}` : code;
     }
 
     const previousBackground = this.resolveColorForProfile(previous.bg);
     const currentBackground = this.resolveColorForProfile(current.bg);
 
     if (!this.areColorsEqual(previousBackground, currentBackground)) {
-      if (currentBackground === null) {
-        codes.push('49');
-      } else {
-        codes.push(this.getColorCode('48', currentBackground));
-      }
+      const code = currentBackground === null ? '49' : this.getColorCode('48', currentBackground);
+      sgr += sgr.length > 0 ? `;${code}` : code;
     }
 
-    return codes;
+    return sgr;
   }
 
   private getUnderlineCode(style: UnderlineStyle): string {
@@ -177,9 +206,11 @@ export class ANSIWriter {
   }
 
   private getAnsi256Index(color: RGBColor): number {
-    const channels = [color.r, color.g, color.b].map((channel) => Math.round((channel / 255) * 5));
+    const r = Math.round((color.r / 255) * 5);
+    const g = Math.round((color.g / 255) * 5);
+    const b = Math.round((color.b / 255) * 5);
 
-    return 16 + 36 * channels[0]! + 6 * channels[1]! + channels[2]!;
+    return 16 + 36 * r + 6 * g + b;
   }
 
   private getAnsi16Code(prefix: '38' | '48' | '58', color: RGBColor): number {
@@ -187,42 +218,22 @@ export class ANSIWriter {
       return 59;
     }
 
-    const palette = [
-      {code: prefix === '38' ? 30 : 40, color: {r: 0, g: 0, b: 0}},
-      {code: prefix === '38' ? 31 : 41, color: {r: 128, g: 0, b: 0}},
-      {code: prefix === '38' ? 32 : 42, color: {r: 0, g: 128, b: 0}},
-      {code: prefix === '38' ? 33 : 43, color: {r: 128, g: 128, b: 0}},
-      {code: prefix === '38' ? 34 : 44, color: {r: 0, g: 0, b: 128}},
-      {code: prefix === '38' ? 35 : 45, color: {r: 128, g: 0, b: 128}},
-      {code: prefix === '38' ? 36 : 46, color: {r: 0, g: 128, b: 128}},
-      {code: prefix === '38' ? 37 : 47, color: {r: 192, g: 192, b: 192}},
-      {code: prefix === '38' ? 90 : 100, color: {r: 128, g: 128, b: 128}},
-      {code: prefix === '38' ? 91 : 101, color: {r: 255, g: 0, b: 0}},
-      {code: prefix === '38' ? 92 : 102, color: {r: 0, g: 255, b: 0}},
-      {code: prefix === '38' ? 93 : 103, color: {r: 255, g: 255, b: 0}},
-      {code: prefix === '38' ? 94 : 104, color: {r: 0, g: 0, b: 255}},
-      {code: prefix === '38' ? 95 : 105, color: {r: 255, g: 0, b: 255}},
-      {code: prefix === '38' ? 96 : 106, color: {r: 0, g: 255, b: 255}},
-      {code: prefix === '38' ? 97 : 107, color: {r: 255, g: 255, b: 255}},
-    ];
-
-    let closest = palette[0]!;
+    const codes = prefix === '38' ? ANSI16_FG_CODES : ANSI16_BG_CODES;
+    let closestIndex = 0;
     let closestDistance = Number.POSITIVE_INFINITY;
 
-    for (const candidate of palette) {
-      const distance = this.getColorDistance(color, candidate.color);
+    for (let i = 0; i < ANSI16_COLORS.length; i += 1) {
+      const candidate = ANSI16_COLORS[i]!;
+      const distance =
+        (color.r - candidate.r) ** 2 + (color.g - candidate.g) ** 2 + (color.b - candidate.b) ** 2;
 
       if (distance < closestDistance) {
-        closest = candidate;
+        closestIndex = i;
         closestDistance = distance;
       }
     }
 
-    return closest.code;
-  }
-
-  private getColorDistance(left: RGBColor, right: RGBColor): number {
-    return (left.r - right.r) ** 2 + (left.g - right.g) ** 2 + (left.b - right.b) ** 2;
+    return codes[closestIndex]!;
   }
 
   private resolveColorForProfile(color: RGBColor | null): RGBColor | null {
@@ -255,18 +266,28 @@ export class ANSIWriter {
     };
   }
 
-  private createStateFromCell(cell: Cell): StyleState {
-    return {
-      fg: cell.fg === null ? null : {...cell.fg},
-      bg: cell.bg === null ? null : {...cell.bg},
-      bold: cell.bold,
-      italic: cell.italic,
-      underline: cell.underline,
-      underlineColor: cell.underlineColor === null ? null : {...cell.underlineColor},
-      strikethrough: cell.strikethrough,
-      faint: cell.faint,
-      hyperlink: cell.hyperlink,
-    };
+  private resetState(state: StyleState): void {
+    state.fg = null;
+    state.bg = null;
+    state.bold = false;
+    state.italic = false;
+    state.underline = 'none';
+    state.underlineColor = null;
+    state.strikethrough = false;
+    state.faint = false;
+    state.hyperlink = null;
+  }
+
+  private updateState(state: StyleState, cell: Readonly<Cell>): void {
+    state.fg = cell.fg;
+    state.bg = cell.bg;
+    state.bold = cell.bold;
+    state.italic = cell.italic;
+    state.underline = cell.underline;
+    state.underlineColor = cell.underlineColor;
+    state.strikethrough = cell.strikethrough;
+    state.faint = cell.faint;
+    state.hyperlink = cell.hyperlink;
   }
 
   private areColorsEqual(left: RGBColor | null, right: RGBColor | null): boolean {

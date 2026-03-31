@@ -115,16 +115,26 @@ export class Painter {
       return;
     }
 
+    const bgCell: Cell = {
+      char: ' ',
+      fg: textCell.fg,
+      bg: textCell.bg,
+      bold: textCell.bold,
+      italic: textCell.italic,
+      underline: textCell.underline,
+      underlineColor: textCell.underlineColor,
+      strikethrough: textCell.strikethrough,
+      faint: textCell.faint,
+      hyperlink: textCell.hyperlink,
+    };
+
     for (let y = metrics.outerY; y < metrics.outerY + metrics.outerHeight; y += 1) {
       for (let x = metrics.outerX; x < metrics.outerX + metrics.outerWidth; x += 1) {
-        if (buffer.get(x, y) === undefined || !this.isWithinClipRect(x, y, clipRect)) {
+        if (buffer.getRef(x, y) === undefined || !this.isWithinClipRect(x, y, clipRect)) {
           continue;
         }
 
-        buffer.set(x, y, {
-          ...textCell,
-          char: ' ',
-        });
+        buffer.setDirect(x, y, bgCell);
       }
     }
   }
@@ -154,9 +164,16 @@ export class Painter {
       : null;
     const solidColor = gradient ? null : parseColor(borderColorValue);
     const borderCell: Cell = {
-      ...textCell,
       char: ' ',
       fg: solidColor,
+      bg: textCell.bg,
+      bold: textCell.bold,
+      italic: textCell.italic,
+      underline: textCell.underline,
+      underlineColor: textCell.underlineColor,
+      strikethrough: textCell.strikethrough,
+      faint: textCell.faint,
+      hyperlink: textCell.hyperlink,
     };
     const maxX = metrics.outerX + metrics.outerWidth - 1;
     const maxY = metrics.outerY + metrics.outerHeight - 1;
@@ -165,75 +182,46 @@ export class Painter {
     const fgAt = sampler ? (lx: number, ly: number) => sampler(lx, ly) : () => solidColor;
 
     /* Corners */
-    this.writeCell(
-      buffer,
-      metrics.outerX,
-      metrics.outerY,
-      {...borderCell, char: characters.topLeft, fg: fgAt(0, 0)},
-      clipRect,
-    );
-    this.writeCell(
-      buffer,
-      maxX,
-      metrics.outerY,
-      {...borderCell, char: characters.topRight, fg: fgAt(metrics.outerWidth - 1, 0)},
-      clipRect,
-    );
-    this.writeCell(
-      buffer,
-      metrics.outerX,
-      maxY,
-      {...borderCell, char: characters.bottomLeft, fg: fgAt(0, metrics.outerHeight - 1)},
-      clipRect,
-    );
-    this.writeCell(
-      buffer,
-      maxX,
-      maxY,
-      {
-        ...borderCell,
-        char: characters.bottomRight,
-        fg: fgAt(metrics.outerWidth - 1, metrics.outerHeight - 1),
-      },
-      clipRect,
-    );
+    borderCell.char = characters.topLeft;
+    borderCell.fg = fgAt(0, 0);
+    this.writeCell(buffer, metrics.outerX, metrics.outerY, borderCell, clipRect);
+
+    borderCell.char = characters.topRight;
+    borderCell.fg = fgAt(metrics.outerWidth - 1, 0);
+    this.writeCell(buffer, maxX, metrics.outerY, borderCell, clipRect);
+
+    borderCell.char = characters.bottomLeft;
+    borderCell.fg = fgAt(0, metrics.outerHeight - 1);
+    this.writeCell(buffer, metrics.outerX, maxY, borderCell, clipRect);
+
+    borderCell.char = characters.bottomRight;
+    borderCell.fg = fgAt(metrics.outerWidth - 1, metrics.outerHeight - 1);
+    this.writeCell(buffer, maxX, maxY, borderCell, clipRect);
 
     /* Top and bottom edges */
     for (let x = metrics.outerX + 1; x < maxX; x += 1) {
       const lx = x - metrics.outerX;
-      this.writeCell(
-        buffer,
-        x,
-        metrics.outerY,
-        {...borderCell, char: characters.top, fg: fgAt(lx, 0)},
-        clipRect,
-      );
-      this.writeCell(
-        buffer,
-        x,
-        maxY,
-        {...borderCell, char: characters.bottom, fg: fgAt(lx, metrics.outerHeight - 1)},
-        clipRect,
-      );
+
+      borderCell.char = characters.top;
+      borderCell.fg = fgAt(lx, 0);
+      this.writeCell(buffer, x, metrics.outerY, borderCell, clipRect);
+
+      borderCell.char = characters.bottom;
+      borderCell.fg = fgAt(lx, metrics.outerHeight - 1);
+      this.writeCell(buffer, x, maxY, borderCell, clipRect);
     }
 
     /* Left and right edges */
     for (let y = metrics.outerY + 1; y < maxY; y += 1) {
       const ly = y - metrics.outerY;
-      this.writeCell(
-        buffer,
-        metrics.outerX,
-        y,
-        {...borderCell, char: characters.left, fg: fgAt(0, ly)},
-        clipRect,
-      );
-      this.writeCell(
-        buffer,
-        maxX,
-        y,
-        {...borderCell, char: characters.right, fg: fgAt(metrics.outerWidth - 1, ly)},
-        clipRect,
-      );
+
+      borderCell.char = characters.left;
+      borderCell.fg = fgAt(0, ly);
+      this.writeCell(buffer, metrics.outerX, y, borderCell, clipRect);
+
+      borderCell.char = characters.right;
+      borderCell.fg = fgAt(metrics.outerWidth - 1, ly);
+      this.writeCell(buffer, maxX, y, borderCell, clipRect);
     }
   }
 
@@ -251,8 +239,21 @@ export class Painter {
 
     if (y >= box.contentY + box.contentHeight) return;
 
+    const hrCell: Cell = {
+      char: '─',
+      fg: textCell.fg,
+      bg: textCell.bg,
+      bold: textCell.bold,
+      italic: textCell.italic,
+      underline: textCell.underline,
+      underlineColor: textCell.underlineColor,
+      strikethrough: textCell.strikethrough,
+      faint: textCell.faint,
+      hyperlink: textCell.hyperlink,
+    };
+
     for (let x = box.contentX; x < box.contentX + box.contentWidth; x++) {
-      this.writeCell(buffer, x, y, {...textCell, char: '─'}, clipRect);
+      this.writeCell(buffer, x, y, hrCell, clipRect);
     }
   }
 
@@ -267,6 +268,18 @@ export class Painter {
     }
 
     const startY = this.resolveTextStartY(box);
+    const writeCell: Cell = {
+      char: ' ',
+      fg: textCell.fg,
+      bg: textCell.bg,
+      bold: textCell.bold,
+      italic: textCell.italic,
+      underline: textCell.underline,
+      underlineColor: textCell.underlineColor,
+      strikethrough: textCell.strikethrough,
+      faint: textCell.faint,
+      hyperlink: textCell.hyperlink,
+    };
 
     for (let row = 0; row < box.textLines.length; row += 1) {
       const y = startY + row;
@@ -289,14 +302,16 @@ export class Painter {
           break;
         }
 
-        this.writeCell(buffer, x, y, {...textCell, char: segment}, clipRect);
+        writeCell.char = segment;
+        this.writeCell(buffer, x, y, writeCell, clipRect);
 
         for (let offset = 1; offset < width; offset += 1) {
           if (x + offset >= box.contentX + box.contentWidth) {
             break;
           }
 
-          this.writeCell(buffer, x + offset, y, {...textCell, char: ' '}, clipRect);
+          writeCell.char = ' ';
+          this.writeCell(buffer, x + offset, y, writeCell, clipRect);
         }
 
         x += width;
@@ -346,19 +361,27 @@ export class Painter {
     cell: Cell,
     clipRect: ClipRect | null,
   ): void {
-    const existing = buffer.get(x, y);
+    const existing = buffer.getRef(x, y);
 
     if (existing === undefined || !this.isWithinClipRect(x, y, clipRect)) {
       return;
     }
 
     if (cell.bg === null && existing.bg !== null) {
-      buffer.set(x, y, {...cell, bg: existing.bg});
+      this.writeCellWithBg = existing.bg;
+      buffer.setDirect(x, y, cell);
+
+      // Restore the bg that setDirect just overwrote with null
+      const ref = buffer.getRef(x, y)!;
+      ref.bg = {r: this.writeCellWithBg.r, g: this.writeCellWithBg.g, b: this.writeCellWithBg.b};
       return;
     }
 
-    buffer.set(x, y, cell);
+    buffer.setDirect(x, y, cell);
   }
+
+  /** Temporary storage for bg preservation in writeCell. */
+  private writeCellWithBg: {r: number; g: number; b: number} | null = null;
 
   private resolveTextStartX(box: LayoutBox, line: string): number {
     const textAlign = box.computedStyle.get('text-align') ?? 'left';

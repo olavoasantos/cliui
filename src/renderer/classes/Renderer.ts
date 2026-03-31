@@ -151,30 +151,27 @@ export class Renderer {
   private applyCaretOverlays(overlays: CaretOverlay[]): void {
     for (const overlay of overlays) {
       if (overlay.cursorVisible) {
-        const cell = this.currentBuffer.get(overlay.cursorX, overlay.cursorY);
+        const cell = this.currentBuffer.getRef(overlay.cursorX, overlay.cursorY);
 
         if (cell) {
-          const fg = cell.fg;
-          const bg = cell.bg;
+          const prevFg = cell.fg;
+          const prevBg = cell.bg;
 
-          this.currentBuffer.set(overlay.cursorX, overlay.cursorY, {
-            ...cell,
-            fg: bg ?? {r: 255, g: 255, b: 255},
-            bg: fg ?? {r: 0, g: 0, b: 0},
-          });
+          cell.fg = prevBg ?? {r: 255, g: 255, b: 255};
+          cell.bg = prevFg ?? {r: 0, g: 0, b: 0};
         }
       }
 
       for (const range of overlay.selection) {
         for (let x = range.x; x < range.x + range.width; x++) {
-          const cell = this.currentBuffer.get(x, range.y);
+          const cell = this.currentBuffer.getRef(x, range.y);
 
           if (cell) {
-            this.currentBuffer.set(x, range.y, {
-              ...cell,
-              fg: cell.bg ?? {r: 255, g: 255, b: 255},
-              bg: cell.fg ?? {r: 0, g: 0, b: 0},
-            });
+            const prevFg = cell.fg;
+            const prevBg = cell.bg;
+
+            cell.fg = prevBg ?? {r: 255, g: 255, b: 255};
+            cell.bg = prevFg ?? {r: 0, g: 0, b: 0};
           }
         }
       }
