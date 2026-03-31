@@ -21,9 +21,9 @@ describe('UiBreadcrumbs', () => {
     expect(window.customElements.get('ui-breadcrumbs')).toBe(UiBreadcrumbs);
   });
 
-  it('inserts separators between segments', () => {
+  it('renders segments joined with the default separator', () => {
     const {document} = createEnv();
-    const crumbs = document.createElement('ui-breadcrumbs');
+    const crumbs = document.createElement('ui-breadcrumbs') as UiBreadcrumbs;
 
     for (const text of ['Home', 'Projects', 'terminal-dom']) {
       const seg = document.createElement('ui-breadcrumb');
@@ -33,25 +33,9 @@ describe('UiBreadcrumbs', () => {
 
     document.body.appendChild(crumbs);
 
-    /* 3 segments + 2 separators = 5 children */
-    expect(crumbs.childNodes.length).toBe(5);
-  });
+    const rendered = crumbs.querySelector('.ui-breadcrumbs-rendered');
 
-  it('uses the default separator character', () => {
-    const {document} = createEnv();
-    const crumbs = document.createElement('ui-breadcrumbs') as UiBreadcrumbs;
-
-    for (const text of ['A', 'B']) {
-      const seg = document.createElement('ui-breadcrumb');
-      seg.textContent = text;
-      crumbs.appendChild(seg);
-    }
-
-    document.body.appendChild(crumbs);
-
-    const sep = crumbs.childNodes[1] as import('../../../dom').Element;
-
-    expect(sep.textContent).toBe('›');
+    expect(rendered?.textContent).toBe('Home › Projects › terminal-dom');
   });
 
   it('uses a custom separator', () => {
@@ -67,8 +51,21 @@ describe('UiBreadcrumbs', () => {
 
     document.body.appendChild(crumbs);
 
-    const sep = crumbs.childNodes[1] as import('../../../dom').Element;
+    const rendered = crumbs.querySelector('.ui-breadcrumbs-rendered');
 
-    expect(sep.textContent).toBe('/');
+    expect(rendered?.textContent).toBe('A / B');
+  });
+
+  it('renders single segment without separator', () => {
+    const {document} = createEnv();
+    const crumbs = document.createElement('ui-breadcrumbs') as UiBreadcrumbs;
+    const seg = document.createElement('ui-breadcrumb');
+    seg.textContent = 'Dashboard';
+    crumbs.appendChild(seg);
+    document.body.appendChild(crumbs);
+
+    const rendered = crumbs.querySelector('.ui-breadcrumbs-rendered');
+
+    expect(rendered?.textContent).toBe('Dashboard');
   });
 });

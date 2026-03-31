@@ -23,7 +23,7 @@ export class UiBreadcrumbs extends HTMLElement {
   static readonly tagName = UI_BREADCRUMBS_TAG_NAME;
 
   connectedCallback(): void {
-    this.insertSeparators();
+    this.renderSegments();
   }
 
   override attributeChangedCallback(
@@ -34,7 +34,7 @@ export class UiBreadcrumbs extends HTMLElement {
     if (oldValue === newValue) return;
 
     if (name === 'separator') {
-      this.updateSeparators();
+      this.renderSegments();
     }
   }
 
@@ -45,43 +45,13 @@ export class UiBreadcrumbs extends HTMLElement {
 
   /* ── Private ────────────────────────────────────────────── */
 
-  private insertSeparators(): void {
-    const doc = this.ownerDocument!;
+  /**
+   * Rebuilds the visible content by collecting segment text and
+   * joining with the separator character.
+   */
+  private renderSegments(): void {
     const sep = this.getSeparator();
-    const segments = this.collectSegments();
-
-    for (let i = segments.length - 1; i > 0; i--) {
-      const sepEl = doc.createElement('span');
-      sepEl.setAttribute('class', 'ui-breadcrumbs-separator');
-      sepEl.style.display = 'inline';
-      sepEl.textContent = sep;
-
-      const after = segments[i]!;
-      this.insertBefore(
-        sepEl as unknown as import('../../dom').Node,
-        after as unknown as import('../../dom').Node,
-      );
-    }
-  }
-
-  private updateSeparators(): void {
-    const sep = this.getSeparator();
-
-    for (let i = 0; i < this.childNodes.length; i++) {
-      const child = this.childNodes[i];
-
-      if (
-        child &&
-        'getAttribute' in child &&
-        (child as import('../../dom').Element).getAttribute('class') === 'ui-breadcrumbs-separator'
-      ) {
-        (child as import('../../dom').Element).textContent = sep;
-      }
-    }
-  }
-
-  private collectSegments(): import('../../dom').Element[] {
-    const segments: import('../../dom').Element[] = [];
+    const texts: string[] = [];
 
     for (let i = 0; i < this.childNodes.length; i++) {
       const child = this.childNodes[i];
@@ -91,10 +61,31 @@ export class UiBreadcrumbs extends HTMLElement {
         'localName' in child &&
         (child as import('../../dom').Element).localName === 'ui-breadcrumb'
       ) {
-        segments.push(child as import('../../dom').Element);
+        texts.push((child as import('../../dom').Element).textContent ?? '');
       }
     }
 
-    return segments;
+    /* Replace visible content with joined text while keeping
+       the original breadcrumb children in the DOM for API access. */
+    const doc = this.ownerDocument!;
+
+    /* Remove any previously rendered text span */
+    for (let i = this.childNodes.length - 1; i >= 0; i--) {
+      const child = this.childNodes[i];
+
+      if (
+        child &&
+        'getAttribute' in child &&
+        (child as import('../../dom').Element).getAttribute('class') === 'ui-breadcrumbs-rendered'
+      ) {
+        this.removeChild(child);
+      }
+    }
+
+    const rendered = doc.createElement('span');
+    rendered.setAttribute('class', 'ui-breadcrumbs-rendered');
+    rendered.style.display = 'inline';
+    rendered.textContent = texts.join(` ${sep} `);
+    this.appendChild(rendered);
   }
 }
