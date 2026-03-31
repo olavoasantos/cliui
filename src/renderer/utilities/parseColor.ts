@@ -64,12 +64,9 @@ function parseHexColor(normalized: string): RGBColor | null {
   }
 
   if (len === 7) {
-    const r =
-      (hexDigit(normalized.charCodeAt(1)) << 4) | hexDigit(normalized.charCodeAt(2));
-    const g =
-      (hexDigit(normalized.charCodeAt(3)) << 4) | hexDigit(normalized.charCodeAt(4));
-    const b =
-      (hexDigit(normalized.charCodeAt(5)) << 4) | hexDigit(normalized.charCodeAt(6));
+    const r = (hexDigit(normalized.charCodeAt(1)) << 4) | hexDigit(normalized.charCodeAt(2));
+    const g = (hexDigit(normalized.charCodeAt(3)) << 4) | hexDigit(normalized.charCodeAt(4));
+    const b = (hexDigit(normalized.charCodeAt(5)) << 4) | hexDigit(normalized.charCodeAt(6));
 
     if (r < 0 || g < 0 || b < 0) return null;
 

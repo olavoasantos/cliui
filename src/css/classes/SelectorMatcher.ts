@@ -3,24 +3,8 @@ import {computeSpecificity} from '../utilities/computeSpecificity';
 import {matchesSelectorParts} from '../utilities/matchesSelectorParts';
 
 import type {Element} from '../../dom/classes/Element';
-import type {SelectorPart} from '../../dom/types';
 import type {MatchedDeclaration} from '../types/MatchedDeclaration';
 import type {CSSRule} from '../types';
-
-/** Pre-computed specificity cached per selector part array (by identity). */
-const specificityCache = new WeakMap<SelectorPart[], [number, number, number]>();
-
-/** Returns the specificity for a selector, computing and caching it if needed. */
-function getCachedSpecificity(parts: SelectorPart[]): [number, number, number] {
-  let result = specificityCache.get(parts);
-
-  if (result === undefined) {
-    result = computeSpecificity(parts);
-    specificityCache.set(parts, result);
-  }
-
-  return result;
-}
 
 /** Matches CSS rules against DOM elements and returns declarations sorted by specificity. */
 export class SelectorMatcher {
@@ -28,12 +12,23 @@ export class SelectorMatcher {
     const matched: MatchedDeclaration[] = [];
     let order = 0;
 
-    for (const rule of rules) {
+    for (let i = 0, rulesLen = rules.length; i < rulesLen; i++) {
+      const rule = rules[i];
       let highestSpecificity: [number, number, number] | null = null;
+      const selectors = rule.selectors;
 
-      for (const selectorParts of rule.selectors) {
+      for (let j = 0, selLen = selectors.length; j < selLen; j++) {
+        const selectorParts = selectors[j];
         if (matchesSelectorParts(element, selectorParts)) {
-          const specificity = getCachedSpecificity(selectorParts);
+          // We attach specificity to the selector array to avoid WeakMap overhead.
+          let specificity = (selectorParts as any)._specificity as
+            | [number, number, number]
+            | undefined;
+
+          if (specificity === undefined) {
+            specificity = computeSpecificity(selectorParts);
+            (selectorParts as any)._specificity = specificity;
+          }
 
           if (
             highestSpecificity === null ||
@@ -48,21 +43,24 @@ export class SelectorMatcher {
         continue;
       }
 
-      for (const declaration of rule.declarations) {
-        matched.push({declaration, specificity: highestSpecificity, order});
+      const declarations = rule.declarations;
+      for (let j = 0, declLen = declarations.length; j < declLen; j++) {
+        matched.push({declaration: declarations[j], specificity: highestSpecificity, order});
         order += 1;
       }
     }
 
-    matched.sort((left, right) => {
-      const comparison = compareSpecificity(left.specificity, right.specificity);
+    if (matched.length > 1) {
+      matched.sort((left, right) => {
+        const comparison = compareSpecificity(left.specificity, right.specificity);
 
-      if (comparison !== 0) {
-        return comparison;
-      }
+        if (comparison !== 0) {
+          return comparison;
+        }
 
-      return left.order - right.order;
-    });
+        return left.order - right.order;
+      });
+    }
 
     return matched;
   }

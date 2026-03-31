@@ -159,8 +159,7 @@ function hasClassName(classAttribute: string, name: string): boolean {
 
     /* Verify the match is bounded by whitespace or string edges. */
     const before = idx === 0 || classAttribute.charCodeAt(idx - 1) <= 0x20;
-    const after =
-      idx + nameLen === len || classAttribute.charCodeAt(idx + nameLen) <= 0x20;
+    const after = idx + nameLen === len || classAttribute.charCodeAt(idx + nameLen) <= 0x20;
 
     if (before && after) return true;
 
