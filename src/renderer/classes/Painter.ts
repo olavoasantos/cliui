@@ -178,24 +178,21 @@ export class Painter {
     const maxX = metrics.outerX + metrics.outerWidth - 1;
     const maxY = metrics.outerY + metrics.outerHeight - 1;
 
-    /** Resolve the foreground color for a border cell at local (lx, ly). */
-    const fgAt = sampler ? (lx: number, ly: number) => sampler(lx, ly) : () => solidColor;
-
     /* Corners */
     borderCell.char = characters.topLeft;
-    borderCell.fg = fgAt(0, 0);
+    borderCell.fg = sampler ? sampler(0, 0) : solidColor;
     this.writeCell(buffer, metrics.outerX, metrics.outerY, borderCell, clipRect);
 
     borderCell.char = characters.topRight;
-    borderCell.fg = fgAt(metrics.outerWidth - 1, 0);
+    borderCell.fg = sampler ? sampler(metrics.outerWidth - 1, 0) : solidColor;
     this.writeCell(buffer, maxX, metrics.outerY, borderCell, clipRect);
 
     borderCell.char = characters.bottomLeft;
-    borderCell.fg = fgAt(0, metrics.outerHeight - 1);
+    borderCell.fg = sampler ? sampler(0, metrics.outerHeight - 1) : solidColor;
     this.writeCell(buffer, metrics.outerX, maxY, borderCell, clipRect);
 
     borderCell.char = characters.bottomRight;
-    borderCell.fg = fgAt(metrics.outerWidth - 1, metrics.outerHeight - 1);
+    borderCell.fg = sampler ? sampler(metrics.outerWidth - 1, metrics.outerHeight - 1) : solidColor;
     this.writeCell(buffer, maxX, maxY, borderCell, clipRect);
 
     /* Top and bottom edges */
@@ -203,11 +200,11 @@ export class Painter {
       const lx = x - metrics.outerX;
 
       borderCell.char = characters.top;
-      borderCell.fg = fgAt(lx, 0);
+      borderCell.fg = sampler ? sampler(lx, 0) : solidColor;
       this.writeCell(buffer, x, metrics.outerY, borderCell, clipRect);
 
       borderCell.char = characters.bottom;
-      borderCell.fg = fgAt(lx, metrics.outerHeight - 1);
+      borderCell.fg = sampler ? sampler(lx, metrics.outerHeight - 1) : solidColor;
       this.writeCell(buffer, x, maxY, borderCell, clipRect);
     }
 
@@ -216,11 +213,11 @@ export class Painter {
       const ly = y - metrics.outerY;
 
       borderCell.char = characters.left;
-      borderCell.fg = fgAt(0, ly);
+      borderCell.fg = sampler ? sampler(0, ly) : solidColor;
       this.writeCell(buffer, metrics.outerX, y, borderCell, clipRect);
 
       borderCell.char = characters.right;
-      borderCell.fg = fgAt(metrics.outerWidth - 1, ly);
+      borderCell.fg = sampler ? sampler(metrics.outerWidth - 1, ly) : solidColor;
       this.writeCell(buffer, maxX, y, borderCell, clipRect);
     }
   }
