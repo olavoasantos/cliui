@@ -1,5 +1,6 @@
-import {TEXT_LAYOUT_SEGMENTER} from '../constants/segmenter';
+import {GRAPHEME_SEGMENTER} from '../constants/cellWidth';
 import {cellWidth} from '../utilities/cellWidth';
+import {graphemeWidth} from '../utilities/graphemeWidth';
 import {layoutPreparedText} from '../utilities/layoutPreparedText';
 import {normalizeWhitespaceNormal} from '../utilities/normalizeWhitespaceNormal';
 import {normalizeWhitespacePreWrap} from '../utilities/normalizeWhitespacePreWrap';
@@ -103,24 +104,24 @@ export class TextLayout {
       let currentText = '';
       let currentWidth = 0;
 
-      for (const {segment} of TEXT_LAYOUT_SEGMENTER.segment(logicalLine)) {
-        let graphemeWidth: number;
+      for (const {segment} of GRAPHEME_SEGMENTER.segment(logicalLine)) {
+        let gWidth: number;
 
         if (segment === '\t') {
           const remainder = currentWidth % tabSize;
-          graphemeWidth = remainder === 0 ? tabSize : tabSize - remainder;
+          gWidth = remainder === 0 ? tabSize : tabSize - remainder;
         } else {
-          graphemeWidth = cellWidth(segment);
+          gWidth = graphemeWidth(segment);
         }
 
-        if (currentWidth + graphemeWidth > availableWidth && currentText.length > 0) {
+        if (currentWidth + gWidth > availableWidth && currentText.length > 0) {
           measuredLines.push({text: currentText, width: currentWidth});
           currentText = '';
           currentWidth = 0;
         }
 
         currentText += segment;
-        currentWidth += graphemeWidth;
+        currentWidth += gWidth;
       }
 
       measuredLines.push({text: currentText, width: currentWidth});
@@ -166,15 +167,15 @@ export class TextLayout {
     let clippedText = '';
     let clippedWidth = 0;
 
-    for (const {segment} of TEXT_LAYOUT_SEGMENTER.segment(text)) {
-      const graphemeWidth = cellWidth(segment);
+    for (const {segment} of GRAPHEME_SEGMENTER.segment(text)) {
+      const gWidth = graphemeWidth(segment);
 
-      if (clippedWidth + graphemeWidth > availableWidth) {
+      if (clippedWidth + gWidth > availableWidth) {
         break;
       }
 
       clippedText += segment;
-      clippedWidth += graphemeWidth;
+      clippedWidth += gWidth;
     }
 
     return {text: clippedText, width: clippedWidth};

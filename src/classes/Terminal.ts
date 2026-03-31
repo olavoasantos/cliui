@@ -4,7 +4,7 @@ import {StyleEngine} from '../css';
 import {Event, InputEvent, Window} from '../dom';
 import {selfAndDescendants} from '../dom/utilities/selfAndDescendants';
 import {LayoutEngine} from '../layout';
-import {cellWidth} from '../layout/utilities/cellWidth';
+import {graphemeWidth} from '../layout/utilities/graphemeWidth';
 import {Renderer} from '../renderer';
 import {CaretManager} from '../terminal/classes/CaretManager';
 import {EDITABLE} from '../terminal/constants/editable';
@@ -428,7 +428,7 @@ export class Terminal {
     let visibleEnd = state.scrollX;
 
     for (let i = state.scrollX; i < state.graphemes.length; i++) {
-      const w = cellWidth(state.graphemes[i]!);
+      const w = graphemeWidth(state.graphemes[i]!);
       if (visibleWidth + w > width) break;
       visibleWidth += w;
       visibleEnd = i + 1;
@@ -439,7 +439,7 @@ export class Terminal {
       let newOffset = state.cursorPosition;
 
       for (let i = state.cursorPosition - 1; i >= 0; i--) {
-        const w = cellWidth(state.graphemes[i]!);
+        const w = graphemeWidth(state.graphemes[i]!);
         if (widthFromCursor + w > width) break;
         widthFromCursor += w;
         newOffset = i;
@@ -509,7 +509,7 @@ export class Terminal {
 
     for (let i = state.scrollX; i < state.graphemes.length; i++) {
       const grapheme = state.graphemes[i]!;
-      const w = cellWidth(grapheme);
+      const w = graphemeWidth(grapheme);
       if (outputWidth + w > width) break;
       output += grapheme;
       outputWidth += w;
@@ -550,7 +550,7 @@ export class Terminal {
       for (let i = line.start; i < line.end && i < state.graphemes.length; i++) {
         const grapheme = state.graphemes[i]!;
         if (grapheme === '\n') continue;
-        const w = cellWidth(grapheme);
+        const w = graphemeWidth(grapheme);
         if (lineWidth + w > width) break;
         lineOutput += grapheme;
         lineWidth += w;
@@ -592,7 +592,7 @@ export class Terminal {
     let width = 0;
 
     for (const grapheme of graphemes) {
-      const w = cellWidth(grapheme);
+      const w = graphemeWidth(grapheme);
       if (width + w > maxWidth) break;
       result += grapheme;
       width += w;
@@ -713,7 +713,7 @@ export class Terminal {
     let targetIndex = state.scrollX;
 
     for (let i = state.scrollX; i < state.graphemes.length; i++) {
-      const w = cellWidth(state.graphemes[i]!);
+      const w = graphemeWidth(state.graphemes[i]!);
       if (currentWidth + w / 2 >= localX) break;
       currentWidth += w;
       targetIndex = i + 1;

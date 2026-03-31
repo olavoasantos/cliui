@@ -1,5 +1,6 @@
+import {GRAPHEME_SEGMENTER} from '../../layout/constants/cellWidth';
 import {cellWidth} from '../../layout/utilities/cellWidth';
-import {PAINTER_SEGMENTER} from '../constants/segmenter';
+import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
 import {createLinearGradient} from '../utilities/createLinearGradient';
 import {parseColor} from '../utilities/parseColor';
 import {parseGradientStops} from '../utilities/parseGradientStops';
@@ -288,8 +289,8 @@ export class Painter {
       const line = box.textLines[row]!;
       let x = this.resolveTextStartX(box, line);
 
-      for (const {segment} of PAINTER_SEGMENTER.segment(line)) {
-        const width = Math.max(0, cellWidth(segment));
+      for (const {segment} of GRAPHEME_SEGMENTER.segment(line)) {
+        const width = Math.max(0, graphemeWidth(segment));
 
         if (width === 0) {
           continue;

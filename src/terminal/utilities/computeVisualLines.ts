@@ -1,4 +1,4 @@
-import {cellWidth} from '../../layout/utilities/cellWidth';
+import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
 
 import type {VisualLine} from '../types/VisualLine';
 
@@ -34,7 +34,7 @@ export function computeVisualLines(
       continue;
     }
 
-    const w = cellWidth(grapheme);
+    const w = graphemeWidth(grapheme);
 
     if (wordWrap && lineWidth + w > viewportWidth && lineWidth > 0) {
       lines.push({start: lineStart, end: i, width: lineWidth});

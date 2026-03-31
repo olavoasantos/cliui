@@ -1,10 +1,6 @@
-import {CELL_WIDTH_SEGMENTER, PRINTABLE_ASCII_REGEX} from '../constants/cellWidth';
-import {EmojiPresentationGuard} from '../guards/EmojiPresentationGuard';
-import {FullWidthOrWideGuard} from '../guards/FullWidthOrWideGuard';
-import {ZeroWidthClusterGuard} from '../guards/ZeroWidthClusterGuard';
-import {baseVisible} from './baseVisible';
+import {GRAPHEME_SEGMENTER, PRINTABLE_ASCII_REGEX} from '../constants/cellWidth';
+import {graphemeWidth} from './graphemeWidth';
 import {stripAnsi} from './stripAnsi';
-import {trailingHalfwidthWidth} from './trailingHalfwidthWidth';
 
 /**
  * Determines the terminal cell width of a string.
@@ -41,24 +37,8 @@ export function cellWidth(input: string): number {
 
   let width = 0;
 
-  for (const {segment} of CELL_WIDTH_SEGMENTER.segment(input)) {
-    if (ZeroWidthClusterGuard(segment)) {
-      continue;
-    }
-
-    if (EmojiPresentationGuard(segment)) {
-      width += 2;
-      continue;
-    }
-
-    const visible = baseVisible(segment);
-    const codePoint = visible.codePointAt(0);
-
-    if (codePoint !== undefined) {
-      width += FullWidthOrWideGuard(codePoint) ? 2 : 1;
-    }
-
-    width += trailingHalfwidthWidth(segment);
+  for (const {segment} of GRAPHEME_SEGMENTER.segment(input)) {
+    width += graphemeWidth(segment);
   }
 
   return width;

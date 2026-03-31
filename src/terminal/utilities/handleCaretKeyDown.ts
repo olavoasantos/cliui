@@ -1,4 +1,4 @@
-import {cellWidth} from '../../layout/utilities/cellWidth';
+import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
 import {computeVisualLines} from './computeVisualLines';
 import {findLineForCursor} from './findLineForCursor';
 import {Caret} from '../classes/Caret';
@@ -350,7 +350,7 @@ function findCursorLinePosition(
 
   for (let j = line.start; j < cursorPos && j < graphemes.length; j++) {
     if (graphemes[j] !== '\n') {
-      columnCells += cellWidth(graphemes[j]!);
+      columnCells += graphemeWidth(graphemes[j]!);
     }
   }
 
@@ -370,7 +370,7 @@ function mapCellOffsetToGraphemeIndex(
   let cells = 0;
 
   for (let i = line.start; i < line.end && i < graphemes.length; i++) {
-    const w = cellWidth(graphemes[i]!);
+    const w = graphemeWidth(graphemes[i]!);
 
     if (cells + w > targetCells) {
       return i;

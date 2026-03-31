@@ -1,8 +1,9 @@
-import {TEXT_LAYOUT_SEGMENTER} from '../constants/segmenter';
+import {GRAPHEME_SEGMENTER} from '../constants/cellWidth';
 import {WORD_SEGMENTER} from '../constants/wordSegmenter';
 import {KINSOKU_END, KINSOKU_START, LEFT_STICKY_PUNCTUATION} from '../constants/kinsoku';
 import {cellWidth} from './cellWidth';
 import {classifyBreakKind} from './classifyBreakKind';
+import {graphemeWidth} from './graphemeWidth';
 import {isAsciiText} from './isAsciiText';
 import {isCJK} from './isCJK';
 import {mergeNumericRuns} from './mergeNumericRuns';
@@ -99,7 +100,7 @@ function prepareFull(collapsed: string): PreparedText {
         /* Merge with the previous word if there is one. */
         if (words.length > 0 && words[words.length - 1] !== ' ') {
           words[words.length - 1] += segment;
-          widths[words.length - 1]! += cellWidth(segment);
+          widths[words.length - 1]! += graphemeWidth(segment);
           graphemeWidths[words.length - 1] = null;
           graphemes[words.length - 1] = null;
         } else {
@@ -113,7 +114,7 @@ function prepareFull(collapsed: string): PreparedText {
           }
 
           words.push(segment);
-          widths.push(cellWidth(segment));
+          widths.push(graphemeWidth(segment));
           graphemeWidths.push(null);
           graphemes.push(null);
         }
@@ -161,9 +162,9 @@ function prepareFull(collapsed: string): PreparedText {
     /* CJK text: split into per-grapheme break units so each character
        can independently start a new line. */
     if (isCJK(segment)) {
-      for (const g of TEXT_LAYOUT_SEGMENTER.segment(segment)) {
+      for (const g of GRAPHEME_SEGMENTER.segment(segment)) {
         const grapheme = g.segment;
-        const w = cellWidth(grapheme);
+        const w = graphemeWidth(grapheme);
         words.push(grapheme);
         widths.push(w);
         graphemeWidths.push(null);
@@ -181,9 +182,9 @@ function prepareFull(collapsed: string): PreparedText {
     const gWidths: number[] = [];
     const gTexts: string[] = [];
 
-    for (const {segment: grapheme} of TEXT_LAYOUT_SEGMENTER.segment(segment)) {
+    for (const {segment: grapheme} of GRAPHEME_SEGMENTER.segment(segment)) {
       gTexts.push(grapheme);
-      gWidths.push(cellWidth(grapheme));
+      gWidths.push(graphemeWidth(grapheme));
     }
 
     if (gTexts.length > 1) {

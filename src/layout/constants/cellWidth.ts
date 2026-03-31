@@ -1,6 +1,7 @@
 import {findWideFastPathRange} from '../utilities/findWideFastPathRange';
 
-export const CELL_WIDTH_SEGMENTER = new Intl.Segmenter();
+/** Shared grapheme-granularity segmenter used by cellWidth, TextLayout, and Painter. */
+export const GRAPHEME_SEGMENTER = new Intl.Segmenter();
 export const PRINTABLE_ASCII_REGEX = /^[\u0020-\u007E]*$/;
 export const ZERO_WIDTH_CLUSTER_REGEX =
   /^(?:\p{Default_Ignorable_Code_Point}|\p{Control}|\p{Format}|\p{Mark}|\p{Surrogate})+$/u;

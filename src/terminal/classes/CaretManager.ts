@@ -1,4 +1,4 @@
-import {cellWidth} from '../../layout/utilities/cellWidth';
+import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
 import {computeVisualLines} from '../utilities/computeVisualLines';
 import {findLineForCursor} from '../utilities/findLineForCursor';
 import {EDITABLE} from '../constants/editable';
@@ -116,7 +116,7 @@ export class CaretManager {
     let xOffset = 0;
 
     for (let i = scrollOffset; i < cursorPos && i < graphemes.length; i++) {
-      xOffset += cellWidth(graphemes[i]!);
+      xOffset += graphemeWidth(graphemes[i]!);
     }
 
     const cursorX = box.contentX + xOffset;
@@ -157,12 +157,12 @@ export class CaretManager {
     let x = box.contentX;
 
     for (let i = scrollOffset; i < visibleStart; i++) {
-      x += cellWidth(graphemes[i]!);
+      x += graphemeWidth(graphemes[i]!);
     }
 
     let width = 0;
     for (let i = visibleStart; i < visibleEnd; i++) {
-      const w = cellWidth(graphemes[i]!);
+      const w = graphemeWidth(graphemes[i]!);
 
       if (x + width + w > box.contentX + box.contentWidth) {
         break;
@@ -234,7 +234,7 @@ export class CaretManager {
 
     for (let j = start; j < cursorPos && j < graphemes.length; j++) {
       if (graphemes[j] === '\n') continue;
-      columnCells += cellWidth(graphemes[j]!);
+      columnCells += graphemeWidth(graphemes[j]!);
     }
 
     return {lineIndex, columnCells};
@@ -271,14 +271,14 @@ export class CaretManager {
 
       for (let j = line.start; j < lineSelStart; j++) {
         if (graphemes[j] === '\n') continue;
-        x += cellWidth(graphemes[j]!);
+        x += graphemeWidth(graphemes[j]!);
       }
 
       let width = 0;
 
       for (let j = lineSelStart; j < lineSelEnd; j++) {
         if (graphemes[j] === '\n') continue;
-        const w = cellWidth(graphemes[j]!);
+        const w = graphemeWidth(graphemes[j]!);
 
         if (x + width + w > box.contentX + box.contentWidth) break;
 

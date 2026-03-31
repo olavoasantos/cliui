@@ -7,7 +7,8 @@ import {
   UI_INPUT_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
-import {cellWidth} from '../../layout/utilities/cellWidth';
+import {GRAPHEME_SEGMENTER} from '../../layout/constants/cellWidth';
+import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
 import {EDITABLE} from '../../terminal/constants/editable';
 
 import type {EditableConfiguration} from '../../terminal/types/EditableConfiguration';
@@ -88,15 +89,13 @@ export class UiInput extends HTMLElement {
   }
 
   private truncateToWidth(text: string, maxWidth: number): string {
-    const segmenter = new Intl.Segmenter('en', {granularity: 'grapheme'});
-    const graphemes = [...segmenter.segment(text)].map((s) => s.segment);
     let result = '';
     let width = 0;
 
-    for (const grapheme of graphemes) {
-      const w = cellWidth(grapheme);
+    for (const {segment} of GRAPHEME_SEGMENTER.segment(text)) {
+      const w = graphemeWidth(segment);
       if (width + w > maxWidth) break;
-      result += grapheme;
+      result += segment;
       width += w;
     }
 
