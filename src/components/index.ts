@@ -2,6 +2,8 @@ export {UiMessage} from './UiMessage/component';
 export {UiButton} from './UiButton/component';
 export {UiCodeblock} from './UiCodeblock/component';
 export {UiDetails} from './UiDetails/component';
+export {UiFieldset} from './UiFieldset/component';
+export {UiForm} from './UiForm/component';
 export {UiDropdown} from './UiDropdown/component';
 export {UiInput} from './UiInput/component';
 export {UiLabel} from './UiLabel/component';
