@@ -404,16 +404,21 @@ for (const [tone, text] of [
 }
 s11.container.appendChild(badgeRow);
 
-const badgeInline = document.createElement('p');
-badgeInline.appendChild(document.createTextNode('Server status: '));
+const badgeInline = document.createElement('div');
+badgeInline.className = 'row';
+const statusLabel = document.createElement('span');
+statusLabel.textContent = 'Server status:';
 const statusBadge = document.createElement('ui-badge');
 statusBadge.setAttribute('tone', 'success');
 statusBadge.textContent = 'ONLINE';
-badgeInline.appendChild(statusBadge);
-badgeInline.appendChild(document.createTextNode('  Alerts: '));
+const alertLabel = document.createElement('span');
+alertLabel.textContent = 'Alerts:';
 const alertBadge = document.createElement('ui-badge');
 alertBadge.setAttribute('tone', 'error');
 alertBadge.textContent = '3';
+badgeInline.appendChild(statusLabel);
+badgeInline.appendChild(statusBadge);
+badgeInline.appendChild(alertLabel);
 badgeInline.appendChild(alertBadge);
 s11.container.appendChild(badgeInline);
 
