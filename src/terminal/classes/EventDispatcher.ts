@@ -210,23 +210,25 @@ export class EventDispatcher {
   }
 
   private flattenBoxes(root: LayoutBox): LayoutBox[] {
-    const flattened: Array<{box: LayoutBox; order: number}> = [];
+    const flattened: Array<{box: LayoutBox; order: number; stackingZ: number}> = [];
     let order = 0;
 
-    const visit = (box: LayoutBox): void => {
-      flattened.push({box, order});
+    const visit = (box: LayoutBox, parentStackingZ: number): void => {
+      const stackingZ = box.zIndex !== 0 ? box.zIndex : parentStackingZ;
+
+      flattened.push({box, order, stackingZ});
       order += 1;
 
       for (const child of box.children) {
-        visit(child);
+        visit(child, stackingZ);
       }
     };
 
-    visit(root);
+    visit(root, 0);
 
     flattened.sort((left, right) => {
-      if (left.box.zIndex !== right.box.zIndex) {
-        return right.box.zIndex - left.box.zIndex;
+      if (left.stackingZ !== right.stackingZ) {
+        return right.stackingZ - left.stackingZ;
       }
 
       return right.order - left.order;
