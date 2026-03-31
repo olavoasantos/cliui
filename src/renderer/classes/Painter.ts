@@ -1,5 +1,4 @@
-import {GRAPHEME_SEGMENTER} from '../../layout/constants/cellWidth';
-import {cellWidth} from '../../layout/utilities/cellWidth';
+import {GRAPHEME_SEGMENTER, PRINTABLE_ASCII_REGEX} from '../../layout/constants/cellWidth';
 import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
 import {createLinearGradient} from '../utilities/createLinearGradient';
 import {parseColor} from '../utilities/parseColor';
@@ -13,6 +12,21 @@ import type {ComputedStyle} from '../../css/types';
 import type {BoxMetrics} from '../types/BoxMetrics';
 import type {ClipRect} from '../types/ClipRect';
 
+type CachedTextLine = {
+  width: number;
+  ascii: boolean;
+  segments: readonly string[] | null;
+  segmentWidths: readonly number[] | null;
+};
+
+const EMPTY_TEXT_LINE: Readonly<CachedTextLine> = Object.freeze({
+  width: 0,
+  ascii: true,
+  segments: null,
+  segmentWidths: null,
+});
+const MAX_TEXT_LINE_CACHE_SIZE = 2048;
+
 /**
  * Paints layout boxes into a renderer cell buffer.
  *
@@ -22,6 +36,8 @@ import type {ClipRect} from '../types/ClipRect';
 export class Painter {
   /** Border style registry for resolving `border-style` values. */
   readonly borderStyles = new BorderStyleRegistry();
+  private readonly styledCellCache = new WeakMap<ComputedStyle, Cell>();
+  private readonly textLineCache = new Map<string, CachedTextLine>();
   /**
    * Paints one or more layout boxes into the provided cell buffer.
    *
@@ -47,17 +63,8 @@ export class Painter {
 
   private paintBox(box: LayoutBox, buffer: CellBuffer, clipRect: ClipRect | null): void {
     const metrics = this.getMetrics(box);
-    const textCell = this.createStyledCell(box.computedStyle);
+    const textCell = this.createStyledCell(box);
     const contentClipRect = this.createChildClipRect(box, clipRect);
-
-    // Anchor elements propagate href to the cell hyperlink field
-    if (box.element.localName === 'a') {
-      const href = box.element.getAttribute('href');
-
-      if (href) {
-        textCell.hyperlink = href;
-      }
-    }
 
     this.paintBackground(metrics, textCell, buffer, clipRect);
     this.paintBorder(metrics, box.computedStyle, textCell, buffer, clipRect);
@@ -278,6 +285,7 @@ export class Painter {
       faint: textCell.faint,
       hyperlink: textCell.hyperlink,
     };
+    const maxX = box.contentX + box.contentWidth;
 
     for (let row = 0; row < box.textLines.length; row += 1) {
       const y = startY + row;
@@ -287,16 +295,36 @@ export class Painter {
       }
 
       const line = box.textLines[row]!;
-      let x = this.resolveTextStartX(box, line);
+      const cachedLine = this.getCachedTextLine(line);
+      let x = this.resolveTextStartX(box, cachedLine.width);
 
-      for (const {segment} of GRAPHEME_SEGMENTER.segment(line)) {
-        const width = Math.max(0, graphemeWidth(segment));
+      if (x >= maxX) {
+        continue;
+      }
 
-        if (width === 0) {
-          continue;
+      if (cachedLine.ascii) {
+        const limit = Math.min(line.length, maxX - x);
+
+        for (let index = 0; index < limit; index += 1) {
+          writeCell.char = line[index]!;
+          this.writeCell(buffer, x + index, y, writeCell, clipRect);
         }
 
-        if (x >= box.contentX + box.contentWidth) {
+        continue;
+      }
+
+      const segments = cachedLine.segments;
+      const segmentWidths = cachedLine.segmentWidths;
+
+      if (segments === null || segmentWidths === null) {
+        continue;
+      }
+
+      for (let index = 0; index < segments.length; index += 1) {
+        const segment = segments[index]!;
+        const width = segmentWidths[index]!;
+
+        if (x >= maxX) {
           break;
         }
 
@@ -304,7 +332,7 @@ export class Painter {
         this.writeCell(buffer, x, y, writeCell, clipRect);
 
         for (let offset = 1; offset < width; offset += 1) {
-          if (x + offset >= box.contentX + box.contentWidth) {
+          if (x + offset >= maxX) {
             break;
           }
 
@@ -317,27 +345,104 @@ export class Painter {
     }
   }
 
-  private createStyledCell(computedStyle: ComputedStyle): Cell {
-    const decorations = (computedStyle.get('text-decoration') ?? '')
-      .split(/\s+/)
-      .filter((value) => value.length > 0);
-    const underline = decorations.includes('underline')
-      ? this.parseUnderlineStyle(computedStyle.get('text-decoration-style'))
-      : 'none';
-    const opacity = Number.parseFloat(computedStyle.get('opacity') ?? '1');
+  private createStyledCell(box: LayoutBox): Cell {
+    let cell = this.styledCellCache.get(box.computedStyle);
+
+    if (cell === undefined) {
+      const decoration = box.computedStyle.get('text-decoration') ?? '';
+      const underline = decoration.includes('underline')
+        ? this.parseUnderlineStyle(box.computedStyle.get('text-decoration-style'))
+        : 'none';
+      const opacity = Number.parseFloat(box.computedStyle.get('opacity') ?? '1');
+
+      cell = {
+        char: ' ',
+        fg: parseColor(box.computedStyle.get('color')),
+        bg: parseColor(box.computedStyle.get('background-color')),
+        bold: box.computedStyle.get('font-weight') === 'bold',
+        italic: box.computedStyle.get('font-style') === 'italic',
+        underline,
+        underlineColor: parseColor(box.computedStyle.get('text-decoration-color')),
+        strikethrough: decoration.includes('line-through'),
+        faint: Number.isFinite(opacity) && opacity < 0.5,
+        hyperlink: box.computedStyle.get('hyperlink') ?? null,
+      };
+
+      this.styledCellCache.set(box.computedStyle, cell);
+    }
+
+    if (box.element.localName !== 'a') {
+      return cell;
+    }
+
+    const href = box.element.getAttribute('href');
+
+    if (href === null || cell.hyperlink === href) {
+      return cell;
+    }
 
     return {
-      char: ' ',
-      fg: parseColor(computedStyle.get('color')),
-      bg: parseColor(computedStyle.get('background-color')),
-      bold: computedStyle.get('font-weight') === 'bold',
-      italic: computedStyle.get('font-style') === 'italic',
-      underline,
-      underlineColor: parseColor(computedStyle.get('text-decoration-color')),
-      strikethrough: decorations.includes('line-through'),
-      faint: Number.isFinite(opacity) && opacity < 0.5,
-      hyperlink: computedStyle.get('hyperlink') ?? null,
+      ...cell,
+      hyperlink: href,
     };
+  }
+
+  private getCachedTextLine(line: string): CachedTextLine {
+    if (line.length === 0) {
+      return EMPTY_TEXT_LINE;
+    }
+
+    const cached = this.textLineCache.get(line);
+
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    let next: CachedTextLine;
+
+    if (PRINTABLE_ASCII_REGEX.test(line)) {
+      next = {
+        width: line.length,
+        ascii: true,
+        segments: null,
+        segmentWidths: null,
+      };
+    } else {
+      const segments: string[] = [];
+      const segmentWidths: number[] = [];
+      let width = 0;
+
+      for (const {segment} of GRAPHEME_SEGMENTER.segment(line)) {
+        const segmentWidth = Math.max(0, graphemeWidth(segment));
+
+        if (segmentWidth === 0) {
+          continue;
+        }
+
+        segments.push(segment);
+        segmentWidths.push(segmentWidth);
+        width += segmentWidth;
+      }
+
+      next = {
+        width,
+        ascii: false,
+        segments,
+        segmentWidths,
+      };
+    }
+
+    if (this.textLineCache.size >= MAX_TEXT_LINE_CACHE_SIZE) {
+      const oldestKey = this.textLineCache.keys().next().value;
+
+      if (oldestKey !== undefined) {
+        this.textLineCache.delete(oldestKey);
+      }
+    }
+
+    this.textLineCache.set(line, next);
+
+    return next;
   }
 
   private parseUnderlineStyle(value: string | undefined): UnderlineStyle {
@@ -381,9 +486,8 @@ export class Painter {
   /** Temporary storage for bg preservation in writeCell. */
   private writeCellWithBg: {r: number; g: number; b: number} | null = null;
 
-  private resolveTextStartX(box: LayoutBox, line: string): number {
+  private resolveTextStartX(box: LayoutBox, lineWidth: number): number {
     const textAlign = box.computedStyle.get('text-align') ?? 'left';
-    const lineWidth = cellWidth(line);
     const freeSpace = Math.max(0, box.contentWidth - lineWidth);
 
     switch (textAlign) {

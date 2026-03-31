@@ -180,6 +180,19 @@ describe('Node', () => {
       expect(div.childNodes.length).toBe(1);
       expect(div.textContent).toBe('replaced');
     });
+
+    it('updates an existing single text child in place', () => {
+      const {document} = createEnv();
+      const div = document.createElement('div');
+      const text = document.createTextNode('before');
+      div.appendChild(text);
+
+      div.textContent = 'after';
+
+      expect(div.childNodes.length).toBe(1);
+      expect(div.childNodes[0]).toBe(text);
+      expect(text.data).toBe('after');
+    });
   });
 
   describe('cloneNode', () => {

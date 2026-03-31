@@ -152,11 +152,27 @@ export class Node extends EventTarget {
     if (CharacterDataGuard(this)) {
       this.data = data;
     } else if (ParentNodeGuard(this)) {
+      const normalizedData = data == null ? '' : String(data);
+      const onlyChild = this[CHILD];
+
+      if (
+        normalizedData.length > 0 &&
+        onlyChild !== null &&
+        onlyChild[NEXT] === null &&
+        TextNodeGuard(onlyChild)
+      ) {
+        if (onlyChild.data !== normalizedData) {
+          onlyChild.data = normalizedData;
+        }
+
+        return;
+      }
+
       let child;
       while ((child = this[CHILD])) {
         this.removeChild(child);
       }
-      this.append(data as string);
+      this.append(normalizedData);
     }
   }
 
