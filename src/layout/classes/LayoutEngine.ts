@@ -522,15 +522,17 @@ export class LayoutEngine {
     availableWidth: number,
     availableHeight: number,
   ): ComputedStyle {
-    const resolved = new Map(computedStyle);
-    let hasPercentage = false;
+    let resolved: ComputedStyle | null = null;
 
     for (const [prop, value] of computedStyle) {
       if (value.endsWith('%')) {
-        hasPercentage = true;
         const numericValue = parseFloat(value);
 
         if (!Number.isNaN(numericValue)) {
+          if (resolved === null) {
+            resolved = new Map(computedStyle);
+          }
+
           const base = this.isHeightProperty(prop) ? availableHeight : availableWidth;
           const resolvedValue = Math.round((numericValue / 100) * base);
 
@@ -539,7 +541,7 @@ export class LayoutEngine {
       }
     }
 
-    return hasPercentage ? resolved : computedStyle;
+    return resolved ?? computedStyle;
   }
 
   /**

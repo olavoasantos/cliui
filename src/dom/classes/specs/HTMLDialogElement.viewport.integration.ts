@@ -48,16 +48,6 @@ function findTextRow(buffer: any, text: string): number {
   return -1;
 }
 
-function dumpBuffer(buffer: any): void {
-  for (let y = 0; y < ROWS; y++) {
-    const row = readRow(buffer, y);
-
-    if (row.trim().length > 0) {
-      console.log(`  row ${y.toString().padStart(2)}: ${JSON.stringify(row)}`);
-    }
-  }
-}
-
 describe('HTMLDialogElement — viewport centering (end-to-end)', () => {
   function createScene() {
     const window = new Window();
@@ -120,9 +110,6 @@ describe('HTMLDialogElement — viewport centering (end-to-end)', () => {
     const frame = renderFrame(styleEngine, layoutEngine, renderer, document.body);
     const row = findTextRow(frame.buffer, 'MODAL CONTENT');
 
-    console.log('No scroll — dialog text at row:', row);
-    dumpBuffer(frame.buffer);
-
     expect(row).toBeGreaterThanOrEqual(0);
 
     const expectedCenter = Math.floor(ROWS / 2);
@@ -153,9 +140,6 @@ describe('HTMLDialogElement — viewport centering (end-to-end)', () => {
     const frame = renderFrame(styleEngine, layoutEngine, renderer, document.body);
     const row = findTextRow(frame.buffer, 'MODAL CONTENT');
 
-    console.log('Scrolled to 40 — dialog text at row:', row);
-    dumpBuffer(frame.buffer);
-
     expect(row).toBeGreaterThanOrEqual(0);
     expect(row).toBeLessThan(ROWS);
 
@@ -182,8 +166,6 @@ describe('HTMLDialogElement — viewport centering (end-to-end)', () => {
     // Frame: dialog should still be centered
     const frame = renderFrame(styleEngine, layoutEngine, renderer, document.body);
     const row = findTextRow(frame.buffer, 'MODAL CONTENT');
-
-    console.log('Scrolled from 20→40 with dialog open — text at row:', row);
 
     expect(row).toBeGreaterThanOrEqual(0);
     expect(row).toBeLessThan(ROWS);

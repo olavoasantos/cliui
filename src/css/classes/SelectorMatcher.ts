@@ -3,8 +3,24 @@ import {computeSpecificity} from '../utilities/computeSpecificity';
 import {matchesSelectorParts} from '../utilities/matchesSelectorParts';
 
 import type {Element} from '../../dom/classes/Element';
+import type {SelectorPart} from '../../dom/types';
 import type {MatchedDeclaration} from '../types/MatchedDeclaration';
 import type {CSSRule} from '../types';
+
+/** Pre-computed specificity cached per selector part array (by identity). */
+const specificityCache = new WeakMap<SelectorPart[], [number, number, number]>();
+
+/** Returns the specificity for a selector, computing and caching it if needed. */
+function getCachedSpecificity(parts: SelectorPart[]): [number, number, number] {
+  let result = specificityCache.get(parts);
+
+  if (result === undefined) {
+    result = computeSpecificity(parts);
+    specificityCache.set(parts, result);
+  }
+
+  return result;
+}
 
 /** Matches CSS rules against DOM elements and returns declarations sorted by specificity. */
 export class SelectorMatcher {
@@ -17,7 +33,7 @@ export class SelectorMatcher {
 
       for (const selectorParts of rule.selectors) {
         if (matchesSelectorParts(element, selectorParts)) {
-          const specificity = computeSpecificity(selectorParts);
+          const specificity = getCachedSpecificity(selectorParts);
 
           if (
             highestSpecificity === null ||
