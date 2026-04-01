@@ -2,5 +2,5 @@ ui-fieldset {
   display: block;
   border-style: solid;
   border-width: 1;
-  padding: 1;
+  padding: 0 1;
 }
