@@ -136,15 +136,11 @@ The select dropdown renders all options in an absolutely positioned div that gro
 
 ---
 
-### BUG-12: Flex row children with borders don't stretch to equal height
+### BUG-12: ~~Flex row children with borders don't stretch to equal height~~ FIXED
 
-**Summary**
+**Root cause:** `FlexLayout` defaulted `align-items` to `flex-start` instead of `stretch` (CSS spec default). Children in a flex row never stretched to match the tallest sibling.
 
-When flex-direction is row and children have borders, the border rendering doesn't match the stretched height. The right border of shorter children appears detached/floating because the border box height doesn't match the flex-stretched outer height.
-
-**Discovered in:** `<ui-sidebar>` example — sidebar with border in a flex row with taller content sibling. The sidebar's right border only covers its content height, not the row height.
-
-**Expected behavior:** In a flex row, children should stretch to the tallest sibling's height by default (`align-items: stretch`), and borders should render at the stretched height.
+**Fix:** Changed default from `'flex-start'` to `'stretch'` in `FlexLayout.ts` line 322.
 
 ---
 
@@ -155,6 +151,7 @@ When flex-direction is row and children have borders, the border rendering doesn
 The `<ui-log>` component was designed to use `overflow: scroll` for a scrollable log viewport, but had to be rewritten to use an internal tail-window approach (only rendering the last N lines as DOM children) because of BUG-3 and BUG-4.
 
 This means the log viewer:
+
 - Cannot be scrolled up by the user to review history (mouse wheel does nothing)
 - Only shows the tail — older lines are in memory but not in the DOM
 - The `height` attribute controls visible lines, not CSS height

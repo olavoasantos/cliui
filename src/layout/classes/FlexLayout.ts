@@ -319,7 +319,7 @@ export class FlexLayout {
 
     // --- Resolve cross-axis sizes (stretch detection) ---
 
-    const alignItems = computedStyle.get('align-items') ?? 'flex-start';
+    const alignItems = computedStyle.get('align-items') ?? 'stretch';
     const resolvedChildren: FlexResolvedChild[] = new Array(childBases.length);
 
     for (let i = 0; i < childBases.length; i += 1) {
