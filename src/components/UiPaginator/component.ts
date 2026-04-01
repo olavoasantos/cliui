@@ -101,13 +101,20 @@ export class UiPaginator extends HTMLElement {
     prev.textContent = '‹';
     this.appendChild(prev);
 
-    for (let i = 1; i <= total; i++) {
+    const pages = this.getVisiblePages(page, total);
+
+    for (const entry of pages) {
       const span = doc.createElement('span');
       span.style.display = 'inline';
-      span.textContent = String(i);
 
-      if (i === page) {
-        span.style.fontWeight = 'bold';
+      if (entry === '…') {
+        span.textContent = '…';
+      } else {
+        span.textContent = String(entry);
+
+        if (entry === page) {
+          span.style.fontWeight = 'bold';
+        }
       }
 
       this.appendChild(span);
@@ -123,5 +130,48 @@ export class UiPaginator extends HTMLElement {
     if (!this.hasAttribute('tabindex')) {
       this.setAttribute('tabindex', '0');
     }
+  }
+
+  /**
+   * Returns the page numbers to display, inserting `'…'` for
+   * truncated ranges. Always shows first, last, and a window
+   * of 1 page on each side of the current page.
+   *
+   * Examples (current page marked with *):
+   * - 5 pages, page 3:  `1 2 *3 4 5`
+   * - 20 pages, page 1:  `*1 2 3 … 20`
+   * - 20 pages, page 10: `1 … 9 *10 11 … 20`
+   * - 20 pages, page 20: `1 … 18 19 *20`
+   */
+  private getVisiblePages(page: number, total: number): Array<number | '…'> {
+    if (total <= 7) {
+      return Array.from({length: total}, (_, i) => i + 1);
+    }
+
+    const pages = new Set<number>();
+
+    /* Always include first and last */
+    pages.add(1);
+    pages.add(total);
+
+    /* Window around current page */
+    for (let i = page - 1; i <= page + 1; i++) {
+      if (i >= 1 && i <= total) {
+        pages.add(i);
+      }
+    }
+
+    const sorted = [...pages].sort((a, b) => a - b);
+    const result: Array<number | '…'> = [];
+
+    for (let i = 0; i < sorted.length; i++) {
+      if (i > 0 && sorted[i]! - sorted[i - 1]! > 1) {
+        result.push('…');
+      }
+
+      result.push(sorted[i]!);
+    }
+
+    return result;
   }
 }

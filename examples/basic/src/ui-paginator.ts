@@ -42,14 +42,26 @@ pag2.addEventListener('change', () => {
 s2.appendChild(pag2);
 app.appendChild(s2);
 
-/* ── Single page ───────────────────────────────────────── */
-const s3 = createSection(document, 'Single page (no navigation)');
+/* ── Large (truncated) ─────────────────────────────────── */
+const s3 = createSection(document, 'Large (50 pages — truncated)');
 const pag3 = document.createElement('ui-paginator') as InstanceType<typeof UiPaginator>;
 pag3.setAttribute('tabindex', '0');
 pag3.setAttribute('page', '1');
-pag3.setAttribute('total-pages', '1');
+pag3.setAttribute('total-pages', '50');
+pag3.addEventListener('change', () => {
+  status.textContent = `Large: page ${pag3.getPage()} of ${pag3.getTotalPages()}`;
+});
 s3.appendChild(pag3);
 app.appendChild(s3);
+
+/* ── Single page ───────────────────────────────────────── */
+const s4 = createSection(document, 'Single page (no navigation)');
+const pag4 = document.createElement('ui-paginator') as InstanceType<typeof UiPaginator>;
+pag4.setAttribute('tabindex', '0');
+pag4.setAttribute('page', '1');
+pag4.setAttribute('total-pages', '1');
+s4.appendChild(pag4);
+app.appendChild(s4);
 
 app.appendChild(status);
 document.body.appendChild(app);

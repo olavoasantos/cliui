@@ -31,6 +31,25 @@ describe('UiPaginator', () => {
     expect(pag.childNodes.length).toBe(7);
   });
 
+  it('truncates large page counts with ellipsis', () => {
+    const {document} = createEnv();
+    const pag = document.createElement('ui-paginator') as UiPaginator;
+    pag.setAttribute('page', '10');
+    pag.setAttribute('total-pages', '20');
+    document.body.appendChild(pag);
+
+    /* ‹ 1 … 9 10 11 … 20 › = 9 children */
+    expect(pag.childNodes.length).toBe(9);
+
+    const texts: string[] = [];
+
+    for (let i = 0; i < pag.childNodes.length; i++) {
+      texts.push((pag.childNodes[i] as import('../../../dom').Element).textContent ?? '');
+    }
+
+    expect(texts).toEqual(['‹', '1', '…', '9', '10', '11', '…', '20', '›']);
+  });
+
   it('advances page on ArrowRight', () => {
     const {document} = createEnv();
     const pag = document.createElement('ui-paginator') as UiPaginator;

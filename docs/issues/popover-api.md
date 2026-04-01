@@ -15,6 +15,7 @@ The Popover API replaces the ad-hoc overlay patterns currently hand-rolled acros
 - The `<dialog>` element's modal rendering (z-index, backdrop) provides a reference for top-layer implementation.
 
 **Reference:**
+
 - [MDN: Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API)
 - [MDN: Using the Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API/Using)
 
@@ -109,6 +110,7 @@ This replaces the manual document-click listeners currently used in `<ui-menu>` 
 Implement declarative popover control via button attributes. A `<button>` (or `<ui-button>`) with `popovertarget="popover-id"` toggles the referenced popover element on activation (click or Enter/Space). The `popovertargetaction` attribute specifies `"show"`, `"hide"`, or `"toggle"` (default: `"toggle"`).
 
 This enables fully declarative popover triggers without JavaScript:
+
 ```html
 <ui-button popovertarget="my-menu">Open Menu</ui-button>
 <ui-menu id="my-menu" popover="auto">...</ui-menu>
@@ -238,7 +240,7 @@ POP-1 ──┬── POP-2 ── POP-3
 
 ### Risks
 
-- **Top layer rendering** — the current layout/paint pipeline uses z-index for stacking. A proper top layer needs elements to render *after* the normal tree, not just at a higher z-index. This may require changes to the painter's traversal order.
+- **Top layer rendering** — the current layout/paint pipeline uses z-index for stacking. A proper top layer needs elements to render _after_ the normal tree, not just at a higher z-index. This may require changes to the painter's traversal order.
 - **Light dismiss vs terminal mouse events** — Ctrl+Click and Cmd+Click aren't available in terminals. Light dismiss only uses plain click, which is fine.
 - **`overflow: scroll` interaction** — the layout engine has known issues with `overflow: scroll` hit-testing (scroll containers block mouse events beyond their visible bounds). Top-layer elements should bypass scroll container clipping entirely.
 - **Dialog refactor** — `HTMLDialogElement.showModal()` currently manages its own stacking. It should be migrated to use the shared top-layer stack to avoid two competing overlay systems.
