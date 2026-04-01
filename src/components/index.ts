@@ -14,7 +14,6 @@ export {UiInput} from './UiInput/component';
 export {UiLabel} from './UiLabel/component';
 export {UiList} from './UiList/component';
 export {UiLog} from './UiLog/component';
-export {UiMarkdown} from './UiMarkdown/component';
 export {UiMenu} from './UiMenu/component';
 export {UiMenuItem} from './UiMenuItem/component';
 export {UiMessage} from './UiMessage/component';
