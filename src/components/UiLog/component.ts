@@ -6,9 +6,13 @@ import {HTMLElement} from '../../dom';
 /**
  * Built-in terminal scrollable log viewer custom element.
  *
- * Provides `append(text)` to add lines. New content triggers a
- * scroll-to-bottom unless the user has scrolled up. Supports a
- * `max-lines` attribute to cap retained history.
+ * Provides `append(text)` to add lines. New content automatically
+ * scrolls to the bottom. Supports a `max-lines` attribute to cap
+ * retained history.
+ *
+ * The element uses `overflow: scroll` so it must have an explicit
+ * `height` set (via CSS or inline style) to create a scrollable
+ * viewport.
  *
  * Register with `window.customElements.define(UiLog.tagName, UiLog)`
  * before creating `<ui-log>` elements in a window.
@@ -22,7 +26,8 @@ export class UiLog extends HTMLElement {
    * Appends a text line to the log.
    *
    * Each call creates a new block-level child element. If `max-lines`
-   * is set and exceeded, the oldest lines are removed.
+   * is set and exceeded, the oldest lines are removed. Automatically
+   * scrolls to the bottom after appending.
    */
   append(text: string): void {
     const doc = this.ownerDocument!;
@@ -31,13 +36,16 @@ export class UiLog extends HTMLElement {
     this.appendChild(line);
 
     this.trimLines();
+    this.scrollToBottom();
   }
 
-  /** Clears all log content. */
+  /** Clears all log content and resets scroll position. */
   clear(): void {
     while (this.childNodes.length > 0) {
       this.removeChild(this.childNodes[0]!);
     }
+
+    (this as unknown as {scrollTop: number}).scrollTop = 0;
   }
 
   /** Returns the current number of lines. */
@@ -46,6 +54,12 @@ export class UiLog extends HTMLElement {
   }
 
   /* ── Private ────────────────────────────────────────────── */
+
+  private scrollToBottom(): void {
+    /* Set scrollTop to a very large value; the layout engine will
+       clamp it to the maximum scroll offset on the next frame. */
+    (this as unknown as {scrollTop: number}).scrollTop = 999999;
+  }
 
   private trimLines(): void {
     const maxLines = this.getMaxLines();
