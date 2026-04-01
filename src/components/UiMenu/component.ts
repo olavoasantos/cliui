@@ -26,6 +26,9 @@ export class UiMenu extends HTMLElement {
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
   private readonly boundClick = this.handleClick.bind(this) as EventListener;
 
+  /** Bound document click handler for close-on-click-outside. */
+  private readonly boundDocClick = this.handleDocumentClick.bind(this) as EventListener;
+
   connectedCallback(): void {
     this.addEventListener('keydown', this.boundKeyDown);
     this.addEventListener('click', this.boundClick);
@@ -34,6 +37,7 @@ export class UiMenu extends HTMLElement {
   disconnectedCallback(): void {
     this.removeEventListener('keydown', this.boundKeyDown);
     this.removeEventListener('click', this.boundClick);
+    this.removeDocumentClickListener();
   }
 
   /** Opens the menu and sets focus for keyboard navigation. */
@@ -50,11 +54,21 @@ export class UiMenu extends HTMLElement {
 
     const doc = this.ownerDocument as import('../../dom').Document;
     doc.setActiveElement(this);
+    this.addDocumentClickListener();
   }
 
-  /** Closes the menu. */
+  /** Closes the menu and returns focus to the parent trigger. */
   close(): void {
     this.removeAttribute('open');
+    this.removeDocumentClickListener();
+
+    /* Return focus to the parent dropdown trigger if present */
+    const parent = this.parentElement as import('../../dom').Element | null;
+
+    if (parent && parent.localName === 'ui-dropdown') {
+      const doc = this.ownerDocument as import('../../dom').Document;
+      doc.setActiveElement(parent);
+    }
   }
 
   /** Returns the value of the currently highlighted item. */
@@ -145,5 +159,38 @@ export class UiMenu extends HTMLElement {
 
       current = current.parentElement as import('../../dom').Element | null;
     }
+  }
+
+  /* ── Document click listener ─────────────────────────────── */
+
+  private handleDocumentClick(event: Event): void {
+    const target = event.target as import('../../dom').Element | null;
+
+    if (!target) return;
+
+    /* Walk up from target — if we reach this menu or its parent
+       dropdown, the click is inside and should be ignored. */
+    let current: import('../../dom').Element | null = target;
+    const self = this as unknown as import('../../dom').Element;
+    const parent = this.parentElement as import('../../dom').Element | null;
+
+    while (current) {
+      if (current === self || (parent && current === parent)) return;
+      current = current.parentElement as import('../../dom').Element | null;
+    }
+
+    this.close();
+  }
+
+  private addDocumentClickListener(): void {
+    const doc = this.ownerDocument;
+    if (!doc) return;
+    doc.body.addEventListener('click', this.boundDocClick);
+  }
+
+  private removeDocumentClickListener(): void {
+    const doc = this.ownerDocument;
+    if (!doc) return;
+    doc.body.removeEventListener('click', this.boundDocClick);
   }
 }
