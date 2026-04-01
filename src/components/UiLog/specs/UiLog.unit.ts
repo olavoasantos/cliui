@@ -19,7 +19,7 @@ describe('UiLog', () => {
     expect(window.customElements.get('ui-log')).toBe(UiLog);
   });
 
-  it('appends lines as child elements', () => {
+  it('appends lines and tracks count', () => {
     const {document} = createEnv();
     const log = document.createElement('ui-log') as UiLog;
     document.body.appendChild(log);
@@ -28,7 +28,24 @@ describe('UiLog', () => {
     log.append('Line 2');
 
     expect(log.getLineCount()).toBe(2);
-    expect((log.childNodes[0] as import('../../../dom').Element).textContent).toBe('Line 1');
+  });
+
+  it('renders only the last N lines when height is set', () => {
+    const {document} = createEnv();
+    const log = document.createElement('ui-log') as UiLog;
+    log.setAttribute('height', '3');
+    document.body.appendChild(log);
+
+    for (let i = 1; i <= 10; i++) {
+      log.append(`Line ${i}`);
+    }
+
+    expect(log.getLineCount()).toBe(10);
+
+    /* Only last 3 should be rendered as child nodes */
+    expect(log.childNodes.length).toBe(3);
+    expect((log.childNodes[0] as import('../../../dom').Element).textContent).toBe('Line 8');
+    expect((log.childNodes[2] as import('../../../dom').Element).textContent).toBe('Line 10');
   });
 
   it('trims old lines when max-lines is exceeded', () => {
@@ -56,5 +73,19 @@ describe('UiLog', () => {
     log.clear();
 
     expect(log.getLineCount()).toBe(0);
+    expect(log.childNodes.length).toBe(0);
+  });
+
+  it('shows all lines when no height is set', () => {
+    const {document} = createEnv();
+    const log = document.createElement('ui-log') as UiLog;
+    document.body.appendChild(log);
+
+    for (let i = 1; i <= 20; i++) {
+      log.append(`Line ${i}`);
+    }
+
+    expect(log.getLineCount()).toBe(20);
+    expect(log.childNodes.length).toBe(20);
   });
 });
