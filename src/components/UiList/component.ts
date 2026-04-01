@@ -13,9 +13,13 @@ import type {UiListMode} from './types';
  * (arrow keys to move highlight, Enter to select). Supports
  * `single` and `multi` selection modes.
  *
- * Dispatches a `select` event when an item is selected via Enter,
- * with the highlighted item's `value` attribute (or text content)
- * available via `getSelectedValue()`.
+ * **Single mode:** Enter or click selects the highlighted item.
+ * **Multi mode:** Enter or click toggles. Shift+Arrow extends
+ * the selection. Ctrl+Click toggles individual items without
+ * clearing. Shift+Click selects a range from the last selected
+ * item to the clicked item.
+ *
+ * Dispatches a `select` event when selection changes.
  *
  * Register with `window.customElements.define(UiList.tagName, UiList)`
  * before creating `<ui-list>` elements in a window.
@@ -26,6 +30,10 @@ export class UiList extends HTMLElement {
   static readonly tagName = UI_LIST_TAG_NAME;
 
   private highlightIndex = 0;
+
+  /** Last index used as the anchor for Shift range selection. */
+  private rangeAnchor = 0;
+
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
   private readonly boundClick = this.handleClick.bind(this) as EventListener;
 
@@ -64,6 +72,20 @@ export class UiList extends HTMLElement {
     return item.getAttribute('value') ?? item.textContent ?? null;
   }
 
+  /** Returns the values of all selected items (useful in multi mode). */
+  getSelectedValues(): string[] {
+    const items = this.getItems();
+    const values: string[] = [];
+
+    for (const item of items) {
+      if (item.hasAttribute('selected')) {
+        values.push(item.getAttribute('value') ?? item.textContent ?? '');
+      }
+    }
+
+    return values;
+  }
+
   /* ── Private ────────────────────────────────────────────── */
 
   private getItems(): Element[] {
@@ -96,6 +118,7 @@ export class UiList extends HTMLElement {
     if (event.target !== this) return;
 
     const key = (event as import('../../dom').KeyboardEvent).key;
+    const shift = !!(event as unknown as {shiftKey?: boolean}).shiftKey;
     const items = this.getItems();
 
     if (items.length === 0) return;
@@ -104,11 +127,21 @@ export class UiList extends HTMLElement {
       event.preventDefault();
       this.highlightIndex = this.highlightIndex <= 0 ? items.length - 1 : this.highlightIndex - 1;
       this.syncHighlight();
+
+      if (shift && this.getMode() === 'multi') {
+        this.selectRange(this.rangeAnchor, this.highlightIndex, items);
+        this.dispatchEvent(new Event('select', {bubbles: true}));
+      }
     } else if (key === 'ArrowDown') {
       event.preventDefault();
       this.highlightIndex = this.highlightIndex >= items.length - 1 ? 0 : this.highlightIndex + 1;
       this.syncHighlight();
-    } else if (key === 'Enter') {
+
+      if (shift && this.getMode() === 'multi') {
+        this.selectRange(this.rangeAnchor, this.highlightIndex, items);
+        this.dispatchEvent(new Event('select', {bubbles: true}));
+      }
+    } else if (key === 'Enter' || key === ' ') {
       event.preventDefault();
 
       const item = items[this.highlightIndex];
@@ -120,12 +153,24 @@ export class UiList extends HTMLElement {
           } else {
             item.setAttribute('selected', '');
           }
+
+          this.rangeAnchor = this.highlightIndex;
         } else {
-          // Single mode: deselect all, select current
           for (const i of items) {
             i.removeAttribute('selected');
           }
 
+          item.setAttribute('selected', '');
+        }
+
+        this.dispatchEvent(new Event('select', {bubbles: true}));
+      }
+    } else if (key === 'a' && !!(event as unknown as {ctrlKey?: boolean}).ctrlKey) {
+      /* Ctrl+A selects all in multi mode */
+      if (this.getMode() === 'multi') {
+        event.preventDefault();
+
+        for (const item of items) {
           item.setAttribute('selected', '');
         }
 
@@ -139,7 +184,11 @@ export class UiList extends HTMLElement {
 
     if (!target) return;
 
-    // Find which child item was clicked
+    const shift = !!(event as unknown as {shiftKey?: boolean}).shiftKey;
+    const ctrl =
+      !!(event as unknown as {ctrlKey?: boolean}).ctrlKey ||
+      !!(event as unknown as {metaKey?: boolean}).metaKey;
+
     const allChildren = Array.from(
       {length: this.children.length},
       (_, i) => this.children[i] as Element,
@@ -170,26 +219,58 @@ export class UiList extends HTMLElement {
     this.highlightIndex = clickedIndex;
     this.syncHighlight();
 
-    // Select the clicked item
     const items = this.getItems();
     const item = items[this.highlightIndex];
 
-    if (item) {
-      if (this.getMode() === 'multi') {
+    if (!item) return;
+
+    if (this.getMode() === 'multi') {
+      if (shift) {
+        /* Shift+Click: select range from anchor to clicked */
+        this.selectRange(this.rangeAnchor, this.highlightIndex, items);
+      } else if (ctrl) {
+        /* Ctrl/Cmd+Click: toggle individual without clearing */
         if (item.hasAttribute('selected')) {
           item.removeAttribute('selected');
         } else {
           item.setAttribute('selected', '');
         }
+
+        this.rangeAnchor = this.highlightIndex;
       } else {
+        /* Plain click: clear all, select clicked */
         for (const i of items) {
           i.removeAttribute('selected');
         }
 
         item.setAttribute('selected', '');
+        this.rangeAnchor = this.highlightIndex;
+      }
+    } else {
+      for (const i of items) {
+        i.removeAttribute('selected');
       }
 
-      this.dispatchEvent(new Event('select', {bubbles: true}));
+      item.setAttribute('selected', '');
+    }
+
+    this.dispatchEvent(new Event('select', {bubbles: true}));
+  }
+
+  /**
+   * Selects all items between `from` and `to` (inclusive),
+   * deselecting everything else.
+   */
+  private selectRange(from: number, to: number, items: Element[]): void {
+    const lo = Math.min(from, to);
+    const hi = Math.max(from, to);
+
+    for (let i = 0; i < items.length; i++) {
+      if (i >= lo && i <= hi) {
+        items[i]!.setAttribute('selected', '');
+      } else {
+        items[i]!.removeAttribute('selected');
+      }
     }
   }
 }
