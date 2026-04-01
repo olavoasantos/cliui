@@ -119,3 +119,32 @@ Custom element stylesheets are injected via `ensureCustomElementStyles()` when t
 **Discovered in:** `<ui-input>` `white-space: pre` not taking effect on the first render inside a dialog, causing space collapsing.
 
 **Expected behavior:** Style injection should trigger immediate recomputation, or the layout engine should defer the first paint until styles are resolved.
+
+---
+
+### BUG-10: `<ui-select>` listbox does not scroll with many options
+
+**Summary**
+
+The select dropdown renders all options in an absolutely positioned div that grows unbounded. With many options (e.g., 20+), the list overflows off the bottom of the terminal with no scrolling or viewport clipping. Browsers cap the dropdown height and provide a scrollable viewport.
+
+**Workaround:** None currently. Users must keep option counts small.
+
+**Expected behavior:** The listbox should have a configurable max visible height (e.g., 8–10 rows) and only render the visible slice of options around the highlighted index, similar to the tail-window approach used in `<ui-log>`. Arrow key navigation should scroll the visible window to keep the highlighted item in view.
+
+**Blocked by:** BUG-3 and BUG-4 (`overflow: scroll` is broken). The fix should use internal windowing instead of CSS overflow.
+
+---
+
+### BUG-11: `<ui-log>` cannot use native scroll — uses internal tail window as workaround
+
+**Summary**
+
+The `<ui-log>` component was designed to use `overflow: scroll` for a scrollable log viewport, but had to be rewritten to use an internal tail-window approach (only rendering the last N lines as DOM children) because of BUG-3 and BUG-4.
+
+This means the log viewer:
+- Cannot be scrolled up by the user to review history (mouse wheel does nothing)
+- Only shows the tail — older lines are in memory but not in the DOM
+- The `height` attribute controls visible lines, not CSS height
+
+**Expected behavior:** Once `overflow: scroll` is fixed (BUG-3 and BUG-4), the log should use native scroll so users can scroll up to review history and mouse wheel works. The internal `lines[]` array should remain for `max-lines` capping, but rendering should use the scroll container instead of windowing.
