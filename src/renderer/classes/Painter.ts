@@ -66,7 +66,7 @@ export class Painter {
     const textCell = this.createStyledCell(box);
     const contentClipRect = this.createChildClipRect(box, clipRect);
 
-    this.paintBackground(metrics, textCell, buffer, clipRect);
+    this.paintBackground(metrics, textCell, buffer, clipRect, box.computedStyle);
     this.paintBorder(metrics, box.computedStyle, textCell, buffer, clipRect);
 
     // <hr> elements fill their content row with horizontal line characters
@@ -118,8 +118,20 @@ export class Painter {
     textCell: Cell,
     buffer: CellBuffer,
     clipRect: ClipRect | null,
+    computedStyle: ComputedStyle,
   ): void {
-    if (textCell.bg === null) {
+    const bgValue = computedStyle.get('background-color');
+    const gradient = bgValue ? parseGradientStops(bgValue) : null;
+    const sampler = gradient
+      ? createLinearGradient(
+          gradient.angleDeg,
+          gradient.stops,
+          metrics.outerWidth,
+          metrics.outerHeight,
+        )
+      : null;
+
+    if (textCell.bg === null && sampler === null) {
       return;
     }
 
@@ -140,6 +152,10 @@ export class Painter {
       for (let x = metrics.outerX; x < metrics.outerX + metrics.outerWidth; x += 1) {
         if (buffer.getRef(x, y) === undefined || !this.isWithinClipRect(x, y, clipRect)) {
           continue;
+        }
+
+        if (sampler) {
+          bgCell.bg = sampler(x - metrics.outerX, y - metrics.outerY);
         }
 
         buffer.setDirect(x, y, bgCell);

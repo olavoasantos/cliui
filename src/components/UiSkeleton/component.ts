@@ -3,11 +3,10 @@ import styles from './styles.css?inline';
 import {
   DEFAULT_UI_SKELETON_HEIGHT,
   DEFAULT_UI_SKELETON_WIDTH,
-  UI_SKELETON_BASE_CHAR,
+  UI_SKELETON_BASE_COLOR,
   UI_SKELETON_OBSERVED_ATTRIBUTES,
-  UI_SKELETON_SHIMMER_CHAR,
+  UI_SKELETON_SHIMMER_COLOR,
   UI_SKELETON_SHIMMER_SPEED,
-  UI_SKELETON_SHIMMER_WIDTH,
   UI_SKELETON_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
@@ -17,9 +16,13 @@ import type {TerminalFrameAware} from '../../types/TerminalFrameAware';
 /**
  * Built-in terminal skeleton loading placeholder custom element.
  *
- * Renders a shimmer animation — a bright band sweeping left to
- * right across dim block characters, similar to web skeleton
- * loading indicators.
+ * Renders a shimmer animation using a moving `linear-gradient`
+ * background — a bright band sweeps across the placeholder,
+ * similar to web skeleton loading indicators.
+ *
+ * Set `width` and `height` attributes to control the placeholder
+ * dimensions. The element fills its area with space characters so
+ * the gradient background is visible.
  *
  * Implements `TerminalFrameAware` for smooth animation driven
  * by the terminal render loop.
@@ -32,14 +35,15 @@ export class UiSkeleton extends HTMLElement implements TerminalFrameAware {
   static readonly styles = styles;
   static readonly tagName = UI_SKELETON_TAG_NAME;
 
-  /** Current shimmer position (fractional column). */
-  private shimmerPos = -UI_SKELETON_SHIMMER_WIDTH;
+  /** Current gradient angle in degrees. */
+  private angle = 0;
 
   /** Timestamp of the previous frame. */
   private lastTimestamp: number | null = null;
 
   connectedCallback(): void {
-    this.renderFrame();
+    this.renderContent();
+    this.syncGradient();
   }
 
   override attributeChangedCallback(
@@ -49,11 +53,11 @@ export class UiSkeleton extends HTMLElement implements TerminalFrameAware {
   ): void {
     if (oldValue === newValue) return;
 
-    this.renderFrame();
+    this.renderContent();
   }
 
   /**
-   * Advances the shimmer sweep.
+   * Advances the shimmer gradient angle.
    *
    * @param timestamp - Current frame timestamp in milliseconds.
    */
@@ -66,34 +70,28 @@ export class UiSkeleton extends HTMLElement implements TerminalFrameAware {
     const dt = (timestamp - this.lastTimestamp) / 1000;
     this.lastTimestamp = timestamp;
 
-    const w = this.getDimension('width', DEFAULT_UI_SKELETON_WIDTH);
-
-    this.shimmerPos += UI_SKELETON_SHIMMER_SPEED * dt;
-
-    /* Wrap around when the shimmer has fully passed */
-    if (this.shimmerPos > w) {
-      this.shimmerPos = -UI_SKELETON_SHIMMER_WIDTH;
-    }
-
-    this.renderFrame();
+    this.angle = (this.angle + UI_SKELETON_SHIMMER_SPEED * dt) % 360;
+    this.syncGradient();
   }
 
   /* ── Private ────────────────────────────────────────────── */
 
-  private renderFrame(): void {
+  /** Fills the element with spaces so the background gradient is visible. */
+  private renderContent(): void {
     const w = this.getDimension('width', DEFAULT_UI_SKELETON_WIDTH);
     const h = this.getDimension('height', DEFAULT_UI_SKELETON_HEIGHT);
-    const shimmerStart = Math.floor(this.shimmerPos);
-    const shimmerEnd = shimmerStart + UI_SKELETON_SHIMMER_WIDTH;
-
-    let line = '';
-
-    for (let x = 0; x < w; x++) {
-      line +=
-        x >= shimmerStart && x < shimmerEnd ? UI_SKELETON_SHIMMER_CHAR : UI_SKELETON_BASE_CHAR;
-    }
+    const line = ' '.repeat(w);
 
     this.textContent = Array.from({length: h}, () => line).join('\n');
+    this.style.width = String(w);
+    this.style.height = String(h);
+  }
+
+  /** Updates the background-color gradient angle. */
+  private syncGradient(): void {
+    const deg = Math.round(this.angle);
+
+    this.style.backgroundColor = `linear-gradient(${deg}deg, ${UI_SKELETON_BASE_COLOR}, ${UI_SKELETON_SHIMMER_COLOR}, ${UI_SKELETON_BASE_COLOR})`;
   }
 
   private getDimension(name: string, fallback: number): number {
