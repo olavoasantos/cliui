@@ -136,11 +136,17 @@ The select dropdown renders all options in an absolutely positioned div that gro
 
 ---
 
-### BUG-12: ~~Flex row children with borders don't stretch to equal height~~ FIXED
+### BUG-12: Flex row children with borders don't stretch to equal height
 
-**Root cause:** `FlexLayout` defaulted `align-items` to `flex-start` instead of `stretch` (CSS spec default). Children in a flex row never stretched to match the tallest sibling.
+**Summary**
 
-**Fix:** Changed default from `'flex-start'` to `'stretch'` in `FlexLayout.ts` line 322.
+When flex-direction is row and children have borders, the border rendering doesn't match the stretched height. The right border of shorter children appears detached/floating.
+
+**Discovered in:** `<ui-sidebar>` example — sidebar with border in a flex row with taller content sibling.
+
+**Investigation:** Changed `align-items` default from `flex-start` to `stretch` (correct per CSS spec). The `FlexLayout.resolve()` does compute `crossSize` and `setCrossSizeUnclamped` sets `box.height` + `box.contentHeight`. Phase 2 in `LayoutEngine` also forces `child.height = resolvedH`. The `Painter.getMetrics()` uses `box.height` for border rendering. All the wiring looks correct, yet the border still renders at the intrinsic content height. Needs deeper debugging of the actual values at runtime.
+
+**Status:** Open — the `align-items: stretch` default fix was correct but insufficient.
 
 ---
 
