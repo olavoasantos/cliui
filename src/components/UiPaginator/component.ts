@@ -134,44 +134,32 @@ export class UiPaginator extends HTMLElement {
 
   /**
    * Returns the page numbers to display, inserting `'…'` for
-   * truncated ranges. Always shows first, last, and a window
-   * of 1 page on each side of the current page.
+   * truncated ranges. Maintains a fixed 7-slot layout to avoid
+   * width shifts when navigating.
    *
-   * Examples (current page marked with *):
-   * - 5 pages, page 3:  `1 2 *3 4 5`
-   * - 20 pages, page 1:  `*1 2 3 … 20`
-   * - 20 pages, page 10: `1 … 9 *10 11 … 20`
-   * - 20 pages, page 20: `1 … 18 19 *20`
+   * Examples (10 pages, current marked with *):
+   * - page 1–4:  `1 2 3 4 5 … 10`  (near start)
+   * - page 5–6:  `1 … 4 *5 6 … 10`  (middle)
+   * - page 7–10: `1 … 6 7 8 9 10`  (near end)
+   *
+   * ≤7 total pages shows all numbers without truncation.
    */
   private getVisiblePages(page: number, total: number): Array<number | '…'> {
     if (total <= 7) {
       return Array.from({length: total}, (_, i) => i + 1);
     }
 
-    const pages = new Set<number>();
-
-    /* Always include first and last */
-    pages.add(1);
-    pages.add(total);
-
-    /* Window around current page */
-    for (let i = page - 1; i <= page + 1; i++) {
-      if (i >= 1 && i <= total) {
-        pages.add(i);
-      }
+    /* Near the start: first 5, …, last */
+    if (page <= 4) {
+      return [1, 2, 3, 4, 5, '…', total];
     }
 
-    const sorted = [...pages].sort((a, b) => a - b);
-    const result: Array<number | '…'> = [];
-
-    for (let i = 0; i < sorted.length; i++) {
-      if (i > 0 && sorted[i]! - sorted[i - 1]! > 1) {
-        result.push('…');
-      }
-
-      result.push(sorted[i]!);
+    /* Near the end: first, …, last 5 */
+    if (page >= total - 3) {
+      return [1, '…', total - 4, total - 3, total - 2, total - 1, total];
     }
 
-    return result;
+    /* Middle: first, …, window of 3, …, last */
+    return [1, '…', page - 1, page, page + 1, '…', total];
   }
 }
