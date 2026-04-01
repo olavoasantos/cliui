@@ -185,9 +185,6 @@ export class UiList extends HTMLElement {
     if (!target) return;
 
     const shift = !!(event as unknown as {shiftKey?: boolean}).shiftKey;
-    const ctrl =
-      !!(event as unknown as {ctrlKey?: boolean}).ctrlKey ||
-      !!(event as unknown as {metaKey?: boolean}).metaKey;
 
     const allChildren = Array.from(
       {length: this.children.length},
@@ -228,22 +225,14 @@ export class UiList extends HTMLElement {
       if (shift) {
         /* Shift+Click: select range from anchor to clicked */
         this.selectRange(this.rangeAnchor, this.highlightIndex, items);
-      } else if (ctrl) {
-        /* Ctrl/Cmd+Click: toggle individual without clearing */
+      } else {
+        /* Click: toggle individual item */
         if (item.hasAttribute('selected')) {
           item.removeAttribute('selected');
         } else {
           item.setAttribute('selected', '');
         }
 
-        this.rangeAnchor = this.highlightIndex;
-      } else {
-        /* Plain click: clear all, select clicked */
-        for (const i of items) {
-          i.removeAttribute('selected');
-        }
-
-        item.setAttribute('selected', '');
         this.rangeAnchor = this.highlightIndex;
       }
     } else {

@@ -46,7 +46,7 @@ const s2 = createSection(document, 'Multi selection');
 const hint2 = document.createElement('div');
 hint2.className = 'hint';
 hint2.textContent =
-  'Enter/Space toggles. Shift+Arrow extends range. Ctrl/Cmd+Click toggles one. Shift+Click selects range. Ctrl+A selects all.';
+  'Enter/Space/Click toggles item. Shift+Arrow extends range. Shift+Click selects range. Ctrl+A selects all.';
 const list2 = document.createElement('ui-list') as InstanceType<typeof UiList>;
 list2.setAttribute('tabindex', '0');
 list2.setAttribute('mode', 'multi');
