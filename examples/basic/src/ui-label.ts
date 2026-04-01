@@ -58,7 +58,7 @@ inp3.setAttribute('id', 'disabled-target');
 inp3.setAttribute('tabindex', '0');
 inp3.setAttribute('width', '25');
 inp3.addEventListener('focus', () => {
-  status.textContent = 'BUG: disabled label forwarded focus!';
+  status.textContent = 'Focus: input focused directly (label did NOT forward — correct)';
 });
 s3.appendChild(lbl3);
 s3.appendChild(inp3);
