@@ -83,6 +83,10 @@ export class UiPrompt extends HTMLElement {
     this.inputEl = doc.createElement('ui-input');
     this.inputEl.setAttribute('tabindex', '0');
     this.inputEl.setAttribute('width', String(DEFAULT_UI_PROMPT_INPUT_WIDTH));
+    this.inputEl.setAttribute('placeholder', 'Type here...');
+    this.inputEl.style.borderStyle = 'single';
+    this.inputEl.style.borderColor = '#475569';
+    this.inputEl.style.padding = '0 1';
 
     const btnRow = doc.createElement('div');
     btnRow.style.display = 'flex';
