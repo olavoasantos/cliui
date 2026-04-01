@@ -3,9 +3,11 @@ import styles from './styles.css?inline';
 import {
   DEFAULT_UI_SKELETON_HEIGHT,
   DEFAULT_UI_SKELETON_WIDTH,
-  UI_SKELETON_FRAMES,
+  UI_SKELETON_BASE_CHAR,
   UI_SKELETON_OBSERVED_ATTRIBUTES,
-  UI_SKELETON_PULSE_INTERVAL,
+  UI_SKELETON_SHIMMER_CHAR,
+  UI_SKELETON_SHIMMER_SPEED,
+  UI_SKELETON_SHIMMER_WIDTH,
   UI_SKELETON_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
@@ -15,9 +17,12 @@ import type {TerminalFrameAware} from '../../types/TerminalFrameAware';
 /**
  * Built-in terminal skeleton loading placeholder custom element.
  *
- * Renders dim pulsing block characters in the shape specified by
- * `width` and `height` attributes, indicating content is loading.
- * Implements `TerminalFrameAware` for the pulse animation.
+ * Renders a shimmer animation — a bright band sweeping left to
+ * right across dim block characters, similar to web skeleton
+ * loading indicators.
+ *
+ * Implements `TerminalFrameAware` for smooth animation driven
+ * by the terminal render loop.
  *
  * Register with `window.customElements.define(UiSkeleton.tagName, UiSkeleton)`
  * before creating `<ui-skeleton>` elements in a window.
@@ -27,11 +32,11 @@ export class UiSkeleton extends HTMLElement implements TerminalFrameAware {
   static readonly styles = styles;
   static readonly tagName = UI_SKELETON_TAG_NAME;
 
-  /** Current animation frame index. */
-  private frameIndex = 0;
+  /** Current shimmer position (fractional column). */
+  private shimmerPos = -UI_SKELETON_SHIMMER_WIDTH;
 
-  /** Timestamp of the last frame switch. */
-  private lastSwitch: number | null = null;
+  /** Timestamp of the previous frame. */
+  private lastTimestamp: number | null = null;
 
   connectedCallback(): void {
     this.renderFrame();
@@ -48,21 +53,29 @@ export class UiSkeleton extends HTMLElement implements TerminalFrameAware {
   }
 
   /**
-   * Advances the pulse animation.
+   * Advances the shimmer sweep.
    *
    * @param timestamp - Current frame timestamp in milliseconds.
    */
   onTerminalFrame(timestamp: number): void {
-    if (this.lastSwitch == null) {
-      this.lastSwitch = timestamp;
+    if (this.lastTimestamp == null) {
+      this.lastTimestamp = timestamp;
       return;
     }
 
-    if (timestamp - this.lastSwitch >= UI_SKELETON_PULSE_INTERVAL) {
-      this.frameIndex = (this.frameIndex + 1) % UI_SKELETON_FRAMES.length;
-      this.lastSwitch = timestamp;
-      this.renderFrame();
+    const dt = (timestamp - this.lastTimestamp) / 1000;
+    this.lastTimestamp = timestamp;
+
+    const w = this.getDimension('width', DEFAULT_UI_SKELETON_WIDTH);
+
+    this.shimmerPos += UI_SKELETON_SHIMMER_SPEED * dt;
+
+    /* Wrap around when the shimmer has fully passed */
+    if (this.shimmerPos > w) {
+      this.shimmerPos = -UI_SKELETON_SHIMMER_WIDTH;
     }
+
+    this.renderFrame();
   }
 
   /* ── Private ────────────────────────────────────────────── */
@@ -70,8 +83,15 @@ export class UiSkeleton extends HTMLElement implements TerminalFrameAware {
   private renderFrame(): void {
     const w = this.getDimension('width', DEFAULT_UI_SKELETON_WIDTH);
     const h = this.getDimension('height', DEFAULT_UI_SKELETON_HEIGHT);
-    const char = UI_SKELETON_FRAMES[this.frameIndex]!;
-    const line = char.repeat(w);
+    const shimmerStart = Math.floor(this.shimmerPos);
+    const shimmerEnd = shimmerStart + UI_SKELETON_SHIMMER_WIDTH;
+
+    let line = '';
+
+    for (let x = 0; x < w; x++) {
+      line +=
+        x >= shimmerStart && x < shimmerEnd ? UI_SKELETON_SHIMMER_CHAR : UI_SKELETON_BASE_CHAR;
+    }
 
     this.textContent = Array.from({length: h}, () => line).join('\n');
   }

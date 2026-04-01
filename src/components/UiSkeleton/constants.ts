@@ -4,8 +4,11 @@ export const UI_SKELETON_TAG_NAME = 'ui-skeleton';
 /** Observed custom element attributes for the built-in skeleton. */
 export const UI_SKELETON_OBSERVED_ATTRIBUTES = ['width', 'height'];
 
-/** Characters used for the pulsing animation. */
-export const UI_SKELETON_FRAMES = ['░', '▒'] as const;
+/** Base (dim) character for the skeleton background. */
+export const UI_SKELETON_BASE_CHAR = '░';
+
+/** Bright character for the shimmer highlight. */
+export const UI_SKELETON_SHIMMER_CHAR = '▒';
 
 /** Default skeleton width in columns. */
 export const DEFAULT_UI_SKELETON_WIDTH = 20;
@@ -13,5 +16,8 @@ export const DEFAULT_UI_SKELETON_WIDTH = 20;
 /** Default skeleton height in rows. */
 export const DEFAULT_UI_SKELETON_HEIGHT = 1;
 
-/** Animation interval in milliseconds. */
-export const UI_SKELETON_PULSE_INTERVAL = 600;
+/** Width of the shimmer highlight band in columns. */
+export const UI_SKELETON_SHIMMER_WIDTH = 4;
+
+/** Speed of the shimmer sweep in columns per second. */
+export const UI_SKELETON_SHIMMER_SPEED = 12;
