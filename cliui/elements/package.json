@@ -1,7 +1,7 @@
 {
   "name": "@cliui/elements",
   "version": "0.0.0",
-  "description": "Terminal UI component library — HTML elements, primitives, and styled components",
+  "description": "Terminal UI component library \u2014 HTML elements, primitives, and styled components",
   "type": "module",
   "license": "MIT",
   "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
@@ -10,7 +10,9 @@
     "url": "https://github.com/olavoasantos/cliui.git",
     "directory": "cliui/elements"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +24,8 @@
     }
   },
   "dependencies": {
-    "@cliui/terminal": "workspace:*"
+    "@cliui/terminal": "workspace:*",
+    "shiki": "^4.0.2"
   },
   "scripts": {
     "build": "vite build",

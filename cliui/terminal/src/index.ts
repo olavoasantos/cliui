@@ -19,6 +19,7 @@ export {ClipboardEvent, Document, Element, Event, KeyboardEvent, MouseEvent, Win
 export {polyfillEnvironment} from '@cliui/dom';
 
 export type {TerminalOptions} from './types';
+export type {TerminalFrameAware} from './types/TerminalFrameAware';
 export type {
   TerminalInput,
   TerminalInputEvent,
@@ -27,3 +28,15 @@ export type {
   TerminalPasteEvent,
   TerminalReadableInput,
 } from './terminal';
+export type {EditableConfiguration} from './terminal/types/EditableConfiguration';
+
+/* Engine internals re-exported for @cliui/elements */
+export {CellBuffer} from './renderer/classes/CellBuffer';
+export {Painter} from './renderer/classes/Painter';
+export {Renderer} from './renderer/classes/Renderer';
+export {StyleEngine} from './css/classes/StyleEngine';
+export {LayoutEngine} from './layout/classes/LayoutEngine';
+export {cellWidth} from './layout/utilities/cellWidth';
+export {graphemeWidth} from './layout/utilities/graphemeWidth';
+export {GRAPHEME_SEGMENTER} from './layout/constants/cellWidth';
+export {EDITABLE} from './terminal/constants/editable';
