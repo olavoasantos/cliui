@@ -1,4 +1,4 @@
-import {UiList} from '@micra/terminal-dom/components';
+import {UiList} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();

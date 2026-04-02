@@ -1,4 +1,4 @@
-import {Terminal} from '@micra/terminal-dom';
+import {Terminal} from '@cliui/terminal';
 import css from './styles.css?inline';
 
 const terminal = new Terminal({

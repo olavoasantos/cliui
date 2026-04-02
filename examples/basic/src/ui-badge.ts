@@ -1,4 +1,4 @@
-import {UiBadge} from '@micra/terminal-dom/components';
+import {UiBadge} from '@cliui/elements';
 import {createDemo, createShell, createSection} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();

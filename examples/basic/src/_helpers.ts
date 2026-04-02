@@ -1,4 +1,4 @@
-import {Terminal} from '@micra/terminal-dom';
+import {Terminal} from '@cliui/terminal';
 
 /**
  * Shared bootstrap for component examples.

@@ -1,4 +1,4 @@
-import {UiStatusline} from '@micra/terminal-dom/components';
+import {UiStatusline} from '@cliui/elements';
 import {createDemo, createShell, createSection} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();

@@ -1,5 +1,5 @@
 import {mount} from 'svelte';
-import {Terminal} from '@micra/terminal-dom';
+import {Terminal} from '@cliui/terminal';
 import App from './App.svelte';
 import css from './styles.css?inline';
 

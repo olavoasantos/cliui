@@ -1,4 +1,4 @@
-import {UiCard} from '@micra/terminal-dom/components';
+import {UiCard} from '@cliui/elements';
 import {createDemo, createShell, createSection} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();

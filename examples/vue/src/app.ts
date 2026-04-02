@@ -1,5 +1,5 @@
 import {createApp} from 'vue';
-import {Terminal} from '@micra/terminal-dom';
+import {Terminal} from '@cliui/terminal';
 import App from './App.vue';
 import css from './styles.css?inline';
 

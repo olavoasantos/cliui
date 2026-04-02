@@ -1,4 +1,4 @@
-import {UiSpinner} from '@micra/terminal-dom/components';
+import {UiSpinner} from '@cliui/elements';
 import {createDemo, createShell, createSection} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();

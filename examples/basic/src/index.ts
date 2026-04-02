@@ -1,4 +1,4 @@
-import {Terminal} from '@micra/terminal-dom';
+import {Terminal} from '@cliui/terminal';
 import {
   UiButton,
   UiCodeblock,
@@ -14,7 +14,7 @@ import {
   UiTh,
   UiThead,
   UiTr,
-} from '@micra/terminal-dom/components';
+} from '@cliui/elements';
 
 /* Load Shiki highlighter before starting the app */
 const jsLang = (await import('shiki/langs/javascript.mjs')).default;
@@ -373,7 +373,7 @@ const codeblock = document.createElement('ui-codeblock') as InstanceType<typeof 
 codeblock.setAttribute('language', 'javascript');
 codeblock.setAttribute('theme', 'nord');
 codeblock.setAttribute('line-numbers', '');
-codeblock.textContent = `import { Terminal } from '@micra/terminal-dom';
+codeblock.textContent = `import { Terminal } from '@cliui/terminal';
 
 const terminal = new Terminal({ altScreen: true, mouse: true, fps: 30 });
 const { document } = terminal;

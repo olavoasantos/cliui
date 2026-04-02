@@ -1,4 +1,4 @@
-import {Terminal} from '@micra/terminal-dom';
+import {Terminal} from '@cliui/terminal';
 import {
   UiBadge,
   UiButton,
@@ -17,7 +17,7 @@ import {
   UiTab,
   UiTabs,
   UiToast,
-} from '@micra/terminal-dom/components';
+} from '@cliui/elements';
 
 process.stdin.setRawMode?.(true);
 process.stdin.resume();
