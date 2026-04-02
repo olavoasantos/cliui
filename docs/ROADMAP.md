@@ -311,3 +311,31 @@ T94. Performance domain: Performance.enable/getMetrics/disable, forward window.p
 T95. Log domain — console forwarding: Intercept console.log/warn/error/info → Log.entryAdded + Runtime.consoleAPICalled events. Non-destructive tee (original output preserved). _(parallel with T93–T94)_
 
 T96. DevToolsBridge orchestrator and Terminal integration: Top-level class wiring all domains. `listen(port?)` / `close()` lifecycle. Terminal option `{ devtools: true }` or separate import `@micra/terminal-dom/devtools`. Registry cleanup on disconnect.
+
+### Phase 9: CSS Animations & Transitions
+
+> Add CSS transitions and `@keyframes` animations. Declarative animation for the common case — state-driven visual transitions — while `TerminalFrameAware` remains for complex imperative animation (spring physics, frame sequences).
+
+T97. Easing functions: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`, `cubic-bezier(x1,y1,x2,y2)`, `steps(n, start|end)`. Pure math, no dependencies.
+
+T98. Animatable property classification and value interpolation: Registry of animatable properties (color, number, discrete types), interpolation dispatch. Color via RGB lerp, numbers via linear interpolation (integer rounding for cell properties), discrete snap at 50%.
+
+T99. @keyframes parser: Extend CSS parser for nested at-rule blocks. `@keyframes name { from { } 50% { } to { } }` — percentage stops, `from`/`to` aliases, multiple properties per stop.
+
+T100. Transition and animation CSS properties: Add 14 new properties to the CSS subset. `transition`/`animation` shorthands with comma-separated multi-value expansion. Time value parsing (`200ms`, `0.5s`). Easing function parsing.
+
+T101. Keyframe resolver: Given animation progress (0–1) and parsed keyframes, find bounding stops, compute local progress, apply easing, interpolate values. Implicit 0%/100% keyframes from computed style.
+
+T102. Record pre-animation performance baseline: Capture baseline before wiring animation into the frame loop. Gate task — blocks T103–T106.
+
+T103. Transition controller: Detect computed value changes in `recomputeDirty()`, start old→new transitions, manage active set, handle cancellation/reversal mid-transition. `transition-property: all` and `none`. _(parallel with T104)_
+
+T104. Animation controller: Manage `@keyframes` playback — iteration count, direction (normal/reverse/alternate), fill mode (none/forwards/backwards/both), play state (running/paused). Multiple animations per element. _(parallel with T103)_
+
+T105. Style engine integration: Wire animation/transition values into cascade. Priority: transitions > animations > normal cascade. Transition detection inside `recomputeDirty()`. Zero overhead for non-animated elements.
+
+T106. Frame loop integration: Wire animation `tick(timestamp)` into `Terminal.renderFrame()` before style recomputation. Iterate only active animation/transition set — no tree walk. Empty set = no-op.
+
+T107. Animation and transition DOM events: `TransitionEvent` (`transitionrun`, `transitionstart`, `transitionend`, `transitioncancel`) and `AnimationEvent` (`animationstart`, `animationend`, `animationiteration`, `animationcancel`). All bubble. _(parallel with T105–T106)_
+
+T108. Record baseline and verify animation overhead: Compare against T102 baseline. Focus on zero-animation overhead. Add animation-specific benchmarks (color transition, multi-property animation, 50 simultaneous transitions).
