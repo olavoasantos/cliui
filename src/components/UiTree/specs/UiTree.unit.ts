@@ -15,6 +15,34 @@ function createEnv() {
   return {window, document};
 }
 
+function buildTree(document: any) {
+  const tree = document.createElement('ui-tree');
+
+  const src = document.createElement('ui-tree-item');
+  src.setAttribute('expandable', '');
+  src.setAttribute('value', 'src');
+  src.textContent = 'src';
+
+  const indexTs = document.createElement('ui-tree-item');
+  indexTs.setAttribute('value', 'index.ts');
+  indexTs.textContent = 'index.ts';
+  src.appendChild(indexTs);
+
+  const utils = document.createElement('ui-tree-item');
+  utils.setAttribute('value', 'utils.ts');
+  utils.textContent = 'utils.ts';
+  src.appendChild(utils);
+
+  const readme = document.createElement('ui-tree-item');
+  readme.setAttribute('value', 'README.md');
+  readme.textContent = 'README.md';
+
+  tree.appendChild(src);
+  tree.appendChild(readme);
+
+  return {tree: tree as UiTree, src, indexTs, utils, readme};
+}
+
 describe('UiTree', () => {
   it('registers the custom element under its tag name', () => {
     const {window} = createEnv();
@@ -22,76 +50,148 @@ describe('UiTree', () => {
     expect(window.customElements.get('ui-tree')).toBe(UiTree);
   });
 
-  it('collects visible leaf items', () => {
+  it('renders only top-level items when all collapsed', () => {
     const {document} = createEnv();
-    const tree = document.createElement('ui-tree') as UiTree;
-
-    for (const name of ['A', 'B', 'C']) {
-      const item = document.createElement('ui-tree-item');
-      item.setAttribute('value', name);
-      item.textContent = name;
-      tree.appendChild(item);
-    }
-
+    const {tree} = buildTree(document);
     document.body.appendChild(tree);
 
-    expect(tree.getVisibleItems().length).toBe(3);
+    const visible = tree.getVisibleItems();
+
+    expect(visible.length).toBe(2);
+    expect(visible[0]!.getValue()).toBe('src');
+    expect(visible[1]!.getValue()).toBe('README.md');
   });
 
-  it('hides children of collapsed expandable items', () => {
+  it('shows children when parent is expanded', () => {
     const {document} = createEnv();
-    const tree = document.createElement('ui-tree') as UiTree;
-
-    const parent = document.createElement('ui-tree-item');
-    parent.setAttribute('value', 'parent');
-    parent.setAttribute('expandable', '');
-    parent.textContent = 'Parent';
-
-    const child = document.createElement('ui-tree-item');
-    child.setAttribute('value', 'child');
-    child.textContent = 'Child';
-    parent.appendChild(child);
-
-    tree.appendChild(parent);
+    const {tree, src} = buildTree(document);
     document.body.appendChild(tree);
 
-    /* Collapsed: only parent visible */
-    expect(tree.getVisibleItems().length).toBe(1);
+    src.setAttribute('open', '');
+    tree.refresh();
 
-    /* Expand */
-    parent.setAttribute('open', '');
+    const visible = tree.getVisibleItems();
 
-    expect(tree.getVisibleItems().length).toBe(2);
+    expect(visible.length).toBe(4);
+    expect(visible[0]!.getValue()).toBe('src');
+    expect(visible[1]!.getValue()).toBe('index.ts');
+    expect(visible[2]!.getValue()).toBe('utils.ts');
+    expect(visible[3]!.getValue()).toBe('README.md');
+  });
+
+  it('hides children when parent is collapsed', () => {
+    const {document} = createEnv();
+    const {tree, src} = buildTree(document);
+    src.setAttribute('open', '');
+    document.body.appendChild(tree);
+
+    src.removeAttribute('open');
+    tree.refresh();
+
+    const visible = tree.getVisibleItems();
+
+    expect(visible.length).toBe(2);
+  });
+
+  it('renders full labels without truncation', () => {
+    const {document} = createEnv();
+    const {tree} = buildTree(document);
+    document.body.appendChild(tree);
+
+    /* Check rendered rows contain full text */
+    const rows = tree.getRenderedRows();
+
+    expect(rows.length).toBe(2);
+    expect(rows[0]!.textContent).toContain('src');
+    expect(rows[1]!.textContent).toContain('README.md');
+  });
+
+  it('renders indented labels for nested items', () => {
+    const {document} = createEnv();
+    const {tree, src} = buildTree(document);
+    src.setAttribute('open', '');
+    document.body.appendChild(tree);
+
+    const rows = tree.getRenderedRows();
+
+    /* Nested items should have leading spaces for indentation */
+    expect(rows[1]!.textContent).toContain('index.ts');
+    const srcText = rows[0]!.textContent ?? '';
+    const childText = rows[1]!.textContent ?? '';
+
+    /* Child should start further right than parent */
+    const srcIndent = srcText.length - srcText.trimStart().length;
+    const childIndent = childText.length - childText.trimStart().length;
+
+    expect(childIndent).toBeGreaterThan(srcIndent);
+  });
+
+  it('shows collapse indicator on expandable items', () => {
+    const {document} = createEnv();
+    const {tree} = buildTree(document);
+    document.body.appendChild(tree);
+
+    const rows = tree.getRenderedRows();
+    const srcRow = rows[0]!.textContent ?? '';
+
+    expect(srcRow).toContain('▸');
+  });
+
+  it('shows expand indicator on expanded items', () => {
+    const {document} = createEnv();
+    const {tree, src} = buildTree(document);
+    src.setAttribute('open', '');
+    document.body.appendChild(tree);
+
+    const rows = tree.getRenderedRows();
+    const srcRow = rows[0]!.textContent ?? '';
+
+    expect(srcRow).toContain('▾');
   });
 
   it('navigates with ArrowDown/ArrowUp', () => {
     const {document} = createEnv();
-    const tree = document.createElement('ui-tree') as UiTree;
-
-    for (const name of ['A', 'B', 'C']) {
-      const item = document.createElement('ui-tree-item');
-      item.setAttribute('value', name);
-      item.textContent = name;
-      tree.appendChild(item);
-    }
-
+    const {tree} = buildTree(document);
     document.body.appendChild(tree);
 
     tree.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowDown', bubbles: true}));
 
-    const items = tree.getVisibleItems();
+    const rows = tree.getRenderedRows();
+    const highlighted = rows.find((r: any) => r.hasAttribute('highlighted'));
 
-    expect(items[1]!.hasAttribute('highlighted')).toBe(true);
+    expect(highlighted).toBeDefined();
+    expect(highlighted!.textContent).toContain('README.md');
+  });
+
+  it('expands on ArrowRight', () => {
+    const {document} = createEnv();
+    const {tree} = buildTree(document);
+    document.body.appendChild(tree);
+
+    /* Highlight is on src (first item, expandable, collapsed) */
+    tree.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight', bubbles: true}));
+
+    const visible = tree.getVisibleItems();
+
+    expect(visible.length).toBe(4); /* src + 2 children + README */
+  });
+
+  it('collapses on ArrowLeft', () => {
+    const {document} = createEnv();
+    const {tree, src} = buildTree(document);
+    src.setAttribute('open', '');
+    document.body.appendChild(tree);
+
+    tree.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowLeft', bubbles: true}));
+
+    const visible = tree.getVisibleItems();
+
+    expect(visible.length).toBe(2);
   });
 
   it('dispatches select on Enter', () => {
     const {document} = createEnv();
-    const tree = document.createElement('ui-tree') as UiTree;
-
-    const item = document.createElement('ui-tree-item');
-    item.setAttribute('value', 'A');
-    item.textContent = 'A';
-    tree.appendChild(item);
+    const {tree} = buildTree(document);
     document.body.appendChild(tree);
 
     const handler = vi.fn();

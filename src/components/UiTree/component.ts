@@ -1,17 +1,37 @@
 import styles from './styles.css?inline';
 
-import {UI_TREE_OBSERVED_ATTRIBUTES, UI_TREE_TAG_NAME} from './constants';
+import {
+  UI_TREE_INDENT_SIZE,
+  UI_TREE_INDICATOR_COLLAPSED,
+  UI_TREE_INDICATOR_EXPANDED,
+  UI_TREE_INDICATOR_LEAF,
+  UI_TREE_OBSERVED_ATTRIBUTES,
+  UI_TREE_TAG_NAME,
+} from './constants';
 import {Event, HTMLElement} from '../../dom';
 
 import type {UiTreeItem} from '../UiTreeItem/component';
 
 /**
+ * Flat entry in the visible item list.
+ */
+interface VisibleEntry {
+  /** The original `<ui-tree-item>` element. */
+  item: UiTreeItem;
+  /** Nesting depth (0 = root). */
+  depth: number;
+}
+
+/**
  * Built-in terminal tree view custom element.
  *
  * Contains `<ui-tree-item>` children arranged in a collapsible
- * hierarchy. Arrow Up/Down navigates between visible items.
- * Arrow Right expands, Arrow Left collapses. Enter dispatches
- * a `select` event with the focused item's value.
+ * hierarchy. The tree flattens the visible items into rendered
+ * rows — only items whose ancestors are all expanded are shown.
+ *
+ * Arrow Up/Down navigates between visible items. Arrow Right
+ * expands, Arrow Left collapses. Enter dispatches a `select`
+ * event with the focused item's value.
  *
  * Register with `window.customElements.define(UiTree.tagName, UiTree)`
  * before creating `<ui-tree>` elements in a window.
@@ -24,12 +44,24 @@ export class UiTree extends HTMLElement {
   /** Index of the currently highlighted item in the visible list. */
   private highlightedIndex = 0;
 
+  /** Cached flat list of visible entries. */
+  private visibleEntries: VisibleEntry[] = [];
+
+  /** Rendered row elements (direct children managed by the tree). */
+  private renderedRows: import('../../dom').Element[] = [];
+
+  /** The original tree-item children (preserved for hierarchy). */
+  private sourceItems: UiTreeItem[] = [];
+
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
 
   connectedCallback(): void {
     this.ensureTabIndex();
     this.addEventListener('keydown', this.boundKeyDown);
-    this.syncHighlight();
+
+    /* Capture the original tree-item children before we replace them */
+    this.captureSourceItems();
+    this.refresh();
   }
 
   disconnectedCallback(): void {
@@ -38,20 +70,139 @@ export class UiTree extends HTMLElement {
 
   /** Returns all currently visible tree items in document order. */
   getVisibleItems(): UiTreeItem[] {
-    return this.collectVisible(this as unknown as import('../../dom').Element, 0);
+    return this.visibleEntries.map((e) => e.item);
   }
 
-  /* ── Private ────────────────────────────────────────────── */
+  /** Returns the rendered row elements (for testing). */
+  getRenderedRows(): import('../../dom').Element[] {
+    return this.renderedRows;
+  }
+
+  /** Returns the highlighted item's value, or null. */
+  getHighlightedValue(): string | null {
+    const entry = this.visibleEntries[this.highlightedIndex];
+    return entry ? entry.item.getValue() : null;
+  }
+
+  /** Rebuilds the visible list and re-renders rows. */
+  refresh(): void {
+    this.visibleEntries = this.collectVisible(this.sourceItems, 0);
+    this.highlightedIndex = Math.min(
+      this.highlightedIndex,
+      Math.max(0, this.visibleEntries.length - 1),
+    );
+    this.renderRows();
+  }
+
+  /* ── Private: Source capture ─────────────────────────────── */
+
+  private captureSourceItems(): void {
+    this.sourceItems = [];
+
+    for (let i = 0; i < this.childNodes.length; i++) {
+      const child = this.childNodes[i];
+
+      if (
+        child &&
+        'localName' in child &&
+        (child as import('../../dom').Element).localName === 'ui-tree-item'
+      ) {
+        this.sourceItems.push(child as unknown as UiTreeItem);
+      }
+    }
+
+    /* Remove source items from DOM — we'll render flat rows instead */
+    for (const item of this.sourceItems) {
+      if (item.parentNode === (this as unknown as import('../../dom').Node)) {
+        this.removeChild(item as unknown as import('../../dom').Node);
+      }
+    }
+  }
+
+  /* ── Private: Visibility ────────────────────────────────── */
+
+  private collectVisible(items: UiTreeItem[], depth: number): VisibleEntry[] {
+    const result: VisibleEntry[] = [];
+
+    for (const item of items) {
+      result.push({item, depth});
+
+      if (item.hasAttribute('expandable') && item.hasAttribute('open')) {
+        const children = this.getTreeItemChildren(item);
+        result.push(...this.collectVisible(children, depth + 1));
+      }
+    }
+
+    return result;
+  }
+
+  private getTreeItemChildren(item: UiTreeItem): UiTreeItem[] {
+    const children: UiTreeItem[] = [];
+
+    for (let i = 0; i < (item as unknown as import('../../dom').Element).childNodes.length; i++) {
+      const child = (item as unknown as import('../../dom').Element).childNodes[i];
+
+      if (
+        child &&
+        'localName' in child &&
+        (child as import('../../dom').Element).localName === 'ui-tree-item'
+      ) {
+        children.push(child as unknown as UiTreeItem);
+      }
+    }
+
+    return children;
+  }
+
+  /* ── Private: Rendering ─────────────────────────────────── */
+
+  private renderRows(): void {
+    const doc = this.ownerDocument!;
+
+    /* Clear existing rendered rows */
+    for (const row of this.renderedRows) {
+      if (row.parentNode === (this as unknown as import('../../dom').Node)) {
+        this.removeChild(row as unknown as import('../../dom').Node);
+      }
+    }
+
+    this.renderedRows = [];
+
+    for (let i = 0; i < this.visibleEntries.length; i++) {
+      const entry = this.visibleEntries[i]!;
+      const row = doc.createElement('div');
+
+      /* Build text: indentation + indicator + label */
+      const indent = ' '.repeat(entry.depth * UI_TREE_INDENT_SIZE);
+      const indicator = entry.item.hasAttribute('expandable')
+        ? entry.item.hasAttribute('open')
+          ? UI_TREE_INDICATOR_EXPANDED
+          : UI_TREE_INDICATOR_COLLAPSED
+        : UI_TREE_INDICATOR_LEAF;
+      const label = entry.item.getAttribute('value') ?? entry.item.textContent ?? '';
+
+      row.textContent = `${indent}${indicator} ${label}`;
+      row.style.whiteSpace = 'pre';
+
+      if (i === this.highlightedIndex) {
+        row.setAttribute('highlighted', '');
+      }
+
+      this.appendChild(row);
+      this.renderedRows.push(row);
+    }
+  }
+
+  /* ── Private: Keyboard ──────────────────────────────────── */
 
   private handleKeyDown(event: Event): void {
     const key = (event as import('../../dom').KeyboardEvent).key;
-    const items = this.getVisibleItems();
 
-    if (items.length === 0) return;
+    if (this.visibleEntries.length === 0) return;
 
     if (key === 'ArrowDown') {
       event.preventDefault();
-      this.highlightedIndex = Math.min(this.highlightedIndex + 1, items.length - 1);
+      this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.visibleEntries.length - 1);
       this.syncHighlight();
     } else if (key === 'ArrowUp') {
       event.preventDefault();
@@ -59,62 +210,34 @@ export class UiTree extends HTMLElement {
       this.syncHighlight();
     } else if (key === 'ArrowRight') {
       event.preventDefault();
-      const item = items[this.highlightedIndex];
+      const entry = this.visibleEntries[this.highlightedIndex];
 
-      if (item && item.hasAttribute('expandable') && !item.hasAttribute('open')) {
-        item.setAttribute('open', '');
+      if (entry && entry.item.hasAttribute('expandable') && !entry.item.hasAttribute('open')) {
+        entry.item.setAttribute('open', '');
+        this.refresh();
       }
     } else if (key === 'ArrowLeft') {
       event.preventDefault();
-      const item = items[this.highlightedIndex];
+      const entry = this.visibleEntries[this.highlightedIndex];
 
-      if (item && item.hasAttribute('open')) {
-        item.removeAttribute('open');
+      if (entry && entry.item.hasAttribute('open')) {
+        entry.item.removeAttribute('open');
+        this.refresh();
       }
     } else if (key === 'Enter') {
       event.preventDefault();
-      const item = items[this.highlightedIndex];
-
-      if (item) {
-        this.dispatchEvent(new Event('select', {bubbles: true}));
-      }
+      this.dispatchEvent(new Event('select', {bubbles: true}));
     }
   }
 
   private syncHighlight(): void {
-    const items = this.getVisibleItems();
-
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < this.renderedRows.length; i++) {
       if (i === this.highlightedIndex) {
-        items[i]!.setAttribute('highlighted', '');
+        this.renderedRows[i]!.setAttribute('highlighted', '');
       } else {
-        items[i]!.removeAttribute('highlighted');
+        this.renderedRows[i]!.removeAttribute('highlighted');
       }
     }
-  }
-
-  private collectVisible(parent: import('../../dom').Element, depth: number): UiTreeItem[] {
-    const result: UiTreeItem[] = [];
-
-    for (let i = 0; i < parent.childNodes.length; i++) {
-      const child = parent.childNodes[i];
-
-      if (
-        child &&
-        'localName' in child &&
-        (child as import('../../dom').Element).localName === 'ui-tree-item'
-      ) {
-        const item = child as unknown as UiTreeItem;
-        item.setDepth(depth);
-        result.push(item);
-
-        if (item.hasAttribute('expandable') && item.hasAttribute('open')) {
-          result.push(...this.collectVisible(child as import('../../dom').Element, depth + 1));
-        }
-      }
-    }
-
-    return result;
   }
 
   private ensureTabIndex(): void {
