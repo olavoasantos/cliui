@@ -6,6 +6,7 @@ import {
   UI_TABLE_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
+import type {Element} from '../../dom';
 import {cellWidth} from '../../layout/utilities/cellWidth';
 
 import type {UiTbody} from '../UiTbody/component';
@@ -95,7 +96,7 @@ export class UiTable extends HTMLElement {
 
       if (!child || !('localName' in child)) continue;
 
-      const el = child as import('../../dom').Element;
+      const el = child as Element;
 
       if (el.localName === 'ui-tr') {
         rows.push(el as unknown as UiTr);

@@ -2,6 +2,7 @@ import styles from './styles.css?inline';
 
 import {UI_FIELDSET_OBSERVED_ATTRIBUTES, UI_FIELDSET_TAG_NAME} from './constants';
 import {HTMLElement} from '../../dom';
+import type {Element, Node} from '../../dom';
 
 /**
  * Built-in terminal fieldset custom element for grouping related form
@@ -20,10 +21,10 @@ export class UiFieldset extends HTMLElement {
   static readonly tagName = UI_FIELDSET_TAG_NAME;
 
   /** Internal legend element rendered above content. */
-  private legendEl: import('../../dom').Element | null = null;
+  private legendEl: Element | null = null;
 
   /** Wrapper for user-provided child content. */
-  private contentWrapper: import('../../dom').Element | null = null;
+  private contentWrapper: Element | null = null;
 
   connectedCallback(): void {
     this.buildInternals();
@@ -50,7 +51,7 @@ export class UiFieldset extends HTMLElement {
     const doc = this.ownerDocument!;
 
     /* Collect existing children */
-    const children: import('../../dom').Node[] = [];
+    const children: Node[] = [];
 
     for (let i = this.childNodes.length - 1; i >= 0; i--) {
       children.unshift(this.childNodes[i]!);

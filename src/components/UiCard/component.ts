@@ -2,6 +2,7 @@ import styles from './styles.css?inline';
 
 import {UI_CARD_OBSERVED_ATTRIBUTES, UI_CARD_TAG_NAME} from './constants';
 import {HTMLElement} from '../../dom';
+import type {Element, Node} from '../../dom';
 
 /**
  * Built-in terminal card custom element for bordered content panels.
@@ -19,13 +20,13 @@ export class UiCard extends HTMLElement {
   static readonly tagName = UI_CARD_TAG_NAME;
 
   /** Internal header element. */
-  private headerEl: import('../../dom').Element | null = null;
+  private headerEl: Element | null = null;
 
   /** Internal footer element. */
-  private footerEl: import('../../dom').Element | null = null;
+  private footerEl: Element | null = null;
 
   /** Wrapper for user-provided child content. */
-  private contentWrapper: import('../../dom').Element | null = null;
+  private contentWrapper: Element | null = null;
 
   connectedCallback(): void {
     this.buildInternals();
@@ -51,7 +52,7 @@ export class UiCard extends HTMLElement {
 
     const doc = this.ownerDocument!;
 
-    const children: import('../../dom').Node[] = [];
+    const children: Node[] = [];
 
     for (let i = this.childNodes.length - 1; i >= 0; i--) {
       children.unshift(this.childNodes[i]!);

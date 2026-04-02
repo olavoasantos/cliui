@@ -8,6 +8,7 @@ import {
   UI_PROMPT_TAG_NAME,
 } from './constants';
 import {Event, HTMLElement} from '../../dom';
+import type {Element, KeyboardEvent, Node} from '../../dom';
 
 import type {HTMLDialogElement} from '../../dom/classes/HTMLDialogElement';
 
@@ -34,7 +35,7 @@ export class UiPrompt extends HTMLElement {
   private dialog: HTMLDialogElement | null = null;
 
   /** Internal input element. */
-  private inputEl: import('../../dom').Element | null = null;
+  private inputEl: Element | null = null;
 
   /** Pending resolve callback for the current `prompt()` call. */
   private pendingResolve: ((value: string | null) => void) | null = null;
@@ -103,12 +104,12 @@ export class UiPrompt extends HTMLElement {
     btnRow.appendChild(confirmBtn);
     btnRow.appendChild(cancelBtn);
 
-    const dialogEl = this.dialog as unknown as import('../../dom').Element;
+    const dialogEl = this.dialog as unknown as Element;
     dialogEl.appendChild(messageEl);
     dialogEl.appendChild(this.inputEl);
     dialogEl.appendChild(btnRow);
 
-    doc.body.appendChild(this.dialog as unknown as import('../../dom').Node);
+    doc.body.appendChild(this.dialog as unknown as Node);
 
     /* Confirm button click */
     confirmBtn.addEventListener('click', (() => {
@@ -122,7 +123,7 @@ export class UiPrompt extends HTMLElement {
 
     /* Enter on confirm button */
     confirmBtn.addEventListener('keydown', ((event: Event) => {
-      const key = (event as import('../../dom').KeyboardEvent).key;
+      const key = (event as KeyboardEvent).key;
       if (key === 'Enter' || key === ' ') {
         event.preventDefault();
         this.resolve(this.getInputValue());
@@ -131,7 +132,7 @@ export class UiPrompt extends HTMLElement {
 
     /* Enter on cancel button */
     cancelBtn.addEventListener('keydown', ((event: Event) => {
-      const key = (event as import('../../dom').KeyboardEvent).key;
+      const key = (event as KeyboardEvent).key;
       if (key === 'Enter' || key === ' ') {
         event.preventDefault();
         this.resolve(null);
@@ -140,7 +141,7 @@ export class UiPrompt extends HTMLElement {
 
     /* Enter in input submits */
     this.inputEl.addEventListener('keydown', ((event: Event) => {
-      const key = (event as import('../../dom').KeyboardEvent).key;
+      const key = (event as KeyboardEvent).key;
       if (key === 'Enter') {
         event.preventDefault();
         this.resolve(this.getInputValue());
@@ -156,7 +157,7 @@ export class UiPrompt extends HTMLElement {
   private syncMessage(): void {
     if (!this.dialog) return;
 
-    const dialogEl = this.dialog as unknown as import('../../dom').Element;
+    const dialogEl = this.dialog as unknown as Element;
     const messageEl = dialogEl.querySelector('.ui-prompt-message');
 
     if (messageEl) {
@@ -167,7 +168,7 @@ export class UiPrompt extends HTMLElement {
   private syncLabels(): void {
     if (!this.dialog) return;
 
-    const dialogEl = this.dialog as unknown as import('../../dom').Element;
+    const dialogEl = this.dialog as unknown as Element;
     const confirmBtn = dialogEl.querySelector('.ui-prompt-confirm');
     const cancelBtn = dialogEl.querySelector('.ui-prompt-cancel');
 

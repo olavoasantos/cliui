@@ -2,6 +2,7 @@ import styles from './styles.css?inline';
 
 import {UI_THEAD_TAG_NAME} from './constants';
 import {HTMLElement} from '../../dom';
+import type {Element} from '../../dom';
 
 import type {UiTr} from '../UiTr/component';
 
@@ -24,11 +25,7 @@ export class UiThead extends HTMLElement {
     for (let i = 0; i < this.childNodes.length; i++) {
       const child = this.childNodes[i];
 
-      if (
-        child &&
-        'localName' in child &&
-        (child as import('../../dom').Element).localName === 'ui-tr'
-      ) {
+      if (child && 'localName' in child && (child as Element).localName === 'ui-tr') {
         rows.push(child as unknown as UiTr);
       }
     }

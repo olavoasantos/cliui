@@ -9,6 +9,7 @@ import {
   UI_TREE_TAG_NAME,
 } from './constants';
 import {Event, HTMLElement} from '../../dom';
+import type {Document, Element, KeyboardEvent, Node} from '../../dom';
 
 import type {UiTreeItem} from '../UiTreeItem/component';
 
@@ -48,7 +49,7 @@ export class UiTree extends HTMLElement {
   private visibleEntries: VisibleEntry[] = [];
 
   /** Rendered row elements (direct children managed by the tree). */
-  private renderedRows: import('../../dom').Element[] = [];
+  private renderedRows: Element[] = [];
 
   /** The original tree-item children (preserved for hierarchy). */
   private sourceItems: UiTreeItem[] = [];
@@ -77,7 +78,7 @@ export class UiTree extends HTMLElement {
   }
 
   /** Returns the rendered row elements (for testing). */
-  getRenderedRows(): import('../../dom').Element[] {
+  getRenderedRows(): Element[] {
     return this.renderedRows;
   }
 
@@ -105,19 +106,15 @@ export class UiTree extends HTMLElement {
     for (let i = 0; i < this.childNodes.length; i++) {
       const child = this.childNodes[i];
 
-      if (
-        child &&
-        'localName' in child &&
-        (child as import('../../dom').Element).localName === 'ui-tree-item'
-      ) {
+      if (child && 'localName' in child && (child as Element).localName === 'ui-tree-item') {
         this.sourceItems.push(child as unknown as UiTreeItem);
       }
     }
 
     /* Remove source items from DOM — we'll render flat rows instead */
     for (const item of this.sourceItems) {
-      if (item.parentNode === (this as unknown as import('../../dom').Node)) {
-        this.removeChild(item as unknown as import('../../dom').Node);
+      if (item.parentNode === (this as unknown as Node)) {
+        this.removeChild(item as unknown as Node);
       }
     }
   }
@@ -142,14 +139,10 @@ export class UiTree extends HTMLElement {
   private getTreeItemChildren(item: UiTreeItem): UiTreeItem[] {
     const children: UiTreeItem[] = [];
 
-    for (let i = 0; i < (item as unknown as import('../../dom').Element).childNodes.length; i++) {
-      const child = (item as unknown as import('../../dom').Element).childNodes[i];
+    for (let i = 0; i < (item as unknown as Element).childNodes.length; i++) {
+      const child = (item as unknown as Element).childNodes[i];
 
-      if (
-        child &&
-        'localName' in child &&
-        (child as import('../../dom').Element).localName === 'ui-tree-item'
-      ) {
+      if (child && 'localName' in child && (child as Element).localName === 'ui-tree-item') {
         children.push(child as unknown as UiTreeItem);
       }
     }
@@ -164,8 +157,8 @@ export class UiTree extends HTMLElement {
 
     /* Clear existing rendered rows */
     for (const row of this.renderedRows) {
-      if (row.parentNode === (this as unknown as import('../../dom').Node)) {
-        this.removeChild(row as unknown as import('../../dom').Node);
+      if (row.parentNode === (this as unknown as Node)) {
+        this.removeChild(row as unknown as Node);
       }
     }
 
@@ -199,7 +192,7 @@ export class UiTree extends HTMLElement {
   /* ── Private: Keyboard ──────────────────────────────────── */
 
   private handleKeyDown(event: Event): void {
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
 
     if (this.visibleEntries.length === 0) return;
 
@@ -244,22 +237,22 @@ export class UiTree extends HTMLElement {
   }
 
   private handleClick(event: Event): void {
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
 
     if (!target) return;
 
     /* Find which rendered row was clicked */
     for (let i = 0; i < this.renderedRows.length; i++) {
-      let current: import('../../dom').Element | null = target;
+      let current: Element | null = target;
 
-      while (current && current !== (this as unknown as import('../../dom').Element)) {
+      while (current && current !== (this as unknown as Element)) {
         if (current === this.renderedRows[i]) {
           this.highlightedIndex = i;
           this.syncHighlight();
 
           /* Focus the tree for keyboard nav */
-          const doc = this.ownerDocument as import('../../dom').Document;
-          doc.setActiveElement(this as unknown as import('../../dom').Element);
+          const doc = this.ownerDocument as Document;
+          doc.setActiveElement(this as unknown as Element);
 
           /* Toggle expand/collapse or select */
           const entry = this.visibleEntries[i];
@@ -279,7 +272,7 @@ export class UiTree extends HTMLElement {
           return;
         }
 
-        current = current.parentElement as import('../../dom').Element | null;
+        current = current.parentElement as Element | null;
       }
     }
   }

@@ -7,6 +7,7 @@ import {
   UI_CONFIRMATION_TAG_NAME,
 } from './constants';
 import {Event, HTMLElement} from '../../dom';
+import type {Element, KeyboardEvent, Node} from '../../dom';
 
 import type {HTMLDialogElement} from '../../dom/classes/HTMLDialogElement';
 
@@ -81,10 +82,10 @@ export class UiConfirmation extends HTMLElement {
     btnRow.appendChild(confirmBtn);
     btnRow.appendChild(cancelBtn);
 
-    (this.dialog as unknown as import('../../dom').Element).appendChild(messageEl);
-    (this.dialog as unknown as import('../../dom').Element).appendChild(btnRow);
+    (this.dialog as unknown as Element).appendChild(messageEl);
+    (this.dialog as unknown as Element).appendChild(btnRow);
 
-    doc.body.appendChild(this.dialog as unknown as import('../../dom').Node);
+    doc.body.appendChild(this.dialog as unknown as Node);
 
     /* Confirm button click */
     confirmBtn.addEventListener('click', (() => {
@@ -98,7 +99,7 @@ export class UiConfirmation extends HTMLElement {
 
     /* Enter on confirm button */
     confirmBtn.addEventListener('keydown', ((event: Event) => {
-      const key = (event as import('../../dom').KeyboardEvent).key;
+      const key = (event as KeyboardEvent).key;
       if (key === 'Enter' || key === ' ') {
         event.preventDefault();
         this.resolve(true);
@@ -107,7 +108,7 @@ export class UiConfirmation extends HTMLElement {
 
     /* Enter on cancel button */
     cancelBtn.addEventListener('keydown', ((event: Event) => {
-      const key = (event as import('../../dom').KeyboardEvent).key;
+      const key = (event as KeyboardEvent).key;
       if (key === 'Enter' || key === ' ') {
         event.preventDefault();
         this.resolve(false);
@@ -115,7 +116,7 @@ export class UiConfirmation extends HTMLElement {
     }) as EventListener);
 
     /* Escape via dialog cancel event */
-    (this.dialog as unknown as import('../../dom').Element).addEventListener('cancel', (() => {
+    (this.dialog as unknown as Element).addEventListener('cancel', (() => {
       this.resolve(false);
     }) as EventListener);
   }
@@ -123,7 +124,7 @@ export class UiConfirmation extends HTMLElement {
   private syncMessage(): void {
     if (!this.dialog) return;
 
-    const dialogEl = this.dialog as unknown as import('../../dom').Element;
+    const dialogEl = this.dialog as unknown as Element;
     const messageEl = dialogEl.querySelector('.ui-confirmation-message');
 
     if (messageEl) {
@@ -134,7 +135,7 @@ export class UiConfirmation extends HTMLElement {
   private syncLabels(): void {
     if (!this.dialog) return;
 
-    const dialogEl = this.dialog as unknown as import('../../dom').Element;
+    const dialogEl = this.dialog as unknown as Element;
     const confirmBtn = dialogEl.querySelector('.ui-confirmation-confirm');
     const cancelBtn = dialogEl.querySelector('.ui-confirmation-cancel');
 

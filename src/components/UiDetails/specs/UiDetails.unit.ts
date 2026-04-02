@@ -4,6 +4,7 @@ import {Event, KeyboardEvent, ToggleEvent, Window} from '../../../dom';
 import {UiDetails} from '../component';
 
 import type {CustomElementConstructor} from '../../../dom/types';
+import type {Element} from '../../../dom';
 
 function createDetails(
   window = new Window(),
@@ -144,21 +145,21 @@ describe('UiDetails', () => {
   describe('content visibility', () => {
     it('hides content when collapsed', () => {
       const {details} = createDetails();
-      const contentWrapper = details.childNodes[1] as import('../../../dom').Element;
+      const contentWrapper = details.childNodes[1] as Element;
 
       expect(contentWrapper.style.display).toBe('none');
     });
 
     it('shows content when expanded', () => {
       const {details} = createDetails(undefined, {open: true});
-      const contentWrapper = details.childNodes[1] as import('../../../dom').Element;
+      const contentWrapper = details.childNodes[1] as Element;
 
       expect(contentWrapper.style.display).toBe('block');
     });
 
     it('toggles content visibility when open changes', () => {
       const {details} = createDetails();
-      const contentWrapper = details.childNodes[1] as import('../../../dom').Element;
+      const contentWrapper = details.childNodes[1] as Element;
 
       expect(contentWrapper.style.display).toBe('none');
 
@@ -270,7 +271,7 @@ describe('UiDetails', () => {
   describe('mouse activation', () => {
     it('toggles when summary is clicked', () => {
       const {details} = createDetails();
-      const summaryRow = details.childNodes[0] as import('../../../dom').Element;
+      const summaryRow = details.childNodes[0] as Element;
 
       summaryRow.dispatchEvent(new Event('click', {bubbles: true}));
 
@@ -283,7 +284,7 @@ describe('UiDetails', () => {
 
     it('does not toggle when content area is clicked', () => {
       const {details} = createDetails(undefined, {open: true});
-      const contentWrapper = details.childNodes[1] as import('../../../dom').Element;
+      const contentWrapper = details.childNodes[1] as Element;
 
       contentWrapper.dispatchEvent(new Event('click', {bubbles: true}));
 
@@ -292,7 +293,7 @@ describe('UiDetails', () => {
 
     it('does not toggle when disabled', () => {
       const {details} = createDetails(undefined, {disabled: true});
-      const summaryRow = details.childNodes[0] as import('../../../dom').Element;
+      const summaryRow = details.childNodes[0] as Element;
 
       summaryRow.dispatchEvent(new Event('click', {bubbles: true}));
 
@@ -354,7 +355,7 @@ describe('UiDetails', () => {
         events.push(e as ToggleEvent);
       }) as EventListener);
 
-      const summaryRow = details.childNodes[0] as import('../../../dom').Element;
+      const summaryRow = details.childNodes[0] as Element;
       summaryRow.dispatchEvent(new Event('click', {bubbles: true}));
 
       expect(events).toHaveLength(1);

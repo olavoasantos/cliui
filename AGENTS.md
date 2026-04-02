@@ -60,3 +60,5 @@ When contributing to this project, AI agents must:
 10. **No deep nesting.** Module subdirectories support at most one level of nesting (typically `specs/` or asset-type grouping).
 
 11. **Commit messages.** No conventional commit prefixes (`feat:`, `fix:`, `docs:`, etc.). No AI attribution. Use imperative mood, keep the subject under 72 characters, and focus on the "why". Use the `commit` skill when committing.
+
+12. **No inline `import()` type references.** Never use `import('../../path').Type` for type annotations. Always use a proper `import type {Type} from '../../path'` statement at the top of the file. Inline import types are unreadable and make refactoring difficult.

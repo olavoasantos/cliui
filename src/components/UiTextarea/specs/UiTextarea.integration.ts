@@ -4,6 +4,7 @@ import {Terminal} from '../../../classes/Terminal';
 import {Event, KeyboardEvent} from '../../../dom';
 import {UiTextarea} from '../component';
 
+import type {Element} from '../../../dom';
 import type {TerminalReadableInput} from '../../../terminal/types';
 
 function createOutput() {
@@ -31,7 +32,7 @@ function createStdin(): TerminalReadableInput {
 const stdin = createStdin();
 
 function typeKey(
-  element: import('../../../dom').Element,
+  element: Element,
   key: string,
   mods: {ctrlKey?: boolean; altKey?: boolean; shiftKey?: boolean} = {},
 ): void {

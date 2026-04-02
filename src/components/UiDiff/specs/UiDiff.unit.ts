@@ -4,6 +4,8 @@ import {UiDiff} from '../component';
 import {UI_DIFF_ADDED_COLOR, UI_DIFF_REMOVED_COLOR} from '../constants';
 import {Window} from '../../../dom/classes/Window';
 
+import type {Element} from '../../../dom';
+
 function createEnv() {
   const window = new Window();
   const document = window.document;
@@ -26,7 +28,7 @@ describe('UiDiff', () => {
     diff.textContent = '+added line';
     document.body.appendChild(diff);
 
-    const line = diff.childNodes[0] as import('../../../dom').Element;
+    const line = diff.childNodes[0] as Element;
 
     expect(line.style.color).toBe(UI_DIFF_ADDED_COLOR);
   });
@@ -37,7 +39,7 @@ describe('UiDiff', () => {
     diff.textContent = '-removed line';
     document.body.appendChild(diff);
 
-    const line = diff.childNodes[0] as import('../../../dom').Element;
+    const line = diff.childNodes[0] as Element;
 
     expect(line.style.color).toBe(UI_DIFF_REMOVED_COLOR);
   });

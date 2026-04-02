@@ -5,6 +5,7 @@ import {UiCodeblock} from '../component';
 import {UI_CODEBLOCK_CONTENT_CLASS, UI_CODEBLOCK_GUTTER_CLASS} from '../constants';
 
 import type {CustomElementConstructor} from '../../../dom/types';
+import type {Element} from '../../../dom';
 
 function createCodeblock(
   window = new Window(),
@@ -39,12 +40,12 @@ function getLineContents(codeblock: UiCodeblock): string[] {
   const lines: string[] = [];
 
   for (let i = 0; i < codeblock.childNodes.length; i++) {
-    const child = codeblock.childNodes[i] as import('../../../dom').Element;
+    const child = codeblock.childNodes[i] as Element;
 
     if (child.getAttribute?.('class')?.includes('ui-codeblock-line')) {
       /* Find the content div */
       for (let j = 0; j < child.childNodes.length; j++) {
-        const inner = child.childNodes[j] as import('../../../dom').Element;
+        const inner = child.childNodes[j] as Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
           lines.push(inner.textContent ?? '');
@@ -60,11 +61,11 @@ function getGutterContents(codeblock: UiCodeblock): string[] {
   const gutters: string[] = [];
 
   for (let i = 0; i < codeblock.childNodes.length; i++) {
-    const child = codeblock.childNodes[i] as import('../../../dom').Element;
+    const child = codeblock.childNodes[i] as Element;
 
     if (child.getAttribute?.('class')?.includes('ui-codeblock-line')) {
       for (let j = 0; j < child.childNodes.length; j++) {
-        const inner = child.childNodes[j] as import('../../../dom').Element;
+        const inner = child.childNodes[j] as Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_GUTTER_CLASS) {
           gutters.push(inner.textContent ?? '');
@@ -78,15 +79,15 @@ function getGutterContents(codeblock: UiCodeblock): string[] {
 
 function getTokenColors(codeblock: UiCodeblock, lineIndex: number): string[] {
   const colors: string[] = [];
-  const lineEl = codeblock.childNodes[lineIndex] as import('../../../dom').Element;
+  const lineEl = codeblock.childNodes[lineIndex] as Element;
   if (!lineEl) return colors;
 
   for (let j = 0; j < lineEl.childNodes.length; j++) {
-    const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+    const inner = lineEl.childNodes[j] as Element;
 
     if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
       for (let k = 0; k < inner.childNodes.length; k++) {
-        const span = inner.childNodes[k] as import('../../../dom').Element;
+        const span = inner.childNodes[k] as Element;
 
         if (span.style) {
           colors.push(span.style.getPropertyValue('color'));
@@ -258,11 +259,11 @@ describe('UiCodeblock', () => {
       UiCodeblock.resetHighlighter();
 
       const {codeblock} = createCodeblock(undefined, 'long line here');
-      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+      const lineEl = codeblock.childNodes[0] as Element;
 
       /* Find content div */
       for (let j = 0; j < lineEl.childNodes.length; j++) {
-        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+        const inner = lineEl.childNodes[j] as Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
           expect(inner.style.getPropertyValue('white-space')).toBe('pre');
@@ -274,10 +275,10 @@ describe('UiCodeblock', () => {
       UiCodeblock.resetHighlighter();
 
       const {codeblock} = createCodeblock(undefined, 'long line here', {wrap: true});
-      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+      const lineEl = codeblock.childNodes[0] as Element;
 
       for (let j = 0; j < lineEl.childNodes.length; j++) {
-        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+        const inner = lineEl.childNodes[j] as Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
           expect(inner.style.getPropertyValue('white-space')).toBe('pre-wrap');
@@ -298,11 +299,11 @@ describe('UiCodeblock', () => {
       });
 
       /* Content div must be display: inline so token children flow as a row */
-      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
-      let contentEl: import('../../../dom').Element | null = null;
+      const lineEl = codeblock.childNodes[0] as Element;
+      let contentEl: Element | null = null;
 
       for (let j = 0; j < lineEl.childNodes.length; j++) {
-        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+        const inner = lineEl.childNodes[j] as Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
           contentEl = inner;
@@ -323,14 +324,14 @@ describe('UiCodeblock', () => {
         theme: 'nord',
       });
 
-      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+      const lineEl = codeblock.childNodes[0] as Element;
 
       for (let j = 0; j < lineEl.childNodes.length; j++) {
-        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+        const inner = lineEl.childNodes[j] as Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
           for (let k = 0; k < inner.childNodes.length; k++) {
-            const span = inner.childNodes[k] as import('../../../dom').Element;
+            const span = inner.childNodes[k] as Element;
 
             if (span.style) {
               expect(span.style.getPropertyValue('display')).toBe('inline');
@@ -344,10 +345,10 @@ describe('UiCodeblock', () => {
       UiCodeblock.resetHighlighter();
 
       const {codeblock} = createCodeblock(undefined, 'a\nb', {'line-numbers': true});
-      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+      const lineEl = codeblock.childNodes[0] as Element;
 
       for (let j = 0; j < lineEl.childNodes.length; j++) {
-        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+        const inner = lineEl.childNodes[j] as Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_GUTTER_CLASS) {
           expect(inner.style.getPropertyValue('display')).toBe('inline');
@@ -365,10 +366,10 @@ describe('UiCodeblock', () => {
         theme: 'nord',
       });
 
-      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+      const lineEl = codeblock.childNodes[0] as Element;
 
       for (let j = 0; j < lineEl.childNodes.length; j++) {
-        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+        const inner = lineEl.childNodes[j] as Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
           expect(inner.style.getPropertyValue('flex-wrap')).toBe('nowrap');
@@ -380,10 +381,10 @@ describe('UiCodeblock', () => {
       UiCodeblock.resetHighlighter();
 
       const {codeblock} = createCodeblock(undefined, '  indented  code  ');
-      const lineEl = codeblock.childNodes[0] as import('../../../dom').Element;
+      const lineEl = codeblock.childNodes[0] as Element;
 
       for (let j = 0; j < lineEl.childNodes.length; j++) {
-        const inner = lineEl.childNodes[j] as import('../../../dom').Element;
+        const inner = lineEl.childNodes[j] as Element;
 
         if (inner.getAttribute?.('class') === UI_CODEBLOCK_CONTENT_CLASS) {
           /* Must use 'pre' not 'nowrap' — nowrap collapses whitespace */

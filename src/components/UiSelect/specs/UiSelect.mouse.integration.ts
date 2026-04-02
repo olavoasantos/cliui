@@ -4,6 +4,7 @@ import {Terminal} from '../../../classes/Terminal';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
+import type {Element} from '../../../dom';
 import type {TerminalReadableInput} from '../../../terminal/types';
 
 function createOutput(cols = 40, rows = 12) {
@@ -82,12 +83,12 @@ describe('UiSelect mouse interactions via EventDispatcher', () => {
     await terminal.run();
 
     /* Focus select and open dropdown */
-    terminal.document.setActiveElement(select as unknown as import('../../../dom').Element);
+    terminal.document.setActiveElement(select as unknown as Element);
     select.open();
     expect(select.isOpen()).toBe(true);
 
     /* Find the Beta option */
-    const listbox = select.childNodes[1] as import('../../../dom').Element;
+    const listbox = select.childNodes[1] as Element;
     let betaOpt: UiOption | null = null;
 
     for (let i = 0; i < listbox.childNodes.length; i++) {
@@ -111,9 +112,7 @@ describe('UiSelect mouse interactions via EventDispatcher', () => {
 
     /* Select should still be focused — the mousedown should NOT blur it
      * because handleMouseFocus walks up to find the tabindex-ed select */
-    expect(terminal.document.activeElement).toBe(
-      select as unknown as import('../../../dom').Element,
-    );
+    expect(terminal.document.activeElement).toBe(select as unknown as Element);
     expect(select.isOpen()).toBe(true);
 
     /* Now click to select the option */
@@ -159,12 +158,12 @@ describe('UiSelect mouse interactions via EventDispatcher', () => {
 
     await terminal.run();
 
-    terminal.document.setActiveElement(select as unknown as import('../../../dom').Element);
+    terminal.document.setActiveElement(select as unknown as Element);
     select.open();
     expect(select.isOpen()).toBe(true);
 
     /* Click on the trigger area — mousedown then click */
-    const trigger = select.childNodes[0] as import('../../../dom').Element;
+    const trigger = select.childNodes[0] as Element;
     trigger.dispatchEvent(
       new (await import('../../../dom')).MouseEvent('mousedown', {
         bubbles: true,

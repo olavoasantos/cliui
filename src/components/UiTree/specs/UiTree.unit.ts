@@ -6,6 +6,8 @@ import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
 import {MouseEvent} from '../../../dom/classes/MouseEvent';
 import {Window} from '../../../dom/classes/Window';
 
+import type {Element} from '../../../dom';
+
 function createEnv() {
   const window = new Window();
   const document = window.document;
@@ -250,7 +252,7 @@ describe('UiTree', () => {
     document.body.appendChild(tree);
 
     /* Simulate tab focus */
-    document.setActiveElement(tree as unknown as import('../../../dom').Element);
+    document.setActiveElement(tree as unknown as Element);
 
     expect(document.activeElement).toBe(tree);
 

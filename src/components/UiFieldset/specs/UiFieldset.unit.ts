@@ -3,6 +3,8 @@ import {describe, expect, it} from 'vitest';
 import {UiFieldset} from '../component';
 import {Window} from '../../../dom/classes/Window';
 
+import type {Element} from '../../../dom';
+
 function createEnv() {
   const window = new Window();
   const document = window.document;
@@ -36,9 +38,7 @@ describe('UiFieldset', () => {
     const contentWrapper = fieldset.childNodes[1];
 
     expect(contentWrapper).toBeDefined();
-    expect((contentWrapper as import('../../../dom').Element).getAttribute('class')).toBe(
-      'ui-fieldset-content',
-    );
+    expect((contentWrapper as Element).getAttribute('class')).toBe('ui-fieldset-content');
   });
 
   it('hides legend row when no legend attribute is set', () => {
@@ -46,7 +46,7 @@ describe('UiFieldset', () => {
     const fieldset = document.createElement('ui-fieldset');
     document.body.appendChild(fieldset);
 
-    const legendEl = fieldset.childNodes[0] as import('../../../dom').Element;
+    const legendEl = fieldset.childNodes[0] as Element;
 
     expect(legendEl.getAttribute('class')).toBe('ui-fieldset-legend');
     expect(legendEl.style.display).toBe('none');
@@ -58,7 +58,7 @@ describe('UiFieldset', () => {
     fieldset.setAttribute('legend', 'Personal Info');
     document.body.appendChild(fieldset);
 
-    const legendEl = fieldset.childNodes[0] as import('../../../dom').Element;
+    const legendEl = fieldset.childNodes[0] as Element;
 
     expect(legendEl.style.display).toBe('block');
     expect(legendEl.textContent).toBe('Personal Info');
@@ -72,7 +72,7 @@ describe('UiFieldset', () => {
 
     fieldset.setAttribute('legend', 'New Title');
 
-    const legendEl = fieldset.childNodes[0] as import('../../../dom').Element;
+    const legendEl = fieldset.childNodes[0] as Element;
 
     expect(legendEl.textContent).toBe('New Title');
   });
@@ -85,7 +85,7 @@ describe('UiFieldset', () => {
 
     fieldset.removeAttribute('legend');
 
-    const legendEl = fieldset.childNodes[0] as import('../../../dom').Element;
+    const legendEl = fieldset.childNodes[0] as Element;
 
     expect(legendEl.style.display).toBe('none');
     expect(legendEl.textContent).toBe('');
@@ -99,11 +99,9 @@ describe('UiFieldset', () => {
     fieldset.appendChild(child);
     document.body.appendChild(fieldset);
 
-    const contentWrapper = fieldset.childNodes[1] as import('../../../dom').Element;
+    const contentWrapper = fieldset.childNodes[1] as Element;
 
     expect(contentWrapper.childNodes.length).toBe(1);
-    expect((contentWrapper.childNodes[0] as import('../../../dom').Element).textContent).toBe(
-      'Input here',
-    );
+    expect((contentWrapper.childNodes[0] as Element).textContent).toBe('Input here');
   });
 });

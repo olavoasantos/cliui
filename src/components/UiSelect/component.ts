@@ -8,6 +8,7 @@ import {
   UI_SELECT_TAG_NAME,
 } from './constants';
 import {Event, HTMLElement, InputEvent} from '../../dom';
+import type {Document, Element, KeyboardEvent} from '../../dom';
 
 import type {UiOption} from '../UiOption/component';
 
@@ -40,16 +41,16 @@ export class UiSelect extends HTMLElement {
   private valueAtFocus = '';
 
   /** Internal trigger element showing the selected label. */
-  private trigger: import('../../dom').Element | null = null;
+  private trigger: Element | null = null;
 
   /** Label span inside the trigger. */
-  private triggerLabel: import('../../dom').Element | null = null;
+  private triggerLabel: Element | null = null;
 
   /** Indicator span inside the trigger. */
-  private triggerIndicator: import('../../dom').Element | null = null;
+  private triggerIndicator: Element | null = null;
 
   /** Internal listbox wrapper for the dropdown overlay. */
-  private listbox: import('../../dom').Element | null = null;
+  private listbox: Element | null = null;
 
   /** Accumulated type-ahead search string. */
   private typeaheadBuffer = '';
@@ -198,7 +199,7 @@ export class UiSelect extends HTMLElement {
         this.listbox.appendChild(header);
 
         /* Move child options out of the optgroup into the listbox */
-        const groupOptions: import('../../dom').Element[] = [];
+        const groupOptions: Element[] = [];
 
         for (let i = 0; i < child.childNodes.length; i++) {
           const grandchild = child.childNodes[i];
@@ -206,9 +207,9 @@ export class UiSelect extends HTMLElement {
           if (
             grandchild &&
             'localName' in grandchild &&
-            (grandchild as import('../../dom').Element).localName === 'ui-option'
+            (grandchild as Element).localName === 'ui-option'
           ) {
-            groupOptions.push(grandchild as import('../../dom').Element);
+            groupOptions.push(grandchild as Element);
           }
         }
 
@@ -250,11 +251,7 @@ export class UiSelect extends HTMLElement {
     for (let i = 0; i < source.childNodes.length; i++) {
       const child = source.childNodes[i];
 
-      if (
-        child &&
-        'localName' in child &&
-        (child as import('../../dom').Element).localName === 'ui-option'
-      ) {
+      if (child && 'localName' in child && (child as Element).localName === 'ui-option') {
         options.push(child as unknown as UiOption);
       }
     }
@@ -266,8 +263,8 @@ export class UiSelect extends HTMLElement {
    * Collects direct children that are either ui-option or ui-optgroup
    * elements, before they are moved into the listbox.
    */
-  private collectTopLevelChildren(): import('../../dom').Element[] {
-    const children: import('../../dom').Element[] = [];
+  private collectTopLevelChildren(): Element[] {
+    const children: Element[] = [];
 
     for (let i = 0; i < this.childNodes.length; i++) {
       const child = this.childNodes[i];
@@ -275,10 +272,10 @@ export class UiSelect extends HTMLElement {
       if (
         child &&
         'localName' in child &&
-        ((child as import('../../dom').Element).localName === 'ui-option' ||
-          (child as import('../../dom').Element).localName === 'ui-optgroup')
+        ((child as Element).localName === 'ui-option' ||
+          (child as Element).localName === 'ui-optgroup')
       ) {
-        children.push(child as import('../../dom').Element);
+        children.push(child as Element);
       }
     }
 
@@ -389,7 +386,7 @@ export class UiSelect extends HTMLElement {
   private handleKeyDown(event: Event): void {
     if (this.isDisabled()) return;
 
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
 
     if (this.isOpen()) {
       this.handleExpandedKeyDown(key, event);
@@ -520,7 +517,7 @@ export class UiSelect extends HTMLElement {
   }
 
   private isModifiedKey(event: Event): boolean {
-    const ke = event as import('../../dom').KeyboardEvent;
+    const ke = event as KeyboardEvent;
     return !!(
       (ke as unknown as {ctrlKey?: boolean}).ctrlKey ||
       (ke as unknown as {altKey?: boolean}).altKey ||
@@ -539,7 +536,7 @@ export class UiSelect extends HTMLElement {
     if (this.isDisabled()) return;
     if (!this.isOpen()) return;
 
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
     if (!target) return;
 
     /* If the mousedown is on an option or inside the listbox, prevent
@@ -554,14 +551,14 @@ export class UiSelect extends HTMLElement {
   private handleClick(event: Event): void {
     if (this.isDisabled()) return;
 
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
     if (!target) return;
 
     /* Ensure focus on click so blur fires on tab-away */
-    const doc = this.ownerDocument as import('../../dom').Document | null;
+    const doc = this.ownerDocument as Document | null;
 
-    if (doc && doc.activeElement !== (this as unknown as import('../../dom').Element)) {
-      doc.setActiveElement(this as unknown as import('../../dom').Element);
+    if (doc && doc.activeElement !== (this as unknown as Element)) {
+      doc.setActiveElement(this as unknown as Element);
     }
 
     /* Click on an option inside the listbox */
@@ -589,41 +586,41 @@ export class UiSelect extends HTMLElement {
     }
   }
 
-  private findOptionFromTarget(target: import('../../dom').Element): UiOption | null {
-    let current: import('../../dom').Element | null = target;
+  private findOptionFromTarget(target: Element): UiOption | null {
+    let current: Element | null = target;
 
-    while (current && current !== (this as unknown as import('../../dom').Element)) {
+    while (current && current !== (this as unknown as Element)) {
       if (current.localName === 'ui-option') {
         return current as unknown as UiOption;
       }
 
-      current = current.parentElement as import('../../dom').Element | null;
+      current = current.parentElement as Element | null;
     }
 
     return null;
   }
 
   /** Checks if a target element is inside the listbox wrapper. */
-  private isInsideListbox(target: import('../../dom').Element): boolean {
-    let current: import('../../dom').Element | null = target;
+  private isInsideListbox(target: Element): boolean {
+    let current: Element | null = target;
 
     while (current) {
       if (current === this.listbox) return true;
-      current = current.parentElement as import('../../dom').Element | null;
+      current = current.parentElement as Element | null;
     }
 
     return false;
   }
 
   private handleDocumentClick(event: Event): void {
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
     if (!target) return;
 
-    let current: import('../../dom').Element | null = target;
+    let current: Element | null = target;
 
     while (current) {
-      if (current === (this as unknown as import('../../dom').Element)) return;
-      current = current.parentElement as import('../../dom').Element | null;
+      if (current === (this as unknown as Element)) return;
+      current = current.parentElement as Element | null;
     }
 
     this.close();

@@ -7,6 +7,7 @@ import {
   UI_DETAILS_TAG_NAME,
 } from './constants';
 import {Event, HTMLElement, ToggleEvent} from '../../dom';
+import type {Element, KeyboardEvent, Node} from '../../dom';
 
 /**
  * Built-in terminal details custom element for expandable/collapsible
@@ -33,13 +34,13 @@ export class UiDetails extends HTMLElement {
   static readonly tagName = UI_DETAILS_TAG_NAME;
 
   /** Internal summary row wrapping the indicator and user-provided summary. */
-  private summaryRow: import('../../dom').Element | null = null;
+  private summaryRow: Element | null = null;
 
   /** Indicator span showing the expand/collapse caret. */
-  private indicator: import('../../dom').Element | null = null;
+  private indicator: Element | null = null;
 
   /** Wrapper div hiding content when collapsed. */
-  private contentWrapper: import('../../dom').Element | null = null;
+  private contentWrapper: Element | null = null;
 
   /** Bound event handlers for cleanup. */
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
@@ -126,7 +127,7 @@ export class UiDetails extends HTMLElement {
 
     /* Collect user-provided summary and content children */
     const userSummary = this.findSummaryChild();
-    const contentChildren: import('../../dom').Node[] = [];
+    const contentChildren: Node[] = [];
 
     for (let i = this.childNodes.length - 1; i >= 0; i--) {
       const child = this.childNodes[i]!;
@@ -176,16 +177,12 @@ export class UiDetails extends HTMLElement {
     this.appendChild(this.contentWrapper);
   }
 
-  private findSummaryChild(): import('../../dom').Element | null {
+  private findSummaryChild(): Element | null {
     for (let i = 0; i < this.childNodes.length; i++) {
       const child = this.childNodes[i];
 
-      if (
-        child &&
-        'localName' in child &&
-        (child as import('../../dom').Element).localName === 'ui-summary'
-      ) {
-        return child as import('../../dom').Element;
+      if (child && 'localName' in child && (child as Element).localName === 'ui-summary') {
+        return child as Element;
       }
     }
 
@@ -218,7 +215,7 @@ export class UiDetails extends HTMLElement {
        textarea pressing Enter to insert a newline). */
     if (event.target !== this) return;
 
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
 
     if (key === 'Enter' || key === ' ') {
       event.preventDefault();
@@ -232,19 +229,19 @@ export class UiDetails extends HTMLElement {
     if (this.isDisabled()) return;
 
     /* Only toggle when clicking on the summary row (or its descendants) */
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
 
     if (target && this.isInsideSummary(target)) {
       this.toggle();
     }
   }
 
-  private isInsideSummary(target: import('../../dom').Element): boolean {
-    let current: import('../../dom').Element | null = target;
+  private isInsideSummary(target: Element): boolean {
+    let current: Element | null = target;
 
-    while (current && current !== (this as unknown as import('../../dom').Element)) {
+    while (current && current !== (this as unknown as Element)) {
       if (current === this.summaryRow) return true;
-      current = current.parentElement as import('../../dom').Element | null;
+      current = current.parentElement as Element | null;
     }
 
     return false;

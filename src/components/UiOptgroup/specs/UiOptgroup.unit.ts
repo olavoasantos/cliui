@@ -6,6 +6,7 @@ import {UiSelect} from '../../UiSelect/component';
 import {KeyboardEvent, Window} from '../../../dom';
 
 import type {CustomElementConstructor} from '../../../dom/types';
+import type {Element} from '../../../dom';
 
 function createEnv() {
   const window = new Window();
@@ -73,7 +74,7 @@ describe('UiOptgroup', () => {
 
     /* The listbox should contain: header, apple, banana */
     const listbox = (select as unknown as {childNodes: any[]}).childNodes[1];
-    const headerEl = listbox.childNodes[0] as import('../../../dom').Element;
+    const headerEl = listbox.childNodes[0] as Element;
 
     expect(headerEl.getAttribute('class')).toBe('ui-optgroup-label');
     expect(headerEl.textContent).toBe('Fruits');

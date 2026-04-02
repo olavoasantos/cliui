@@ -2,6 +2,7 @@ import styles from './styles.css?inline';
 
 import {UI_PAGINATOR_OBSERVED_ATTRIBUTES, UI_PAGINATOR_TAG_NAME} from './constants';
 import {Event, HTMLElement} from '../../dom';
+import type {KeyboardEvent} from '../../dom';
 
 /**
  * Built-in terminal paginator custom element.
@@ -65,7 +66,7 @@ export class UiPaginator extends HTMLElement {
   /* ── Private ────────────────────────────────────────────── */
 
   private handleKeyDown(event: Event): void {
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
 
     if (key === 'ArrowLeft') {
       event.preventDefault();

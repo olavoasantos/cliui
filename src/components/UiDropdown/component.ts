@@ -2,6 +2,7 @@ import styles from './styles.css?inline';
 
 import {UI_DROPDOWN_OBSERVED_ATTRIBUTES, UI_DROPDOWN_TAG_NAME} from './constants';
 import {Event, HTMLElement} from '../../dom';
+import type {Element, KeyboardEvent} from '../../dom';
 
 import type {UiMenu} from '../UiMenu/component';
 
@@ -54,7 +55,7 @@ export class UiDropdown extends HTMLElement {
     if (this.hasAttribute('disabled')) return;
     if (event.target !== this) return;
 
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
 
     if (key === 'Enter' || key === ' ') {
       event.preventDefault();
@@ -71,13 +72,13 @@ export class UiDropdown extends HTMLElement {
     if (this.hasAttribute('disabled')) return;
 
     // Only open if the click was on the dropdown itself, not on the menu
-    const target = event.target as import('../../dom').Element | null;
-    let current: import('../../dom').Element | null = target;
+    const target = event.target as Element | null;
+    let current: Element | null = target;
 
-    while (current && current !== (this as unknown as import('../../dom').Element)) {
+    while (current && current !== (this as unknown as Element)) {
       if (current.localName === 'ui-menu') return; // Click inside menu, let menu handle it
 
-      current = current.parentElement as import('../../dom').Element | null;
+      current = current.parentElement as Element | null;
     }
 
     const menu = this.getMenu();

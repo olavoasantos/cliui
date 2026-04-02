@@ -2,6 +2,7 @@ import styles from './styles.css?inline';
 
 import {UI_MENU_OBSERVED_ATTRIBUTES, UI_MENU_TAG_NAME} from './constants';
 import {Event, HTMLElement} from '../../dom';
+import type {Document, Element, KeyboardEvent} from '../../dom';
 
 import type {UiMenuItem} from '../UiMenuItem/component';
 
@@ -52,7 +53,7 @@ export class UiMenu extends HTMLElement {
       this.setAttribute('tabindex', '0');
     }
 
-    const doc = this.ownerDocument as import('../../dom').Document;
+    const doc = this.ownerDocument as Document;
     doc.setActiveElement(this);
     this.addDocumentClickListener();
   }
@@ -63,10 +64,10 @@ export class UiMenu extends HTMLElement {
     this.removeDocumentClickListener();
 
     /* Return focus to the parent dropdown trigger if present */
-    const parent = this.parentElement as import('../../dom').Element | null;
+    const parent = this.parentElement as Element | null;
 
     if (parent && parent.localName === 'ui-dropdown') {
-      const doc = this.ownerDocument as import('../../dom').Document;
+      const doc = this.ownerDocument as Document;
       doc.setActiveElement(parent);
     }
   }
@@ -87,7 +88,7 @@ export class UiMenu extends HTMLElement {
     const items: UiMenuItem[] = [];
 
     for (let i = 0; i < this.children.length; i++) {
-      const child = this.children[i] as import('../../dom').Element;
+      const child = this.children[i] as Element;
 
       if (child.localName === 'ui-menu-item' && !child.hasAttribute('disabled')) {
         items.push(child as unknown as UiMenuItem);
@@ -110,7 +111,7 @@ export class UiMenu extends HTMLElement {
   }
 
   private handleKeyDown(event: Event): void {
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
     const items = this.getItems();
 
     if (items.length === 0) return;
@@ -134,14 +135,14 @@ export class UiMenu extends HTMLElement {
   }
 
   private handleClick(event: Event): void {
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
 
     if (!target) return;
 
     // Walk up from click target to find a menu item
-    let current: import('../../dom').Element | null = target;
+    let current: Element | null = target;
 
-    while (current && current !== (this as unknown as import('../../dom').Element)) {
+    while (current && current !== (this as unknown as Element)) {
       if (current.localName === 'ui-menu-item' && !current.hasAttribute('disabled')) {
         // Find the index among non-disabled items
         const items = this.getItems();
@@ -157,26 +158,26 @@ export class UiMenu extends HTMLElement {
         return;
       }
 
-      current = current.parentElement as import('../../dom').Element | null;
+      current = current.parentElement as Element | null;
     }
   }
 
   /* ── Document click listener ─────────────────────────────── */
 
   private handleDocumentClick(event: Event): void {
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
 
     if (!target) return;
 
     /* Walk up from target — if we reach this menu or its parent
        dropdown, the click is inside and should be ignored. */
-    let current: import('../../dom').Element | null = target;
-    const self = this as unknown as import('../../dom').Element;
-    const parent = this.parentElement as import('../../dom').Element | null;
+    let current: Element | null = target;
+    const self = this as unknown as Element;
+    const parent = this.parentElement as Element | null;
 
     while (current) {
       if (current === self || (parent && current === parent)) return;
-      current = current.parentElement as import('../../dom').Element | null;
+      current = current.parentElement as Element | null;
     }
 
     this.close();

@@ -3,6 +3,8 @@ import {describe, expect, it} from 'vitest';
 import {UiLog} from '../component';
 import {Window} from '../../../dom/classes/Window';
 
+import type {Element} from '../../../dom';
+
 function createEnv() {
   const window = new Window();
   const document = window.document;
@@ -44,8 +46,8 @@ describe('UiLog', () => {
 
     /* Only last 3 should be rendered as child nodes */
     expect(log.childNodes.length).toBe(3);
-    expect((log.childNodes[0] as import('../../../dom').Element).textContent).toBe('Line 8');
-    expect((log.childNodes[2] as import('../../../dom').Element).textContent).toBe('Line 10');
+    expect((log.childNodes[0] as Element).textContent).toBe('Line 8');
+    expect((log.childNodes[2] as Element).textContent).toBe('Line 10');
   });
 
   it('trims old lines when max-lines is exceeded', () => {
@@ -60,7 +62,7 @@ describe('UiLog', () => {
     log.append('D');
 
     expect(log.getLineCount()).toBe(3);
-    expect((log.childNodes[0] as import('../../../dom').Element).textContent).toBe('B');
+    expect((log.childNodes[0] as Element).textContent).toBe('B');
   });
 
   it('clears all content', () => {

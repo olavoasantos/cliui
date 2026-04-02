@@ -2,6 +2,7 @@ import styles from './styles.css?inline';
 
 import {UI_TR_TAG_NAME} from './constants';
 import {HTMLElement} from '../../dom';
+import type {Element} from '../../dom';
 
 import type {UiTd} from '../UiTd/component';
 import type {UiTh} from '../UiTh/component';
@@ -27,7 +28,7 @@ export class UiTr extends HTMLElement {
       const child = this.childNodes[i];
 
       if (child && 'localName' in child) {
-        const el = child as import('../../dom').Element;
+        const el = child as Element;
 
         if (el.localName === 'ui-th' || el.localName === 'ui-td') {
           cells.push(el as unknown as UiTh | UiTd);

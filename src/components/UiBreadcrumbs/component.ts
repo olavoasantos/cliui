@@ -6,6 +6,7 @@ import {
   UI_BREADCRUMBS_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
+import type {Element} from '../../dom';
 
 /**
  * Built-in terminal breadcrumbs container custom element.
@@ -56,12 +57,8 @@ export class UiBreadcrumbs extends HTMLElement {
     for (let i = 0; i < this.childNodes.length; i++) {
       const child = this.childNodes[i];
 
-      if (
-        child &&
-        'localName' in child &&
-        (child as import('../../dom').Element).localName === 'ui-breadcrumb'
-      ) {
-        texts.push((child as import('../../dom').Element).textContent ?? '');
+      if (child && 'localName' in child && (child as Element).localName === 'ui-breadcrumb') {
+        texts.push((child as Element).textContent ?? '');
       }
     }
 
@@ -76,7 +73,7 @@ export class UiBreadcrumbs extends HTMLElement {
       if (
         child &&
         'getAttribute' in child &&
-        (child as import('../../dom').Element).getAttribute('class') === 'ui-breadcrumbs-rendered'
+        (child as Element).getAttribute('class') === 'ui-breadcrumbs-rendered'
       ) {
         this.removeChild(child);
       }

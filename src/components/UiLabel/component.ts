@@ -3,7 +3,7 @@ import styles from './styles.css?inline';
 import {UI_LABEL_OBSERVED_ATTRIBUTES, UI_LABEL_TAG_NAME} from './constants';
 import {Event, HTMLElement} from '../../dom';
 
-import type {Document} from '../../dom';
+import type {Document, Element} from '../../dom';
 
 /**
  * Built-in terminal label custom element for form fields.
@@ -37,7 +37,7 @@ export class UiLabel extends HTMLElement {
    * Returns the associated element identified by the `for` attribute,
    * or `null` if no match is found.
    */
-  getTarget(): import('../../dom').Element | null {
+  getTarget(): Element | null {
     const forId = this.getAttribute('for');
 
     if (!forId) return null;

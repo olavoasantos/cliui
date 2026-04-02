@@ -2,6 +2,7 @@ import styles from './styles.css?inline';
 
 import {UI_FORM_OBSERVED_ATTRIBUTES, UI_FORM_TAG_NAME} from './constants';
 import {Event, HTMLElement} from '../../dom';
+import type {Element, KeyboardEvent} from '../../dom';
 import {EDITABLE} from '../../terminal/constants/editable';
 
 /**
@@ -67,7 +68,7 @@ export class UiForm extends HTMLElement {
   private handleClick(event: Event): void {
     if (this.isDisabled()) return;
 
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
 
     if (this.isSubmitButton(target)) {
       this.dispatchSubmit();
@@ -77,24 +78,24 @@ export class UiForm extends HTMLElement {
   private handleKeyDown(event: Event): void {
     if (this.isDisabled()) return;
 
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
 
     if (key !== 'Enter') return;
 
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
 
     if (target && this.isSingleLineEditable(target)) {
       this.dispatchSubmit();
     }
   }
 
-  private isSubmitButton(target: import('../../dom').Element | null): boolean {
+  private isSubmitButton(target: Element | null): boolean {
     if (!target) return false;
 
     return target.localName === 'ui-button' && target.getAttribute('type') === 'submit';
   }
 
-  private isSingleLineEditable(target: import('../../dom').Element | null): boolean {
+  private isSingleLineEditable(target: Element | null): boolean {
     if (!target) return false;
 
     const config = (target as unknown as Record<symbol, unknown>)[EDITABLE];

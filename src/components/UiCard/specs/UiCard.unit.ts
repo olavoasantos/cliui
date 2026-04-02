@@ -3,6 +3,8 @@ import {describe, expect, it} from 'vitest';
 import {UiCard} from '../component';
 import {Window} from '../../../dom/classes/Window';
 
+import type {Element} from '../../../dom';
+
 function createEnv() {
   const window = new Window();
   const document = window.document;
@@ -25,7 +27,7 @@ describe('UiCard', () => {
     card.setAttribute('header', 'Stats');
     document.body.appendChild(card);
 
-    const headerEl = card.childNodes[0] as import('../../../dom').Element;
+    const headerEl = card.childNodes[0] as Element;
 
     expect(headerEl.textContent).toBe('Stats');
     expect(headerEl.style.display).toBe('block');
@@ -36,7 +38,7 @@ describe('UiCard', () => {
     const card = document.createElement('ui-card');
     document.body.appendChild(card);
 
-    const headerEl = card.childNodes[0] as import('../../../dom').Element;
+    const headerEl = card.childNodes[0] as Element;
 
     expect(headerEl.style.display).toBe('none');
   });
@@ -47,7 +49,7 @@ describe('UiCard', () => {
     card.setAttribute('footer', 'Updated 5m ago');
     document.body.appendChild(card);
 
-    const footerEl = card.childNodes[2] as import('../../../dom').Element;
+    const footerEl = card.childNodes[2] as Element;
 
     expect(footerEl.textContent).toBe('Updated 5m ago');
     expect(footerEl.style.display).toBe('block');
@@ -62,7 +64,7 @@ describe('UiCard', () => {
     card.appendChild(child);
     document.body.appendChild(card);
 
-    const contentWrapper = card.childNodes[1] as import('../../../dom').Element;
+    const contentWrapper = card.childNodes[1] as Element;
 
     expect(contentWrapper.getAttribute('class')).toBe('ui-card-content');
     expect(contentWrapper.childNodes.length).toBe(1);

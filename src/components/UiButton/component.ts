@@ -8,6 +8,7 @@ import {
   UI_BUTTON_TAG_NAME,
 } from './constants';
 import {Event, HTMLElement, MouseEvent} from '../../dom';
+import type {KeyboardEvent} from '../../dom';
 
 import type {TerminalFrameAware} from '../../types/TerminalFrameAware';
 import type {UiButtonTone, UiButtonVariant} from './types';
@@ -146,7 +147,7 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
   private handleKeyDown(event: Event): void {
     if (this.isDisabled()) return;
 
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
 
     if (key === 'Enter') {
       this.setAttribute('pressed', '');
@@ -167,7 +168,7 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
   }
 
   private handleKeyUp(event: Event): void {
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
 
     if (key === ' ' && this.spacePressed) {
       this.clearPressed();

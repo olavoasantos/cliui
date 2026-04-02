@@ -3,6 +3,8 @@ import {describe, expect, it} from 'vitest';
 import {UiMessage} from '../component';
 import {Window} from '../../../dom/classes/Window';
 
+import type {Element} from '../../../dom';
+
 function createEnv() {
   const window = new Window();
   const document = window.document;
@@ -51,8 +53,8 @@ describe('UiMessage', () => {
       document.body.appendChild(alert);
 
       // The icon element is the first child of the internal row
-      const row = alert.childNodes[0] as import('../../../dom').Element;
-      const iconEl = row?.childNodes[0] as import('../../../dom').Element;
+      const row = alert.childNodes[0] as Element;
+      const iconEl = row?.childNodes[0] as Element;
 
       expect(iconEl?.textContent).toBe(icon);
     }
@@ -65,8 +67,8 @@ describe('UiMessage', () => {
     alert.textContent = 'Message';
     document.body.appendChild(alert);
 
-    const row = alert.childNodes[0] as import('../../../dom').Element;
-    const iconEl = row?.childNodes[0] as import('../../../dom').Element;
+    const row = alert.childNodes[0] as Element;
+    const iconEl = row?.childNodes[0] as Element;
 
     expect(iconEl?.textContent).toBe('ℹ');
 

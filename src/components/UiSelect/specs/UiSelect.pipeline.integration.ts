@@ -4,6 +4,7 @@ import {Event, KeyboardEvent} from '../../../dom';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
+import type {Element} from '../../../dom';
 import type {TerminalReadableInput} from '../../../terminal/types';
 
 function createOutput(cols = 40, rows = 12) {
@@ -96,7 +97,7 @@ describe('UiSelect full pipeline', () => {
 
     await terminal.run();
 
-    terminal.document.setActiveElement(select as unknown as import('../../../dom').Element);
+    terminal.document.setActiveElement(select as unknown as Element);
 
     /* Open via Enter */
     select.dispatchEvent(
@@ -119,7 +120,7 @@ describe('UiSelect full pipeline', () => {
 
     await terminal.run();
 
-    terminal.document.setActiveElement(select as unknown as import('../../../dom').Element);
+    terminal.document.setActiveElement(select as unknown as Element);
     select.open();
     expect(select.isOpen()).toBe(true);
 
@@ -138,11 +139,11 @@ describe('UiSelect full pipeline', () => {
 
     await terminal.run();
 
-    terminal.document.setActiveElement(select as unknown as import('../../../dom').Element);
+    terminal.document.setActiveElement(select as unknown as Element);
     select.open();
 
     /* Find the cherry option in the DOM */
-    const listbox = select.childNodes[1] as import('../../../dom').Element;
+    const listbox = select.childNodes[1] as Element;
     let cherryOpt: UiOption | null = null;
 
     for (let i = 0; i < listbox.childNodes.length; i++) {

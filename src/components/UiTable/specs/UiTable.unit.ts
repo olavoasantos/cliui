@@ -10,6 +10,8 @@ import {UiTr} from '../../UiTr/component';
 import {UiTable} from '../component';
 
 import type {CustomElementConstructor} from '../../../dom/types';
+import type {Element} from '../../../dom';
+import type {Document} from '../../../dom/classes/Document';
 
 function registerAll(window: Window): void {
   window.customElements.define(UiTable.tagName, UiTable as unknown as CustomElementConstructor);
@@ -21,20 +23,13 @@ function registerAll(window: Window): void {
   window.customElements.define(UiTd.tagName, UiTd as unknown as CustomElementConstructor);
 }
 
-function createCell(
-  doc: import('../../../dom').Document,
-  tag: 'ui-th' | 'ui-td',
-  text: string,
-): import('../../../dom').Element {
+function createCell(doc: Document, tag: 'ui-th' | 'ui-td', text: string): Element {
   const cell = doc.createElement(tag);
   cell.textContent = text;
   return cell;
 }
 
-function createRow(
-  doc: import('../../../dom').Document,
-  cells: Array<{tag: 'ui-th' | 'ui-td'; text: string}>,
-): import('../../../dom').Element {
+function createRow(doc: Document, cells: Array<{tag: 'ui-th' | 'ui-td'; text: string}>): Element {
   const row = doc.createElement('ui-tr');
 
   for (const cell of cells) {
@@ -125,11 +120,11 @@ function createTable(
 function getCellWidths(table: UiTable): number[][] {
   const widths: number[][] = [];
 
-  function scanChildren(parent: import('../../../dom').Element): void {
+  function scanChildren(parent: Element): void {
     for (let i = 0; i < parent.childNodes.length; i++) {
       const child = parent.childNodes[i];
       if (!child || !('localName' in child)) continue;
-      const el = child as import('../../../dom').Element;
+      const el = child as Element;
 
       if (el.localName === 'ui-tr') {
         const rowWidths: number[] = [];
@@ -137,7 +132,7 @@ function getCellWidths(table: UiTable): number[][] {
         for (let j = 0; j < el.childNodes.length; j++) {
           const cell = el.childNodes[j];
           if (!cell || !('localName' in cell)) continue;
-          const cellEl = cell as import('../../../dom').Element;
+          const cellEl = cell as Element;
 
           if (cellEl.localName === 'ui-th' || cellEl.localName === 'ui-td') {
             const w = cellEl.style.getPropertyValue('width');
@@ -156,18 +151,18 @@ function getCellWidths(table: UiTable): number[][] {
     }
   }
 
-  scanChildren(table as unknown as import('../../../dom').Element);
+  scanChildren(table as unknown as Element);
   return widths;
 }
 
 function getRowGaps(table: UiTable): string[] {
   const gaps: string[] = [];
 
-  function scanChildren(parent: import('../../../dom').Element): void {
+  function scanChildren(parent: Element): void {
     for (let i = 0; i < parent.childNodes.length; i++) {
       const child = parent.childNodes[i];
       if (!child || !('localName' in child)) continue;
-      const el = child as import('../../../dom').Element;
+      const el = child as Element;
 
       if (el.localName === 'ui-tr') {
         gaps.push(el.style.getPropertyValue('column-gap'));
@@ -181,7 +176,7 @@ function getRowGaps(table: UiTable): string[] {
     }
   }
 
-  scanChildren(table as unknown as import('../../../dom').Element);
+  scanChildren(table as unknown as Element);
   return gaps;
 }
 
@@ -339,9 +334,9 @@ describe('UiTable', () => {
       expect(widths[0]).toEqual([1, 1]);
 
       /* Programmatically change a cell's text */
-      const tbody = table.childNodes[0] as import('../../../dom').Element;
-      const firstRow = tbody.childNodes[0] as import('../../../dom').Element;
-      const firstCell = firstRow.childNodes[0] as import('../../../dom').Element;
+      const tbody = table.childNodes[0] as Element;
+      const firstRow = tbody.childNodes[0] as Element;
+      const firstCell = firstRow.childNodes[0] as Element;
       firstCell.textContent = 'LongerText';
 
       table.alignColumns();

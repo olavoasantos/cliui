@@ -2,6 +2,7 @@ import styles from './styles.css?inline';
 
 import {UI_TABS_OBSERVED_ATTRIBUTES, UI_TABS_TAG_NAME} from './constants';
 import {Event, HTMLElement} from '../../dom';
+import type {Element, KeyboardEvent} from '../../dom';
 
 import type {UiTab} from '../UiTab/component';
 
@@ -31,10 +32,10 @@ export class UiTabs extends HTMLElement {
   static readonly tagName = UI_TABS_TAG_NAME;
 
   /** Internal tab bar element. */
-  private tabBar: import('../../dom').Element | null = null;
+  private tabBar: Element | null = null;
 
   /** Tab header elements inside the bar. */
-  private tabHeaders: import('../../dom').Element[] = [];
+  private tabHeaders: Element[] = [];
 
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
   private readonly boundClick = this.handleClick.bind(this) as EventListener;
@@ -195,7 +196,7 @@ export class UiTabs extends HTMLElement {
   private handleKeyDown(event: Event): void {
     if (event.target !== this) return;
 
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
     const tabs = this.getTabs();
 
     if (tabs.length === 0) return;
@@ -238,14 +239,14 @@ export class UiTabs extends HTMLElement {
   /* ── Private: Mouse ─────────────────────────────────────── */
 
   private handleClick(event: Event): void {
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
 
     if (!target) return;
 
     // Walk up from click target to find a tab header with data-tab-index
-    let current: import('../../dom').Element | null = target;
+    let current: Element | null = target;
 
-    while (current && current !== (this as unknown as import('../../dom').Element)) {
+    while (current && current !== (this as unknown as Element)) {
       const indexAttr = current.getAttribute('data-tab-index');
 
       if (indexAttr !== null) {
@@ -267,7 +268,7 @@ export class UiTabs extends HTMLElement {
         return;
       }
 
-      current = current.parentElement as import('../../dom').Element | null;
+      current = current.parentElement as Element | null;
     }
   }
 }

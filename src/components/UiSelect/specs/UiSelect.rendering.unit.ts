@@ -8,6 +8,8 @@ import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
 import type {CustomElementConstructor} from '../../../dom/types';
+import type {Element} from '../../../dom';
+import type {Document} from '../../../dom/classes/Document';
 
 /**
  * Sets up a select with the SAME CSS the example app uses — no component
@@ -54,12 +56,7 @@ function setup(opts: {value?: string; options: Array<{value: string; label: stri
   return {w, d, se, select};
 }
 
-function renderToRows(
-  se: StyleEngine,
-  d: import('../../../dom').Document,
-  cols: number,
-  rows: number,
-): string[] {
+function renderToRows(se: StyleEngine, d: Document, cols: number, rows: number): string[] {
   se.computeAll();
   const le = new LayoutEngine(se);
   const layout = le.layout(d.body, cols, rows);
@@ -146,13 +143,10 @@ describe('UiSelect click behavior', () => {
     const options = Array.from(
       (select as unknown as {childNodes: ArrayLike<unknown>}).childNodes,
     ).flatMap((child) => {
-      if ((child as import('../../../dom').Element).localName === 'div') {
+      if ((child as Element).localName === 'div') {
         return Array.from(
-          (child as import('../../../dom').Element as unknown as {childNodes: ArrayLike<unknown>})
-            .childNodes,
-        ).filter(
-          (n) => (n as import('../../../dom').Element).localName === 'ui-option',
-        ) as unknown as UiOption[];
+          (child as Element as unknown as {childNodes: ArrayLike<unknown>}).childNodes,
+        ).filter((n) => (n as Element).localName === 'ui-option') as unknown as UiOption[];
       }
 
       return [];
@@ -178,7 +172,7 @@ describe('UiSelect click behavior', () => {
     const {w, select} = setup({value: 'apple', options: FRUITS});
 
     /* Focus the select */
-    w.document.setActiveElement(select as unknown as import('../../../dom').Element);
+    w.document.setActiveElement(select as unknown as Element);
     select.open();
     expect(select.isOpen()).toBe(true);
 
@@ -195,7 +189,7 @@ describe('UiSelect click behavior', () => {
     other.setAttribute('tabindex', '1');
     w.document.body.appendChild(other);
 
-    w.document.setActiveElement(select as unknown as import('../../../dom').Element);
+    w.document.setActiveElement(select as unknown as Element);
     select.open();
     expect(select.isOpen()).toBe(true);
 

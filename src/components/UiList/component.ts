@@ -3,7 +3,7 @@ import styles from './styles.css?inline';
 import {UI_LIST_OBSERVED_ATTRIBUTES, UI_LIST_TAG_NAME} from './constants';
 import {Event, HTMLElement} from '../../dom';
 
-import type {Element} from '../../dom';
+import type {Element, KeyboardEvent} from '../../dom';
 import type {UiListMode} from './types';
 
 /**
@@ -117,7 +117,7 @@ export class UiList extends HTMLElement {
   private handleKeyDown(event: Event): void {
     if (event.target !== this) return;
 
-    const key = (event as import('../../dom').KeyboardEvent).key;
+    const key = (event as KeyboardEvent).key;
     const shift = !!(event as unknown as {shiftKey?: boolean}).shiftKey;
     const items = this.getItems();
 
@@ -180,7 +180,7 @@ export class UiList extends HTMLElement {
   }
 
   private handleClick(event: Event): void {
-    const target = event.target as import('../../dom').Element | null;
+    const target = event.target as Element | null;
 
     if (!target) return;
 
@@ -193,15 +193,15 @@ export class UiList extends HTMLElement {
     let clickedIndex = -1;
 
     for (let i = 0; i < allChildren.length; i++) {
-      let current: import('../../dom').Element | null = target;
+      let current: Element | null = target;
 
-      while (current && current !== (this as unknown as import('../../dom').Element)) {
+      while (current && current !== (this as unknown as Element)) {
         if (current === allChildren[i]) {
           clickedIndex = i;
           break;
         }
 
-        current = current.parentElement as import('../../dom').Element | null;
+        current = current.parentElement as Element | null;
       }
 
       if (clickedIndex >= 0) break;

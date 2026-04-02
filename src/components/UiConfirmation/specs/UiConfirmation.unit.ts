@@ -5,6 +5,8 @@ import {Event} from '../../../dom/classes/Event';
 import {MouseEvent} from '../../../dom/classes/MouseEvent';
 import {Window} from '../../../dom/classes/Window';
 
+import type {Element} from '../../../dom';
+
 function createEnv() {
   const window = new Window();
   const document = window.document;
@@ -45,9 +47,7 @@ describe('UiConfirmation', () => {
     const promise = confirmation.confirm();
 
     const dialog = document.body.querySelector('dialog')!;
-    const messageEl = (dialog as unknown as import('../../../dom').Element).querySelector(
-      '.ui-confirmation-message',
-    );
+    const messageEl = (dialog as unknown as Element).querySelector('.ui-confirmation-message');
 
     expect(messageEl?.textContent).toBe('Delete this file?');
 
@@ -64,9 +64,7 @@ describe('UiConfirmation', () => {
     const promise = confirmation.confirm();
 
     const dialog = document.body.querySelector('dialog')!;
-    const confirmBtn = (dialog as unknown as import('../../../dom').Element).querySelector(
-      '.ui-confirmation-confirm',
-    )!;
+    const confirmBtn = (dialog as unknown as Element).querySelector('.ui-confirmation-confirm')!;
     confirmBtn.dispatchEvent(new MouseEvent('click', {bubbles: true}));
 
     const result = await promise;
@@ -83,9 +81,7 @@ describe('UiConfirmation', () => {
     const promise = confirmation.confirm();
 
     const dialog = document.body.querySelector('dialog')!;
-    const cancelBtn = (dialog as unknown as import('../../../dom').Element).querySelector(
-      '.ui-confirmation-cancel',
-    )!;
+    const cancelBtn = (dialog as unknown as Element).querySelector('.ui-confirmation-cancel')!;
     cancelBtn.dispatchEvent(new MouseEvent('click', {bubbles: true}));
 
     const result = await promise;
@@ -120,7 +116,7 @@ describe('UiConfirmation', () => {
     const promise = confirmation.confirm();
 
     const dialog = document.body.querySelector('dialog')!;
-    const dialogEl = dialog as unknown as import('../../../dom').Element;
+    const dialogEl = dialog as unknown as Element;
     const confirmBtn = dialogEl.querySelector('.ui-confirmation-confirm')!;
     const cancelBtn = dialogEl.querySelector('.ui-confirmation-cancel')!;
 

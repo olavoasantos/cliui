@@ -7,6 +7,7 @@ import {
   UI_MESSAGE_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
+import type {Element, Node} from '../../dom';
 
 import type {UiMessageTone} from './types';
 
@@ -26,10 +27,10 @@ export class UiMessage extends HTMLElement {
   static readonly tagName = UI_MESSAGE_TAG_NAME;
 
   /** Internal icon element. */
-  private iconEl: import('../../dom').Element | null = null;
+  private iconEl: Element | null = null;
 
   /** Internal message wrapper. */
-  private messageEl: import('../../dom').Element | null = null;
+  private messageEl: Element | null = null;
 
   connectedCallback(): void {
     this.buildInternals();
@@ -66,7 +67,7 @@ export class UiMessage extends HTMLElement {
 
     const doc = this.ownerDocument!;
 
-    const children: import('../../dom').Node[] = [];
+    const children: Node[] = [];
 
     for (let i = this.childNodes.length - 1; i >= 0; i--) {
       children.unshift(this.childNodes[i]!);

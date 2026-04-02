@@ -7,6 +7,7 @@ import {
   UI_TOAST_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '../../dom';
+import type {Node} from '../../dom';
 
 import type {TerminalFrameAware} from '../../types/TerminalFrameAware';
 import type {UiToastTone} from './types';
@@ -78,7 +79,7 @@ export class UiToast extends HTMLElement implements TerminalFrameAware {
   /** Removes the toast from its parent. */
   private detach(): void {
     if (this.parentNode) {
-      this.parentNode.removeChild(this as unknown as import('../../dom').Node);
+      this.parentNode.removeChild(this as unknown as Node);
     }
   }
 }
