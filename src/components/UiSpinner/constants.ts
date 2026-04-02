@@ -43,7 +43,7 @@ export const UI_SPINNER_VARIANTS: Record<UiSpinnerVariantName, UiSpinnerVariantD
     interval: 143,
   },
   ellipsis: {
-    frames: ['', '.', '..', '...'],
+    frames: ['   ', '.  ', '.. ', '...'],
     interval: 333,
   },
 };
