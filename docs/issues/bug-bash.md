@@ -142,7 +142,7 @@ The select dropdown renders all options in an absolutely positioned div that gro
 
 When flex-direction is row and children have borders, the border rendering doesn't match the stretched height. The right border of shorter children appears detached/floating.
 
-**Discovered in:** `<ui-sidebar>` example — sidebar with border in a flex row with taller content sibling.
+**Discovered in:** `<ui-sidebar>` example — sidebar with border in a flex row with taller content sibling. Also seen in `<ui-toolbar>` — buttons with borders in a flex row render with detached borders.
 
 **Investigation:** Changed `align-items` default from `flex-start` to `stretch` (correct per CSS spec). The `FlexLayout.resolve()` does compute `crossSize` and `setCrossSizeUnclamped` sets `box.height` + `box.contentHeight`. Phase 2 in `LayoutEngine` also forces `child.height = resolvedH`. The `Painter.getMetrics()` uses `box.height` for border rendering. All the wiring looks correct, yet the border still renders at the intrinsic content height. Needs deeper debugging of the actual values at runtime.
 
