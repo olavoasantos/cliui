@@ -1,7 +1,7 @@
 {
   "name": "@cliui/dom",
   "version": "0.0.0",
-  "description": "Standalone DOM polyfill for Node.js — Window, Document, Element, Event, MutationObserver, and more",
+  "description": "Standalone DOM polyfill for Node.js \u2014 Window, Document, Element, Event, MutationObserver, and more",
   "license": "MIT",
   "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
   "repository": {
@@ -29,5 +29,9 @@
     "test:integration": "vitest run --config=vitest.integration.config.ts",
     "test:performance": "vitest bench --run --config=vitest.bench.config.ts",
     "type:check": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://registry.npmjs.org/"
   }
 }
