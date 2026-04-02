@@ -54,10 +54,12 @@ export class UiTree extends HTMLElement {
   private sourceItems: UiTreeItem[] = [];
 
   private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
+  private readonly boundClick = this.handleClick.bind(this) as EventListener;
 
   connectedCallback(): void {
     this.ensureTabIndex();
     this.addEventListener('keydown', this.boundKeyDown);
+    this.addEventListener('click', this.boundClick);
 
     /* Capture the original tree-item children before we replace them */
     this.captureSourceItems();
@@ -66,6 +68,7 @@ export class UiTree extends HTMLElement {
 
   disconnectedCallback(): void {
     this.removeEventListener('keydown', this.boundKeyDown);
+    this.removeEventListener('click', this.boundClick);
   }
 
   /** Returns all currently visible tree items in document order. */
@@ -236,6 +239,32 @@ export class UiTree extends HTMLElement {
         this.renderedRows[i]!.setAttribute('highlighted', '');
       } else {
         this.renderedRows[i]!.removeAttribute('highlighted');
+      }
+    }
+  }
+
+  private handleClick(event: Event): void {
+    const target = event.target as import('../../dom').Element | null;
+
+    if (!target) return;
+
+    /* Find which rendered row was clicked */
+    for (let i = 0; i < this.renderedRows.length; i++) {
+      let current: import('../../dom').Element | null = target;
+
+      while (current && current !== (this as unknown as import('../../dom').Element)) {
+        if (current === this.renderedRows[i]) {
+          this.highlightedIndex = i;
+          this.syncHighlight();
+
+          /* Focus the tree for keyboard nav */
+          const doc = this.ownerDocument as import('../../dom').Document;
+          doc.setActiveElement(this as unknown as import('../../dom').Element);
+
+          return;
+        }
+
+        current = current.parentElement as import('../../dom').Element | null;
       }
     }
   }
