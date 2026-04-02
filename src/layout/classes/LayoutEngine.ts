@@ -573,10 +573,31 @@ export class LayoutEngine {
    * Repositions a layout box to be centered in the terminal viewport.
    * Called after scroll offsets have been applied, so coordinates are
    * viewport-relative.
+   *
+   * The center position is cached per dialog element and only
+   * recomputed when the viewport dimensions change. This prevents
+   * layout shift when dialog content changes size.
    */
   private centerInViewport(box: LayoutBox): void {
+    const element = box.element as Element & {
+      __cachedCenter?: {centerX: number; centerY: number; vpCols: number; vpRows: number};
+    };
+    const cached = element.__cachedCenter;
+
+    if (cached && cached.vpCols === this.viewportColumns && cached.vpRows === this.viewportRows) {
+      this.offsetBox(box, cached.centerX - box.x, cached.centerY - box.y);
+      return;
+    }
+
     const centerX = Math.max(0, Math.floor((this.viewportColumns - box.width) / 2));
     const centerY = Math.max(0, Math.floor((this.viewportRows - box.height) / 2));
+
+    element.__cachedCenter = {
+      centerX,
+      centerY,
+      vpCols: this.viewportColumns,
+      vpRows: this.viewportRows,
+    };
 
     // Reset to origin then move to center
     this.offsetBox(box, centerX - box.x, centerY - box.y);

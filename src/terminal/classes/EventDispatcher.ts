@@ -10,6 +10,14 @@ import type {
   TerminalPasteEvent,
 } from '../types';
 
+/** Rectangular clipping region for overflow containers. */
+interface ClipRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /**
  * Bridges parsed terminal input events into DOM events dispatched on the
  * document body.
@@ -198,33 +206,65 @@ export class EventDispatcher {
       return null;
     }
 
-    for (const box of this.flattenBoxes(this.layoutRoot)) {
-      if (box.computedStyle.get('display') === 'none' || !this.containsPoint(box, column, row)) {
+    for (const entry of this.flattenBoxes(this.layoutRoot)) {
+      if (entry.box.computedStyle.get('display') === 'none') {
         continue;
       }
 
-      return box;
+      if (!this.containsPoint(entry.box, column, row)) {
+        continue;
+      }
+
+      // Clip to ancestor scroll/hidden overflow viewports
+      if (entry.clipRect && !this.isInsideClipRect(entry.clipRect, column, row)) {
+        continue;
+      }
+
+      return entry.box;
     }
 
     return null;
   }
 
-  private flattenBoxes(root: LayoutBox): LayoutBox[] {
-    const flattened: Array<{box: LayoutBox; order: number; stackingZ: number}> = [];
+  private flattenBoxes(
+    root: LayoutBox,
+  ): Array<{box: LayoutBox; order: number; stackingZ: number; clipRect: ClipRect | null}> {
+    const flattened: Array<{
+      box: LayoutBox;
+      order: number;
+      stackingZ: number;
+      clipRect: ClipRect | null;
+    }> = [];
     let order = 0;
 
-    const visit = (box: LayoutBox, parentStackingZ: number): void => {
+    const visit = (
+      box: LayoutBox,
+      parentStackingZ: number,
+      parentClipRect: ClipRect | null,
+    ): void => {
       const stackingZ = box.zIndex !== 0 ? box.zIndex : parentStackingZ;
+      const overflow = box.computedStyle.get('overflow');
+      const isClipping = overflow === 'scroll' || overflow === 'hidden';
 
-      flattened.push({box, order, stackingZ});
+      flattened.push({box, order, stackingZ, clipRect: parentClipRect});
       order += 1;
 
+      // Propagate clip rect to children if this box clips overflow
+      const childClipRect: ClipRect | null = isClipping
+        ? this.intersectClipRects(parentClipRect, {
+            x: box.x,
+            y: box.y,
+            width: box.width,
+            height: box.height,
+          })
+        : parentClipRect;
+
       for (const child of box.children) {
-        visit(child, stackingZ);
+        visit(child, stackingZ, childClipRect);
       }
     };
 
-    visit(root, 0);
+    visit(root, 0, null);
 
     flattened.sort((left, right) => {
       if (left.stackingZ !== right.stackingZ) {
@@ -234,7 +274,34 @@ export class EventDispatcher {
       return right.order - left.order;
     });
 
-    return flattened.map((entry) => entry.box);
+    return flattened;
+  }
+
+  private isInsideClipRect(clip: ClipRect, column: number, row: number): boolean {
+    return (
+      column >= clip.x &&
+      row >= clip.y &&
+      column < clip.x + clip.width &&
+      row < clip.y + clip.height
+    );
+  }
+
+  private intersectClipRects(existing: ClipRect | null, next: ClipRect): ClipRect {
+    if (existing === null) {
+      return next;
+    }
+
+    const x = Math.max(existing.x, next.x);
+    const y = Math.max(existing.y, next.y);
+    const right = Math.min(existing.x + existing.width, next.x + next.width);
+    const bottom = Math.min(existing.y + existing.height, next.y + next.height);
+
+    return {
+      x,
+      y,
+      width: Math.max(0, right - x),
+      height: Math.max(0, bottom - y),
+    };
   }
 
   /**
@@ -408,9 +475,9 @@ export class EventDispatcher {
       return null;
     }
 
-    for (const box of this.flattenBoxes(this.layoutRoot)) {
-      if (box.element === element) {
-        return box;
+    for (const entry of this.flattenBoxes(this.layoutRoot)) {
+      if (entry.box.element === element) {
+        return entry.box;
       }
     }
 

@@ -1,6 +1,7 @@
 import {NamespaceURI} from '../constants';
 import {setupElement} from './setupElement';
 import {Element} from '../classes/Element';
+import {HTMLAnchorElement} from '../classes/HTMLAnchorElement';
 import {HTMLDialogElement} from '../classes/HTMLDialogElement';
 import {HTMLStyleElement} from '../classes/HTMLStyleElement';
 import {HTMLTemplateElement} from '../classes/HTMLTemplateElement';
@@ -16,6 +17,8 @@ export function createElement(ownerDocument: Document, name: string, namespace?:
 
   if (namespace === NamespaceURI.SVG) {
     element = new SVGElement();
+  } else if (lowerName === 'a') {
+    element = new HTMLAnchorElement();
   } else if (lowerName === 'template') {
     element = new HTMLTemplateElement();
   } else if (lowerName === 'style') {

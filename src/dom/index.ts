@@ -29,6 +29,7 @@ export {DOMTokenList} from './classes/DOMTokenList';
 export {CustomElementRegistryImplementation as CustomElementRegistry} from './classes/CustomElementRegistry';
 export {MutationObserver} from './classes/MutationObserver';
 export {HTMLElement} from './classes/HTMLElement';
+export {HTMLAnchorElement} from './classes/HTMLAnchorElement';
 export {HTMLBodyElement} from './classes/HTMLBodyElement';
 export {HTMLDialogElement} from './classes/HTMLDialogElement';
 export {HTMLHeadElement} from './classes/HTMLHeadElement';

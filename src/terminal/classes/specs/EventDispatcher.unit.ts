@@ -284,6 +284,129 @@ describe('EventDispatcher', () => {
     expect(dispatcher.hitTest(3, 3)).toBe(later);
   });
 
+  it('clips hit-testing to scroll container visible viewport (BUG-3)', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const elementBelow = document.createElement('button');
+    const scrollContainer = document.createElement('div');
+    const scrollChild = document.createElement('div');
+
+    // DOM order: elementBelow first, then scrollContainer
+    // This means scrollChild has the highest flattening order and
+    // gets priority in hit-testing. Without clipping, it swallows
+    // clicks outside the scroll container's visible viewport.
+    document.body.appendChild(elementBelow);
+    document.body.appendChild(scrollContainer);
+    scrollContainer.appendChild(scrollChild);
+
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 20,
+        height: 20,
+        children: [
+          createBox(document, {
+            element: elementBelow,
+            x: 0,
+            y: 5,
+            width: 20,
+            height: 5,
+          }),
+          // Scroll container viewport: rows 0–4 (height 5)
+          // But child extends to row 14 (height 15)
+          createBox(document, {
+            element: scrollContainer,
+            x: 0,
+            y: 0,
+            width: 20,
+            height: 5,
+            contentX: 0,
+            contentY: 0,
+            contentWidth: 20,
+            contentHeight: 5,
+            computedStyle: style({overflow: 'scroll'}),
+            scrollOffsetY: 0,
+            scrollHeight: 15,
+            children: [
+              createBox(document, {
+                element: scrollChild,
+                x: 0,
+                y: 0,
+                width: 20,
+                height: 15,
+              }),
+            ],
+          }),
+        ],
+      }),
+    );
+
+    // Click at row 6 — should hit the button below, not the scroll child
+    expect(dispatcher.hitTest(5, 6)).toBe(elementBelow);
+  });
+
+  it('does not hit-test children scrolled above the scroll viewport (BUG-3)', () => {
+    const {document} = createEnv();
+    const dispatcher = new EventDispatcher(document);
+    const scrollContainer = document.createElement('div');
+    const scrolledOutChild = document.createElement('div');
+    const visibleChild = document.createElement('div');
+
+    document.body.appendChild(scrollContainer);
+    scrollContainer.appendChild(scrolledOutChild);
+    scrollContainer.appendChild(visibleChild);
+
+    // Scroll container viewport: rows 0–4 (height 5)
+    // scrolledOutChild has been offset to y=-3 (scrolled above viewport)
+    // visibleChild is at y=0 (visible)
+    dispatcher.setLayoutRoot(
+      createBox(document, {
+        element: document.body,
+        x: 0,
+        y: 0,
+        width: 20,
+        height: 10,
+        children: [
+          createBox(document, {
+            element: scrollContainer,
+            x: 0,
+            y: 0,
+            width: 20,
+            height: 5,
+            contentX: 0,
+            contentY: 0,
+            contentWidth: 20,
+            contentHeight: 5,
+            computedStyle: style({overflow: 'scroll'}),
+            scrollOffsetY: 3,
+            scrollHeight: 10,
+            children: [
+              createBox(document, {
+                element: scrolledOutChild,
+                x: 0,
+                y: -3,
+                width: 20,
+                height: 2,
+              }),
+              createBox(document, {
+                element: visibleChild,
+                x: 0,
+                y: 0,
+                width: 20,
+                height: 5,
+              }),
+            ],
+          }),
+        ],
+      }),
+    );
+
+    // Click at row 1 — should hit visibleChild, not scrolledOutChild
+    expect(dispatcher.hitTest(5, 1)).toBe(visibleChild);
+  });
+
   it('dispatches mouse down, up, and click events to the hit-tested element with bubbling', () => {
     const {document} = createEnv();
     const dispatcher = new EventDispatcher(document);

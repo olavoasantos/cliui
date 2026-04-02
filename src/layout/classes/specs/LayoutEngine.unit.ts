@@ -392,6 +392,91 @@ describe('LayoutEngine', () => {
     });
   });
 
+  it('positions display:inline children side by side in a flex-direction:row parent (BUG-13)', () => {
+    const {document, styleEngine} = createEnv();
+    const body = document.body;
+    const row = document.createElement('div');
+    const cell1 = document.createElement('span');
+    const cell2 = document.createElement('span');
+    const cell3 = document.createElement('span');
+
+    cell1.textContent = 'Name';
+    cell2.textContent = 'Role';
+    cell3.textContent = 'Status';
+    row.appendChild(cell1);
+    row.appendChild(cell2);
+    row.appendChild(cell3);
+    body.appendChild(row);
+
+    addStyle(
+      document,
+      '.row { display: flex; flex-direction: row; } .cell { display: inline; white-space: nowrap; }',
+    );
+    row.className = 'row';
+    cell1.className = 'cell';
+    cell2.className = 'cell';
+    cell3.className = 'cell';
+    styleEngine.computeAll();
+
+    const engine = new LayoutEngine(styleEngine);
+    const layout = engine.layout(body, 60, 20);
+    const rowBox = layout.children[0]!;
+
+    // All cells should be on the same row (same y)
+    expect(rowBox.children.length).toBe(3);
+    expect(rowBox.children[0]!.y).toBe(rowBox.children[1]!.y);
+    expect(rowBox.children[1]!.y).toBe(rowBox.children[2]!.y);
+
+    // Each subsequent cell should start after the previous one
+    expect(rowBox.children[1]!.x).toBeGreaterThan(rowBox.children[0]!.x);
+    expect(rowBox.children[2]!.x).toBeGreaterThan(rowBox.children[1]!.x);
+  });
+
+  it('positions display:inline children with explicit widths in a flex row (BUG-13)', () => {
+    const {document, styleEngine} = createEnv();
+    const body = document.body;
+    const row = document.createElement('div');
+    const cell1 = document.createElement('span');
+    const cell2 = document.createElement('span');
+    const cell3 = document.createElement('span');
+
+    cell1.textContent = 'Name';
+    cell2.textContent = 'Role';
+    cell3.textContent = 'Status';
+    row.appendChild(cell1);
+    row.appendChild(cell2);
+    row.appendChild(cell3);
+    body.appendChild(row);
+
+    // Mimic table component: row is flex-row, cells are inline with explicit widths
+    addStyle(
+      document,
+      `.row { display: flex; flex-direction: row; gap: 2; }
+       .cell { display: inline; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }`,
+    );
+    row.className = 'row';
+    cell1.className = 'cell';
+    cell1.style.width = '10';
+    cell2.className = 'cell';
+    cell2.style.width = '10';
+    cell3.className = 'cell';
+    cell3.style.width = '10';
+    styleEngine.computeAll();
+
+    const engine = new LayoutEngine(styleEngine);
+    const layout = engine.layout(body, 60, 20);
+    const rowBox = layout.children[0]!;
+
+    expect(rowBox.children.length).toBe(3);
+    // All cells must be on the same row
+    expect(rowBox.children[0]!.y).toBe(rowBox.children[1]!.y);
+    expect(rowBox.children[1]!.y).toBe(rowBox.children[2]!.y);
+    // With width 10 + gap 2, cells should be at x=0, x=12, x=24
+    expect(rowBox.children[0]!.x).toBe(0);
+    expect(rowBox.children[1]!.x).toBe(12);
+    expect(rowBox.children[2]!.x).toBe(24);
+  });
+
   describe('display: none', () => {
     it('produces a zero-size box for hidden elements', () => {
       const {document, styleEngine} = createEnv();

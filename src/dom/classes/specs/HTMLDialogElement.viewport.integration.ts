@@ -148,6 +148,39 @@ describe('HTMLDialogElement — viewport centering (end-to-end)', () => {
     expect(Math.abs(row - expectedCenter)).toBeLessThanOrEqual(4);
   });
 
+  it('modal dialog does not re-center when content size changes (BUG-5)', () => {
+    const {document, styleEngine, layoutEngine, renderer, dialog} = createScene();
+
+    // Frame 1: initial render
+    renderFrame(styleEngine, layoutEngine, renderer, document.body);
+
+    // Open modal
+    dialog.showModal();
+
+    // Frame 2: dialog visible and centered
+    const frame1 = renderFrame(styleEngine, layoutEngine, renderer, document.body);
+    const row1 = findTextRow(frame1.buffer, 'MODAL CONTENT');
+    expect(row1).toBeGreaterThanOrEqual(0);
+
+    // Add extra content to the dialog, changing its height
+    const extra = document.createElement('div');
+    extra.textContent = 'EXTRA LINE 1';
+    dialog.appendChild(extra);
+    const extra2 = document.createElement('div');
+    extra2.textContent = 'EXTRA LINE 2';
+    dialog.appendChild(extra2);
+    const extra3 = document.createElement('div');
+    extra3.textContent = 'EXTRA LINE 3';
+    dialog.appendChild(extra3);
+
+    // Frame 3: dialog content changed, should stay at the same position
+    const frame2 = renderFrame(styleEngine, layoutEngine, renderer, document.body);
+    const row2 = findTextRow(frame2.buffer, 'MODAL CONTENT');
+
+    // The dialog should stay at the same position, not re-center
+    expect(row2).toBe(row1);
+  });
+
   it('modal dialog stays centered when user scrolls after opening', () => {
     const {document, styleEngine, layoutEngine, renderer, dialog} = createScene();
 

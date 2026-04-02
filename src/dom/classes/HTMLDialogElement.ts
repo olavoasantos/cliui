@@ -108,6 +108,9 @@ export class HTMLDialogElement extends HTMLElement {
     this.removeAttribute('modal');
     this.removeEventListener('keydown', this.boundKeyDown);
 
+    // Clear cached center position so re-opening recalculates
+    delete (this as HTMLDialogElement & {__cachedCenter?: unknown}).__cachedCenter;
+
     const wasModal = this.modal;
     this.modal = false;
 

@@ -5,6 +5,7 @@ export default mergeConfig(
   projectConfig,
   defineConfig({
     test: {
+      css: true,
       include: ['**/*.integration.ts', '**/*.integration.tsx'],
       exclude: ['**/.testing/**', '**/build/**', '**/node_modules/**'],
       coverage: {

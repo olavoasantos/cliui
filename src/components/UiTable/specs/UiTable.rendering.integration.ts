@@ -136,11 +136,9 @@ describe('UiTable rendering', () => {
     vi.useRealTimers();
   });
 
-  // BUG-13: Table cells render vertically instead of side by side
-  // The flex row layout for ui-tr doesn't produce horizontal cell
-  // layout in the rendered buffer. Cells with display: inline get
-  // normalizeDisplay'd into row+wrap containers that stack vertically.
-  it.skip('renders header and body text on the same row without truncation', async () => {
+  // BUG-13: Fixed — root cause was BUG-9 (component stylesheets not loaded in tests).
+  // Resolved by enabling `css: true` in vitest config so ?inline imports work.
+  it('renders header and body text on the same row without truncation', async () => {
     const terminal = createTerminal();
     const doc = terminal.document;
 
@@ -178,6 +176,7 @@ describe('UiTable rendering', () => {
     terminal.exit();
   });
 
+  // BUG-12: Borders on inline cells in flex rows still have issues
   it.skip('renders full cell text with borders and padding applied via CSS', async () => {
     const terminal = createTerminal();
     const doc = terminal.document;
@@ -210,7 +209,7 @@ describe('UiTable rendering', () => {
     terminal.exit();
   });
 
-  it.skip('aligns columns so the same column starts at the same x across rows', async () => {
+  it('aligns columns so the same column starts at the same x across rows', async () => {
     const terminal = createTerminal();
     const doc = terminal.document;
 
