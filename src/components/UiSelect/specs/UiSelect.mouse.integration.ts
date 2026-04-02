@@ -1,6 +1,7 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '../../../classes/Terminal';
+import {MouseEvent} from '../../../dom/classes/MouseEvent';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
@@ -104,7 +105,7 @@ describe('UiSelect mouse interactions via EventDispatcher', () => {
 
     /* Simulate mousedown on option (what EventDispatcher does on press) */
     betaOpt!.dispatchEvent(
-      new (await import('../../../dom')).MouseEvent('mousedown', {
+      new MouseEvent('mousedown', {
         bubbles: true,
         cancelable: true,
       }),
@@ -116,7 +117,7 @@ describe('UiSelect mouse interactions via EventDispatcher', () => {
     expect(select.isOpen()).toBe(true);
 
     /* Now click to select the option */
-    betaOpt!.dispatchEvent(new (await import('../../../dom')).MouseEvent('click', {bubbles: true}));
+    betaOpt!.dispatchEvent(new MouseEvent('click', {bubbles: true}));
 
     expect(select.getAttribute('value')).toBe('b');
     expect(select.isOpen()).toBe(false);
@@ -165,12 +166,12 @@ describe('UiSelect mouse interactions via EventDispatcher', () => {
     /* Click on the trigger area — mousedown then click */
     const trigger = select.childNodes[0] as Element;
     trigger.dispatchEvent(
-      new (await import('../../../dom')).MouseEvent('mousedown', {
+      new MouseEvent('mousedown', {
         bubbles: true,
         cancelable: true,
       }),
     );
-    trigger.dispatchEvent(new (await import('../../../dom')).MouseEvent('click', {bubbles: true}));
+    trigger.dispatchEvent(new MouseEvent('click', {bubbles: true}));
 
     expect(select.isOpen()).toBe(false);
 

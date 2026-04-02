@@ -5,6 +5,7 @@ import {Event, KeyboardEvent} from '../../../dom';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
+import type {Element} from '../../../dom';
 import type {TerminalReadableInput} from '../../../terminal/types';
 
 function createOutput() {
@@ -31,7 +32,7 @@ function createStdin(): TerminalReadableInput {
 
 const stdin = createStdin();
 
-function keyDown(element: import('../../../dom/classes/Element').Element, key: string): void {
+function keyDown(element: Element, key: string): void {
   element.dispatchEvent(new KeyboardEvent('keydown', {bubbles: true, cancelable: true, key}));
 }
 
