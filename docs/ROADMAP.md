@@ -281,3 +281,33 @@ T81. Input dispatch instrumentation: Instrument `EventDispatcher` with `Performa
 T82. Verify instrumentation overhead: Compare instrumented performance against T79 baseline via `pnpm test:performance:compare`. Document overhead. If unacceptable, add `{ performance: false }` constructor opt-out.
 
 T83. Terminal Vitals utility: Higher-level utility consuming `PerformanceObserver` entries to compute derived metrics: dropped frames, frame budget utilization, idle frame ratio, dirty element ratio, frame output size, input dispatch latency, INP (p98), FCP, and LCP. Callback-based reporting API.
+
+### Phase 8: Chrome DevTools Protocol Bridge
+
+> Connect terminal-dom to Chrome DevTools via CDP over WebSockets. Implement DOM, CSS, Runtime, Overlay, Performance, and Log domains backed by the real DOM polyfill, style engine, layout engine, and Performance API.
+
+T84. WebSocket server: Minimal text-frame WebSocket server on Node's `http` module. RFC 6455 upgrade handshake, text frame encoding/decoding, ping/pong, close. Zero dependencies.
+
+T85. CDP transport and target discovery: HTTP `/json/list` discovery endpoint (with `type: "page"` — critical), WebSocket message routing, domain dispatch, startup handshake stubs (Page.enable, Inspector.enable, Network.enable, Target.setAutoAttach).
+
+T86. Node registry and DOM serialization: Bidirectional node↔integer ID mapping, CDP `DOM.Node` serialization (flat attribute arrays, depth-limited children), cleanup on node removal.
+
+T87. DOM domain — tree inspection: DOM.getDocument, DOM.requestChildNodes (response via DOM.setChildNodes event), DOM.querySelector/querySelectorAll, DOM.getOuterHTML, DOM.resolveNode, DOM.setInspectedNode ($0), DOMDebugger.getEventListeners.
+
+T88. DOM domain — live mutations: Hooks bridge → CDP events: childNodeInserted, childNodeRemoved, attributeModified, attributeRemoved, characterDataModified. Only for nodes DevTools has seen. _(parallel with T87)_
+
+T89. DOM domain — inbound editing: DOM.setAttributeValue, DOM.setAttributesAsText (parse raw attribute string), DOM.removeAttribute, DOM.removeNode, DOM.setNodeValue, DOM.setOuterHTML. Standard DOM API calls trigger hooks automatically — completing the two-way binding loop.
+
+T90. CSS domain — style inspection: CSS.getMatchedStylesForNode (real matched rules from SelectorMatcher with selectors and specificity), CSS.getComputedStyleForNode (real values from StyleEngine), CSS.getInlineStylesForNode, inherited style entries from ancestors. All entries include range objects.
+
+T91. CSS domain — stylesheet management and editing: CSS.getStyleSheetText, CSS.setStyleTexts (inline and stylesheet edits), CSS.styleSheetAdded/styleSheetRemoved events. Edits trigger re-cascade, relayout, re-render.
+
+T92. Runtime domain — evaluation and object inspection: Runtime.evaluate with $0/window/document/terminal scope, Runtime.getProperties, Runtime.callFunctionOn, Runtime.releaseObject. Object registry with bidirectional ID mapping. _(parallel with T90–T91)_
+
+T93. Overlay domain — element highlighting: Overlay.highlightNode renders box-model overlay in terminal (content/padding/border/margin regions). Overlay.hideHighlight restores normal rendering. Overlay.setInspectMode for terminal-side inspect. Uses layout engine box positions, painted as post-processing pass.
+
+T94. Performance domain: Performance.enable/getMetrics/disable, forward window.performance entries. Tracing.start/end for recording windows.
+
+T95. Log domain — console forwarding: Intercept console.log/warn/error/info → Log.entryAdded + Runtime.consoleAPICalled events. Non-destructive tee (original output preserved). _(parallel with T93–T94)_
+
+T96. DevToolsBridge orchestrator and Terminal integration: Top-level class wiring all domains. `listen(port?)` / `close()` lifecycle. Terminal option `{ devtools: true }` or separate import `@micra/terminal-dom/devtools`. Registry cleanup on disconnect.
