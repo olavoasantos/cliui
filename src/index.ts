@@ -7,16 +7,16 @@
  * Use `@micra/terminal-dom/core` for a side-effect-free import.
  */
 
-import {Window} from './dom';
-import {polyfillEnvironment} from './dom';
+import {Window} from '@cliui/dom';
+import {polyfillEnvironment} from '@cliui/dom';
 
 polyfillEnvironment(new Window());
 
 export {Terminal} from './classes/Terminal';
 
-export {ClipboardEvent, Document, Element, Event, KeyboardEvent, MouseEvent, Window} from './dom';
+export {ClipboardEvent, Document, Element, Event, KeyboardEvent, MouseEvent, Window} from '@cliui/dom';
 
-export {polyfillEnvironment} from './dom';
+export {polyfillEnvironment} from '@cliui/dom';
 
 export type {TerminalOptions} from './types';
 export type {

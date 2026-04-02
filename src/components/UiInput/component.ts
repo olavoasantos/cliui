@@ -6,7 +6,7 @@ import {
   UI_INPUT_OBSERVED_ATTRIBUTES,
   UI_INPUT_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 import {GRAPHEME_SEGMENTER} from '../../layout/constants/cellWidth';
 import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
 import {EDITABLE} from '../../terminal/constants/editable';

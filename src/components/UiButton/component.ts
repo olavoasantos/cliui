@@ -7,8 +7,8 @@ import {
   UI_BUTTON_OBSERVED_ATTRIBUTES,
   UI_BUTTON_TAG_NAME,
 } from './constants';
-import {Event, HTMLElement, MouseEvent} from '../../dom';
-import type {KeyboardEvent} from '../../dom';
+import {Event, HTMLElement, MouseEvent} from '@cliui/dom';
+import type {KeyboardEvent} from '@cliui/dom';
 
 import type {TerminalFrameAware} from '../../types/TerminalFrameAware';
 import type {UiButtonTone, UiButtonVariant} from './types';

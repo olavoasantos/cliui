@@ -6,10 +6,10 @@ import {
   UI_CONFIRMATION_OBSERVED_ATTRIBUTES,
   UI_CONFIRMATION_TAG_NAME,
 } from './constants';
-import {Event, HTMLElement} from '../../dom';
-import type {Element, KeyboardEvent, Node} from '../../dom';
+import {Event, HTMLElement} from '@cliui/dom';
+import type {Element, KeyboardEvent, Node} from '@cliui/dom';
 
-import type {HTMLDialogElement} from '../../dom/classes/HTMLDialogElement';
+import type {HTMLDialogElement} from '@cliui/dom';
 
 /**
  * Built-in confirmation dialog custom element.

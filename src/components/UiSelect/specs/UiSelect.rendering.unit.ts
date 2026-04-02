@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {Event, Window} from '../../../dom';
+import {Event, Window} from '@cliui/dom';
 import {StyleEngine} from '../../../css';
 import {LayoutEngine} from '../../../layout';
 import {Painter} from '../../../renderer/classes/Painter';
@@ -7,9 +7,9 @@ import {CellBuffer} from '../../../renderer/classes/CellBuffer';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
-import type {CustomElementConstructor} from '../../../dom/types';
-import type {Element} from '../../../dom';
-import type {Document} from '../../../dom/classes/Document';
+import type {CustomElementConstructor} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
+import type {Document} from '@cliui/dom';
 
 /**
  * Sets up a select with the SAME CSS the example app uses — no component

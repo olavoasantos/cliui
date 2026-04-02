@@ -1,7 +1,7 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '../../../classes/Terminal';
-import {Event, KeyboardEvent, ToggleEvent} from '../../../dom';
+import {Event, KeyboardEvent, ToggleEvent} from '@cliui/dom';
 import {UiDetails} from '../component';
 
 import type {TerminalReadableInput} from '../../../terminal/types';

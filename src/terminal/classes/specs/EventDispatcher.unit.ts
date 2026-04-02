@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from 'vitest';
 
-import {ClipboardEvent, KeyboardEvent, MouseEvent, WheelEvent, Window} from '../../../dom';
+import {ClipboardEvent, KeyboardEvent, MouseEvent, WheelEvent, Window} from '@cliui/dom';
 import type {ComputedStyle} from '../../../css/types';
 import type {LayoutBox} from '../../../layout/types';
 import type {TerminalInputEvent} from '../../types';

@@ -1,4 +1,4 @@
-import type {Element} from '../../dom/classes/Element';
+import type {Element} from '@cliui/dom';
 import type {VisualLineCache} from '../utilities/cachedComputeVisualLines';
 
 /**

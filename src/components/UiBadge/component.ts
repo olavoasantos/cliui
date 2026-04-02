@@ -1,7 +1,7 @@
 import styles from './styles.css?inline';
 
 import {DEFAULT_UI_BADGE_TONE, UI_BADGE_OBSERVED_ATTRIBUTES, UI_BADGE_TAG_NAME} from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 import type {UiBadgeTone} from './types';
 

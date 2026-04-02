@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest';
 
 import {CSSParser} from '../CSSParser';
-import {SelectorCombinator, SelectorMatcherType} from '../../../dom/constants';
+import {SelectorCombinator, SelectorMatcherType} from '@cliui/dom';
 
 describe('CSSParser', () => {
   const parser = new CSSParser();

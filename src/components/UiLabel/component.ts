@@ -1,9 +1,9 @@
 import styles from './styles.css?inline';
 
 import {UI_LABEL_OBSERVED_ATTRIBUTES, UI_LABEL_TAG_NAME} from './constants';
-import {Event, HTMLElement} from '../../dom';
+import {Event, HTMLElement} from '@cliui/dom';
 
-import type {Document, Element} from '../../dom';
+import type {Document, Element} from '@cliui/dom';
 
 /**
  * Built-in terminal label custom element for form fields.

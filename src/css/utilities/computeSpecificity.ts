@@ -1,6 +1,6 @@
-import {SelectorMatcherType} from '../../dom/constants';
+import {SelectorMatcherType} from '@cliui/dom';
 
-import type {SelectorPart} from '../../dom/types';
+import type {SelectorPart} from '@cliui/dom';
 
 /** Computes CSS specificity for a parsed selector. */
 export function computeSpecificity(parts: SelectorPart[]): [number, number, number] {

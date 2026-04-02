@@ -1,8 +1,8 @@
 import styles from './styles.css?inline';
 
 import {UI_TBODY_TAG_NAME} from './constants';
-import {HTMLElement} from '../../dom';
-import type {Element} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
 
 import type {UiTr} from '../UiTr/component';
 

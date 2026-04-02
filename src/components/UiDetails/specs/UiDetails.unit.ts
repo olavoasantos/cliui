@@ -1,10 +1,10 @@
 import {describe, expect, it} from 'vitest';
 
-import {Event, KeyboardEvent, ToggleEvent, Window} from '../../../dom';
+import {Event, KeyboardEvent, ToggleEvent, Window} from '@cliui/dom';
 import {UiDetails} from '../component';
 
-import type {CustomElementConstructor} from '../../../dom/types';
-import type {Element} from '../../../dom';
+import type {CustomElementConstructor} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
 
 function createDetails(
   window = new Window(),

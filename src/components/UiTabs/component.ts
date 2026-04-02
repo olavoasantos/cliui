@@ -1,8 +1,8 @@
 import styles from './styles.css?inline';
 
 import {UI_TABS_OBSERVED_ATTRIBUTES, UI_TABS_TAG_NAME} from './constants';
-import {Event, HTMLElement} from '../../dom';
-import type {Element, KeyboardEvent} from '../../dom';
+import {Event, HTMLElement} from '@cliui/dom';
+import type {Element, KeyboardEvent} from '@cliui/dom';
 
 import type {UiTab} from '../UiTab/component';
 

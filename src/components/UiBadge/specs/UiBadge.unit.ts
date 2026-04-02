@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 
 import {UiBadge} from '../component';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

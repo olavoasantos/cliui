@@ -11,6 +11,10 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    /* Path mappings for workspace packages */
+    "paths": {
+      "@cliui/dom": ["./cliui/dom/src/index.ts"]
+    },
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -20,6 +24,6 @@
     "noUncheckedSideEffectImports": true,
     "skipLibCheck": true
   },
-  "include": ["src", "*.ts", "**/*.ts"],
+  "include": ["src", "*.ts", "cliui/dom/src/register.d.ts"],
   "exclude": ["examples"]
 }

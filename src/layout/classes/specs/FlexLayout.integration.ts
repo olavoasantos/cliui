@@ -1,10 +1,10 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 import {TextLayout} from '../TextLayout';
 import {FlexLayout} from '../FlexLayout';
 
-import type {Element} from '../../../dom/classes/Element';
+import type {Element} from '@cliui/dom';
 import type {ComputedStyle} from '../../../css/types';
 import type {LayoutBox} from '../../types';
 

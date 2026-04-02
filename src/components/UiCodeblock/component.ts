@@ -8,7 +8,7 @@ import {
   UI_CODEBLOCK_OBSERVED_ATTRIBUTES,
   UI_CODEBLOCK_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 import type {UiCodeblockHighlighterOptions} from './types';
 

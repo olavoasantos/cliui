@@ -3,7 +3,7 @@ import {INHERITABLE_PROPERTIES} from '../constants/inheritableProperties';
 import {applyDeclaration} from '../utilities/applyDeclaration';
 import {resolveVar} from '../utilities/resolveVar';
 
-import type {CSSStyleDeclaration} from '../../dom/classes/CSSStyleDeclaration';
+import type {CSSStyleDeclaration} from '@cliui/dom';
 import type {ComputedStyle} from '../types';
 import type {MatchedDeclaration} from '../types/MatchedDeclaration';
 

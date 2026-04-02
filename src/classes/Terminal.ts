@@ -1,11 +1,11 @@
 import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../constants/terminal';
 import {EDITABLE_STATE} from '../constants/editableState';
 import {StyleEngine} from '../css';
-import {Event, InputEvent, Window} from '../dom';
-import {CHILD, NEXT, PARENT} from '../dom/constants';
+import {Event, InputEvent, Window} from '@cliui/dom';
+import {CHILD, NEXT, PARENT} from '@cliui/dom';
 
-import type {ClipboardEvent} from '../dom/classes/ClipboardEvent';
-import type {MouseEvent} from '../dom/classes/MouseEvent';
+import type {ClipboardEvent} from '@cliui/dom';
+import type {MouseEvent} from '@cliui/dom';
 import {LayoutEngine} from '../layout';
 import {graphemeWidth} from '../layout/utilities/graphemeWidth';
 
@@ -30,9 +30,9 @@ import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
 import {resolveWindow} from '../utilities/resolveWindow';
 import {segmentGraphemes} from '../utilities/segmentGraphemes';
 
-import type {Document, Element} from '../dom';
-import type {KeyboardEvent} from '../dom/classes/KeyboardEvent';
-import type {Node as DomNode} from '../dom/classes/Node';
+import type {Document, Element} from '@cliui/dom';
+import type {KeyboardEvent} from '@cliui/dom';
+import type {Node as DomNode} from '@cliui/dom';
 import type {LayoutBox} from '../layout/types';
 import type {TerminalFrameAware} from '../types/TerminalFrameAware';
 import type {EditableStateElement} from '../types/EditableStateElement';

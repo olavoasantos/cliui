@@ -1,7 +1,7 @@
-import {matchesParts} from '../../dom/utilities/matches';
+import {matchesParts} from '@cliui/dom';
 
-import type {Element} from '../../dom/classes/Element';
-import type {SelectorPart} from '../../dom/types';
+import type {Element} from '@cliui/dom';
+import type {SelectorPart} from '@cliui/dom';
 
 /** Returns whether an element matches a parsed selector. */
 export function matchesSelectorParts(element: Element, parts: SelectorPart[]): boolean {

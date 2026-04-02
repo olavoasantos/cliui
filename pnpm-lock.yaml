@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@cliui/dom':
+        specifier: workspace:*
+        version: link:cliui/dom
       shiki:
         specifier: ^4.0.2
         version: 4.0.2

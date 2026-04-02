@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 
 import {StyleEngine} from '../StyleEngine';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 describe('StyleEngine integration', () => {
   it('recomputes dirty elements after DOM, inline style, and stylesheet changes and exposes resolved styles for layout consumers', () => {

@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 
 import {UiMeter} from '../component';
 import {UI_METER_EMPTY_CHAR, UI_METER_FILL_CHAR} from '../constants';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

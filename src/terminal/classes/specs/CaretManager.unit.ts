@@ -1,9 +1,9 @@
 import {describe, expect, it} from 'vitest';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 import {EDITABLE} from '../../constants/editable';
 import {CaretManager} from '../CaretManager';
 
-import type {Element} from '../../../dom/classes/Element';
+import type {Element} from '@cliui/dom';
 import type {LayoutBox} from '../../../layout/types';
 import type {EditableConfiguration} from '../../types/EditableConfiguration';
 import type {Editable} from '../../types/Editable';

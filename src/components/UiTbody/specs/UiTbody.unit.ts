@@ -1,10 +1,10 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom';
+import {Window} from '@cliui/dom';
 import {UiTr} from '../../UiTr/component';
 import {UiTbody} from '../component';
 
-import type {CustomElementConstructor} from '../../../dom/types';
+import type {CustomElementConstructor} from '@cliui/dom';
 
 function createTbody(window = new Window(), rowCount = 0): {window: Window; tbody: UiTbody} {
   window.customElements.define(UiTbody.tagName, UiTbody as unknown as CustomElementConstructor);

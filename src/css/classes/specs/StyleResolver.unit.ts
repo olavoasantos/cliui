@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest';
 
 import {StyleResolver} from '../StyleResolver';
-import {CSSStyleDeclaration} from '../../../dom/classes/CSSStyleDeclaration';
+import {CSSStyleDeclaration} from '@cliui/dom';
 
 import type {MatchedDeclaration} from '../../types/MatchedDeclaration';
 import type {ComputedStyle} from '../../types';

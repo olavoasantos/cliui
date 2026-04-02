@@ -1,11 +1,11 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '../../../classes/Terminal';
-import {Event, KeyboardEvent} from '../../../dom';
+import {Event, KeyboardEvent} from '@cliui/dom';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
-import type {Element} from '../../../dom';
+import type {Element} from '@cliui/dom';
 import type {TerminalReadableInput} from '../../../terminal/types';
 
 function createOutput() {

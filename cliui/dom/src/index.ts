@@ -38,7 +38,7 @@ export {HTMLTemplateElement} from './classes/HTMLTemplateElement';
 export {HTMLStyleElement} from './classes/HTMLStyleElement';
 export {SVGElement} from './classes/SVGElement';
 
-export {matches} from './utilities/matches';
+export {matches, matchesParts} from './utilities/matches';
 export {parseHtml} from './utilities/parseHtml';
 export {parseSelector} from './utilities/parseSelector';
 export {querySelector} from './utilities/querySelector';
@@ -49,10 +49,13 @@ export {expandShorthand} from './utilities/expandShorthand';
 export {polyfillEnvironment} from './utilities/polyfillEnvironment';
 
 export {
+  CHILD,
   EventPhase,
   HOOKS,
+  NEXT,
   NamespaceURI,
   NodeType,
+  PARENT,
   SelectorCombinator,
   SelectorMatcherType,
 } from './constants';

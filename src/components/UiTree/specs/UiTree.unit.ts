@@ -2,11 +2,11 @@ import {describe, expect, it, vi} from 'vitest';
 
 import {UiTree} from '../component';
 import {UiTreeItem} from '../../UiTreeItem/component';
-import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
-import {MouseEvent} from '../../../dom/classes/MouseEvent';
-import {Window} from '../../../dom/classes/Window';
+import {KeyboardEvent} from '@cliui/dom';
+import {MouseEvent} from '@cliui/dom';
+import {Window} from '@cliui/dom';
 
-import type {Element} from '../../../dom';
+import type {Element} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

@@ -5,8 +5,8 @@ import {
   UI_TABLE_OBSERVED_ATTRIBUTES,
   UI_TABLE_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '../../dom';
-import type {Element} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
 import {cellWidth} from '../../layout/utilities/cellWidth';
 
 import type {UiTbody} from '../UiTbody/component';

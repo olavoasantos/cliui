@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 
 import {UiToast} from '../component';
 import {DEFAULT_UI_TOAST_DURATION} from '../constants';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

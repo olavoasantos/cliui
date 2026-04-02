@@ -1,10 +1,10 @@
 import {describe, it, expect, vi} from 'vitest';
 
-import {HOOKS} from '../../../dom/constants';
+import {HOOKS} from '@cliui/dom';
 import {StyleEngine} from '../StyleEngine';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
-import type {Hooks} from '../../../dom/types';
+import type {Hooks} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

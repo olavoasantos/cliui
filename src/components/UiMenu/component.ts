@@ -1,8 +1,8 @@
 import styles from './styles.css?inline';
 
 import {UI_MENU_OBSERVED_ATTRIBUTES, UI_MENU_TAG_NAME} from './constants';
-import {Event, HTMLElement} from '../../dom';
-import type {Document, Element, KeyboardEvent} from '../../dom';
+import {Event, HTMLElement} from '@cliui/dom';
+import type {Document, Element, KeyboardEvent} from '@cliui/dom';
 
 import type {UiMenuItem} from '../UiMenuItem/component';
 

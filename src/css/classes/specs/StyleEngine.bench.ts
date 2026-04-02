@@ -1,9 +1,9 @@
 import {bench, describe} from 'vitest';
 
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 import {StyleEngine} from '../StyleEngine';
 
-import type {Element} from '../../../dom/classes/Element';
+import type {Element} from '@cliui/dom';
 
 type StyleEngineScenario = {
   engine: StyleEngine;

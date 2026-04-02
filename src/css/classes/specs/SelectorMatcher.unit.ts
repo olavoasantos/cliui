@@ -2,7 +2,7 @@ import {describe, it, expect} from 'vitest';
 
 import {CSSParser} from '../CSSParser';
 import {SelectorMatcher} from '../SelectorMatcher';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 function createDocument() {
   const window = new Window();

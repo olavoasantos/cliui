@@ -1,4 +1,4 @@
-import {CHILD, HOOKS, NEXT, NodeType} from '../../dom/constants';
+import {CHILD, HOOKS, NEXT, NodeType} from '@cliui/dom';
 import {USER_AGENT_STYLESHEET} from '../constants/userAgentStylesheet';
 import {collectStyleElements} from '../utilities/collectStyleElements';
 import {hasLayoutChange} from '../utilities/hasLayoutChange';
@@ -7,12 +7,12 @@ import {CSSParser} from './CSSParser';
 import {SelectorMatcher} from './SelectorMatcher';
 import {StyleResolver} from './StyleResolver';
 
-import type {Node} from '../../dom/classes/Node';
-import type {Element} from '../../dom/classes/Element';
-import type {Document} from '../../dom/classes/Document';
-import type {Window} from '../../dom/classes/Window';
-import type {HTMLStyleElement} from '../../dom/classes/HTMLStyleElement';
-import type {Hooks} from '../../dom/types';
+import type {Node} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
+import type {Document} from '@cliui/dom';
+import type {Window} from '@cliui/dom';
+import type {HTMLStyleElement} from '@cliui/dom';
+import type {Hooks} from '@cliui/dom';
 import type {CSSAtRule, CSSRule, ComputedStyle} from '../types';
 
 /**

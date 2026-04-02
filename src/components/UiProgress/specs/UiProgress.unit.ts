@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom';
+import {Window} from '@cliui/dom';
 import {UiProgress} from '../component';
 
 function createProgress(window = new Window(), attributes: Record<string, string | boolean> = {}) {

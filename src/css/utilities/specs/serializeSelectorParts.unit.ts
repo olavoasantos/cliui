@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 
-import {parseSelector} from '../../../dom/utilities/parseSelector';
+import {parseSelector} from '@cliui/dom';
 import {serializeSelectorParts} from '../serializeSelectorParts';
 
 describe('serializeSelectorParts', () => {

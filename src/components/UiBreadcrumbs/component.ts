@@ -5,8 +5,8 @@ import {
   UI_BREADCRUMBS_OBSERVED_ATTRIBUTES,
   UI_BREADCRUMBS_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '../../dom';
-import type {Element} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
 
 /**
  * Built-in terminal breadcrumbs container custom element.

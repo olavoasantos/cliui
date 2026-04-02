@@ -3,7 +3,7 @@ import {cachedComputeVisualLines} from './cachedComputeVisualLines';
 import {findLineForCursor} from './findLineForCursor';
 import {Caret} from '../classes/Caret';
 
-import type {KeyboardEvent} from '../../dom/classes/KeyboardEvent';
+import type {KeyboardEvent} from '@cliui/dom';
 import type {EditableConfiguration} from '../types/EditableConfiguration';
 import type {CaretKeyDownOptions} from '../types/CaretKeyDownOptions';
 import type {Editable} from '../types/Editable';

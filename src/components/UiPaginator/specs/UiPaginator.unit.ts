@@ -1,10 +1,10 @@
 import {describe, expect, it, vi} from 'vitest';
 
 import {UiPaginator} from '../component';
-import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
-import {Window} from '../../../dom/classes/Window';
+import {KeyboardEvent} from '@cliui/dom';
+import {Window} from '@cliui/dom';
 
-import type {Element} from '../../../dom';
+import type {Element} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

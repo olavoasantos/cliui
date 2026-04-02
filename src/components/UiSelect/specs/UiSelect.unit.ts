@@ -1,10 +1,10 @@
 import {describe, expect, it} from 'vitest';
 
-import {Event, KeyboardEvent, Window} from '../../../dom';
+import {Event, KeyboardEvent, Window} from '@cliui/dom';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
-import type {CustomElementConstructor} from '../../../dom/types';
+import type {CustomElementConstructor} from '@cliui/dom';
 
 function createSelect(
   optionData: Array<{value: string; label: string; disabled?: boolean}> = [],

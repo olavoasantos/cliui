@@ -1,7 +1,7 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../../constants/terminal';
-import {KeyboardEvent, Window} from '../../dom';
+import {KeyboardEvent, Window} from '@cliui/dom';
 import {Terminal} from '../Terminal';
 
 import type {TerminalReadableInput} from '../../terminal/types';

@@ -4,7 +4,7 @@ import {findLineForCursor} from '../utilities/findLineForCursor';
 import {EDITABLE} from '../constants/editable';
 import {Caret} from './Caret';
 
-import type {Element} from '../../dom/classes/Element';
+import type {Element} from '@cliui/dom';
 import type {LayoutBox} from '../../layout/types';
 import type {CaretOverlay} from '../types/CaretOverlay';
 import type {EditableConfiguration} from '../types/EditableConfiguration';

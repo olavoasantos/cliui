@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from 'vitest';
 
-import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
+import {KeyboardEvent} from '@cliui/dom';
 import {Caret} from '../../classes/Caret';
 import {handleCaretKeyDown} from '../handleCaretKeyDown';
 

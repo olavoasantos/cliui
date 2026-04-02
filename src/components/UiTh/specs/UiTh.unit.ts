@@ -1,9 +1,9 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom';
+import {Window} from '@cliui/dom';
 import {UiTh} from '../component';
 
-import type {CustomElementConstructor} from '../../../dom/types';
+import type {CustomElementConstructor} from '@cliui/dom';
 
 describe('UiTh', () => {
   it('registers the custom element under its tag name', () => {

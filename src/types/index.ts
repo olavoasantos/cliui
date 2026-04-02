@@ -1,6 +1,6 @@
 import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
 
-import type {Window} from '../dom';
+import type {Window} from '@cliui/dom';
 
 /**
  * Public configuration options for the `Terminal` class.

@@ -6,8 +6,8 @@ import {
   UI_MESSAGE_OBSERVED_ATTRIBUTES,
   UI_MESSAGE_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '../../dom';
-import type {Element, Node} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
+import type {Element, Node} from '@cliui/dom';
 
 import type {UiMessageTone} from './types';
 

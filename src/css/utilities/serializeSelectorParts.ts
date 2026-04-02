@@ -1,6 +1,6 @@
-import {SelectorCombinator, SelectorMatcherType} from '../../dom/constants';
+import {SelectorCombinator, SelectorMatcherType} from '@cliui/dom';
 
-import type {SelectorPart} from '../../dom/types';
+import type {SelectorPart} from '@cliui/dom';
 
 /** Serializes parsed selector parts back into a CSS selector string. */
 export function serializeSelectorParts(parts: SelectorPart[]): string {

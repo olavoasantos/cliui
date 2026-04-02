@@ -3,7 +3,7 @@ import {describe, expect, it} from 'vitest';
 import {CSSParser} from '../CSSParser';
 import {SelectorMatcher} from '../SelectorMatcher';
 import {StyleResolver} from '../StyleResolver';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 describe('CSSParser integration', () => {
   it('parses a stylesheet with comments and multiple selector blocks into declarations consumed by the style pipeline', () => {

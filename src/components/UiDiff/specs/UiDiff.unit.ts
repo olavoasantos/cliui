@@ -2,9 +2,9 @@ import {describe, expect, it} from 'vitest';
 
 import {UiDiff} from '../component';
 import {UI_DIFF_ADDED_COLOR, UI_DIFF_REMOVED_COLOR} from '../constants';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
-import type {Element} from '../../../dom';
+import type {Element} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

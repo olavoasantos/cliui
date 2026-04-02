@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 import type {LayoutBox} from '../../../layout/types';
 import type {ComputedStyle} from '../../../css/types';
 import {CellBuffer} from '../CellBuffer';

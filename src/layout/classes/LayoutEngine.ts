@@ -1,4 +1,4 @@
-import {CHILD, NEXT, NodeType} from '../../dom/constants';
+import {CHILD, NEXT, NodeType} from '@cliui/dom';
 import {FlexLayout} from './FlexLayout';
 import {TextLayout} from './TextLayout';
 import {layoutPreparedText} from '../utilities/layoutPreparedText';
@@ -6,9 +6,9 @@ import {prepareText} from '../utilities/prepareText';
 
 import type {PreparedText} from '../types/PreparedText';
 
-import type {Node} from '../../dom/classes/Node';
-import type {Element} from '../../dom/classes/Element';
-import type {CharacterData} from '../../dom/classes/CharacterData';
+import type {Node} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
+import type {CharacterData} from '@cliui/dom';
 import type {StyleEngine} from '../../css/classes/StyleEngine';
 import type {ComputedStyle} from '../../css/types';
 import type {LayoutBox, TextLayoutOptions} from '../types';

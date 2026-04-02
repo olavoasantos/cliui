@@ -1,7 +1,7 @@
 import styles from './styles.css?inline';
 
 import {UI_TAB_OBSERVED_ATTRIBUTES, UI_TAB_TAG_NAME} from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 /**
  * Built-in terminal tab custom element.

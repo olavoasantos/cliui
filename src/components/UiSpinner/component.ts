@@ -7,7 +7,7 @@ import {
   UI_SPINNER_TAG_NAME,
   UI_SPINNER_VARIANTS,
 } from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 import type {TerminalFrameAware} from '../../types/TerminalFrameAware';
 import type {UiSpinnerVariantName} from './types';

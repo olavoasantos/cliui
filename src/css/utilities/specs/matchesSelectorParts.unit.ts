@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom/classes/Window';
-import {parseSelector} from '../../../dom/utilities/parseSelector';
+import {Window} from '@cliui/dom';
+import {parseSelector} from '@cliui/dom';
 import {matchesSelectorParts} from '../matchesSelectorParts';
 
 describe('matchesSelectorParts', () => {

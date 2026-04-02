@@ -9,7 +9,7 @@ import {
   UI_SKELETON_SHIMMER_SPEED,
   UI_SKELETON_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 import type {TerminalFrameAware} from '../../types/TerminalFrameAware';
 

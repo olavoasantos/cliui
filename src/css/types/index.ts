@@ -1,4 +1,4 @@
-import type {SelectorPart} from '../../dom/types';
+import type {SelectorPart} from '@cliui/dom';
 
 /** A single CSS property declaration (e.g. `color: red`). */
 export interface CSSDeclaration {

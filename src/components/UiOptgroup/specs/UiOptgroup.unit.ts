@@ -3,10 +3,10 @@ import {describe, expect, it} from 'vitest';
 import {UiOptgroup} from '../component';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../../UiSelect/component';
-import {KeyboardEvent, Window} from '../../../dom';
+import {KeyboardEvent, Window} from '@cliui/dom';
 
-import type {CustomElementConstructor} from '../../../dom/types';
-import type {Element} from '../../../dom';
+import type {CustomElementConstructor} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

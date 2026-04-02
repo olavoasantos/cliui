@@ -7,7 +7,7 @@ import {
   UI_METER_OBSERVED_ATTRIBUTES,
   UI_METER_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 /**
  * Built-in terminal meter gauge custom element.

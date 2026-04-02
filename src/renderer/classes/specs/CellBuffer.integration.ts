@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 import {CellBuffer} from '../CellBuffer';
 import {Painter} from '../Painter';
 

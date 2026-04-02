@@ -1,6 +1,6 @@
 import {bench, describe} from 'vitest';
 
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 import {Renderer} from '../Renderer';
 
 import type {LayoutBox} from '../../../layout/types';

@@ -1,8 +1,8 @@
 import {describe, expect, it} from 'vitest';
 
 import {UiLabel} from '../component';
-import {MouseEvent} from '../../../dom/classes/MouseEvent';
-import {Window} from '../../../dom/classes/Window';
+import {MouseEvent} from '@cliui/dom';
+import {Window} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

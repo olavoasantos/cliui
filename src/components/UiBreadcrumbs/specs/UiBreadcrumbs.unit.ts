@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 
 import {UiBreadcrumbs} from '../component';
 import {UiBreadcrumb} from '../../UiBreadcrumb/component';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

@@ -9,9 +9,9 @@
 
 export {Terminal} from './classes/Terminal';
 
-export {ClipboardEvent, Document, Element, Event, KeyboardEvent, MouseEvent, Window} from './dom';
+export {ClipboardEvent, Document, Element, Event, KeyboardEvent, MouseEvent, Window} from '@cliui/dom';
 
-export {polyfillEnvironment} from './dom';
+export {polyfillEnvironment} from '@cliui/dom';
 
 export type {TerminalOptions} from './types';
 export type {

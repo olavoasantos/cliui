@@ -67,7 +67,8 @@
     "version:bump": "changeset"
   },
   "dependencies": {
-    "shiki": "^4.0.2"
+    "shiki": "^4.0.2",
+    "@cliui/dom": "workspace:*"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",

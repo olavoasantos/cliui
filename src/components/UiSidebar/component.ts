@@ -1,7 +1,7 @@
 import styles from './styles.css?inline';
 
 import {UI_SIDEBAR_OBSERVED_ATTRIBUTES, UI_SIDEBAR_TAG_NAME} from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 /**
  * Built-in terminal sidebar panel custom element.

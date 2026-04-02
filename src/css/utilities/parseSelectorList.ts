@@ -1,4 +1,4 @@
-import {parseSelector} from '../../dom/utilities/parseSelector';
+import {parseSelector} from '@cliui/dom';
 
 import type {SelectorList} from '../types/SelectorList';
 

@@ -1,10 +1,10 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom';
+import {Window} from '@cliui/dom';
 import {UiTr} from '../../UiTr/component';
 import {UiTfoot} from '../component';
 
-import type {CustomElementConstructor} from '../../../dom/types';
+import type {CustomElementConstructor} from '@cliui/dom';
 
 function createTfoot(window = new Window(), rowCount = 0): {window: Window; tfoot: UiTfoot} {
   window.customElements.define(UiTfoot.tagName, UiTfoot as unknown as CustomElementConstructor);

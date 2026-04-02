@@ -1,7 +1,7 @@
-import {CHILD, NEXT, NodeType} from '../../dom/constants';
+import {CHILD, NEXT, NodeType} from '@cliui/dom';
 
-import type {Node} from '../../dom/classes/Node';
-import type {Element} from '../../dom/classes/Element';
+import type {Node} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
 
 /** Walks all element descendants of a given element. */
 export function walkElements(element: Element, callback: (element: Element) => void): void {

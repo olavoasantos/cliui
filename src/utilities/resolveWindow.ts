@@ -1,4 +1,4 @@
-import {Window} from '../dom';
+import {Window} from '@cliui/dom';
 
 import type {TerminalOptions} from '../types';
 

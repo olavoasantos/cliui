@@ -8,8 +8,8 @@ import {
   UI_TREE_OBSERVED_ATTRIBUTES,
   UI_TREE_TAG_NAME,
 } from './constants';
-import {Event, HTMLElement} from '../../dom';
-import type {Document, Element, KeyboardEvent, Node} from '../../dom';
+import {Event, HTMLElement} from '@cliui/dom';
+import type {Document, Element, KeyboardEvent, Node} from '@cliui/dom';
 
 import type {UiTreeItem} from '../UiTreeItem/component';
 

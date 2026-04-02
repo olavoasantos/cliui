@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 
 import {CSSParser} from '../CSSParser';
 import {SelectorMatcher} from '../SelectorMatcher';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 describe('SelectorMatcher integration', () => {
   it('matches compound and descendant selectors against realistic DOM trees produced by the document implementation', () => {

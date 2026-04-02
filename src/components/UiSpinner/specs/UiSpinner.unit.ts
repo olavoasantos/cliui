@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom';
+import {Window} from '@cliui/dom';
 import {UiSpinner} from '../component';
 
 function createSpinner(window = new Window(), attributes: Record<string, string | boolean> = {}) {

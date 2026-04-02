@@ -7,7 +7,7 @@ import {
   UI_DIFF_REMOVED_COLOR,
   UI_DIFF_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 /**
  * Built-in terminal diff viewer custom element.

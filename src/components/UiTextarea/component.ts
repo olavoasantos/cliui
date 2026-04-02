@@ -8,7 +8,7 @@ import {
   UI_TEXTAREA_OBSERVED_ATTRIBUTES,
   UI_TEXTAREA_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 import {EDITABLE} from '../../terminal/constants/editable';
 
 import type {EditableConfiguration} from '../../terminal/types/EditableConfiguration';

@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 
-import {MouseEvent, WheelEvent, Window} from '../../../dom';
+import {MouseEvent, WheelEvent, Window} from '@cliui/dom';
 import type {ComputedStyle} from '../../../css/types';
 import type {LayoutBox} from '../../../layout/types';
 import {InputReader} from '../InputReader';

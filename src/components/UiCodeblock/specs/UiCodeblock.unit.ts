@@ -1,11 +1,11 @@
 import {describe, expect, it} from 'vitest';
 
-import {Window} from '../../../dom';
+import {Window} from '@cliui/dom';
 import {UiCodeblock} from '../component';
 import {UI_CODEBLOCK_CONTENT_CLASS, UI_CODEBLOCK_GUTTER_CLASS} from '../constants';
 
-import type {CustomElementConstructor} from '../../../dom/types';
-import type {Element} from '../../../dom';
+import type {CustomElementConstructor} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
 
 function createCodeblock(
   window = new Window(),

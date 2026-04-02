@@ -1,6 +1,6 @@
-import {ClipboardEvent, FocusEvent, KeyboardEvent, MouseEvent, WheelEvent} from '../../dom';
+import {ClipboardEvent, FocusEvent, KeyboardEvent, MouseEvent, WheelEvent} from '@cliui/dom';
 
-import type {Document, Element} from '../../dom';
+import type {Document, Element} from '@cliui/dom';
 import type {LayoutBox} from '../../layout/types';
 import type {
   TerminalInputEvent,

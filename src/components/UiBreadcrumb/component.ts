@@ -1,7 +1,7 @@
 import styles from './styles.css?inline';
 
 import {UI_BREADCRUMB_OBSERVED_ATTRIBUTES, UI_BREADCRUMB_TAG_NAME} from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 /**
  * Built-in terminal breadcrumb segment custom element.

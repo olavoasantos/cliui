@@ -3,7 +3,7 @@ import {describe, expect, it} from 'vitest';
 import {StyleResolver} from '../StyleResolver';
 import {CSSParser} from '../CSSParser';
 import {SelectorMatcher} from '../SelectorMatcher';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 describe('StyleResolver integration', () => {
   it('resolves matched stylesheet declarations, inline overrides, inheritance, and shorthand expansion across the style pipeline', () => {

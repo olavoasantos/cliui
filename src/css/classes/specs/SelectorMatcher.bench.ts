@@ -1,12 +1,12 @@
 import {bench, describe} from 'vitest';
 
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 import {CSSParser} from '../CSSParser';
 import {SelectorMatcher} from '../SelectorMatcher';
 
 import type {CSSRule} from '../../types';
 
-import type {Element} from '../../../dom/classes/Element';
+import type {Element} from '@cliui/dom';
 
 function createDeepTreeScenario(depth: number): {
   rules: CSSRule[];

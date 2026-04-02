@@ -8,8 +8,8 @@ import {
   UI_SELECT_OBSERVED_ATTRIBUTES,
   UI_SELECT_TAG_NAME,
 } from './constants';
-import {Event, HTMLElement, InputEvent} from '../../dom';
-import type {Document, Element, KeyboardEvent} from '../../dom';
+import {Event, HTMLElement, InputEvent} from '@cliui/dom';
+import type {Document, Element, KeyboardEvent} from '@cliui/dom';
 
 import type {UiOption} from '../UiOption/component';
 

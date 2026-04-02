@@ -1,10 +1,10 @@
 import {bench, describe} from 'vitest';
 
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 import {StyleEngine} from '../../../css/classes/StyleEngine';
 import {LayoutEngine} from '../LayoutEngine';
 
-import type {Document} from '../../../dom/classes/Document';
+import type {Document} from '@cliui/dom';
 
 type LayoutScenario = {
   layout(): void;

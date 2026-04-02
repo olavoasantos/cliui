@@ -23,7 +23,7 @@ export default defineConfig({
       },
     },
     rollupOptions: {
-      external: [/@micra\/*/],
+      external: [/@cliui\/.*/, /^node:/],
       output: [
         {
           format: 'es',

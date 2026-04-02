@@ -1,10 +1,10 @@
 import {describe, expect, it} from 'vitest';
 
 import {UiList} from '../component';
-import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
-import {Window} from '../../../dom/classes/Window';
+import {KeyboardEvent} from '@cliui/dom';
+import {Window} from '@cliui/dom';
 
-import type {Element} from '../../../dom/classes/Element';
+import type {Element} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

@@ -1,9 +1,9 @@
-import {CHILD, NEXT, NodeType} from '../../dom/constants';
+import {CHILD, NEXT, NodeType} from '@cliui/dom';
 import {walkAndCollectStyle} from './walkAndCollectStyle';
 
-import type {Node} from '../../dom/classes/Node';
-import type {Element} from '../../dom/classes/Element';
-import type {Document} from '../../dom/classes/Document';
+import type {Node} from '@cliui/dom';
+import type {Element} from '@cliui/dom';
+import type {Document} from '@cliui/dom';
 
 /** Collects all `<style>` elements from a document. */
 export function collectStyleElements(document: Document): Element[] {

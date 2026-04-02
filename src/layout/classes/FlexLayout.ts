@@ -1,5 +1,5 @@
 import {cellWidth} from '../utilities/cellWidth';
-import type {Element} from '../../dom/classes/Element';
+import type {Element} from '@cliui/dom';
 import type {ComputedStyle} from '../../css/types';
 import type {LayoutBox} from '../types';
 import type {BoxModel} from '../types/BoxModel';

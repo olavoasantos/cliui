@@ -2,8 +2,8 @@ import {describe, expect, it} from 'vitest';
 
 import {UiTabs} from '../component';
 import {UiTab} from '../../UiTab/component';
-import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
-import {Window} from '../../../dom/classes/Window';
+import {KeyboardEvent} from '@cliui/dom';
+import {Window} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

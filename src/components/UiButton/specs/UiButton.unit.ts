@@ -1,9 +1,9 @@
 import {describe, expect, it} from 'vitest';
 
-import {Event, KeyboardEvent, MouseEvent, Window} from '../../../dom';
+import {Event, KeyboardEvent, MouseEvent, Window} from '@cliui/dom';
 import {UiButton} from '../component';
 
-import type {CustomElementConstructor} from '../../../dom/types';
+import type {CustomElementConstructor} from '@cliui/dom';
 
 function createButton(
   window = new Window(),

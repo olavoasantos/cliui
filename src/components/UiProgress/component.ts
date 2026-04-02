@@ -16,7 +16,7 @@ import {
   UI_PROGRESS_TAG_NAME,
   UI_PROGRESS_VARIANTS,
 } from './constants';
-import {HTMLElement} from '../../dom';
+import {HTMLElement} from '@cliui/dom';
 
 import type {TerminalFrameAware} from '../../types/TerminalFrameAware';
 import type {UiProgressSpringCoefficients, UiProgressVariantName} from './types';

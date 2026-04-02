@@ -2,8 +2,8 @@ import {describe, expect, it} from 'vitest';
 
 import {UiMenu} from '../component';
 import {UiMenuItem} from '../../UiMenuItem/component';
-import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
-import {Window} from '../../../dom/classes/Window';
+import {KeyboardEvent} from '@cliui/dom';
+import {Window} from '@cliui/dom';
 
 function createEnv() {
   const window = new Window();

@@ -1,9 +1,9 @@
 import {bench, describe} from 'vitest';
 
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 import {FlexLayout} from '../FlexLayout';
 
-import type {Document} from '../../../dom/classes/Document';
+import type {Document} from '@cliui/dom';
 import type {ComputedStyle} from '../../../css/types';
 import type {LayoutBox} from '../../types';
 

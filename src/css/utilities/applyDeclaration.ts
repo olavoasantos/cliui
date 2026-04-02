@@ -1,4 +1,4 @@
-import {expandShorthand} from '../../dom/utilities/expandShorthand';
+import {expandShorthand} from '@cliui/dom';
 
 import type {ComputedStyle} from '../types';
 

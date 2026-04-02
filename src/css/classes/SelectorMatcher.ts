@@ -2,7 +2,7 @@ import {compareSpecificity} from '../utilities/compareSpecificity';
 import {computeSpecificity} from '../utilities/computeSpecificity';
 import {matchesSelectorParts} from '../utilities/matchesSelectorParts';
 
-import type {Element} from '../../dom/classes/Element';
+import type {Element} from '@cliui/dom';
 import type {MatchedDeclaration} from '../types/MatchedDeclaration';
 import type {CSSRule} from '../types';
 

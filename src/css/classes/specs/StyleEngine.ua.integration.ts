@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 
 import {StyleEngine} from '../StyleEngine';
-import {Window} from '../../../dom/classes/Window';
+import {Window} from '@cliui/dom';
 
 describe('StyleEngine UA stylesheet integration', () => {
   it('semantic elements render with correct styles in a real DOM tree', () => {
