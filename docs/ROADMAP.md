@@ -369,3 +369,29 @@ T119. Vite plugin — dev mode: `vite-plugin-terminal-dom` intercepts HTML entry
 T120. Vite plugin — HMR: CSS changes hot-reload without restart. `<style>` block changes re-inject. Script changes trigger module re-evaluation or full reload. HTML structure changes trigger full reload.
 
 T121. Vite plugin — build mode: `vite build` outputs standalone `node dist/index.js` — bundled scripts, inlined styles, embedded HTML. No dev dependencies at runtime.
+
+### Phase 11: Component Taxonomy Restructure
+
+> Restructure the component library from flat `ui-*` into three tiers: HTML elements with proper tag names (`<button>`, `<table>`), unstyled primitives without prefix (`<tabs>`, `<navmenu>`), and styled components keeping `ui-*` (`<ui-card>`, `<ui-badge>`). All opt-in via registration helpers.
+
+T122. User-agent stylesheet extension for registered components: Tier 1 and 2 styles inject at UA priority (lowest cascade). Tier 3 styles stay in author cascade. Registration helpers manage injection.
+
+T123. Registration helpers: `registerHTMLElements(window)`, `registerPrimitives(window)`, `registerStyledComponents(window)`, `registerAll(window)`. Idempotent. Individual registration still works.
+
+T124. HTML table elements: Rename ui-table/thead/tbody/tfoot/tr/th/td → table/thead/tbody/tfoot/tr/th/td. Update selectors, tests. _(parallel with T125–T130)_
+
+T125. HTML form structure elements: Rename ui-form/fieldset/label → form/fieldset/label. Add `elements` getter, `reset()`/`submit()`, label-for association. _(parallel with T124, T126–T130)_
+
+T126. HTML button element: Rename ui-button → button. Add `type`, `disabled`, `form` properties. _(parallel with T124–T125, T127–T130)_
+
+T127. HTML input and textarea elements: Rename ui-input/textarea → input/textarea. Add `value` property (diverges from attribute like browsers), `type`, `placeholder`, `select()`, `form`. _(parallel with T124–T126, T128–T130)_
+
+T128. HTML select, option, optgroup, meter, progress, details: Rename to standard tags. Add `selectedIndex`, `value`, `options` on select. Reconcile details with existing HTMLDetailsElement shell. _(parallel with T124–T127, T129–T130)_
+
+T129. Navigation and data primitives: Rename ui-tabs/tab → tabs/tab, ui-menu/menuitem → navmenu/navmenuitem, ui-tree/treeitem → tree/treeitem, ui-list → listbox, ui-dropdown → dropdown, ui-breadcrumbs/breadcrumb → breadcrumbs/breadcrumb. _(parallel with T124–T128, T130)_
+
+T130. Layout primitives: Rename ui-toolbar → toolbar, ui-statusline → statusline, ui-paginator → paginator. _(parallel with T124–T129)_
+
+T131. Update createElement dispatch and public API: Infrastructure elements only in dispatch. Update barrel exports, docblocks, registration instructions.
+
+T132. Comprehensive test migration and verification: Remove all old folders, verify no stale references, full `pnpm check` pass.
