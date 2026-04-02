@@ -395,3 +395,25 @@ T130. Layout primitives: Rename ui-toolbar → toolbar, ui-statusline → status
 T131. Update createElement dispatch and public API: Infrastructure elements only in dispatch. Update barrel exports, docblocks, registration instructions.
 
 T132. Comprehensive test migration and verification: Remove all old folders, verify no stale references, full `pnpm check` pass.
+
+### Phase 12: Monorepo Migration
+
+> Migrate from single `@micra/terminal-dom` package to `@cliui/*` monorepo. Five packages: `@cliui/dom` (standalone DOM polyfill), `@cliui/terminal` (engine: CSS + Layout + Renderer + Terminal), `@cliui/elements` (components), `@cliui/devtools` (M8, scaffolded), `@cliui/vite-plugin` (M10, scaffolded). Executes after M0–M5, before M7–M11.
+
+T133. Monorepo workspace setup: pnpm workspaces, package directories, package.json for each package with workspace:* dependencies. Scaffold @cliui/devtools and @cliui/vite-plugin shells.
+
+T134. Shared build and test configuration: Base Vite, TypeScript, and vitest configs in .config/. Packages extend with their own entry points and include patterns.
+
+T135. Extract @cliui/dom: Move src/dom/ → packages/dom/src/. No internal dependencies. Self-contained build and tests.
+
+T136. Extract @cliui/terminal: Move src/css/, src/layout/, src/renderer/, src/terminal/, src/classes/, src/utilities/, src/types/, src/constants/ → packages/terminal/src/. Depends on @cliui/dom. Re-exports DOM types. Subpath exports for css/layout/renderer.
+
+T137. Extract @cliui/elements: Move src/components/ → packages/elements/src/. Depends on @cliui/terminal. src/ directory at root is now empty.
+
+T138. Workspace scripts and quality gates: Root pnpm scripts (build, check, fix, test:unit, test:performance, etc.) run across all packages in dependency order.
+
+T139. Update examples: All examples update imports from @micra/terminal-dom → @cliui/terminal + @cliui/elements. Verify each example runs.
+
+T140. Publishing and versioning: Changesets for independent versioning, publishConfig, workspace:* → real versions on publish, dry-run verification.
+
+T141. Update documentation and conventions: AGENTS.md, architecture doc, ROADMAP, milestone files, README, skill files — all references updated from @micra/terminal-dom to @cliui/*.
