@@ -500,7 +500,7 @@ export class FlexLayout {
       );
     } else {
       // When text and children coexist, children must be positioned
-      // past the text on the main axis so they don't overlap (BUG-6).
+      // past the text on the main axis so they don't overlap.
       const textMainOffset =
         textLines.length > 0
           ? ctx.isRowDirection

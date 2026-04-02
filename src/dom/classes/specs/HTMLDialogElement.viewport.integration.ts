@@ -148,7 +148,7 @@ describe('HTMLDialogElement — viewport centering (end-to-end)', () => {
     expect(Math.abs(row - expectedCenter)).toBeLessThanOrEqual(4);
   });
 
-  it('modal dialog does not re-center when content size changes (BUG-5)', () => {
+  it('modal dialog does not re-center when content size changes ', () => {
     const {document, styleEngine, layoutEngine, renderer, dialog} = createScene();
 
     // Frame 1: initial render

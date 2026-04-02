@@ -284,7 +284,7 @@ describe('EventDispatcher', () => {
     expect(dispatcher.hitTest(3, 3)).toBe(later);
   });
 
-  it('clips hit-testing to scroll container visible viewport (BUG-3)', () => {
+  it('clips hit-testing to scroll container visible viewport ', () => {
     const {document} = createEnv();
     const dispatcher = new EventDispatcher(document);
     const elementBelow = document.createElement('button');
@@ -347,7 +347,7 @@ describe('EventDispatcher', () => {
     expect(dispatcher.hitTest(5, 6)).toBe(elementBelow);
   });
 
-  it('does not hit-test children scrolled above the scroll viewport (BUG-3)', () => {
+  it('does not hit-test children scrolled above the scroll viewport ', () => {
     const {document} = createEnv();
     const dispatcher = new EventDispatcher(document);
     const scrollContainer = document.createElement('div');

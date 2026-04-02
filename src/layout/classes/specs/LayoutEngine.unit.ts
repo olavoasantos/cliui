@@ -392,7 +392,7 @@ describe('LayoutEngine', () => {
     });
   });
 
-  it('positions display:inline children side by side in a flex-direction:row parent (BUG-13)', () => {
+  it('positions display:inline children side by side in a flex-direction:row parent ', () => {
     const {document, styleEngine} = createEnv();
     const body = document.body;
     const row = document.createElement('div');
@@ -432,7 +432,7 @@ describe('LayoutEngine', () => {
     expect(rowBox.children[2]!.x).toBeGreaterThan(rowBox.children[1]!.x);
   });
 
-  it('positions display:inline children with explicit widths in a flex row (BUG-13)', () => {
+  it('positions display:inline children with explicit widths in a flex row ', () => {
     const {document, styleEngine} = createEnv();
     const body = document.body;
     const row = document.createElement('div');
@@ -477,7 +477,7 @@ describe('LayoutEngine', () => {
     expect(rowBox.children[2]!.x).toBe(24);
   });
 
-  describe('text and child element coexistence (BUG-6)', () => {
+  describe('text and child element coexistence ', () => {
     it('positions child elements below text lines in column layout', () => {
       const {document, styleEngine} = createEnv();
       const body = document.body;
@@ -533,7 +533,7 @@ describe('LayoutEngine', () => {
     });
   });
 
-  describe('explicit height on inline elements (BUG-1)', () => {
+  describe('explicit height on inline elements ', () => {
     it('respects explicit height on a standalone inline element', () => {
       const {document, styleEngine} = createEnv();
       const body = document.body;
@@ -603,7 +603,7 @@ describe('LayoutEngine', () => {
       expect(child.textLines?.length ?? 0).toBe(0);
     });
 
-    it('NBSP padding under white-space normal does not collapse (BUG-2)', () => {
+    it('NBSP padding under white-space normal does not collapse ', () => {
       const {document, styleEngine} = createEnv();
       const body = document.body;
       const el = document.createElement('div');
@@ -622,7 +622,7 @@ describe('LayoutEngine', () => {
     });
   });
 
-  describe('flex row stretch with borders (BUG-12)', () => {
+  describe('flex row stretch with borders ', () => {
     it('stretches row children to equal height when one has a border', () => {
       const {document, styleEngine} = createEnv();
       const body = document.body;
@@ -652,7 +652,7 @@ describe('LayoutEngine', () => {
     });
   });
 
-  describe('overflow: scroll (BUG-4)', () => {
+  describe('overflow: scroll ', () => {
     it('does not flex-shrink children inside a scroll container', () => {
       const {document, styleEngine} = createEnv();
       const body = document.body;

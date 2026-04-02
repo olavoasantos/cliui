@@ -628,7 +628,7 @@ describe('Painter', () => {
     });
   });
 
-  describe('background over existing text (BUG-6)', () => {
+  describe('background over existing text ', () => {
     it('child background does not overwrite parent text when positioned correctly', () => {
       const {document} = createEnv();
       const parent = document.createElement('div');
