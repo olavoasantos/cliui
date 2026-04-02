@@ -1,4 +1,5 @@
 import type {Element} from '../../dom/classes/Element';
+import type {VisualLineCache} from '../utilities/cachedComputeVisualLines';
 
 /**
  * Internal contract used by the caret system to interact with editable
@@ -44,4 +45,7 @@ export interface Editable {
 
   /** Returns the underlying DOM element. */
   getElement(): Element;
+
+  /** Returns the visual line cache for avoiding redundant computeVisualLines calls. */
+  getVisualLineCache(): VisualLineCache;
 }

@@ -7,6 +7,7 @@ import type {Element} from '../../../dom/classes/Element';
 import type {LayoutBox} from '../../../layout/types';
 import type {EditableConfiguration} from '../../types/EditableConfiguration';
 import type {Editable} from '../../types/Editable';
+import {createVisualLineCache} from '../../utilities/cachedComputeVisualLines';
 
 function createEditable(
   element: Element,
@@ -35,6 +36,7 @@ function createEditable(
     isReadonly: () => false,
     isDisabled: () => false,
     getElement: () => element,
+    getVisualLineCache: () => createVisualLineCache(),
   };
 }
 

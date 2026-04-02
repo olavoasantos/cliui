@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {Caret} from '../Caret';
 
 import type {Editable} from '../../types/Editable';
+import {createVisualLineCache} from '../../utilities/cachedComputeVisualLines';
 
 function createEditable(graphemes: string[] = []): Editable & {cursorPos: number} {
   const state = {
@@ -31,6 +32,7 @@ function createEditable(graphemes: string[] = []): Editable & {cursorPos: number
     isReadonly: () => false,
     isDisabled: () => false,
     getElement: () => ({}) as any,
+    getVisualLineCache: () => createVisualLineCache(),
   };
 }
 

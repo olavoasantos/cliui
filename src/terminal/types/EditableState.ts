@@ -1,4 +1,5 @@
 import type {Caret} from '../classes/Caret';
+import type {VisualLineCache} from '../utilities/cachedComputeVisualLines';
 
 /**
  * System-managed editing state for an element with `[EDITABLE]`.
@@ -41,4 +42,7 @@ export interface EditableState {
    * `intrinsicHeight()` before the first layout pass.
    */
   resolvedHeight: number;
+
+  /** Cache for computeVisualLines results, invalidated on content change. */
+  visualLineCache: VisualLineCache;
 }

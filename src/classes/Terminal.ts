@@ -20,7 +20,10 @@ const NBSP = '\u00A0';
 import {Renderer} from '../renderer';
 import {CaretManager} from '../terminal/classes/CaretManager';
 import {EDITABLE} from '../terminal/constants/editable';
-import {computeVisualLines} from '../terminal/utilities/computeVisualLines';
+import {
+  cachedComputeVisualLines,
+  createVisualLineCache,
+} from '../terminal/utilities/cachedComputeVisualLines';
 import {findLineForCursor} from '../terminal/utilities/findLineForCursor';
 import {handleCaretKeyDown} from '../terminal/utilities/handleCaretKeyDown';
 import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
@@ -292,6 +295,7 @@ export class Terminal {
       caret: null,
       resolvedWidth: config.intrinsicWidth(),
       resolvedHeight: config.intrinsicHeight(),
+      visualLineCache: createVisualLineCache(),
     };
 
     (element as unknown as EditableStateElement)[EDITABLE_STATE] = state;
@@ -398,6 +402,7 @@ export class Terminal {
       isReadonly: () => element.hasAttribute('readonly'),
       isDisabled: () => element.hasAttribute('disabled'),
       getElement: () => element,
+      getVisualLineCache: () => state.visualLineCache,
     };
   }
 
@@ -478,7 +483,12 @@ export class Terminal {
     state: EditableState,
     config: EditableConfiguration,
   ): void {
-    const lines = computeVisualLines(state.graphemes, state.resolvedWidth, config.wordWrap);
+    const lines = cachedComputeVisualLines(
+      state.visualLineCache,
+      state.graphemes,
+      state.resolvedWidth,
+      config.wordWrap,
+    );
     const cursorLine = findLineForCursor(lines, state.cursorPosition, state.graphemes);
 
     const viewportHeight = state.resolvedHeight;
@@ -553,7 +563,12 @@ export class Terminal {
     width: number,
     height: number,
   ): void {
-    const lines = computeVisualLines(state.graphemes, width, config.wordWrap);
+    const lines = cachedComputeVisualLines(
+      state.visualLineCache,
+      state.graphemes,
+      width,
+      config.wordWrap,
+    );
     const renderedLines: string[] = [];
 
     for (let row = 0; row < height; row++) {

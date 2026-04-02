@@ -1,5 +1,5 @@
 import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
-import {computeVisualLines} from './computeVisualLines';
+import {cachedComputeVisualLines} from './cachedComputeVisualLines';
 import {findLineForCursor} from './findLineForCursor';
 import {Caret} from '../classes/Caret';
 
@@ -38,7 +38,12 @@ export function handleCaretKeyDown(
   /* ── Multi-line navigation ────────────────────────────── */
 
   if (config && (key === 'ArrowUp' || key === 'ArrowDown') && !alt && !ctrl && !meta) {
-    const lines = computeVisualLines(target.getGraphemes(), resolvedWidth, config.wordWrap);
+    const lines = cachedComputeVisualLines(
+      target.getVisualLineCache(),
+      target.getGraphemes(),
+      resolvedWidth,
+      config.wordWrap,
+    );
     const {lineIndex, columnCells} = findCursorLinePosition(target, lines);
     const nextLineIndex = key === 'ArrowUp' ? lineIndex - 1 : lineIndex + 1;
 
@@ -392,7 +397,12 @@ function getLineStart(
   width: number,
 ): number {
   const graphemes = target.getGraphemes();
-  const lines = computeVisualLines(graphemes, width, config.wordWrap);
+  const lines = cachedComputeVisualLines(
+    target.getVisualLineCache(),
+    graphemes,
+    width,
+    config.wordWrap,
+  );
   const lineIndex = findLineForCursor(lines, cursorPos, graphemes);
 
   return lines[lineIndex]!.start;
@@ -408,7 +418,12 @@ function getLineEnd(
   width: number,
 ): number {
   const graphemes = target.getGraphemes();
-  const lines = computeVisualLines(graphemes, width, config.wordWrap);
+  const lines = cachedComputeVisualLines(
+    target.getVisualLineCache(),
+    graphemes,
+    width,
+    config.wordWrap,
+  );
   const lineIndex = findLineForCursor(lines, cursorPos, graphemes);
 
   return lines[lineIndex]!.end;

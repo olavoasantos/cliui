@@ -1,5 +1,5 @@
 import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
-import {computeVisualLines} from '../utilities/computeVisualLines';
+import {cachedComputeVisualLines} from '../utilities/cachedComputeVisualLines';
 import {findLineForCursor} from '../utilities/findLineForCursor';
 import {EDITABLE} from '../constants/editable';
 import {Caret} from './Caret';
@@ -185,7 +185,12 @@ export class CaretManager {
     const graphemes = caret.target.getGraphemes();
     const scrollX = caret.target.getScrollOffset();
     const scrollY = caret.target.getScrollY();
-    const lines = computeVisualLines(graphemes, box.contentWidth, config.wordWrap);
+    const lines = cachedComputeVisualLines(
+      caret.target.getVisualLineCache(),
+      graphemes,
+      box.contentWidth,
+      config.wordWrap,
+    );
     const cursorPos = caret.position;
 
     const {lineIndex, columnCells} = this.findCursorLine(graphemes, lines, cursorPos, scrollX);
