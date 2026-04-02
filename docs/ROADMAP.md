@@ -257,3 +257,27 @@ C71. How-to guide — Custom elements: Write a guide covering creating and regis
 C72. Reference — CSS property reference: Generate/write a complete reference of all supported CSS properties, their values, and terminal mappings.
 
 C73. Explanation — Architecture overview: Write an explanation doc covering the pipeline architecture, design decisions, and trade-offs.
+
+### Phase 7: Performance Observability
+
+> Add a standard Performance API to the DOM polyfill, instrument the render pipeline and input dispatch, and provide a Terminal Vitals utility for derived metrics.
+
+T74. Performance entry base classes: Implement `PerformanceEntry`, `PerformanceMark`, and `PerformanceMeasure` in `src/dom/classes/`. Standard data classes for all performance measurements.
+
+T75. Performance class and Window integration: Implement `Performance` class with `now()`, `mark()`, `measure()`, `getEntries*()`, `clear*()`. Wire to `window.performance`. Uses Node's `perf_hooks` `performance.now()` as the high-resolution clock source.
+
+T76. PerformanceObserver: Implement `PerformanceObserver` with `observe()`, `disconnect()`, `takeRecords()`, and `PerformanceObserverEntryList`. Microtask-batched delivery matching browser behavior. Expose on `Window`.
+
+T77. PerformanceEventTiming: Implement extended entry type for input responsiveness metrics (FID/INP). Properties: `processingStart`, `processingEnd`, `interactionId`. Entry types: `'event'` and `'first-input'`. _(parallel with T75, T76)_
+
+T78. Paint timing entry classes: Implement `PerformancePaintTiming` (for `first-contentful-paint`) and `LargestContentfulPaint` (with `element`, `size`, `renderTime`). _(parallel with T75, T76, T77)_
+
+T79. Record pre-instrumentation performance baseline: Run `pnpm test:performance:record` to capture a baseline snapshot **before** any instrumentation is wired into the render loop or input dispatch. Gate task — blocks T80 and T81.
+
+T80. Frame cycle instrumentation: Instrument `Terminal.renderFrame()` with `performance.measure()` calls for each phase (`terminal.frame`, `terminal.frame.style`, `terminal.frame.layout`, `terminal.frame.paint`, `terminal.frame.diff`, `terminal.frame.ansi`, `terminal.frame.write`). Record `first-contentful-paint` and `largest-contentful-paint` entries. Frame measures carry `detail` with `{ dirtyElements, totalElements, outputBytes, idle }`.
+
+T81. Input dispatch instrumentation: Instrument `EventDispatcher` with `PerformanceEventTiming` entries. Capture `startTime` at stdin, `processingStart`/`processingEnd` around handlers, finalize `duration` after next frame. Record `first-input` for the first interaction. _(parallel with T80)_
+
+T82. Verify instrumentation overhead: Compare instrumented performance against T79 baseline via `pnpm test:performance:compare`. Document overhead. If unacceptable, add `{ performance: false }` constructor opt-out.
+
+T83. Terminal Vitals utility: Higher-level utility consuming `PerformanceObserver` entries to compute derived metrics: dropped frames, frame budget utilization, idle frame ratio, dirty element ratio, frame output size, input dispatch latency, INP (p98), FCP, and LCP. Callback-based reporting API.
