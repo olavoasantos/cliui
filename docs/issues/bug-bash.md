@@ -180,6 +180,30 @@ Performing text selection in `<ui-textarea>` via Shift+Arrow keys causes multi-s
 
 ---
 
+### BUG-15: `<ui-tree>` is fundamentally broken
+
+**Summary**
+
+The tree component has multiple critical issues:
+
+1. **Labels truncated** — indicator prefix (`▸ `) and `paddingLeft` for indentation clip the start of the text content. "src" renders as "c", "Alpha" as "pha".
+2. **Expand/collapse doesn't work** — collapsed items still show all their nested children. The `open` attribute toggle doesn't hide DOM children.
+3. **Highlight covers all nested items** — the highlighted item's background paints over all its DOM descendants as one giant block instead of a single row.
+4. **Flat list also truncated** — even non-nested items lose their first characters.
+
+**Root cause:** The tree uses DOM nesting for hierarchy (child `<ui-tree-item>` elements inside parent items). `setDepth()` adds a `paddingLeft` and prepends an indicator `<span>` on each frame tick, but:
+- The paddingLeft shifts the content start, clipping visible text.
+- Collapsed state only controls whether `collectVisible()` returns nested items, but doesn't hide them in the DOM — they're still laid out and painted.
+- The highlight `background-color` paints the entire item box including nested children.
+
+**Expected behavior:** The tree should either:
+- Flatten the DOM structure and manage indentation/visibility internally (like `<ui-log>`'s tail window), OR
+- Use `display: none` on collapsed children and fix the indicator/padding to not clip text.
+
+**Regression tests:** None yet — needs buffer rendering tests similar to BUG-13's approach.
+
+---
+
 ### BUG-11: `<ui-log>` cannot use native scroll — uses internal tail window as workaround
 
 **Summary**
