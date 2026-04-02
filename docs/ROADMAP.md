@@ -339,3 +339,33 @@ T106. Frame loop integration: Wire animation `tick(timestamp)` into `Terminal.re
 T107. Animation and transition DOM events: `TransitionEvent` (`transitionrun`, `transitionstart`, `transitionend`, `transitioncancel`) and `AnimationEvent` (`animationstart`, `animationend`, `animationiteration`, `animationcancel`). All bubble. _(parallel with T105–T106)_
 
 T108. Record baseline and verify animation overhead: Compare against T102 baseline. Focus on zero-animation overhead. Add animation-specific benchmarks (color transition, multi-property animation, 50 simultaneous transitions).
+
+### Phase 10: HTML Entry Points & Vite Integration
+
+> Make HTML files first-class entry points. Parse full documents, load stylesheets from the filesystem, execute scripts in the terminal's `window` scope via `node:vm`, and provide tooling (CLI runner + Vite plugin) for the complete developer experience.
+
+T109. Full HTML document parser: Extend or complement `parseHtml()` for full document structure — `<!DOCTYPE>`, `<html>`, `<head>`, `<body>`. Populate the existing document skeleton. Graceful fallback for fragments without structural tags.
+
+T110. HTMLScriptElement and HTMLLinkElement: DOM element classes with attribute tracking (`src`, `type`, `defer`, `async`, `rel`, `href`). Registered in `createElement()` dispatch. Insertion hooks for resource loading.
+
+T111. Filesystem resource resolver and cache: Resolve paths relative to document base directory, read files via `node:fs`, cache by resolved path with `mtime` invalidation. Graceful error handling for missing files.
+
+T112. Stylesheet loading: `<link rel="stylesheet">` insertion → resolve → load → parse via CSSParser → feed to StyleEngine. Removal unloads rules. `href` change reloads. Document-order cascade with `<style>` elements.
+
+T113. Script execution context: `node:vm` context populated with terminal's `window` properties — `document`, `console`, `setTimeout`, `performance`, `MutationObserver`, etc. Same object references. `terminal` available as global.
+
+T114. Inline and external script execution: Classic `<script>` via `vm.runInContext()`. External `<script src>` via resource resolver + execution. Synchronous during parsing. Error events on element and `window`.
+
+T115. Module script support: `<script type="module">` via `vm.SourceTextModule` (experimental flag) with `import()` fallback. Deferred by default. Import resolution relative to script/document path. Module caching. TypeScript requires loader (`tsx`, `--experimental-strip-types`) or Vite plugin.
+
+T116. Script ordering and document lifecycle events: Head scripts block body parsing. `defer` after parse. `async` non-blocking. Module scripts deferred. `DOMContentLoaded` after sync+deferred scripts. `load` after all resources.
+
+T117. Document loading API: `Terminal.loadDocument(html, options?)` and `Terminal.loadFile(path)`. Orchestrate parsing, resource loading, script execution, lifecycle events. Returns promise resolved after `DOMContentLoaded`.
+
+T118. CLI runner: `npx @micra/terminal-dom <file.html>` with `--no-alt-screen`, `--fps`, `--watch` flags. Clear error messages for missing files, parse errors, missing TS loader.
+
+T119. Vite plugin — dev mode: `vite-plugin-terminal-dom` intercepts HTML entry, uses Vite's transform pipeline for TS/module resolution, runs in terminal instead of browser. Module wrapping injects globals (no `node:vm` needed).
+
+T120. Vite plugin — HMR: CSS changes hot-reload without restart. `<style>` block changes re-inject. Script changes trigger module re-evaluation or full reload. HTML structure changes trigger full reload.
+
+T121. Vite plugin — build mode: `vite build` outputs standalone `node dist/index.js` — bundled scripts, inlined styles, embedded HTML. No dev dependencies at runtime.
