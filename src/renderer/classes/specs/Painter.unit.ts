@@ -627,4 +627,51 @@ describe('Painter', () => {
       expect(buffer.get(0, 2)?.fg).toEqual({r: 255, g: 0, b: 0});
     });
   });
+
+  describe('background over existing text (BUG-6)', () => {
+    // BUG-6: When text nodes and inline elements share the same parent,
+    // child elements with background-color paint over parent text.
+    // This is a layout-level limitation — the engine does not implement
+    // CSS inline flow where text and elements share a line box.
+    // Workaround: use flex row containers with <span> labels instead
+    // of mixing text nodes with inline elements.
+    it.skip('does not overwrite parent text when child background overlaps', () => {
+      const {document} = createEnv();
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+
+      const parentBox = createBox({
+        element: parent,
+        x: 0,
+        y: 0,
+        width: 20,
+        height: 1,
+        contentX: 0,
+        contentY: 0,
+        contentWidth: 20,
+        contentHeight: 1,
+        textLines: ['Hello World'],
+        children: [
+          createBox({
+            element: child,
+            x: 0,
+            y: 0,
+            width: 5,
+            height: 1,
+            contentX: 0,
+            contentY: 0,
+            contentWidth: 5,
+            contentHeight: 1,
+            computedStyle: style({'background-color': '#ff0000'}),
+          }),
+        ],
+      });
+
+      const buffer = new CellBuffer(20, 1);
+      painter.paint(parentBox, buffer);
+
+      expect(buffer.get(0, 0)?.char).toBe('H');
+      expect(buffer.get(0, 0)?.bg).toEqual({r: 255, g: 0, b: 0});
+    });
+  });
 });
