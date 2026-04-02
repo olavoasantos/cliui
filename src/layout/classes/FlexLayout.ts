@@ -212,8 +212,12 @@ export class FlexLayout {
     childrenIntrinsicMainSize +=
       Math.max(0, childBases.length - 1) * mainGap + (isRowDirection ? 0 : textHeight);
 
+    // For overflow: scroll containers, children should overflow rather
+    // than shrink to fit the viewport. Use the larger of available and
+    // intrinsic content size so flex-shrink does not collapse children.
+    const isScrollContainer = computedStyle.get('overflow') === 'scroll';
     const flexSizingMainSize =
-      !isRowDirection && explicitHeight === null
+      !isRowDirection && (explicitHeight === null || isScrollContainer)
         ? Math.max(availableMainSize, childrenIntrinsicMainSize)
         : availableMainSize;
 

@@ -566,6 +566,73 @@ describe('LayoutEngine', () => {
     });
   });
 
+  describe('overflow: scroll (BUG-4)', () => {
+    it('does not flex-shrink children inside a scroll container', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const container = document.createElement('div');
+
+      container.setAttribute('id', 'scroller');
+
+      for (let i = 0; i < 10; i++) {
+        const child = document.createElement('div');
+
+        child.textContent = 'Item ' + i;
+        container.appendChild(child);
+      }
+
+      body.appendChild(container);
+      addStyle(document, '#scroller { overflow: scroll; height: 5; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const layout = engine.layout(body, 40, 30);
+      const scrollerBox = layout.children[0]!;
+
+      expect(scrollerBox.children.length).toBe(10);
+      expect(scrollerBox.scrollHeight).toBe(10);
+      expect(scrollerBox.height).toBe(5);
+    });
+
+    it('maintains constant scroll height regardless of scroll position', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const container = document.createElement('div');
+
+      container.setAttribute('id', 'scroller');
+
+      for (let i = 0; i < 20; i++) {
+        const child = document.createElement('div');
+
+        child.textContent = 'Line ' + i;
+        container.appendChild(child);
+      }
+
+      body.appendChild(container);
+      addStyle(document, '#scroller { overflow: scroll; height: 5; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const scroller = container as typeof container & {scrollTop?: number};
+
+      // Frame 1: no scroll
+      let layout = engine.layout(body, 40, 30);
+      const scrollHeight0 = layout.children[0]!.scrollHeight!;
+
+      expect(scrollHeight0).toBe(20);
+
+      // Frame 2: scrolled to 5
+      scroller.scrollTop = 5;
+      layout = engine.layout(body, 40, 30);
+      expect(layout.children[0]!.scrollHeight).toBe(scrollHeight0);
+
+      // Frame 3: scrolled to 15 (near end)
+      scroller.scrollTop = 15;
+      layout = engine.layout(body, 40, 30);
+      expect(layout.children[0]!.scrollHeight).toBe(scrollHeight0);
+    });
+  });
+
   describe('display: none', () => {
     it('produces a zero-size box for hidden elements', () => {
       const {document, styleEngine} = createEnv();
