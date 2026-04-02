@@ -25,6 +25,23 @@
   },
   "scripts": {
     "build": "vite build",
+    "clean": "rm -rf dist node_modules",
+    "dev": "vite build --watch",
+    "docs:generate": "echo 'noop'",
+    "format:check": "oxfmt check . --config ../internals/.prettierrc --no-error-on-unmatched-pattern",
+    "format:fix": "oxfmt . --config ../internals/.prettierrc --no-error-on-unmatched-pattern",
+    "lint:check": "oxlint -c ../internals/oxlint.json --silent",
+    "lint:fix": "oxlint -c ../internals/oxlint.json --fix",
+    "test:check": "echo 'no tests'",
+    "test:check:all": "echo 'no tests'",
+    "test:unit": "echo 'no tests'",
+    "test:unit:watch": "echo 'no tests'",
+    "test:integration": "echo 'no tests'",
+    "test:integration:watch": "echo 'no tests'",
+    "test:performance": "echo 'no tests'",
+    "test:performance:watch": "echo 'no tests'",
+    "test:performance:record": "echo 'no tests'",
+    "test:performance:compare": "echo 'no tests'",
     "type:check": "tsc --noEmit"
   },
   "peerDependencies": {

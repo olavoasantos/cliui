@@ -49,9 +49,23 @@
   },
   "scripts": {
     "build": "vite build",
+    "clean": "rm -rf dist node_modules",
+    "dev": "vite build --watch",
+    "docs:generate": "echo 'noop'",
+    "format:check": "oxfmt check . --config ../internals/.prettierrc --no-error-on-unmatched-pattern",
+    "format:fix": "oxfmt . --config ../internals/.prettierrc --no-error-on-unmatched-pattern",
+    "lint:check": "oxlint -c ../internals/oxlint.json --silent",
+    "lint:fix": "oxlint -c ../internals/oxlint.json --fix",
+    "test:check": "run-p test:unit test:integration",
+    "test:check:all": "run-p test:unit test:integration test:performance",
     "test:unit": "vitest run --config=vitest.unit.config.ts",
+    "test:unit:watch": "vitest --config=vitest.unit.config.ts",
     "test:integration": "vitest run --config=vitest.integration.config.ts",
+    "test:integration:watch": "vitest --config=vitest.integration.config.ts",
     "test:performance": "vitest bench --run --config=vitest.bench.config.ts",
+    "test:performance:watch": "vitest bench --config=vitest.bench.config.ts",
+    "test:performance:record": "vitest bench --run --config=vitest.bench.config.ts --outputJson=../../.testing/performance/reference.json",
+    "test:performance:compare": "vitest bench --run --config=vitest.bench.config.ts --compare=../../.testing/performance/reference.json",
     "type:check": "tsc --noEmit"
   },
   "dependencies": {

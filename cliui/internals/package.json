@@ -4,5 +4,26 @@
   "private": true,
   "description": "Shared build, test, and lint configuration for @cliui packages",
   "license": "MIT",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "echo 'noop'",
+    "clean": "rm -rf node_modules",
+    "dev": "echo 'noop'",
+    "docs:generate": "echo 'noop'",
+    "format:check": "echo 'noop'",
+    "format:fix": "echo 'noop'",
+    "lint:check": "echo 'noop'",
+    "lint:fix": "echo 'noop'",
+    "test:check": "echo 'noop'",
+    "test:check:all": "echo 'noop'",
+    "test:unit": "echo 'noop'",
+    "test:unit:watch": "echo 'noop'",
+    "test:integration": "echo 'noop'",
+    "test:integration:watch": "echo 'noop'",
+    "test:performance": "echo 'noop'",
+    "test:performance:watch": "echo 'noop'",
+    "test:performance:record": "echo 'noop'",
+    "test:performance:compare": "echo 'noop'",
+    "type:check": "echo 'noop'"
+  }
 }
