@@ -1,0 +1,31 @@
+{
+  "name": "@cliui/dom",
+  "version": "0.0.0",
+  "description": "Standalone DOM polyfill for Node.js — Window, Document, Element, Event, MutationObserver, and more",
+  "type": "module",
+  "license": "MIT",
+  "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/olavoasantos/cliui.git",
+    "directory": "cliui/dom"
+  },
+  "files": ["dist"],
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "test:unit": "vitest run --config=vitest.unit.config.ts",
+    "test:integration": "vitest run --config=vitest.integration.config.ts",
+    "test:performance": "vitest bench --run --config=vitest.bench.config.ts",
+    "type:check": "tsc --noEmit"
+  }
+}

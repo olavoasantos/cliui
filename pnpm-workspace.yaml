@@ -1,5 +1,5 @@
 packages:
-  - '.'
+  - 'cliui/*'
   - 'examples/*'
 allowBuilds:
   esbuild: true

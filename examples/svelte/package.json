@@ -9,7 +9,7 @@
     "dev": "vite build && node dist/app.js"
   },
   "dependencies": {
-    "@micra/terminal-dom": "workspace:*",
+    "@cliui/terminal": "workspace:*", "@cliui/elements": "workspace:*",
     "svelte": "^5.0.0"
   },
   "devDependencies": {

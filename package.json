@@ -1,15 +1,15 @@
 {
-  "name": "@micra/terminal-dom",
+  "name": "@cliui/monorepo",
   "version": "0.0.0",
   "bugs": {
-    "url": "https://github.com/micrajs/micra/issues?q=is:issue+is:open+label:%22Project:+terminal-dom%22+label:%22Type:+fix%22"
+    "url": "https://github.com/olavoasantos/cliui/issues?q=is:issue+is:open+label:%22Project:+terminal%22+label:%22Type:+fix%22"
   },
   "license": "MIT",
   "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/micrajs/micra.git",
-    "directory": "packages/terminal-dom"
+    "url": "https://github.com/olavoasantos/cliui.git",
+    "directory": "packages/terminal"
   },
   "files": [
     "dist"

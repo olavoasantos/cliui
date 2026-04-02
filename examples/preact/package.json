@@ -9,7 +9,7 @@
     "dev": "vite build && node dist/main.js"
   },
   "dependencies": {
-    "@micra/terminal-dom": "workspace:*",
+    "@cliui/terminal": "workspace:*", "@cliui/elements": "workspace:*",
     "preact": "^10.25.0"
   },
   "devDependencies": {
