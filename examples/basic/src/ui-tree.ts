@@ -75,9 +75,7 @@ tree1.appendChild(pkg);
 tree1.appendChild(readme);
 
 tree1.addEventListener('select', () => {
-  const items = tree1.getVisibleItems();
-  const highlighted = items.find((i: any) => i.hasAttribute('highlighted'));
-  status.textContent = `Selected: ${highlighted?.getValue?.() ?? '(none)'}`;
+  status.textContent = `Selected: ${(tree1 as UiTree).getHighlightedValue() ?? '(none)'}`;
 });
 
 s1.appendChild(tree1);
@@ -94,9 +92,7 @@ for (const name of ['Alpha', 'Bravo', 'Charlie', 'Delta']) {
   tree2.appendChild(item);
 }
 tree2.addEventListener('select', () => {
-  const items = tree2.getVisibleItems();
-  const highlighted = items.find((i: any) => i.hasAttribute('highlighted'));
-  status.textContent = `Flat: ${highlighted?.getValue?.() ?? '(none)'}`;
+  status.textContent = `Flat: ${(tree2 as UiTree).getHighlightedValue() ?? '(none)'}`;
 });
 s2.appendChild(tree2);
 app.appendChild(s2);

@@ -3,6 +3,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {UiTree} from '../component';
 import {UiTreeItem} from '../../UiTreeItem/component';
 import {KeyboardEvent} from '../../../dom/classes/KeyboardEvent';
+import {MouseEvent} from '../../../dom/classes/MouseEvent';
 import {Window} from '../../../dom/classes/Window';
 
 function createEnv() {
@@ -200,5 +201,63 @@ describe('UiTree', () => {
     tree.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
 
     expect(handler).toHaveBeenCalledOnce();
+  });
+
+  it('highlights a row on click', () => {
+    const {document} = createEnv();
+    const {tree} = buildTree(document);
+    document.body.appendChild(tree);
+
+    const rows = tree.getRenderedRows();
+
+    /* Click the second row (README.md) */
+    rows[1]!.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+
+    expect(rows[1]!.hasAttribute('highlighted')).toBe(true);
+    expect(rows[0]!.hasAttribute('highlighted')).toBe(false);
+  });
+
+  it('focuses the tree on click so keyboard works', () => {
+    const {document} = createEnv();
+    const {tree} = buildTree(document);
+    document.body.appendChild(tree);
+
+    const rows = tree.getRenderedRows();
+    rows[0]!.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+
+    expect(document.activeElement).toBe(tree);
+  });
+
+  it('keyboard works after click-to-focus', () => {
+    const {document} = createEnv();
+    const {tree} = buildTree(document);
+    document.body.appendChild(tree);
+
+    /* Click first row to focus */
+    const rows = tree.getRenderedRows();
+    rows[0]!.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+
+    /* Now ArrowDown should move highlight */
+    tree.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowDown', bubbles: true}));
+
+    const updatedRows = tree.getRenderedRows();
+    expect(updatedRows[1]!.hasAttribute('highlighted')).toBe(true);
+  });
+
+  it('tab focuses the tree via tabindex', () => {
+    const {document} = createEnv();
+    const {tree} = buildTree(document);
+    document.body.appendChild(tree);
+
+    /* Simulate tab focus */
+    document.setActiveElement(tree as unknown as import('../../../dom').Element);
+
+    expect(document.activeElement).toBe(tree);
+
+    /* Keyboard should work after tab focus */
+    tree.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowDown', bubbles: true}));
+
+    const rows = tree.getRenderedRows();
+    expect(rows[1]!.hasAttribute('highlighted')).toBe(true);
   });
 });
