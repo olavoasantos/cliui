@@ -18,7 +18,18 @@
 
 ## About
 
-<!-- TODO -->
+`@cliui/internals` is a private package that provides shared build, test, and lint configuration for all `@cliui/*` packages. It is not published to npm.
+
+### What it provides
+
+- **`tsconfig.base.json`** — shared TypeScript compiler options (ES2023, strict, bundler resolution)
+- **`vite.base.ts`** — `createViteConfig()` factory for library-mode Vite builds with DTS generation, dual CJS/ESM output, and `@cliui/*` externalization
+- **`vitest.unit.ts`** / **`vitest.integration.ts`** / **`vitest.bench.ts`** / **`vitest.e2e.ts`** — shared vitest configurations for each test type
+- **`oxlint.json`** — shared oxlint rules
+- **`.prettierrc.mjs`** — shared oxfmt formatting rules
+- **`dom-globals.d.ts`** — ambient type declarations for DOM globals used across packages
+
+Each package extends these via its own `tsconfig.json`, `vite.config.ts`, and `vitest.*.config.ts` files.
 
 ## Contributors
 

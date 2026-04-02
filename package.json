@@ -1,9 +1,6 @@
 {
   "name": "@cliui/monorepo",
   "version": "0.0.0",
-  "bugs": {
-    "url": "https://github.com/olavoasantos/cliui/issues?q=is:issue+is:open+label:%22Project:+terminal%22+label:%22Type:+fix%22"
-  },
   "license": "MIT",
   "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
   "repository": {
@@ -11,30 +8,7 @@
     "url": "https://github.com/olavoasantos/cliui.git",
     "directory": "packages/terminal"
   },
-  "files": [
-    "dist"
-  ],
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./core": {
-      "types": "./dist/core.d.ts",
-      "import": "./dist/core.js",
-      "require": "./dist/core.cjs"
-    },
-    "./components": {
-      "types": "./dist/components/index.d.ts",
-      "import": "./dist/components.js",
-      "require": "./dist/components.cjs"
-    }
-  },
   "scripts": {
     "build": "pnpm -r --filter=./cliui/* run build",
     "check": "pnpm build && pnpm -r --filter=./cliui/* run check",
@@ -59,9 +33,6 @@
     "test:performance:compare": "pnpm -r --filter=./cliui/* run test:performance:compare",
     "type:check": "pnpm -r --filter=./cliui/* run type:check",
     "version:bump": "changeset"
-  },
-  "dependencies": {
-    "@cliui/dom": "workspace:*"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",

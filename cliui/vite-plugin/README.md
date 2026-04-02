@@ -18,7 +18,15 @@
 
 ## About
 
-<!-- TODO -->
+`@cliui/vite-plugin` will provide Vite integration for `@cliui/terminal`. It will make HTML files first-class entry points for terminal apps — with hot module replacement for CSS, script re-evaluation, and a production build that outputs standalone Node.js bundles.
+
+> **Status:** This package is scaffolded but not yet implemented. It will be built in a future milestone.
+
+### Planned features
+
+- **Dev mode** — intercept HTML entry points, use Vite's transform pipeline for TypeScript/module resolution, run in the terminal instead of a browser
+- **HMR** — CSS changes hot-reload without restart, script changes trigger re-evaluation or full reload
+- **Build mode** — `vite build` outputs a standalone `node dist/index.js` with bundled scripts, inlined styles, and embedded HTML
 
 ## Usage
 

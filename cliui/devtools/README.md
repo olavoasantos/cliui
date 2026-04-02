@@ -18,7 +18,18 @@
 
 ## About
 
-<!-- TODO -->
+`@cliui/devtools` will provide a Chrome DevTools Protocol (CDP) bridge for `@cliui/terminal`. It will let you inspect and edit terminal UIs using Chrome DevTools — DOM tree inspection, CSS editing, element highlighting, console forwarding, and performance profiling — all over a WebSocket connection.
+
+> **Status:** This package is scaffolded but not yet implemented. It will be built in a future milestone.
+
+### Planned features
+
+- **DOM domain** — tree inspection, live mutations, inline editing
+- **CSS domain** — matched styles, computed styles, stylesheet editing
+- **Runtime domain** — `$0`, `evaluate()`, object inspection
+- **Overlay domain** — box-model highlighting in the terminal
+- **Performance domain** — frame metrics, `performance.measure()` forwarding
+- **Log domain** — `console.log` / `warn` / `error` forwarding
 
 ## Usage
 
