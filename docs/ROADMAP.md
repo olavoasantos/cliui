@@ -378,42 +378,44 @@ T122. User-agent stylesheet extension for registered components: Tier 1 and 2 st
 
 T123. Registration helpers: `registerHTMLElements(window)`, `registerPrimitives(window)`, `registerStyledComponents(window)`, `registerAll(window)`. Idempotent. Individual registration still works.
 
-T124. HTML table elements: Rename ui-table/thead/tbody/tfoot/tr/th/td → table/thead/tbody/tfoot/tr/th/td. Update selectors, tests. _(parallel with T125–T130)_
+T124. HTML table elements: Rename ui-table/thead/tbody/tfoot/tr/th/td → table/thead/tbody/tfoot/tr/th/td. Update selectors, tests. _(parallel with T125–T131)_
 
-T125. HTML form structure elements: Rename ui-form/fieldset/label → form/fieldset/label. Add `elements` getter, `reset()`/`submit()`, label-for association. _(parallel with T124, T126–T130)_
+T125. HTML form structure elements: Rename ui-form/fieldset/label → form/fieldset/label. Add `elements` getter, `reset()`/`submit()`, label-for association. _(parallel with T124, T126–T131)_
 
-T126. HTML button element: Rename ui-button → button. Add `type`, `disabled`, `form` properties. _(parallel with T124–T125, T127–T130)_
+T126. HTML button element: Rename ui-button → button. Add `type`, `disabled`, `form` properties. _(parallel with T124–T125, T127–T131)_
 
-T127. HTML input and textarea elements: Rename ui-input/textarea → input/textarea. Add `value` property (diverges from attribute like browsers), `type`, `placeholder`, `select()`, `form`. _(parallel with T124–T126, T128–T130)_
+T127. HTML input and textarea elements: Rename ui-input/textarea → input/textarea. Add `value` property (diverges from attribute like browsers), `type`, `placeholder`, `select()`, `form`. _(parallel with T124–T126, T128–T131)_
 
-T128. HTML select, option, optgroup, meter, progress, details: Rename to standard tags. Add `selectedIndex`, `value`, `options` on select. Reconcile details with existing HTMLDetailsElement shell. _(parallel with T124–T127, T129–T130)_
+T128. HTML select, option, optgroup, meter, progress, details: Rename to standard tags. Add `selectedIndex`, `value`, `options` on select. Reconcile details with existing HTMLDetailsElement shell. _(parallel with T124–T127, T129–T131)_
 
-T129. Navigation and data primitives: Rename ui-tabs/tab → tabs/tab, ui-menu/menuitem → navmenu/navmenuitem, ui-tree/treeitem → tree/treeitem, ui-list → listbox, ui-dropdown → dropdown, ui-breadcrumbs/breadcrumb → breadcrumbs/breadcrumb. _(parallel with T124–T128, T130)_
+T129. HTML img element with terminal graphics support: New tier 1 element. `src`, `alt`, `width`, `height` properties. Graphics capability detection (Kitty > iTerm2 > Sixel). Protocol-specific writers in ANSIWriter. Cell region reservation in Painter. Fallback to alt text or placeholder. Zero new dependencies. _(parallel with T124–T128, T130–T131)_
 
-T130. Layout primitives: Rename ui-toolbar → toolbar, ui-statusline → statusline, ui-paginator → paginator. _(parallel with T124–T129)_
+T130. Navigation and data primitives: Rename ui-tabs/tab → tabs/tab, ui-menu/menuitem → navmenu/navmenuitem, ui-tree/treeitem → tree/treeitem, ui-list → listbox, ui-dropdown → dropdown, ui-breadcrumbs/breadcrumb → breadcrumbs/breadcrumb. _(parallel with T124–T129, T131)_
 
-T131. Update createElement dispatch and public API: Infrastructure elements only in dispatch. Update barrel exports, docblocks, registration instructions.
+T131. Layout primitives: Rename ui-toolbar → toolbar, ui-statusline → statusline, ui-paginator → paginator. _(parallel with T124–T130)_
 
-T132. Comprehensive test migration and verification: Remove all old folders, verify no stale references, full `pnpm check` pass.
+T132. Update createElement dispatch and public API: Infrastructure elements only in dispatch. Update barrel exports, docblocks, registration instructions.
+
+T133. Comprehensive test migration and verification: Remove all old folders, verify no stale references, full `pnpm check` pass.
 
 ### Phase 12: Monorepo Migration
 
 > Migrate from single `@micra/terminal-dom` package to `@cliui/*` monorepo. Five packages: `@cliui/dom` (standalone DOM polyfill), `@cliui/terminal` (engine: CSS + Layout + Renderer + Terminal), `@cliui/elements` (components), `@cliui/devtools` (M8, scaffolded), `@cliui/vite-plugin` (M10, scaffolded). Executes after M0–M5, before M7–M11.
 
-T133. Monorepo workspace setup: pnpm workspaces, package directories, package.json for each package with workspace:* dependencies. Scaffold @cliui/devtools and @cliui/vite-plugin shells.
+T134. Monorepo workspace setup: pnpm workspaces, package directories, package.json for each package with workspace:* dependencies. Scaffold @cliui/devtools and @cliui/vite-plugin shells.
 
-T134. Shared build and test configuration: Base Vite, TypeScript, and vitest configs in .config/. Packages extend with their own entry points and include patterns.
+T135. Shared build and test configuration: Base Vite, TypeScript, and vitest configs in .config/. Packages extend with their own entry points and include patterns.
 
-T135. Extract @cliui/dom: Move src/dom/ → packages/dom/src/. No internal dependencies. Self-contained build and tests.
+T136. Extract @cliui/dom: Move src/dom/ → packages/dom/src/. No internal dependencies. Self-contained build and tests.
 
-T136. Extract @cliui/terminal: Move src/css/, src/layout/, src/renderer/, src/terminal/, src/classes/, src/utilities/, src/types/, src/constants/ → packages/terminal/src/. Depends on @cliui/dom. Re-exports DOM types. Subpath exports for css/layout/renderer.
+T137. Extract @cliui/terminal: Move src/css/, src/layout/, src/renderer/, src/terminal/, src/classes/, src/utilities/, src/types/, src/constants/ → packages/terminal/src/. Depends on @cliui/dom. Re-exports DOM types. Subpath exports for css/layout/renderer.
 
-T137. Extract @cliui/elements: Move src/components/ → packages/elements/src/. Depends on @cliui/terminal. src/ directory at root is now empty.
+T138. Extract @cliui/elements: Move src/components/ → packages/elements/src/. Depends on @cliui/terminal. src/ directory at root is now empty.
 
-T138. Workspace scripts and quality gates: Root pnpm scripts (build, check, fix, test:unit, test:performance, etc.) run across all packages in dependency order.
+T139. Workspace scripts and quality gates: Root pnpm scripts (build, check, fix, test:unit, test:performance, etc.) run across all packages in dependency order.
 
-T139. Update examples: All examples update imports from @micra/terminal-dom → @cliui/terminal + @cliui/elements. Verify each example runs.
+T140. Update examples: All examples update imports from @micra/terminal-dom → @cliui/terminal + @cliui/elements. Verify each example runs.
 
-T140. Publishing and versioning: Changesets for independent versioning, publishConfig, workspace:* → real versions on publish, dry-run verification.
+T141. Publishing and versioning: Changesets for independent versioning, publishConfig, workspace:* → real versions on publish, dry-run verification.
 
-T141. Update documentation and conventions: AGENTS.md, architecture doc, ROADMAP, milestone files, README, skill files — all references updated from @micra/terminal-dom to @cliui/*.
+T142. Update documentation and conventions: AGENTS.md, architecture doc, ROADMAP, milestone files, README, skill files — all references updated from @micra/terminal-dom to @cliui/*.

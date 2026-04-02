@@ -34,9 +34,9 @@ registerAll(terminal.window);
 **Four groups of work:**
 
 1. **Infrastructure (M11T1–M11T2):** User-agent stylesheet extension mechanism and registration helpers.
-2. **HTML elements (M11T3–M11T7):** Rename and enhance existing `ui-*` components to use standard HTML tag names, add missing standard DOM properties.
-3. **Primitives (M11T8–M11T9):** Rename `ui-*` primitives to descriptive unprefixed names.
-4. **Integration (M11T10–M11T11):** Update `createElement` dispatch, exports, and migrate all tests.
+2. **HTML elements (M11T3–M11T8):** Rename and enhance existing `ui-*` components to use standard HTML tag names, add missing standard DOM properties. Implement `<img>` with terminal graphics protocol support.
+3. **Primitives (M11T9–M11T10):** Rename `ui-*` primitives to descriptive unprefixed names.
+4. **Integration (M11T11–M11T12):** Update `createElement` dispatch, exports, and migrate all tests.
 
 **Key context and design decisions:**
 
@@ -47,6 +47,7 @@ registerAll(terminal.window);
 - **Component source stays in `src/components/`.** All three tiers live in the same directory, following the existing component folder convention. Folder names match the class name (e.g., `Button/`, `Tabs/`, `UiCard/`).
 - **HTML elements need standard DOM properties.** The current `UiButton` already handles `disabled` via attributes. But `<button>` should also have a `type` property, `<input>` should have a `value` property that reflects the attribute, `<select>` should have `selectedIndex` and `options`. These are added pragmatically — not full DOM spec compliance, but the properties developers expect.
 - **`<menu>` is an HTML element; `<navmenu>` is the navigable primitive.** HTML's `<menu>` is semantically a list of commands (tier 1, low priority). The current `UiMenu` with keyboard navigation, highlight tracking, and selection becomes `<navmenu>` / `<navmenuitem>` (tier 2).
+- **`<img>` is a new HTML element with terminal graphics protocol support.** No existing `ui-*` component to rename — this is a new implementation. The `<img>` element participates in layout like any other box (width, height, flex item). At paint time, the renderer emits the appropriate graphics protocol (Kitty > iTerm2 > Sixel) or falls back to alt text / placeholder characters. Capability detection for graphics protocols is added to `TerminalManager`.
 
 **Tier mapping:**
 
@@ -71,6 +72,7 @@ registerAll(terminal.window);
 | `UiMeter` | 1 – HTML | `<meter>` | `Meter` |
 | `UiProgress` | 1 – HTML | `<progress>` | `Progress` |
 | `UiDetails` | 1 – HTML | `<details>` | `Details` |
+| _(new)_ | 1 – HTML | `<img>` | `Img` |
 | `UiTabs` | 2 – Primitive | `<tabs>` | `Tabs` |
 | `UiTab` | 2 – Primitive | `<tab>` | `Tab` |
 | `UiMenu` | 2 – Primitive | `<navmenu>` | `Navmenu` |
@@ -273,7 +275,47 @@ _Can run in parallel with M11T3–M11T6._
 
 ---
 
-### M11T8: Rename navigation and data primitives
+### M11T8: HTML img element with terminal graphics support
+
+**Summary**
+
+Implement `<img>` as a new tier 1 HTML element. Unlike the other tier 1 tasks which rename existing components, this is a new implementation. The `<img>` element participates in layout like any other box (it has width, height, acts as a flex item). At paint time, the renderer emits terminal graphics protocol sequences to display the image within the element's cell region. Capability detection determines the best available protocol, with a text fallback for terminals without graphics support.
+
+**Expected Outcomes**
+
+- `Img` class exists in `src/components/Img/`, tag name `img`
+- Standard DOM properties: `src` (file path), `alt` (fallback text), `width` (in cells), `height` (in cells), `naturalWidth`, `naturalHeight`
+- Image loading via the filesystem resource resolver (same mechanism as `<link>` in M10, or direct `node:fs` read) — supports PNG, JPEG, GIF at minimum
+- Image scaling: the loaded image is scaled to fit the element's cell dimensions (width × height from layout), maintaining aspect ratio by default
+- Terminal graphics capability detection added to `TerminalManager`: query for Kitty graphics protocol, iTerm2 inline images, and Sixel support (in preference order)
+- Graphics protocol writers:
+  - **Kitty graphics protocol** — transmits image data via APC sequences, places at cell coordinates
+  - **iTerm2 inline images** — transmits base64-encoded image via OSC 1337 sequences
+  - **Sixel** — converts image to Sixel format, emits at cursor position
+- **Fallback** when no graphics protocol is available: renders `alt` text content within the element's box, or fills with block characters (`░`) as a placeholder if no `alt` is provided
+- The painter reserves the image's cell region in the cell buffer (cells marked as occupied so text/borders don't overwrite)
+- The differ treats image regions correctly — re-emits the graphics protocol sequence when the image region is invalidated (resize, content change, scroll)
+- UA default styles: `img { display: inline; }` (matching browser default)
+- Unit tests cover: element properties, image loading, fallback behavior
+- Integration tests cover: image renders via graphics protocol in a layout with surrounding elements, graceful fallback
+
+**Technical Constraints**
+
+- Image decoding: use a minimal image header parser to read dimensions (for `naturalWidth`/`naturalHeight`) without a heavy image processing dependency. Full pixel data is needed only for Sixel conversion — Kitty and iTerm2 can transmit the raw file bytes.
+- Zero new runtime dependencies. Sixel encoding (if supported) is implemented from scratch — it's a simple RLE encoding of 6-pixel-high rows.
+
+**Dependencies**
+
+- M11T1: UA stylesheet (for default `img` styles)
+- M4T5: Terminal capability detection (`TerminalManager` being extended)
+- M1T22: Painter (image region reservation)
+- M1T24: ANSI writer (graphics protocol sequences)
+
+_Can run in parallel with M11T3–M11T7._
+
+---
+
+### M11T9: Rename navigation and data primitives
 
 **Summary**
 
@@ -298,11 +340,11 @@ Rename the navigation and data interaction primitives — remove the `ui-` prefi
 
 - None (rename only)
 
-_Can run in parallel with M11T3–M11T7._
+_Can run in parallel with M11T3–M11T8._
 
 ---
 
-### M11T9: Rename layout primitives
+### M11T10: Rename layout primitives
 
 **Summary**
 
@@ -320,11 +362,10 @@ Rename the remaining layout and utility primitives — remove the `ui-` prefix.
 
 - None (rename only)
 
-_Can run in parallel with M11T3–M11T8._
-
+_Can run in parallel with M11T3–M11T9._
 ---
 
-### M11T10: Update createElement dispatch and public API
+### M11T11: Update createElement dispatch and public API
 
 **Summary**
 
@@ -341,11 +382,11 @@ Update the `createElement()` dispatch table, barrel exports, and public API to r
 
 **Dependencies**
 
-- M11T3–M11T9: All renames must be complete
+- M11T3–M11T10: All renames and new elements must be complete
 
 ---
 
-### M11T11: Comprehensive test migration and verification
+### M11T12: Comprehensive test migration and verification
 
 **Summary**
 
@@ -361,6 +402,6 @@ Final verification pass: ensure all tests use the new tag names, all old compone
 
 **Dependencies**
 
-- M11T10: Public API updates (final wiring)
+- M11T11: Public API updates (final wiring)
 
 ---
