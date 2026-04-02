@@ -477,6 +477,61 @@ describe('LayoutEngine', () => {
     expect(rowBox.children[2]!.x).toBe(24);
   });
 
+  describe('explicit height on inline elements (BUG-1)', () => {
+    it('respects explicit height on a standalone inline element', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const el = document.createElement('div');
+
+      body.appendChild(el);
+      addStyle(document, 'div { display: inline; height: 3; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 40, 20);
+      const child = box.children[0]!;
+
+      expect(child.height).toBe(3);
+      expect(child.contentHeight).toBe(3);
+    });
+
+    it('respects explicit height on an inline child inside a column parent', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+
+      child.setAttribute('id', 'child');
+      parent.appendChild(child);
+      body.appendChild(parent);
+      addStyle(document, '#child { display: inline; height: 3; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 40, 20);
+      const childBox = box.children[0]!.children[0]!;
+
+      expect(childBox.height).toBe(3);
+    });
+
+    it('does not collapse an empty inline element with explicit height and white-space pre', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const el = document.createElement('div');
+
+      el.textContent = '';
+      body.appendChild(el);
+      addStyle(document, 'div { display: inline; height: 1; white-space: pre; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 40, 20);
+      const child = box.children[0]!;
+
+      expect(child.height).toBe(1);
+    });
+  });
+
   describe('display: none', () => {
     it('produces a zero-size box for hidden elements', () => {
       const {document, styleEngine} = createEnv();

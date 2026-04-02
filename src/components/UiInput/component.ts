@@ -41,7 +41,6 @@ export class UiInput extends HTMLElement {
 
   connectedCallback(): void {
     this.renderInitial();
-    this.style.height = '1';
   }
 
   override attributeChangedCallback(
