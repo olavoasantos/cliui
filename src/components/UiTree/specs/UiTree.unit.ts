@@ -260,4 +260,39 @@ describe('UiTree', () => {
     const rows = tree.getRenderedRows();
     expect(rows[1]!.hasAttribute('highlighted')).toBe(true);
   });
+
+  it('click on expandable item toggles expand/collapse', () => {
+    const {document} = createEnv();
+    const {tree, src} = buildTree(document);
+    document.body.appendChild(tree);
+
+    /* src is collapsed — click should expand */
+    const rows = tree.getRenderedRows();
+    rows[0]!.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+
+    expect(src.hasAttribute('open')).toBe(true);
+    expect(tree.getVisibleItems().length).toBe(4);
+
+    /* Click again should collapse */
+    const updatedRows = tree.getRenderedRows();
+    updatedRows[0]!.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+
+    expect(src.hasAttribute('open')).toBe(false);
+    expect(tree.getVisibleItems().length).toBe(2);
+  });
+
+  it('click on leaf item dispatches select', () => {
+    const {document} = createEnv();
+    const {tree} = buildTree(document);
+    document.body.appendChild(tree);
+
+    const handler = vi.fn();
+    tree.addEventListener('select', handler);
+
+    /* README.md is at index 1, it's a leaf */
+    const rows = tree.getRenderedRows();
+    rows[1]!.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+
+    expect(handler).toHaveBeenCalledOnce();
+  });
 });

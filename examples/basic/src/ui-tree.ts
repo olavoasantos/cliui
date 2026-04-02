@@ -9,7 +9,7 @@ const style = document.createElement('style');
 style.textContent = `
   ui-tree { border-style: single; border-color: #475569; padding: 0 1; width: 40; }
   ui-tree:focus { border-color: #7c3aed; }
-  ui-tree-item[highlighted] { background-color: #7c3aed; color: #fff; }
+  ui-tree div[highlighted] { background-color: #7c3aed; color: #fff; }
 `;
 document.head.appendChild(style);
 

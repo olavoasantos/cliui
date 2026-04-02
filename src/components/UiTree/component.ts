@@ -261,6 +261,21 @@ export class UiTree extends HTMLElement {
           const doc = this.ownerDocument as import('../../dom').Document;
           doc.setActiveElement(this as unknown as import('../../dom').Element);
 
+          /* Toggle expand/collapse or select */
+          const entry = this.visibleEntries[i];
+
+          if (entry && entry.item.hasAttribute('expandable')) {
+            if (entry.item.hasAttribute('open')) {
+              entry.item.removeAttribute('open');
+            } else {
+              entry.item.setAttribute('open', '');
+            }
+
+            this.refresh();
+          } else {
+            this.dispatchEvent(new Event('select', {bubbles: true}));
+          }
+
           return;
         }
 
