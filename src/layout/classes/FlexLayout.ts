@@ -487,22 +487,39 @@ export class FlexLayout {
         lines.reverse();
       }
 
+      // Offset past text on the main axis when text and children coexist
+      const textMainOffset = textLines.length > 0 ? this.maxTextWidth(textLines) : 0;
+
       this.positionWrappedRows(
         lines,
         computedStyle,
-        contentX,
+        contentX + textMainOffset,
         contentY,
-        ctx.contentWidth,
+        Math.max(0, ctx.contentWidth - textMainOffset),
         ctx.lineGap,
       );
     } else {
+      // When text and children coexist, children must be positioned
+      // past the text on the main axis so they don't overlap (BUG-6).
+      const textMainOffset =
+        textLines.length > 0
+          ? ctx.isRowDirection
+            ? this.maxTextWidth(textLines)
+            : textLines.length
+          : 0;
+      const childContentX = ctx.isRowDirection ? contentX + textMainOffset : contentX;
+      const childContentY = ctx.isRowDirection ? contentY : contentY + textMainOffset;
+      const childAvailableMain = ctx.isRowDirection
+        ? ctx.contentWidth - textMainOffset
+        : ctx.contentHeight - textMainOffset;
+
       this.positionChildren(
         children,
         computedStyle,
-        contentX,
-        contentY,
+        childContentX,
+        childContentY,
         ctx.flexDirection,
-        ctx.isRowDirection ? ctx.contentWidth : ctx.contentHeight,
+        Math.max(0, childAvailableMain),
         ctx.isRowDirection ? ctx.contentHeight : ctx.contentWidth,
         ctx.mainGap,
       );

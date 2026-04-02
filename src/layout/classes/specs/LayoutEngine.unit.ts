@@ -477,6 +477,62 @@ describe('LayoutEngine', () => {
     expect(rowBox.children[2]!.x).toBe(24);
   });
 
+  describe('text and child element coexistence (BUG-6)', () => {
+    it('positions child elements below text lines in column layout', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const parent = document.createElement('div');
+      const textNode = document.createTextNode('Hello ');
+      const child = document.createElement('span');
+
+      child.textContent = 'World';
+      child.setAttribute('id', 'child');
+      parent.appendChild(textNode);
+      parent.appendChild(child);
+      body.appendChild(parent);
+
+      addStyle(document, '#child { background-color: red; }');
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const layout = engine.layout(body, 40, 20);
+      const parentBox = layout.children[0]!;
+      const childBox = parentBox.children[0]!;
+
+      // Text "Hello " occupies row 0. Child should be positioned at row 1 or later.
+      expect(childBox.y).toBeGreaterThanOrEqual(parentBox.contentY + 1);
+    });
+
+    it('positions child elements after text width in row layout', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const parent = document.createElement('div');
+      const textNode = document.createTextNode('Hello ');
+      const child = document.createElement('span');
+
+      child.textContent = 'World';
+      child.setAttribute('id', 'child');
+      parent.appendChild(textNode);
+      parent.appendChild(child);
+      body.appendChild(parent);
+
+      addStyle(
+        document,
+        '.row { display: flex; flex-direction: row; } #child { background-color: red; }',
+      );
+      parent.className = 'row';
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const layout = engine.layout(body, 40, 20);
+      const parentBox = layout.children[0]!;
+      const childBox = parentBox.children[0]!;
+
+      // Text "Hello " normalizes to "Hello" (5 cells). Child should start at x >= 5.
+      expect(childBox.x).toBeGreaterThanOrEqual(parentBox.contentX + 5);
+    });
+  });
+
   describe('explicit height on inline elements (BUG-1)', () => {
     it('respects explicit height on a standalone inline element', () => {
       const {document, styleEngine} = createEnv();

@@ -49,6 +49,7 @@ describe('LayoutEngine integration', () => {
     expect(articleBox.textLines).toEqual(['alpha', 'beta', 'gamma']);
     expect(badgeBox.textLines).toEqual(['OK']);
     expect(badgeBox.x).toBe(articleBox.contentX);
-    expect(badgeBox.y).toBe(articleBox.contentY);
+    // Badge is positioned below the 3 lines of text (BUG-6 fix)
+    expect(badgeBox.y).toBe(articleBox.contentY + 3);
   });
 });

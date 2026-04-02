@@ -176,8 +176,8 @@ describe('UiTable rendering', () => {
     terminal.exit();
   });
 
-  // BUG-12: Borders on inline cells in flex rows still have issues
-  it.skip('renders full cell text with borders and padding applied via CSS', async () => {
+  // BUG-12: Borders on inline cells in flex rows — fixed via content-box
+  it('renders full cell text with borders and padding applied via CSS', async () => {
     const terminal = createTerminal();
     const doc = terminal.document;
 

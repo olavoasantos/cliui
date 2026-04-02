@@ -4,4 +4,5 @@ ui-th {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  box-sizing: content-box;
 }
