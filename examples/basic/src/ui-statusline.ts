@@ -6,7 +6,7 @@ window.customElements.define(UiStatusline.tagName, UiStatusline);
 
 const style = document.createElement('style');
 style.textContent = `
-  ui-statusline { background-color: #1e293b; color: #e5e7eb; padding: 0 1; }
+  ui-statusline { background-color: #1e293b; color: #e5e7eb; padding: 0 1; gap: 1; }
 `;
 document.head.appendChild(style);
 
