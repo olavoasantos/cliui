@@ -232,4 +232,35 @@ describe('Caret', () => {
       expect(caret.getSelectedText()).toBe('bc');
     });
   });
+
+  describe('tick after position change', () => {
+    it('reports change on the first tick after selectTo', () => {
+      const editable = createEditable(['a', 'b', 'c']);
+      const caret = new Caret(editable);
+
+      caret.moveTo(0);
+      // Consume the initial ticks
+      caret.tick(0);
+      caret.tick(100);
+
+      // selectTo triggers resetBlink
+      caret.selectTo(2);
+
+      // The very next tick should report a change
+      expect(caret.tick(200)).toBe(true);
+    });
+
+    it('reports change on the first tick after moveTo', () => {
+      const editable = createEditable(['a', 'b', 'c']);
+      const caret = new Caret(editable);
+
+      caret.moveTo(0);
+      caret.tick(0);
+      caret.tick(100);
+
+      caret.moveTo(2);
+
+      expect(caret.tick(200)).toBe(true);
+    });
+  });
 });

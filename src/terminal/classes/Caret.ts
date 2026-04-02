@@ -64,8 +64,18 @@ export class Caret {
    *
    * @returns `true` if the blink phase changed (the caller should re-render).
    */
+  /** Whether the caret needs a render due to a position/selection change. */
+  private needsRender = false;
+
   tick(timestamp: number): boolean {
     if (this.target.isDisabled()) return false;
+
+    // Position/selection change always triggers a render on the next tick
+    if (this.needsRender) {
+      this.needsRender = false;
+      this.lastBlinkTimestamp = timestamp;
+      return true;
+    }
 
     if (this.lastBlinkTimestamp === null) {
       this.lastBlinkTimestamp = timestamp;
@@ -87,6 +97,7 @@ export class Caret {
   resetBlink(): void {
     this.blinkVisible = true;
     this.lastBlinkTimestamp = null;
+    this.needsRender = true;
   }
 
   /**
