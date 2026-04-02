@@ -3,6 +3,7 @@ import {HTMLElement} from './HTMLElement';
 
 import type {Document} from './Document';
 import type {Element} from './Element';
+import type {KeyboardEvent} from './KeyboardEvent';
 
 /**
  * Platform `<dialog>` element with modal and non-modal open/close semantics.
@@ -122,7 +123,7 @@ export class HTMLDialogElement extends HTMLElement {
   /* ── Private ────────────────────────────────────────────── */
 
   private handleKeyDown(event: Event): void {
-    const keyEvent = event as import('./KeyboardEvent').KeyboardEvent;
+    const keyEvent = event as KeyboardEvent;
 
     if (keyEvent.key === 'Escape') {
       event.preventDefault();

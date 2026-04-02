@@ -3,6 +3,9 @@ import {EDITABLE_STATE} from '../constants/editableState';
 import {StyleEngine} from '../css';
 import {Event, InputEvent, Window} from '../dom';
 import {CHILD, NEXT, PARENT} from '../dom/constants';
+
+import type {ClipboardEvent} from '../dom/classes/ClipboardEvent';
+import type {MouseEvent} from '../dom/classes/MouseEvent';
 import {LayoutEngine} from '../layout';
 import {graphemeWidth} from '../layout/utilities/graphemeWidth';
 import {Renderer} from '../renderer';
@@ -212,7 +215,7 @@ export class Terminal {
 
       if (target.hasAttribute('disabled') || target.hasAttribute('readonly')) return;
 
-      const clipboardEvent = event as import('../dom').ClipboardEvent;
+      const clipboardEvent = event as ClipboardEvent;
       const text = clipboardEvent.clipboardData?.getData('text/plain') ?? '';
 
       if (text.length > 0) {
@@ -235,7 +238,7 @@ export class Terminal {
       const state = stateEl[EDITABLE_STATE];
       if (!state || !state.caret) return;
 
-      const mouseEvent = event as import('../dom').MouseEvent;
+      const mouseEvent = event as MouseEvent;
       const localX = mouseEvent.offsetX ?? 0;
       const shift = mouseEvent.shiftKey ?? false;
 
