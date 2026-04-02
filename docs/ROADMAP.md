@@ -419,3 +419,23 @@ T140. Update examples: All examples update imports from @micra/terminal-dom → 
 T141. Publishing and versioning: Changesets for independent versioning, publishConfig, workspace:* → real versions on publish, dry-run verification.
 
 T142. Update documentation and conventions: AGENTS.md, architecture doc, ROADMAP, milestone files, README, skill files — all references updated from @micra/terminal-dom to @cliui/*.
+
+### Phase 13: Web API ↔ Terminal Bridge
+
+> Wire standard Web APIs to terminal escape sequences. `document.title` → window title, `<a href>` → clickable hyperlinks, `alert()`/`confirm()`/`prompt()` → modal dialogs, `Notification` → OS notifications, `navigator.clipboard` → OSC 52, `matchMedia('(prefers-color-scheme)')` → terminal color query.
+
+T143. Document title and window title: `document.title` / `<title>` → OSC 2. Hooks bridge detects text changes. Title restored on exit via OSC 22/23 stack.
+
+T144. Anchor hyperlinks and document focus state: `<a href>` → OSC 8 hyperlink cells during paint (writer already supports it). `document.hasFocus()` and `document.visibilityState` from existing focus events.
+
+T145. Window dialogs: `alert(message)` → `Promise<void>`, `confirm(message)` → `Promise<boolean>`, `prompt(message, default?)` → `Promise<string | null>`. Built on `<dialog>` + raw elements. Modal focus, Enter/Escape, focus restoration.
+
+T146. Notification API: `new Notification(title, { body })` → OSC 9 (iTerm2/Konsole) or OSC 777 (rxvt). Capability detection. BEL fallback. `Notification.permission` always `'granted'`.
+
+T147. Clipboard API: `navigator.clipboard.writeText()` via OSC 52 (refactor existing). `readText()` via OSC 52 query with in-memory fallback. Capability detection for read support.
+
+T148. Color scheme detection: `window.matchMedia('(prefers-color-scheme: dark)')` via OSC 11 background color query. `MediaQueryList` with `matches`, `change` event. Luminance threshold. Default to dark.
+
+T149. CWD reporting: `window.location.pathname` setter → OSC 7. Initial emission on `run()` with `process.cwd()`. Enables terminal "New Tab Here" features.
+
+T150. CSS cursor property: `cursor: text` → bar, `cursor: default` → block, `cursor: wait` → blinking block, `cursor: none` → hidden. Follows `document.activeElement`. Restored on exit.
