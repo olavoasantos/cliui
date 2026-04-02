@@ -32,7 +32,7 @@ describe('UiLog', () => {
     expect(log.getLineCount()).toBe(2);
   });
 
-  it('renders only the last N lines when height is set', () => {
+  it('renders all lines as DOM children with height controlling scroll viewport', () => {
     const {document} = createEnv();
     const log = document.createElement('ui-log') as UiLog;
     log.setAttribute('height', '3');
@@ -44,10 +44,10 @@ describe('UiLog', () => {
 
     expect(log.getLineCount()).toBe(10);
 
-    /* Only last 3 should be rendered as child nodes */
-    expect(log.childNodes.length).toBe(3);
-    expect((log.childNodes[0] as Element).textContent).toBe('Line 8');
-    expect((log.childNodes[2] as Element).textContent).toBe('Line 10');
+    /* All 10 lines should be rendered; scroll viewport limits visibility */
+    expect(log.childNodes.length).toBe(10);
+    expect((log.childNodes[0] as Element).textContent).toBe('Line 1');
+    expect((log.childNodes[9] as Element).textContent).toBe('Line 10');
   });
 
   it('trims old lines when max-lines is exceeded', () => {

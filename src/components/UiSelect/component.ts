@@ -1,6 +1,7 @@
 import styles from './styles.css?inline';
 
 import {
+  DEFAULT_MAX_VISIBLE_OPTIONS,
   UI_SELECT_INDICATOR_DOWN,
   UI_SELECT_INDICATOR_UP,
   UI_SELECT_LISTBOX_Z_INDEX,
@@ -363,6 +364,18 @@ export class UiSelect extends HTMLElement {
 
   private showListbox(): void {
     if (!this.listbox) return;
+
+    const maxVisible = this.getMaxVisibleOptions();
+    const optionCount = this.getOptions().length;
+
+    if (optionCount > maxVisible) {
+      this.listbox.style.height = String(maxVisible);
+      this.listbox.style.overflow = 'scroll';
+    } else {
+      this.listbox.style.height = '';
+      this.listbox.style.overflow = '';
+    }
+
     this.listbox.style.display = 'block';
     this.syncHighlight();
     this.syncTriggerText();
@@ -469,6 +482,7 @@ export class UiSelect extends HTMLElement {
       if (!options[next]!.isDisabled()) {
         this.highlightedIndex = next;
         this.syncHighlight();
+        this.scrollToHighlighted();
         return;
       }
 
@@ -661,6 +675,45 @@ export class UiSelect extends HTMLElement {
   private ensureTabIndex(): void {
     if (!this.hasAttribute('tabindex')) {
       this.setAttribute('tabindex', '0');
+    }
+  }
+
+  /**
+   * Returns the maximum number of visible options before the listbox scrolls.
+   */
+  private getMaxVisibleOptions(): number {
+    const raw = this.getAttribute('max-visible-options');
+
+    if (raw != null) {
+      const parsed = Number.parseInt(raw, 10);
+
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+
+    return DEFAULT_MAX_VISIBLE_OPTIONS;
+  }
+
+  /**
+   * Scrolls the listbox so the highlighted option is visible.
+   */
+  private scrollToHighlighted(): void {
+    if (!this.listbox) return;
+
+    const maxVisible = this.getMaxVisibleOptions();
+    const optionCount = this.getOptions().length;
+
+    if (optionCount <= maxVisible) return;
+
+    const listboxEl = this.listbox as Element & {scrollTop?: number};
+    const scrollTop = listboxEl.scrollTop ?? 0;
+    const idx = this.highlightedIndex;
+
+    if (idx < scrollTop) {
+      listboxEl.scrollTop = idx;
+    } else if (idx >= scrollTop + maxVisible) {
+      listboxEl.scrollTop = idx - maxVisible + 1;
     }
   }
 }

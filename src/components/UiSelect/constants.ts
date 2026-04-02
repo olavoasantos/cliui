@@ -2,7 +2,13 @@
 export const UI_SELECT_TAG_NAME = 'ui-select';
 
 /** Observed custom element attributes for the built-in select. */
-export const UI_SELECT_OBSERVED_ATTRIBUTES = ['value', 'disabled', 'open', 'width'];
+export const UI_SELECT_OBSERVED_ATTRIBUTES = [
+  'value',
+  'disabled',
+  'open',
+  'width',
+  'max-visible-options',
+];
 
 /** Character used as the dropdown indicator when collapsed. */
 export const UI_SELECT_INDICATOR_DOWN = '▾';
@@ -15,6 +21,9 @@ export const UI_SELECT_LISTBOX_Z_INDEX = 10;
 
 /** Default width in characters when no explicit width is set. */
 export const DEFAULT_UI_SELECT_WIDTH = 20;
+
+/** Default maximum visible options before the listbox scrolls. */
+export const DEFAULT_MAX_VISIBLE_OPTIONS = 8;
 
 /** Minimum width in characters. */
 export const MIN_UI_SELECT_WIDTH = 5;

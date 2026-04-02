@@ -7,13 +7,12 @@ import {HTMLElement} from '../../dom';
  * Built-in terminal log viewer custom element.
  *
  * Provides `append(text)` to add lines. The component keeps a
- * configurable number of visible lines (set via the `height`
- * attribute) and internally trims older entries so only the
- * tail is displayed — no scroll container needed.
+ * configurable visible height (set via the `height` attribute)
+ * and uses native `overflow: scroll` for scrollback. New lines
+ * auto-scroll to the bottom.
  *
  * Set `max-lines` to cap total retained history (0 = unlimited).
- * The visible window is controlled by the `height` attribute
- * (defaults to all lines).
+ * Mouse wheel scrolling allows reviewing older entries.
  *
  * Register with `window.customElements.define(UiLog.tagName, UiLog)`
  * before creating `<ui-log>` elements in a window.
@@ -29,19 +28,30 @@ export class UiLog extends HTMLElement {
   /**
    * Appends a text line to the log.
    *
-   * Trims history to `max-lines` if set, then re-renders the
-   * visible tail.
+   * Trims history to `max-lines` if set, then renders the new
+   * line and scrolls to the bottom.
    */
   append(text: string): void {
     this.lines.push(text);
-    this.trimHistory();
-    this.renderTail();
+
+    const trimmed = this.trimHistory();
+
+    if (trimmed) {
+      this.renderAll();
+    } else {
+      this.appendLineElement(text);
+    }
+
+    this.scrollToBottom();
   }
 
   /** Clears all log content. */
   clear(): void {
     this.lines = [];
-    this.renderTail();
+
+    while (this.childNodes.length > 0) {
+      this.removeChild(this.childNodes[0]!);
+    }
   }
 
   /** Returns the current number of retained lines. */
@@ -51,41 +61,44 @@ export class UiLog extends HTMLElement {
 
   /* ── Private ────────────────────────────────────────────── */
 
-  private renderTail(): void {
-    /* Remove all current children */
+  private appendLineElement(text: string): void {
+    const doc = this.ownerDocument!;
+    const line = doc.createElement('div');
+
+    line.textContent = text;
+    this.appendChild(line);
+  }
+
+  private renderAll(): void {
     while (this.childNodes.length > 0) {
       this.removeChild(this.childNodes[0]!);
     }
 
-    const doc = this.ownerDocument!;
-    const visibleCount = this.getVisibleCount();
-    const start = visibleCount > 0 ? Math.max(0, this.lines.length - visibleCount) : 0;
-
-    for (let i = start; i < this.lines.length; i++) {
-      const line = doc.createElement('div');
-      line.textContent = this.lines[i]!;
-      this.appendChild(line);
+    for (const text of this.lines) {
+      this.appendLineElement(text);
     }
   }
 
-  private trimHistory(): void {
+  private scrollToBottom(): void {
+    const selfWithScroll = this as HTMLElement & {scrollTop?: number};
+
+    // Set to a large value; the layout engine clamps to maxScrollOffset
+    selfWithScroll.scrollTop = this.lines.length;
+  }
+
+  /**
+   * Trims history to `max-lines`. Returns true if lines were removed.
+   */
+  private trimHistory(): boolean {
     const maxLines = this.getMaxLines();
 
-    if (maxLines <= 0) return;
+    if (maxLines <= 0 || this.lines.length <= maxLines) return false;
 
     while (this.lines.length > maxLines) {
       this.lines.shift();
     }
-  }
 
-  private getVisibleCount(): number {
-    const raw = this.getAttribute('height');
-
-    if (raw == null) return 0; /* 0 = show all */
-
-    const parsed = Number.parseInt(raw, 10);
-
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+    return true;
   }
 
   private getMaxLines(): number {

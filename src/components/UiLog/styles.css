@@ -1,3 +1,4 @@
 ui-log {
   display: block;
+  overflow: scroll;
 }
