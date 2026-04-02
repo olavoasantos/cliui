@@ -26,31 +26,31 @@ Phase 9 adds CSS transitions and `@keyframes` animations to terminal-dom. Severa
 
 **Animatable property classification:**
 
-| Interpolation type | Properties | Method |
-|---|---|---|
-| **Color** | `color`, `background-color`, `border-color`, `text-decoration-color` | RGB channel lerp (existing `lerpColor`) |
-| **Number (cells)** | `width`, `height`, `min-width`, `min-height`, `max-width`, `max-height`, `padding-*`, `margin-*`, `gap`, `row-gap`, `column-gap`, `top`, `left`, `flex-basis` | Linear interpolation, rounded to integers |
-| **Number (continuous)** | `opacity`, `flex-grow`, `flex-shrink`, `z-index` | Linear interpolation |
-| **Discrete** | `display`, `flex-direction`, `flex-wrap`, `border-style`, `font-weight`, `font-style`, `text-decoration`, `text-align`, `white-space`, `overflow`, `position`, `justify-content`, `align-items`, `align-self`, `box-sizing` | Snap at 50% progress |
+| Interpolation type      | Properties                                                                                                                                                                                                                  | Method                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| **Color**               | `color`, `background-color`, `border-color`, `text-decoration-color`                                                                                                                                                        | RGB channel lerp (existing `lerpColor`)   |
+| **Number (cells)**      | `width`, `height`, `min-width`, `min-height`, `max-width`, `max-height`, `padding-*`, `margin-*`, `gap`, `row-gap`, `column-gap`, `top`, `left`, `flex-basis`                                                               | Linear interpolation, rounded to integers |
+| **Number (continuous)** | `opacity`, `flex-grow`, `flex-shrink`, `z-index`                                                                                                                                                                            | Linear interpolation                      |
+| **Discrete**            | `display`, `flex-direction`, `flex-wrap`, `border-style`, `font-weight`, `font-style`, `text-decoration`, `text-align`, `white-space`, `overflow`, `position`, `justify-content`, `align-items`, `align-self`, `box-sizing` | Snap at 50% progress                      |
 
 **New CSS properties (14 total):**
 
-| Property | Values |
-|---|---|
-| `transition` | Shorthand: `property duration timing-function delay`, comma-separated |
-| `transition-property` | Property name, `all`, `none` |
-| `transition-duration` | Time value (e.g., `200ms`, `0.5s`) |
-| `transition-timing-function` | `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`, `cubic-bezier(x1,y1,x2,y2)`, `steps(n, start\|end)` |
-| `transition-delay` | Time value |
-| `animation` | Shorthand: `name duration timing-function delay iteration-count direction fill-mode play-state`, comma-separated |
-| `animation-name` | `@keyframes` name, `none` |
-| `animation-duration` | Time value |
-| `animation-timing-function` | Same as `transition-timing-function` |
-| `animation-delay` | Time value |
-| `animation-iteration-count` | Number, `infinite` |
-| `animation-direction` | `normal`, `reverse`, `alternate`, `alternate-reverse` |
-| `animation-fill-mode` | `none`, `forwards`, `backwards`, `both` |
-| `animation-play-state` | `running`, `paused` |
+| Property                     | Values                                                                                                           |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `transition`                 | Shorthand: `property duration timing-function delay`, comma-separated                                            |
+| `transition-property`        | Property name, `all`, `none`                                                                                     |
+| `transition-duration`        | Time value (e.g., `200ms`, `0.5s`)                                                                               |
+| `transition-timing-function` | `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`, `cubic-bezier(x1,y1,x2,y2)`, `steps(n, start\|end)`      |
+| `transition-delay`           | Time value                                                                                                       |
+| `animation`                  | Shorthand: `name duration timing-function delay iteration-count direction fill-mode play-state`, comma-separated |
+| `animation-name`             | `@keyframes` name, `none`                                                                                        |
+| `animation-duration`         | Time value                                                                                                       |
+| `animation-timing-function`  | Same as `transition-timing-function`                                                                             |
+| `animation-delay`            | Time value                                                                                                       |
+| `animation-iteration-count`  | Number, `infinite`                                                                                               |
+| `animation-direction`        | `normal`, `reverse`, `alternate`, `alternate-reverse`                                                            |
+| `animation-fill-mode`        | `none`, `forwards`, `backwards`, `both`                                                                          |
+| `animation-play-state`       | `running`, `paused`                                                                                              |
 
 ---
 

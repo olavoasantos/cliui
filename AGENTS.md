@@ -21,7 +21,20 @@ Detailed scaffolding recipes for each code type (classes, components, data sourc
 | Services          | `PascalCase` + `Service` suffix    | Named export | Mediates data source mutations                             |
 | Utilities         | `camelCase`                        | Named export | One function per file                                      |
 
-### Entry Points
+### Monorepo Structure
+
+The codebase is a pnpm monorepo under `cliui/`:
+
+- **`cliui/dom/`** — `@cliui/dom`: Standalone DOM polyfill (no internal dependencies)
+- **`cliui/terminal/`** — `@cliui/terminal`: Engine (CSS + Layout + Renderer + Terminal I/O), depends on `@cliui/dom`
+- **`cliui/elements/`** — `@cliui/elements`: Component library, depends on `@cliui/terminal`
+- **`cliui/internals/`** — `@cliui/internals`: Shared build/test/lint configs (private, not published)
+- **`cliui/devtools/`** — `@cliui/devtools`: CDP bridge scaffold (future)
+- **`cliui/vite-plugin/`** — `@cliui/vite-plugin`: Vite integration scaffold (future)
+
+Examples live in `examples/*` and reference `@cliui/terminal` + `@cliui/elements`.
+
+### Entry Points (per package)
 
 - **`src/index.ts`**: Main exports. Must be environment-agnostic.
 - **`src/index.css`**: Central stylesheet for the module's critical styles (if applicable).

@@ -1,6 +1,6 @@
 # Vue example
 
-Demonstrates `@micra/terminal-dom` with Vue 3 — SFC components, Composition API, and event handling.
+Demonstrates `@cliui/terminal` with Vue 3 — SFC components, Composition API, and event handling.
 
 ```bash
 pnpm --dir examples/vue dev

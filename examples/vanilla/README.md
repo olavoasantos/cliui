@@ -1,6 +1,6 @@
 # Vanilla TypeScript example
 
-Demonstrates `@micra/terminal-dom` without any UI framework — pure DOM API.
+Demonstrates `@cliui/terminal` without any UI framework — pure DOM API.
 
 ```bash
 pnpm --dir examples/vanilla dev

@@ -18,13 +18,13 @@ import {
   registerPrimitives,
   registerStyledComponents,
   registerAll,
-} from '@micra/terminal-dom/components';
+} from '@cliui/terminal/components';
 
 const terminal = new Terminal();
 
 // Pick what you need
-registerHTMLElements(terminal.window);   // <button>, <input>, <table>, etc.
-registerPrimitives(terminal.window);     // <tabs>, <tree>, <navmenu>, etc.
+registerHTMLElements(terminal.window); // <button>, <input>, <table>, etc.
+registerPrimitives(terminal.window); // <tabs>, <tree>, <navmenu>, etc.
 registerStyledComponents(terminal.window); // <ui-card>, <ui-badge>, etc.
 
 // Or everything
@@ -51,53 +51,53 @@ registerAll(terminal.window);
 
 **Tier mapping:**
 
-| Current | Tier | New tag name | New class name |
-|---|---|---|---|
-| `UiButton` | 1 – HTML | `<button>` | `Button` |
-| `UiInput` | 1 – HTML | `<input>` | `Input` |
-| `UiTextarea` | 1 – HTML | `<textarea>` | `Textarea` |
-| `UiSelect` | 1 – HTML | `<select>` | `Select` |
-| `UiOption` | 1 – HTML | `<option>` | `Option` |
-| `UiOptgroup` | 1 – HTML | `<optgroup>` | `Optgroup` |
-| `UiTable` | 1 – HTML | `<table>` | `Table` |
-| `UiThead` | 1 – HTML | `<thead>` | `Thead` |
-| `UiTbody` | 1 – HTML | `<tbody>` | `Tbody` |
-| `UiTfoot` | 1 – HTML | `<tfoot>` | `Tfoot` |
-| `UiTr` | 1 – HTML | `<tr>` | `Tr` |
-| `UiTh` | 1 – HTML | `<th>` | `Th` |
-| `UiTd` | 1 – HTML | `<td>` | `Td` |
-| `UiForm` | 1 – HTML | `<form>` | `Form` |
-| `UiFieldset` | 1 – HTML | `<fieldset>` | `Fieldset` |
-| `UiLabel` | 1 – HTML | `<label>` | `Label` |
-| `UiMeter` | 1 – HTML | `<meter>` | `Meter` |
-| `UiProgress` | 1 – HTML | `<progress>` | `Progress` |
-| `UiDetails` | 1 – HTML | `<details>` | `Details` |
-| _(new)_ | 1 – HTML | `<img>` | `Img` |
-| `UiTabs` | 2 – Primitive | `<tabs>` | `Tabs` |
-| `UiTab` | 2 – Primitive | `<tab>` | `Tab` |
-| `UiMenu` | 2 – Primitive | `<navmenu>` | `Navmenu` |
-| `UiMenuItem` | 2 – Primitive | `<navmenuitem>` | `NavmenuItem` |
-| `UiTree` | 2 – Primitive | `<tree>` | `Tree` |
-| `UiTreeItem` | 2 – Primitive | `<treeitem>` | `TreeItem` |
-| `UiList` | 2 – Primitive | `<listbox>` | `Listbox` |
-| `UiDropdown` | 2 – Primitive | `<dropdown>` | `Dropdown` |
-| `UiToolbar` | 2 – Primitive | `<toolbar>` | `Toolbar` |
-| `UiBreadcrumbs` | 2 – Primitive | `<breadcrumbs>` | `Breadcrumbs` |
-| `UiBreadcrumb` | 2 – Primitive | `<breadcrumb>` | `Breadcrumb` |
-| `UiStatusline` | 2 – Primitive | `<statusline>` | `Statusline` |
-| `UiPaginator` | 2 – Primitive | `<paginator>` | `Paginator` |
-| `UiCard` | 3 – Styled | `<ui-card>` | `UiCard` (unchanged) |
-| `UiBadge` | 3 – Styled | `<ui-badge>` | `UiBadge` (unchanged) |
-| `UiMessage` | 3 – Styled | `<ui-message>` | `UiMessage` (unchanged) |
-| `UiCodeblock` | 3 – Styled | `<ui-codeblock>` | `UiCodeblock` (unchanged) |
-| `UiDiff` | 3 – Styled | `<ui-diff>` | `UiDiff` (unchanged) |
-| `UiSkeleton` | 3 – Styled | `<ui-skeleton>` | `UiSkeleton` (unchanged) |
-| `UiSpinner` | 3 – Styled | `<ui-spinner>` | `UiSpinner` (unchanged) |
-| `UiToast` | 3 – Styled | `<ui-toast>` | `UiToast` (unchanged) |
-| `UiConfirmation` | 3 – Styled | `<ui-confirmation>` | `UiConfirmation` (unchanged) |
-| `UiPrompt` | 3 – Styled | `<ui-prompt>` | `UiPrompt` (unchanged) |
-| `UiSidebar` | 3 – Styled | `<ui-sidebar>` | `UiSidebar` (unchanged) |
-| `UiLog` | 3 – Styled | `<ui-log>` | `UiLog` (unchanged) |
+| Current          | Tier          | New tag name        | New class name               |
+| ---------------- | ------------- | ------------------- | ---------------------------- |
+| `UiButton`       | 1 – HTML      | `<button>`          | `Button`                     |
+| `UiInput`        | 1 – HTML      | `<input>`           | `Input`                      |
+| `UiTextarea`     | 1 – HTML      | `<textarea>`        | `Textarea`                   |
+| `UiSelect`       | 1 – HTML      | `<select>`          | `Select`                     |
+| `UiOption`       | 1 – HTML      | `<option>`          | `Option`                     |
+| `UiOptgroup`     | 1 – HTML      | `<optgroup>`        | `Optgroup`                   |
+| `UiTable`        | 1 – HTML      | `<table>`           | `Table`                      |
+| `UiThead`        | 1 – HTML      | `<thead>`           | `Thead`                      |
+| `UiTbody`        | 1 – HTML      | `<tbody>`           | `Tbody`                      |
+| `UiTfoot`        | 1 – HTML      | `<tfoot>`           | `Tfoot`                      |
+| `UiTr`           | 1 – HTML      | `<tr>`              | `Tr`                         |
+| `UiTh`           | 1 – HTML      | `<th>`              | `Th`                         |
+| `UiTd`           | 1 – HTML      | `<td>`              | `Td`                         |
+| `UiForm`         | 1 – HTML      | `<form>`            | `Form`                       |
+| `UiFieldset`     | 1 – HTML      | `<fieldset>`        | `Fieldset`                   |
+| `UiLabel`        | 1 – HTML      | `<label>`           | `Label`                      |
+| `UiMeter`        | 1 – HTML      | `<meter>`           | `Meter`                      |
+| `UiProgress`     | 1 – HTML      | `<progress>`        | `Progress`                   |
+| `UiDetails`      | 1 – HTML      | `<details>`         | `Details`                    |
+| _(new)_          | 1 – HTML      | `<img>`             | `Img`                        |
+| `UiTabs`         | 2 – Primitive | `<tabs>`            | `Tabs`                       |
+| `UiTab`          | 2 – Primitive | `<tab>`             | `Tab`                        |
+| `UiMenu`         | 2 – Primitive | `<navmenu>`         | `Navmenu`                    |
+| `UiMenuItem`     | 2 – Primitive | `<navmenuitem>`     | `NavmenuItem`                |
+| `UiTree`         | 2 – Primitive | `<tree>`            | `Tree`                       |
+| `UiTreeItem`     | 2 – Primitive | `<treeitem>`        | `TreeItem`                   |
+| `UiList`         | 2 – Primitive | `<listbox>`         | `Listbox`                    |
+| `UiDropdown`     | 2 – Primitive | `<dropdown>`        | `Dropdown`                   |
+| `UiToolbar`      | 2 – Primitive | `<toolbar>`         | `Toolbar`                    |
+| `UiBreadcrumbs`  | 2 – Primitive | `<breadcrumbs>`     | `Breadcrumbs`                |
+| `UiBreadcrumb`   | 2 – Primitive | `<breadcrumb>`      | `Breadcrumb`                 |
+| `UiStatusline`   | 2 – Primitive | `<statusline>`      | `Statusline`                 |
+| `UiPaginator`    | 2 – Primitive | `<paginator>`       | `Paginator`                  |
+| `UiCard`         | 3 – Styled    | `<ui-card>`         | `UiCard` (unchanged)         |
+| `UiBadge`        | 3 – Styled    | `<ui-badge>`        | `UiBadge` (unchanged)        |
+| `UiMessage`      | 3 – Styled    | `<ui-message>`      | `UiMessage` (unchanged)      |
+| `UiCodeblock`    | 3 – Styled    | `<ui-codeblock>`    | `UiCodeblock` (unchanged)    |
+| `UiDiff`         | 3 – Styled    | `<ui-diff>`         | `UiDiff` (unchanged)         |
+| `UiSkeleton`     | 3 – Styled    | `<ui-skeleton>`     | `UiSkeleton` (unchanged)     |
+| `UiSpinner`      | 3 – Styled    | `<ui-spinner>`      | `UiSpinner` (unchanged)      |
+| `UiToast`        | 3 – Styled    | `<ui-toast>`        | `UiToast` (unchanged)        |
+| `UiConfirmation` | 3 – Styled    | `<ui-confirmation>` | `UiConfirmation` (unchanged) |
+| `UiPrompt`       | 3 – Styled    | `<ui-prompt>`       | `UiPrompt` (unchanged)       |
+| `UiSidebar`      | 3 – Styled    | `<ui-sidebar>`      | `UiSidebar` (unchanged)      |
+| `UiLog`          | 3 – Styled    | `<ui-log>`          | `UiLog` (unchanged)          |
 
 ---
 
@@ -362,8 +362,7 @@ Rename the remaining layout and utility primitives — remove the `ui-` prefix.
 
 - None (rename only)
 
-_Can run in parallel with M11T3–M11T9._
----
+## _Can run in parallel with M11T3–M11T9._
 
 ### M11T11: Update createElement dispatch and public API
 

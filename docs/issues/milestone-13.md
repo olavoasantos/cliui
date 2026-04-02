@@ -2,7 +2,7 @@
 
 ## Working Summary
 
-Phase 13 wires standard Web APIs to their terminal escape sequence equivalents. The DOM polyfill already mirrors the browser's API shape — `Window`, `Document`, `Navigator`, `Location`. This milestone makes those APIs actually *do something* by connecting them to the terminal capabilities underneath.
+Phase 13 wires standard Web APIs to their terminal escape sequence equivalents. The DOM polyfill already mirrors the browser's API shape — `Window`, `Document`, `Navigator`, `Location`. This milestone makes those APIs actually _do something_ by connecting them to the terminal capabilities underneath.
 
 **Four groups of work:**
 
@@ -23,18 +23,18 @@ Phase 13 wires standard Web APIs to their terminal escape sequence equivalents. 
 
 **Terminal escape sequence reference:**
 
-| Sequence | Purpose | Web API mapping |
-|---|---|---|
-| OSC 2 | Set window/tab title | `document.title` / `<title>` |
-| OSC 7 | Report CWD | `window.location.pathname` |
-| OSC 8 | Hyperlinks (already implemented) | `<a href>` click → open in browser |
-| OSC 9 | iTerm2/Konsole notification | `new Notification()` |
-| OSC 777 | rxvt-unicode notification | `new Notification()` fallback |
-| OSC 10 | Query foreground color | `matchMedia('(prefers-color-scheme)')` |
-| OSC 11 | Query background color | `matchMedia('(prefers-color-scheme)')` |
-| OSC 52 | Clipboard read/write | `navigator.clipboard` |
-| BEL `\x07` | System bell | `Notification` fallback |
-| CSI cursor style | Cursor shape | CSS `cursor` property |
+| Sequence         | Purpose                          | Web API mapping                        |
+| ---------------- | -------------------------------- | -------------------------------------- |
+| OSC 2            | Set window/tab title             | `document.title` / `<title>`           |
+| OSC 7            | Report CWD                       | `window.location.pathname`             |
+| OSC 8            | Hyperlinks (already implemented) | `<a href>` click → open in browser     |
+| OSC 9            | iTerm2/Konsole notification      | `new Notification()`                   |
+| OSC 777          | rxvt-unicode notification        | `new Notification()` fallback          |
+| OSC 10           | Query foreground color           | `matchMedia('(prefers-color-scheme)')` |
+| OSC 11           | Query background color           | `matchMedia('(prefers-color-scheme)')` |
+| OSC 52           | Clipboard read/write             | `navigator.clipboard`                  |
+| BEL `\x07`       | System bell                      | `Notification` fallback                |
+| CSI cursor style | Cursor shape                     | CSS `cursor` property                  |
 
 ---
 

@@ -22,19 +22,19 @@ Phase 7 adds performance observability to terminal-dom. The browser has `window.
 
 **Entry taxonomy:**
 
-| Name | Entry Type | Source | Shape |
-|---|---|---|---|
-| `first-contentful-paint` | `paint` | Render instrumentation | `PerformancePaintTiming` |
-| `largest-contentful-paint` | `largest-contentful-paint` | Render instrumentation | `LargestContentfulPaint` |
-| _(first interaction)_ | `first-input` | Input instrumentation | `PerformanceEventTiming` |
-| _(per interaction)_ | `event` | Input instrumentation | `PerformanceEventTiming` |
-| `terminal.frame` | `measure` | Render instrumentation | `PerformanceMeasure` with `detail` |
-| `terminal.frame.style` | `measure` | Render instrumentation | `PerformanceMeasure` |
-| `terminal.frame.layout` | `measure` | Render instrumentation | `PerformanceMeasure` |
-| `terminal.frame.paint` | `measure` | Render instrumentation | `PerformanceMeasure` |
-| `terminal.frame.diff` | `measure` | Render instrumentation | `PerformanceMeasure` |
-| `terminal.frame.ansi` | `measure` | Render instrumentation | `PerformanceMeasure` |
-| `terminal.frame.write` | `measure` | Render instrumentation | `PerformanceMeasure` |
+| Name                       | Entry Type                 | Source                 | Shape                              |
+| -------------------------- | -------------------------- | ---------------------- | ---------------------------------- |
+| `first-contentful-paint`   | `paint`                    | Render instrumentation | `PerformancePaintTiming`           |
+| `largest-contentful-paint` | `largest-contentful-paint` | Render instrumentation | `LargestContentfulPaint`           |
+| _(first interaction)_      | `first-input`              | Input instrumentation  | `PerformanceEventTiming`           |
+| _(per interaction)_        | `event`                    | Input instrumentation  | `PerformanceEventTiming`           |
+| `terminal.frame`           | `measure`                  | Render instrumentation | `PerformanceMeasure` with `detail` |
+| `terminal.frame.style`     | `measure`                  | Render instrumentation | `PerformanceMeasure`               |
+| `terminal.frame.layout`    | `measure`                  | Render instrumentation | `PerformanceMeasure`               |
+| `terminal.frame.paint`     | `measure`                  | Render instrumentation | `PerformanceMeasure`               |
+| `terminal.frame.diff`      | `measure`                  | Render instrumentation | `PerformanceMeasure`               |
+| `terminal.frame.ansi`      | `measure`                  | Render instrumentation | `PerformanceMeasure`               |
+| `terminal.frame.write`     | `measure`                  | Render instrumentation | `PerformanceMeasure`               |
 
 **`terminal.frame` detail payload:**
 

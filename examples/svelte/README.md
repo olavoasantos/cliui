@@ -1,6 +1,6 @@
 # Svelte example
 
-Demonstrates `@micra/terminal-dom` with Svelte 5 — runes (`$state`, `$effect`, `$props`), components, and event handling.
+Demonstrates `@cliui/terminal` with Svelte 5 — runes (`$state`, `$effect`, `$props`), components, and event handling.
 
 ```bash
 pnpm --dir examples/svelte dev

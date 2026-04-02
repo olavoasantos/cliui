@@ -24,7 +24,7 @@ Phase 10 makes HTML files first-class entry points for terminal-dom applications
 - **`<link>` only supports `rel="stylesheet"`.** Other `rel` values (`icon`, `preload`, `prefetch`, etc.) are not applicable in a terminal context and are silently ignored.
 - **Script ordering matches browsers.** Scripts in `<head>` (without `defer`) block body parsing. Scripts in `<body>` execute after preceding elements are parsed. `defer` scripts execute after the full document is parsed. `async` scripts execute when loaded (filesystem reads are near-instant, so `async` behaves like inline for local files). `DOMContentLoaded` fires after all synchronous and deferred scripts. `load` fires after all resources (stylesheets) are loaded.
 - **The Vite plugin is a separate package.** It uses Vite's existing transform pipeline for TypeScript compilation, module resolution, and HMR infrastructure. The terminal-dom core provides the document loading API; the plugin provides the DX layer.
-- **The CLI runner is in the main package.** It adds a `bin` entry to `package.json` so `npx @micra/terminal-dom index.html` works. For TypeScript files referenced in `<script src>`, the CLI checks for `tsx` availability or uses Node's `--experimental-strip-types`.
+- **The CLI runner is in the main package.** It adds a `bin` entry to `package.json` so `npx @cliui/terminal index.html` works. For TypeScript files referenced in `<script src>`, the CLI checks for `tsx` availability or uses Node's `--experimental-strip-types`.
 
 **The developer experience:**
 
@@ -32,19 +32,21 @@ Phase 10 makes HTML files first-class entry points for terminal-dom applications
 <!-- index.html -->
 <!DOCTYPE html>
 <html>
-<head>
-  <link rel="stylesheet" href="./styles.css">
-  <style>
-    .status { color: #93c5fd; }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <div class="header">My Terminal App</div>
-    <div class="status" id="status">Loading...</div>
-  </div>
-  <script type="module" src="./app.ts"></script>
-</body>
+  <head>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      .status {
+        color: #93c5fd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">My Terminal App</div>
+      <div class="status" id="status">Loading...</div>
+    </div>
+    <script type="module" src="./app.ts"></script>
+  </body>
 </html>
 ```
 
@@ -77,7 +79,7 @@ document.body.addEventListener('keydown', (e) => {
 
 ```bash
 # CLI
-npx @micra/terminal-dom index.html
+npx @cliui/terminal index.html
 
 # Or with Vite
 npx vite dev  # reads index.html, runs in terminal
@@ -315,15 +317,15 @@ Expose the document loading capability through the `Terminal` class. This is the
 
 **Summary**
 
-Add a CLI entry point so developers can run terminal-dom applications directly from an HTML file: `npx @micra/terminal-dom index.html`. This provides a zero-config way to run HTML-based terminal apps without a bundler.
+Add a CLI entry point so developers can run terminal-dom applications directly from an HTML file: `npx @cliui/terminal index.html`. This provides a zero-config way to run HTML-based terminal apps without a bundler.
 
 **Expected Outcomes**
 
 - A `bin` entry is added to `package.json` pointing to a CLI script
-- `npx @micra/terminal-dom <file.html>` creates a `Terminal` instance, calls `loadFile(path)`, and calls `run()`
-- `npx @micra/terminal-dom <file.html> --no-alt-screen` disables alternate screen mode (for debugging)
-- `npx @micra/terminal-dom <file.html> --fps <n>` sets the frame rate
-- `npx @micra/terminal-dom <file.html> --watch` watches the HTML file and referenced resources for changes, reloading on change
+- `npx @cliui/terminal <file.html>` creates a `Terminal` instance, calls `loadFile(path)`, and calls `run()`
+- `npx @cliui/terminal <file.html> --no-alt-screen` disables alternate screen mode (for debugging)
+- `npx @cliui/terminal <file.html> --fps <n>` sets the frame rate
+- `npx @cliui/terminal <file.html> --watch` watches the HTML file and referenced resources for changes, reloading on change
 - Clear error messages for: file not found, HTML parse errors, script execution errors, missing TypeScript loader
 - For TypeScript `<script src>` references: checks for `tsx` availability, then Node's `--experimental-strip-types` — if neither is available, prints a clear message suggesting installation of `tsx` or use of the Vite plugin
 - `--help` prints usage information
@@ -399,7 +401,7 @@ Support `vite build` to produce a distributable Node.js application from an HTML
 - All `<script>` modules are bundled into the output (Vite's default bundling behavior)
 - All `<link rel="stylesheet">` and `<style>` blocks are inlined into the HTML string embedded in the output
 - The output script:
-  1. Imports `Terminal` from `@micra/terminal-dom`
+  1. Imports `Terminal` from `@cliui/terminal`
   2. Creates a terminal instance
   3. Calls `loadDocument(inlinedHtml)` with the bundled HTML (styles inlined, scripts bundled)
   4. Calls `run()`

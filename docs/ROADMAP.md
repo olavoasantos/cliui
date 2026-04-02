@@ -1,4 +1,4 @@
-# @micra/terminal-dom — Implementation Roadmap
+# @cliui/terminal — Implementation Roadmap
 
 ## Project Understanding
 
@@ -310,7 +310,7 @@ T94. Performance domain: Performance.enable/getMetrics/disable, forward window.p
 
 T95. Log domain — console forwarding: Intercept console.log/warn/error/info → Log.entryAdded + Runtime.consoleAPICalled events. Non-destructive tee (original output preserved). _(parallel with T93–T94)_
 
-T96. DevToolsBridge orchestrator and Terminal integration: Top-level class wiring all domains. `listen(port?)` / `close()` lifecycle. Terminal option `{ devtools: true }` or separate import `@micra/terminal-dom/devtools`. Registry cleanup on disconnect.
+T96. DevToolsBridge orchestrator and Terminal integration: Top-level class wiring all domains. `listen(port?)` / `close()` lifecycle. Terminal option `{ devtools: true }` or separate import `@cliui/terminal/devtools`. Registry cleanup on disconnect.
 
 ### Phase 9: CSS Animations & Transitions
 
@@ -362,7 +362,7 @@ T116. Script ordering and document lifecycle events: Head scripts block body par
 
 T117. Document loading API: `Terminal.loadDocument(html, options?)` and `Terminal.loadFile(path)`. Orchestrate parsing, resource loading, script execution, lifecycle events. Returns promise resolved after `DOMContentLoaded`.
 
-T118. CLI runner: `npx @micra/terminal-dom <file.html>` with `--no-alt-screen`, `--fps`, `--watch` flags. Clear error messages for missing files, parse errors, missing TS loader.
+T118. CLI runner: `npx @cliui/terminal <file.html>` with `--no-alt-screen`, `--fps`, `--watch` flags. Clear error messages for missing files, parse errors, missing TS loader.
 
 T119. Vite plugin — dev mode: `vite-plugin-terminal-dom` intercepts HTML entry, uses Vite's transform pipeline for TS/module resolution, runs in terminal instead of browser. Module wrapping injects globals (no `node:vm` needed).
 
@@ -400,9 +400,9 @@ T133. Comprehensive test migration and verification: Remove all old folders, ver
 
 ### Phase 12: Monorepo Migration
 
-> Migrate from single `@micra/terminal-dom` package to `@cliui/*` monorepo. Five packages: `@cliui/dom` (standalone DOM polyfill), `@cliui/terminal` (engine: CSS + Layout + Renderer + Terminal), `@cliui/elements` (components), `@cliui/devtools` (M8, scaffolded), `@cliui/vite-plugin` (M10, scaffolded). Executes after M0–M5, before M7–M11.
+> Migrate from single `@cliui/terminal` package to `@cliui/*` monorepo. Five packages: `@cliui/dom` (standalone DOM polyfill), `@cliui/terminal` (engine: CSS + Layout + Renderer + Terminal), `@cliui/elements` (components), `@cliui/devtools` (M8, scaffolded), `@cliui/vite-plugin` (M10, scaffolded). Executes after M0–M5, before M7–M11.
 
-T134. Monorepo workspace setup: pnpm workspaces, package directories, package.json for each package with workspace:* dependencies. Scaffold @cliui/devtools and @cliui/vite-plugin shells.
+T134. Monorepo workspace setup: pnpm workspaces, package directories, package.json for each package with workspace:\* dependencies. Scaffold @cliui/devtools and @cliui/vite-plugin shells.
 
 T135. Shared build and test configuration: Base Vite, TypeScript, and vitest configs in .config/. Packages extend with their own entry points and include patterns.
 
@@ -414,11 +414,11 @@ T138. Extract @cliui/elements: Move src/components/ → packages/elements/src/. 
 
 T139. Workspace scripts and quality gates: Root pnpm scripts (build, check, fix, test:unit, test:performance, etc.) run across all packages in dependency order.
 
-T140. Update examples: All examples update imports from @micra/terminal-dom → @cliui/terminal + @cliui/elements. Verify each example runs.
+T140. Update examples: All examples update imports from @cliui/terminal → @cliui/terminal + @cliui/elements. Verify each example runs.
 
-T141. Publishing and versioning: Changesets for independent versioning, publishConfig, workspace:* → real versions on publish, dry-run verification.
+T141. Publishing and versioning: Changesets for independent versioning, publishConfig, workspace:\* → real versions on publish, dry-run verification.
 
-T142. Update documentation and conventions: AGENTS.md, architecture doc, ROADMAP, milestone files, README, skill files — all references updated from @micra/terminal-dom to @cliui/*.
+T142. Update documentation and conventions: AGENTS.md, architecture doc, ROADMAP, milestone files, README, skill files — all references updated from @cliui/terminal to @cliui/\*.
 
 ### Phase 13: Web API ↔ Terminal Bridge
 

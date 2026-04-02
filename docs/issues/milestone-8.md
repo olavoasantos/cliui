@@ -27,20 +27,20 @@ The bridge is wired into the `Terminal` class as an opt-in development tool (M8T
 - **EventTarget stores listeners** in an internal `Map` keyed by the `LISTENERS` symbol. `DOMDebugger.getEventListeners` can read this map to show attached listeners in DevTools.
 - **Overlay highlighting** renders in the terminal itself — when you hover over an element in DevTools' Elements panel, the terminal visually highlights that element's box model (content, padding, border, margin regions) using color overlays or inverted cells.
 - **Performance domain** forwards entries from `window.performance` (M7). Frame timing, FCP, LCP, and INP data are available in DevTools.
-- **Source structure:** `src/devtools/` with `classes/`, `types/`, `constants/` subdirectories, following project conventions. Exported via a separate entry point (`@micra/terminal-dom/devtools`) so the bridge is tree-shakeable — zero cost when not imported.
+- **Source structure:** `src/devtools/` with `classes/`, `types/`, `constants/` subdirectories, following project conventions. Exported via a separate entry point (`@cliui/terminal/devtools`) so the bridge is tree-shakeable — zero cost when not imported.
 
 **Implemented CDP domains:**
 
-| Domain | Scope | Terminal-dom data source |
-|---|---|---|
-| **DOM** | Tree inspection, mutations, editing, search | DOM polyfill + hooks bridge |
-| **CSS** | Matched rules, computed styles, stylesheets, editing | StyleEngine, SelectorMatcher, CSSParser |
-| **Runtime** | Evaluation, object inspection, `$0` | Window, Document, Terminal instance |
-| **Overlay** | Element highlighting | Layout engine (box positions) + Renderer |
-| **Performance** | Metrics, timeline | `window.performance` (M7) |
-| **Log** | Console messages | Console interception |
-| **DOMDebugger** | Event listener inspection | EventTarget `LISTENERS` map |
-| **Page** | Startup stubs | Minimal stubs for DevTools handshake |
+| Domain          | Scope                                                | Terminal-dom data source                 |
+| --------------- | ---------------------------------------------------- | ---------------------------------------- |
+| **DOM**         | Tree inspection, mutations, editing, search          | DOM polyfill + hooks bridge              |
+| **CSS**         | Matched rules, computed styles, stylesheets, editing | StyleEngine, SelectorMatcher, CSSParser  |
+| **Runtime**     | Evaluation, object inspection, `$0`                  | Window, Document, Terminal instance      |
+| **Overlay**     | Element highlighting                                 | Layout engine (box positions) + Renderer |
+| **Performance** | Metrics, timeline                                    | `window.performance` (M7)                |
+| **Log**         | Console messages                                     | Console interception                     |
+| **DOMDebugger** | Event listener inspection                            | EventTarget `LISTENERS` map              |
+| **Page**        | Startup stubs                                        | Minimal stubs for DevTools handshake     |
 
 **Stubbed domains (acknowledged to satisfy DevTools startup, no implementation):**
 
@@ -369,7 +369,7 @@ Implement the top-level `DevToolsBridge` class that wires all CDP domains togeth
 - When a DevTools client connects, all domains are initialized with the terminal's current state (document tree, stylesheets, performance entries)
 - When a DevTools client disconnects, registries are cleaned up to prevent memory leaks
 - Terminal integration via constructor option: `new Terminal({ devtools: true })` or `new Terminal({ devtools: { port: 9333 } })` automatically creates and starts the bridge
-- Separate import path for explicit control: `import { DevToolsBridge } from '@micra/terminal-dom/devtools'`
+- Separate import path for explicit control: `import { DevToolsBridge } from '@cliui/terminal/devtools'`
 - The `src/devtools/index.ts` barrel exports `DevToolsBridge` and relevant types
 - Integration tests verify: full round-trip from Terminal creation with DevTools enabled → WebSocket connection → DOM inspection → style inspection → console evaluation → element highlighting → performance metrics
 

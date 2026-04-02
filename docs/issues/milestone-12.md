@@ -2,7 +2,7 @@
 
 ## Working Summary
 
-Phase 12 migrates the codebase from a single `@micra/terminal-dom` package into a `@cliui/*` monorepo with distinct packages that follow the architecture's natural boundaries. This is structural infrastructure work — all existing code and tests must continue to work, just organized across packages instead of one.
+Phase 12 migrates the codebase from a single `@cliui/terminal` package into a `@cliui/*` monorepo with distinct packages that follow the architecture's natural boundaries. This is structural infrastructure work — all existing code and tests must continue to work, just organized across packages instead of one.
 
 **Package structure:**
 
@@ -64,8 +64,8 @@ cliui/                          ← workspace root
 - **Scaffolded packages for future milestones.** `@cliui/devtools` (M8) and `@cliui/vite-plugin` (M10) get empty package shells with correct dependency declarations. Actual implementation happens in their milestones.
 - **pnpm workspaces with workspace protocol.** Internal dependencies use `"@cliui/dom": "workspace:*"` for linked development. Published packages resolve to real versions.
 - **Shared config files.** Base Vite, TypeScript, and vitest configs live in `.config/` at the workspace root. Each package extends them. This avoids config duplication while allowing per-package overrides.
-- **Examples are updated.** The existing examples (`basic`, `preact`, `react`, `solid`, `svelte`, `vanilla`, `vue`) update their imports from `@micra/terminal-dom` to `@cliui/terminal` and `@cliui/elements`.
-- **The `polyfillEnvironment` side-effect import moves to `@cliui/terminal`.** The current main entry (`src/index.ts`) auto-polyfills globals. This behavior stays as `@cliui/terminal`'s default export, with `@cliui/terminal/core` as the side-effect-free alternative (matching the current `@micra/terminal-dom/core` pattern).
+- **Examples are updated.** The existing examples (`basic`, `preact`, `react`, `solid`, `svelte`, `vanilla`, `vue`) update their imports from `@cliui/terminal` to `@cliui/terminal` and `@cliui/elements`.
+- **The `polyfillEnvironment` side-effect import moves to `@cliui/terminal`.** The current main entry (`src/index.ts`) auto-polyfills globals. This behavior stays as `@cliui/terminal`'s default export, with `@cliui/terminal/core` as the side-effect-free alternative (matching the current `@cliui/terminal/core` pattern).
 - **Performance benchmarks stay with their packages.** `*.bench.ts` files move alongside the source they benchmark. The root `pnpm test:performance:record` and `pnpm test:performance:compare` aggregate across packages.
 
 **Execution order:**
@@ -233,12 +233,12 @@ Set up root-level workspace scripts that run across all packages. The `pnpm chec
 
 **Summary**
 
-Update all existing example applications to use `@cliui/*` imports instead of `@micra/terminal-dom`. Each example should work with the monorepo's workspace linking.
+Update all existing example applications to use `@cliui/*` imports instead of `@cliui/terminal`. Each example should work with the monorepo's workspace linking.
 
 **Expected Outcomes**
 
-- All examples (`basic`, `preact`, `react`, `solid`, `svelte`, `vanilla`, `vue`) update their `package.json` dependencies from `@micra/terminal-dom` to `@cliui/terminal` and `@cliui/elements`
-- All source imports in examples are updated: `@micra/terminal-dom` → `@cliui/terminal`, `@micra/terminal-dom/components` → `@cliui/elements`
+- All examples (`basic`, `preact`, `react`, `solid`, `svelte`, `vanilla`, `vue`) update their `package.json` dependencies from `@cliui/terminal` to `@cliui/terminal` and `@cliui/elements`
+- All source imports in examples are updated: `@cliui/terminal` → `@cliui/terminal`, `@cliui/terminal/components` → `@cliui/elements`
 - Each example builds and runs correctly with workspace-linked packages
 - Example `pnpm-workspace.yaml` references are maintained
 
@@ -279,12 +279,12 @@ Update all documentation, conventions, and project references to reflect the `@c
 
 - `AGENTS.md` (now `CLAUDE.md` per convention) is updated: file paths reference `packages/` structure, import examples use `@cliui/*`
 - `docs/learn/architecture.md` — source structure section updated to reflect the monorepo layout and package boundaries
-- `docs/ROADMAP.md` — any references to `@micra/terminal-dom` updated to `@cliui/*`
+- `docs/ROADMAP.md` — any references to `@cliui/terminal` updated to `@cliui/*`
 - All milestone files in `docs/issues/` — import examples and package references updated
 - `README.md` — installation and usage examples updated
 - Skill files (`.agents/skills/`) — any file path references updated for the monorepo structure
 - `register.d.ts` — global type declarations updated if namespace changes
-- No stale references to `@micra/terminal-dom` remain in documentation (except historical context)
+- No stale references to `@cliui/terminal` remain in documentation (except historical context)
 
 **Dependencies**
 

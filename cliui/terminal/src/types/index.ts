@@ -25,9 +25,9 @@ export interface TerminalOptions {
    * DOM `Window` instance powering this terminal.
    *
    * When omitted the constructor reads `globalThis.window` — which the
-   * default `@micra/terminal-dom` import populates automatically via
+   * default `@cliui/terminal` import populates automatically via
    * the environment polyfill.  Pass an explicit instance when using the
-   * side-effect-free `@micra/terminal-dom/core` entry point.
+   * side-effect-free `@cliui/terminal/core` entry point.
    */
   window?: Window;
 }

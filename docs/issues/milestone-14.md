@@ -23,29 +23,30 @@ Phase 14 adds responsive styling to terminal-dom via CSS media queries and conta
   4. Layout children
 
   The layout engine already does multiple passes for flex sizing (`flex-grow`/`flex-shrink` distribution). The container query resolution adds another pass layer but follows the same pattern.
+
 - **`container-type: inline-size` only.** Browsers support `inline-size`, `block-size`, and `normal`. For terminal-dom's first pass, `inline-size` (width-based queries) covers the vast majority of use cases. Block-size can be added later.
 - **Boolean combinators.** Media conditions support `and`, `or` (comma-separated in CSS), and `not`: `@media (min-width: 80) and (max-height: 40) { }`. Container conditions support the same.
 - **`prefers-reduced-motion` checks environment.** Maps to the `REDUCE_MOTION` or `NO_MOTION` environment variable, or a terminal-level setting if detectable. When matched, components can disable animations and transitions.
 
 **Supported media features:**
 
-| Feature | Values | Source |
-|---|---|---|
-| `min-width` / `max-width` | Number (cells) | Terminal columns |
-| `min-height` / `max-height` | Number (cells) | Terminal rows |
-| `width` / `height` | Number (cells) | Exact match |
-| `prefers-color-scheme` | `dark`, `light` | OSC 11 query (M13T6) |
-| `prefers-reduced-motion` | `reduce`, `no-preference` | Environment variable |
-| `orientation` | `landscape`, `portrait` | `columns > rows` → landscape |
+| Feature                     | Values                    | Source                       |
+| --------------------------- | ------------------------- | ---------------------------- |
+| `min-width` / `max-width`   | Number (cells)            | Terminal columns             |
+| `min-height` / `max-height` | Number (cells)            | Terminal rows                |
+| `width` / `height`          | Number (cells)            | Exact match                  |
+| `prefers-color-scheme`      | `dark`, `light`           | OSC 11 query (M13T6)         |
+| `prefers-reduced-motion`    | `reduce`, `no-preference` | Environment variable         |
+| `orientation`               | `landscape`, `portrait`   | `columns > rows` → landscape |
 
 **Supported container features:**
 
-| Feature | Values | Source |
-|---|---|---|
-| `min-width` / `max-width` | Number (cells) | Container's resolved content width |
-| `min-height` / `max-height` | Number (cells) | Container's resolved content height |
-| `width` / `height` | Number (cells) | Exact match |
-| `orientation` | `landscape`, `portrait` | Container dimensions comparison |
+| Feature                     | Values                  | Source                              |
+| --------------------------- | ----------------------- | ----------------------------------- |
+| `min-width` / `max-width`   | Number (cells)          | Container's resolved content width  |
+| `min-height` / `max-height` | Number (cells)          | Container's resolved content height |
+| `width` / `height`          | Number (cells)          | Exact match                         |
+| `orientation`               | `landscape`, `portrait` | Container dimensions comparison     |
 
 **Example — responsive terminal dashboard:**
 
@@ -57,25 +58,41 @@ Phase 14 adds responsive styling to terminal-dom via CSS media queries and conta
 
 /* Wide terminal: side-by-side layout */
 @media (min-width: 120) {
-  .dashboard { flex-direction: row; }
-  .sidebar { width: 30; }
-  .main { flex-grow: 1; }
+  .dashboard {
+    flex-direction: row;
+  }
+  .sidebar {
+    width: 30;
+  }
+  .main {
+    flex-grow: 1;
+  }
 }
 
 /* Narrow terminal: stacked layout */
 @media (max-width: 119) {
-  .dashboard { flex-direction: column; }
-  .sidebar { display: none; }
+  .dashboard {
+    flex-direction: column;
+  }
+  .sidebar {
+    display: none;
+  }
 }
 
 /* Short terminal: compact mode */
 @media (max-height: 24) {
-  .header { padding: 0; border-style: none; }
+  .header {
+    padding: 0;
+    border-style: none;
+  }
 }
 
 /* Dark terminal theme */
 @media (prefers-color-scheme: dark) {
-  .app { background-color: #1a1a2e; color: #e0e0e0; }
+  .app {
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+  }
 }
 ```
 
@@ -88,13 +105,22 @@ Phase 14 adds responsive styling to terminal-dom via CSS media queries and conta
 
 /* Panel is wide enough for horizontal layout */
 @container (min-width: 40) {
-  .panel-content { display: flex; flex-direction: row; gap: 2; }
+  .panel-content {
+    display: flex;
+    flex-direction: row;
+    gap: 2;
+  }
 }
 
 /* Panel is narrow — stack vertically */
 @container (max-width: 39) {
-  .panel-content { display: flex; flex-direction: column; }
-  .panel-detail { display: none; }
+  .panel-content {
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-detail {
+    display: none;
+  }
 }
 ```
 

@@ -1,6 +1,6 @@
 # React example
 
-Demonstrates `@micra/terminal-dom` with React 19 — JSX components, hooks, and event handling.
+Demonstrates `@cliui/terminal` with React 19 — JSX components, hooks, and event handling.
 
 ```bash
 pnpm --dir examples/react dev

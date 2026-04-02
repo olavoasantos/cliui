@@ -4,7 +4,7 @@
  * `navigator`, etc. on `globalThis` pick up the terminal DOM
  * automatically.
  *
- * Use `@micra/terminal-dom/core` for a side-effect-free import.
+ * Use `@cliui/terminal/core` for a side-effect-free import.
  */
 
 import {Window} from '@cliui/dom';

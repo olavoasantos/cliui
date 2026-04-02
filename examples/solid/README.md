@@ -1,6 +1,6 @@
 # Solid example
 
-Demonstrates `@micra/terminal-dom` with SolidJS — reactive signals, JSX, and event handling.
+Demonstrates `@cliui/terminal` with SolidJS — reactive signals, JSX, and event handling.
 
 ```bash
 pnpm --dir examples/solid dev

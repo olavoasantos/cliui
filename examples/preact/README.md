@@ -1,6 +1,6 @@
 # Preact example
 
-Demonstrates `@micra/terminal-dom` with Preact — JSX components, hooks, and event handling.
+Demonstrates `@cliui/terminal` with Preact — JSX components, hooks, and event handling.
 
 ```bash
 pnpm --dir examples/preact dev

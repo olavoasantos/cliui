@@ -1,7 +1,7 @@
 {
   "name": "@cliui/terminal",
   "version": "0.0.0",
-  "description": "Terminal UI engine \u2014 CSS, Layout, Renderer, and Terminal I/O",
+  "description": "Terminal UI engine — CSS, Layout, Renderer, and Terminal I/O",
   "license": "MIT",
   "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
   "repository": {
@@ -43,6 +43,10 @@
       "require": "./dist/renderer/index.cjs"
     }
   },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "vite build",
     "test:unit": "vitest run --config=vitest.unit.config.ts",
@@ -52,9 +56,5 @@
   },
   "dependencies": {
     "@cliui/dom": "workspace:*"
-  },
-  "publishConfig": {
-    "access": "restricted",
-    "registry": "https://registry.npmjs.org/"
   }
 }

@@ -1,4 +1,4 @@
-# @micra/terminal-dom — Design Document
+# @cliui/terminal — Design Document
 
 ## Context
 
@@ -393,7 +393,7 @@ Wrap the entire frame update in synchronized output mode (`CSI ? 2026 h` / `CSI 
 ### Terminal Class
 
 ```ts
-import {Terminal} from '@micra/terminal-dom';
+import {Terminal} from '@cliui/terminal';
 
 const terminal = new Terminal({
   altScreen: true,
@@ -456,7 +456,7 @@ doc.body.appendChild(container);
 ### With a Framework (Preact)
 
 ```tsx
-import {Terminal} from '@micra/terminal-dom';
+import {Terminal} from '@cliui/terminal';
 import {render} from 'preact';
 
 const terminal = new Terminal();
