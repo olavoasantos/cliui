@@ -43,15 +43,20 @@ file.textContent = ' src/components/index.ts';
 
 const pos = document.createElement('span');
 pos.style.display = 'inline';
-pos.textContent = 'Ln 42, Col 8 ';
+pos.textContent = 'Ln 42, Col 8';
+
+const sep = document.createElement('span');
+sep.style.display = 'inline';
+sep.textContent = ' │ ';
 
 const enc = document.createElement('span');
 enc.style.display = 'inline';
-enc.textContent = 'UTF-8 ';
+enc.textContent = 'UTF-8';
 
 bar.appendChild(left);
 bar.appendChild(file);
 bar.appendChild(pos);
+bar.appendChild(sep);
 bar.appendChild(enc);
 document.body.appendChild(bar);
 
