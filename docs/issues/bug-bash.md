@@ -150,6 +150,22 @@ When flex-direction is row and children have borders, the border rendering doesn
 
 ---
 
+### BUG-13: Table cells render vertically instead of side by side in flex row
+
+**Summary**
+
+Table cells (`ui-th`, `ui-td`) with `display: inline` inside a `ui-tr` (`display: flex; flex-direction: row`) render stacked vertically instead of side by side. The `normalizeDisplay` function converts `inline` to `flex-direction: row; flex-wrap: wrap`, making each cell a row-direction flex container. The layout engine then stacks these containers vertically within the parent row.
+
+**Discovered in:** Buffer rendering tests — "Name" renders at row 0, "Role" at row 3, "Status" at row 6 instead of all on row 0.
+
+**Impact:** Table layout is fundamentally broken at the rendering level. The table appears to work because column widths are computed and set, but the actual pixel output has cells stacked vertically. Borders on table cells cannot work until this is fixed.
+
+**Regression tests:** `src/components/UiTable/specs/UiTable.rendering.integration.ts` (3 tests, currently skipped).
+
+**Root cause:** The interaction between `display: inline` normalization and parent flex row layout. Needs investigation in `FlexLayout` and `normalizeDisplay`.
+
+---
+
 ### BUG-11: `<ui-log>` cannot use native scroll — uses internal tail window as workaround
 
 **Summary**

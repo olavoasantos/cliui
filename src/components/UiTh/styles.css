@@ -1,4 +1,7 @@
 ui-th {
-  display: block;
+  display: inline;
   font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

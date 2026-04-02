@@ -1,3 +1,6 @@
 ui-td {
-  display: block;
+  display: inline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
