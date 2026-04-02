@@ -530,6 +530,40 @@ describe('LayoutEngine', () => {
 
       expect(child.height).toBe(1);
     });
+    it('space-only text under white-space normal collapses to zero lines', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const el = document.createElement('div');
+
+      el.textContent = '          ';
+      body.appendChild(el);
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 40, 20);
+      const child = box.children[0]!;
+
+      // Regular spaces collapse under white-space: normal
+      expect(child.textLines?.length ?? 0).toBe(0);
+    });
+
+    it('NBSP padding under white-space normal does not collapse (BUG-2)', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const el = document.createElement('div');
+
+      // Non-breaking spaces should NOT collapse
+      el.textContent = '\u00A0'.repeat(10);
+      body.appendChild(el);
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const box = engine.layout(body, 40, 20);
+      const child = box.children[0]!;
+
+      expect(child.textLines?.length ?? 0).toBeGreaterThanOrEqual(1);
+      expect(child.height).toBeGreaterThanOrEqual(1);
+    });
   });
 
   describe('display: none', () => {

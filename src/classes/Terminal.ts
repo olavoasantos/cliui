@@ -8,6 +8,15 @@ import type {ClipboardEvent} from '../dom/classes/ClipboardEvent';
 import type {MouseEvent} from '../dom/classes/MouseEvent';
 import {LayoutEngine} from '../layout';
 import {graphemeWidth} from '../layout/utilities/graphemeWidth';
+
+/**
+ * Non-breaking space used for editable content padding.
+ *
+ * Regular ASCII spaces collapse to nothing under `white-space: normal`.
+ * NBSP (U+00A0) is not collapsible whitespace, so it preserves the
+ * intended width regardless of the active white-space mode.
+ */
+const NBSP = '\u00A0';
 import {Renderer} from '../renderer';
 import {CaretManager} from '../terminal/classes/CaretManager';
 import {EDITABLE} from '../terminal/constants/editable';
@@ -500,7 +509,7 @@ export class Terminal {
       } else if (placeholder.length > 0) {
         element.textContent = this.truncateToWidth(placeholder, width);
       } else {
-        element.textContent = ' '.repeat(width);
+        element.textContent = NBSP.repeat(width);
       }
       return;
     }
@@ -528,7 +537,7 @@ export class Terminal {
     }
 
     if (outputWidth < width) {
-      output += ' '.repeat(width - outputWidth);
+      output += NBSP.repeat(width - outputWidth);
     }
 
     element.textContent = output;
@@ -551,7 +560,7 @@ export class Terminal {
       const lineIndex = state.scrollY + row;
 
       if (lineIndex >= lines.length) {
-        renderedLines.push(' '.repeat(width));
+        renderedLines.push(NBSP.repeat(width));
         continue;
       }
 
@@ -569,7 +578,7 @@ export class Terminal {
       }
 
       if (lineWidth < width) {
-        lineOutput += ' '.repeat(width - lineWidth);
+        lineOutput += NBSP.repeat(width - lineWidth);
       }
 
       renderedLines.push(lineOutput);
@@ -589,7 +598,7 @@ export class Terminal {
     for (let row = 0; row < height; row++) {
       const line = lines[row] ?? '';
       const padAmount = Math.max(0, width - line.length);
-      padded.push(line + ' '.repeat(padAmount));
+      padded.push(line + NBSP.repeat(padAmount));
     }
 
     return padded.join('\n');
@@ -611,7 +620,7 @@ export class Terminal {
     }
 
     if (width < maxWidth) {
-      result += ' '.repeat(maxWidth - width);
+      result += NBSP.repeat(maxWidth - width);
     }
 
     return result;
