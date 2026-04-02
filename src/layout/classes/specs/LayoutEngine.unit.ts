@@ -566,6 +566,36 @@ describe('LayoutEngine', () => {
     });
   });
 
+  describe('flex row stretch with borders (BUG-12)', () => {
+    it('stretches row children to equal height when one has a border', () => {
+      const {document, styleEngine} = createEnv();
+      const body = document.body;
+      const row = document.createElement('div');
+      const short = document.createElement('div');
+      const tall = document.createElement('div');
+
+      short.textContent = 'Short';
+      short.setAttribute('id', 'short');
+      tall.textContent = 'Line 1\nLine 2\nLine 3';
+      tall.setAttribute('id', 'tall');
+      row.appendChild(short);
+      row.appendChild(tall);
+      body.appendChild(row);
+
+      addStyle(
+        document,
+        'div { display: flex; flex-direction: row; } #short { width: 10; border-style: single; white-space: pre; } #tall { width: 10; white-space: pre; }',
+      );
+      styleEngine.computeAll();
+
+      const engine = new LayoutEngine(styleEngine);
+      const layout = engine.layout(body, 40, 20);
+      const rowBox = layout.children[0]!;
+
+      expect(rowBox.children[0]!.height).toBe(rowBox.children[1]!.height);
+    });
+  });
+
   describe('overflow: scroll (BUG-4)', () => {
     it('does not flex-shrink children inside a scroll container', () => {
       const {document, styleEngine} = createEnv();
