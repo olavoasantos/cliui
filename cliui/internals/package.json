@@ -24,6 +24,18 @@
     "test:performance:watch": "echo 'noop'",
     "test:performance:record": "echo 'noop'",
     "test:performance:compare": "echo 'noop'",
-    "type:check": "echo 'noop'"
+    "type:check": "echo 'noop'",
+    "check": "echo 'noop'"
+  },
+  "dependencies": {
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "terser": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vitest": "catalog:"
   }
 }

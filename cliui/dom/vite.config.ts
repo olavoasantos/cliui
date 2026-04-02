@@ -1,4 +1,4 @@
-import {createViteConfig} from '../internals/vite.base';
+import {createViteConfig} from '@cliui/internals/vite.base';
 import pkg from './package.json';
 
 export default createViteConfig({

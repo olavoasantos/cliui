@@ -1,8 +1,4 @@
-/**
- * Minimal ambient declarations for packages that depend on @cliui/dom.
- * This file provides the global type augmentations without pulling in
- * the dom source tree via import() references.
- */
+/** Ambient DOM types needed by the terminal DOM implementation. */
 
 declare global {
   interface EventListenerOptions {
@@ -22,6 +18,10 @@ declare global {
   }
 
   type EventListenerOrEventListenerObject = EventListener | EventListenerObject;
+
+  interface CustomElementConstructor {
+    new (): import('./src/classes/HTMLElement').HTMLElement;
+  }
 
   interface ElementDefinitionOptions {
     extends?: string;

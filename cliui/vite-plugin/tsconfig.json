@@ -1,8 +1,5 @@
 {
-  "extends": "../internals/tsconfig.base.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo"
-  },
+  "extends": "@cliui/internals/tsconfig.base.json",
   "include": ["src"],
   "exclude": ["dist", "node_modules"]
 }

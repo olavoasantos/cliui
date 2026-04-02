@@ -10,7 +10,8 @@
     "directory": "cliui/dom"
   },
   "files": [
-    "dist"
+    "dist",
+    "register.d.ts"
   ],
   "type": "module",
   "main": "dist/index.cjs",
@@ -21,6 +22,9 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./register": {
+      "types": "./register.d.ts"
     }
   },
   "publishConfig": {
@@ -32,10 +36,10 @@
     "clean": "rm -rf dist node_modules",
     "dev": "vite build --watch",
     "docs:generate": "echo 'noop'",
-    "format:check": "oxfmt check . --config ../internals/.prettierrc --no-error-on-unmatched-pattern",
-    "format:fix": "oxfmt . --config ../internals/.prettierrc --no-error-on-unmatched-pattern",
-    "lint:check": "oxlint -c ../internals/oxlint.json --silent",
-    "lint:fix": "oxlint -c ../internals/oxlint.json --fix",
+    "format:check": "oxfmt check . --config .prettierrc.mjs --no-error-on-unmatched-pattern",
+    "format:fix": "oxfmt . --config .prettierrc.mjs --no-error-on-unmatched-pattern",
+    "lint:check": "oxlint -c oxlint.json --silent",
+    "lint:fix": "oxlint -c oxlint.json --fix",
     "test:check": "run-p test:unit test:integration",
     "test:check:all": "run-p test:unit test:integration test:performance",
     "test:unit": "vitest run --config=vitest.unit.config.ts",
@@ -46,6 +50,19 @@
     "test:performance:watch": "vitest bench --config=vitest.bench.config.ts",
     "test:performance:record": "vitest bench --run --config=vitest.bench.config.ts --outputJson=../../.testing/performance/reference.json",
     "test:performance:compare": "vitest bench --run --config=vitest.bench.config.ts --compare=../../.testing/performance/reference.json",
-    "type:check": "tsc --noEmit"
+    "type:check": "tsc --noEmit",
+    "check": "run-p type:check lint:check format:check test:check"
+  },
+  "devDependencies": {
+    "@cliui/internals": "workspace:*",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "terser": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vitest": "catalog:"
   }
 }
