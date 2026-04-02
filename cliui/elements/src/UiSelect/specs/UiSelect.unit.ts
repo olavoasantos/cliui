@@ -1,10 +1,9 @@
 import {describe, expect, it} from 'vitest';
 
 import {Event, KeyboardEvent, Window} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
-
-import type {CustomElementConstructor} from '@cliui/dom';
 
 function createSelect(
   optionData: Array<{value: string; label: string; disabled?: boolean}> = [],
@@ -111,7 +110,7 @@ describe('UiSelect', () => {
       const {select} = createSelect(FRUITS, {value: 'apple'});
       const events: Event[] = [];
 
-      select.addEventListener('input', ((e: Event) => events.push(e)) as EventListener);
+      select.addEventListener('input', ((e: Event) => events.push(e)) as never);
 
       keyDown(select, 'ArrowDown');
 
@@ -284,7 +283,7 @@ describe('UiSelect', () => {
       const {select} = createSelect(FRUITS, {value: 'apple'});
       const changes: Event[] = [];
 
-      select.addEventListener('change', ((e: Event) => changes.push(e)) as EventListener);
+      select.addEventListener('change', ((e: Event) => changes.push(e)) as never);
 
       select.dispatchEvent(new Event('focus'));
       keyDown(select, 'ArrowDown');
@@ -297,7 +296,7 @@ describe('UiSelect', () => {
       const {select} = createSelect(FRUITS, {value: 'apple'});
       const changes: Event[] = [];
 
-      select.addEventListener('change', ((e: Event) => changes.push(e)) as EventListener);
+      select.addEventListener('change', ((e: Event) => changes.push(e)) as never);
 
       select.dispatchEvent(new Event('focus'));
       select.dispatchEvent(new Event('blur'));

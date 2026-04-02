@@ -2,6 +2,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '@cliui/terminal';
 import {Event, KeyboardEvent} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
@@ -91,7 +92,7 @@ describe('UiSelect integration', () => {
 
     select.addEventListener('input', ((event: Event) => {
       inputEvents.push(event);
-    }) as EventListener);
+    }) as never);
 
     keyDown(select, 'ArrowDown');
 

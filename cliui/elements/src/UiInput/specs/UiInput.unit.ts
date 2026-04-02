@@ -1,10 +1,10 @@
 import {describe, expect, it} from 'vitest';
 
 import {Window} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {EDITABLE} from '@cliui/terminal';
 import {UiInput} from '../component';
 
-import type {CustomElementConstructor} from '@cliui/dom';
 import type {EditableConfiguration} from '@cliui/terminal';
 
 function createInput(

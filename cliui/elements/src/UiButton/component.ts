@@ -42,10 +42,10 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
   private flashFramesRemaining = 0;
 
   /** Bound event handlers for cleanup. */
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
-  private readonly boundKeyUp = this.handleKeyUp.bind(this) as EventListener;
-  private readonly boundClick = this.handleClick.bind(this) as EventListener;
-  private readonly boundBlur = this.handleBlur.bind(this) as EventListener;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
+  private readonly boundKeyUp = this.handleKeyUp.bind(this) as never;
+  private readonly boundClick = this.handleClick.bind(this) as never;
+  private readonly boundBlur = this.handleBlur.bind(this) as never;
 
   connectedCallback(): void {
     if (!this.isDisabled()) {

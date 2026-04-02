@@ -1,11 +1,10 @@
 import {describe, expect, it} from 'vitest';
 
 import {Window} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiTd} from '../../UiTd/component';
 import {UiTh} from '../../UiTh/component';
 import {UiTr} from '../component';
-
-import type {CustomElementConstructor} from '@cliui/dom';
 
 function createRow(
   window = new Window(),

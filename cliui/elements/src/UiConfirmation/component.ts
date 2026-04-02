@@ -90,12 +90,12 @@ export class UiConfirmation extends HTMLElement {
     /* Confirm button click */
     confirmBtn.addEventListener('click', (() => {
       this.resolve(true);
-    }) as EventListener);
+    }) as never);
 
     /* Cancel button click */
     cancelBtn.addEventListener('click', (() => {
       this.resolve(false);
-    }) as EventListener);
+    }) as never);
 
     /* Enter on confirm button */
     confirmBtn.addEventListener('keydown', ((event: Event) => {
@@ -104,7 +104,7 @@ export class UiConfirmation extends HTMLElement {
         event.preventDefault();
         this.resolve(true);
       }
-    }) as EventListener);
+    }) as never);
 
     /* Enter on cancel button */
     cancelBtn.addEventListener('keydown', ((event: Event) => {
@@ -113,12 +113,12 @@ export class UiConfirmation extends HTMLElement {
         event.preventDefault();
         this.resolve(false);
       }
-    }) as EventListener);
+    }) as never);
 
     /* Escape via dialog cancel event */
     (this.dialog as unknown as Element).addEventListener('cancel', (() => {
       this.resolve(false);
-    }) as EventListener);
+    }) as never);
   }
 
   private syncMessage(): void {

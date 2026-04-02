@@ -1,9 +1,8 @@
 import {describe, expect, it} from 'vitest';
 
 import {Event, KeyboardEvent, MouseEvent, Window} from '@cliui/dom';
-import {UiButton} from '../component';
-
 import type {CustomElementConstructor} from '@cliui/dom';
+import {UiButton} from '../component';
 
 function createButton(
   window = new Window(),
@@ -119,7 +118,7 @@ describe('UiButton', () => {
 
       button.addEventListener('click', ((event: Event) => {
         clicks.push(event);
-      }) as EventListener);
+      }) as never);
 
       keyDown(button, 'Enter');
 
@@ -154,7 +153,7 @@ describe('UiButton', () => {
 
       button.addEventListener('click', ((event: Event) => {
         clicks.push(event);
-      }) as EventListener);
+      }) as never);
 
       keyDown(button, 'Enter');
 
@@ -184,7 +183,7 @@ describe('UiButton', () => {
 
       button.addEventListener('click', ((event: Event) => {
         clicks.push(event);
-      }) as EventListener);
+      }) as never);
 
       keyDown(button, ' ');
 
@@ -221,7 +220,7 @@ describe('UiButton', () => {
 
       button.addEventListener('click', ((event: Event) => {
         clicks.push(event);
-      }) as EventListener);
+      }) as never);
 
       keyDown(button, ' ');
       keyUp(button, ' ');
@@ -247,7 +246,7 @@ describe('UiButton', () => {
 
       button.addEventListener('click', ((event: Event) => {
         clicks.push(event);
-      }) as EventListener);
+      }) as never);
 
       keyUp(button, ' ');
 
@@ -283,7 +282,7 @@ describe('UiButton', () => {
 
       button.addEventListener('click', ((event: Event) => {
         clicks.push(event);
-      }) as EventListener);
+      }) as never);
 
       button.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true}));
 
@@ -296,7 +295,7 @@ describe('UiButton', () => {
 
       button.ownerDocument?.body.addEventListener('click', ((event: Event) => {
         bodyClicks.push(event);
-      }) as EventListener);
+      }) as never);
 
       button.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true}));
 
@@ -371,7 +370,7 @@ describe('UiButton', () => {
 
       button.addEventListener('click', ((event: Event) => {
         clicks.push(event);
-      }) as EventListener);
+      }) as never);
 
       button.parentNode?.removeChild(button);
       keyDown(button, 'Enter');

@@ -24,11 +24,11 @@ export class UiMenu extends HTMLElement {
   static readonly tagName = UI_MENU_TAG_NAME;
 
   private highlightIndex = 0;
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
-  private readonly boundClick = this.handleClick.bind(this) as EventListener;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
+  private readonly boundClick = this.handleClick.bind(this) as never;
 
   /** Bound document click handler for close-on-click-outside. */
-  private readonly boundDocClick = this.handleDocumentClick.bind(this) as EventListener;
+  private readonly boundDocClick = this.handleDocumentClick.bind(this) as never;
 
   connectedCallback(): void {
     this.addEventListener('keydown', this.boundKeyDown);

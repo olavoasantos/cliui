@@ -43,8 +43,8 @@ export class UiDetails extends HTMLElement {
   private contentWrapper: Element | null = null;
 
   /** Bound event handlers for cleanup. */
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
-  private readonly boundClick = this.handleClick.bind(this) as EventListener;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
+  private readonly boundClick = this.handleClick.bind(this) as never;
 
   connectedCallback(): void {
     if (!this.isDisabled()) {

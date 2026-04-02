@@ -34,8 +34,8 @@ export class UiList extends HTMLElement {
   /** Last index used as the anchor for Shift range selection. */
   private rangeAnchor = 0;
 
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
-  private readonly boundClick = this.handleClick.bind(this) as EventListener;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
+  private readonly boundClick = this.handleClick.bind(this) as never;
 
   connectedCallback(): void {
     if (!this.hasAttribute('tabindex')) {

@@ -1,10 +1,9 @@
 import {describe, expect, it} from 'vitest';
 
 import {Window} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiTr} from '../../UiTr/component';
 import {UiThead} from '../component';
-
-import type {CustomElementConstructor} from '@cliui/dom';
 
 function createThead(window = new Window(), rowCount = 0): {window: Window; thead: UiThead} {
   window.customElements.define(UiThead.tagName, UiThead as unknown as CustomElementConstructor);

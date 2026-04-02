@@ -151,7 +151,7 @@ export class Terminal {
           (target as unknown as {setCaret(c: unknown): void}).setCaret(caret);
         }
       }
-    }) as unknown as EventListener);
+    }) as never);
 
     this.document.body.addEventListener('focusout', ((event: Event) => {
       const target = event.target as Element | null;
@@ -179,7 +179,7 @@ export class Terminal {
           (target as unknown as {setCaret(c: unknown): void}).setCaret(null);
         }
       }
-    }) as unknown as EventListener);
+    }) as never);
 
     this.document.body.addEventListener('keydown', ((event: Event) => {
       const activeElement = this.document.activeElement;
@@ -212,7 +212,7 @@ export class Terminal {
           }
         }
       }
-    }) as unknown as EventListener);
+    }) as never);
 
     this.document.body.addEventListener('paste', ((event: Event) => {
       const target = this.document.activeElement;
@@ -234,7 +234,7 @@ export class Terminal {
         state.caret.insertText(text);
         this.syncEditableRendering(target, config);
       }
-    }) as unknown as EventListener);
+    }) as never);
 
     this.document.body.addEventListener('mousedown', ((event: Event) => {
       const target = event.target as Element | null;
@@ -263,7 +263,7 @@ export class Terminal {
       }
 
       this.syncEditableRendering(target, config);
-    }) as unknown as EventListener);
+    }) as never);
   }
 
   /* ── [EDITABLE] system management ──────────────────────── */
@@ -700,7 +700,7 @@ export class Terminal {
       if (nextScroll !== currentScroll) {
         this.renderFrame();
       }
-    }) as unknown as EventListener);
+    }) as never);
   }
 
   /**

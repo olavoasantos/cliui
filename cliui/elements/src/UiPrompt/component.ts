@@ -114,12 +114,12 @@ export class UiPrompt extends HTMLElement {
     /* Confirm button click */
     confirmBtn.addEventListener('click', (() => {
       this.resolve(this.getInputValue());
-    }) as EventListener);
+    }) as never);
 
     /* Cancel button click */
     cancelBtn.addEventListener('click', (() => {
       this.resolve(null);
-    }) as EventListener);
+    }) as never);
 
     /* Enter on confirm button */
     confirmBtn.addEventListener('keydown', ((event: Event) => {
@@ -128,7 +128,7 @@ export class UiPrompt extends HTMLElement {
         event.preventDefault();
         this.resolve(this.getInputValue());
       }
-    }) as EventListener);
+    }) as never);
 
     /* Enter on cancel button */
     cancelBtn.addEventListener('keydown', ((event: Event) => {
@@ -137,7 +137,7 @@ export class UiPrompt extends HTMLElement {
         event.preventDefault();
         this.resolve(null);
       }
-    }) as EventListener);
+    }) as never);
 
     /* Enter in input submits */
     this.inputEl.addEventListener('keydown', ((event: Event) => {
@@ -146,12 +146,12 @@ export class UiPrompt extends HTMLElement {
         event.preventDefault();
         this.resolve(this.getInputValue());
       }
-    }) as EventListener);
+    }) as never);
 
     /* Escape via dialog cancel event */
     dialogEl.addEventListener('cancel', (() => {
       this.resolve(null);
-    }) as EventListener);
+    }) as never);
   }
 
   private syncMessage(): void {

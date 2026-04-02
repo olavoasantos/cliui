@@ -2,7 +2,6 @@
   "name": "@cliui/terminal",
   "version": "0.0.0",
   "description": "Terminal UI engine — CSS, Layout, Renderer, and Terminal I/O",
-  "type": "module",
   "license": "MIT",
   "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
   "repository": {
@@ -10,7 +9,10 @@
     "url": "https://github.com/olavoasantos/cliui.git",
     "directory": "cliui/terminal"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -41,14 +43,14 @@
       "require": "./dist/renderer/index.cjs"
     }
   },
-  "dependencies": {
-    "@cliui/dom": "workspace:*"
-  },
   "scripts": {
     "build": "vite build",
     "test:unit": "vitest run --config=vitest.unit.config.ts",
     "test:integration": "vitest run --config=vitest.integration.config.ts",
     "test:performance": "vitest bench --run --config=vitest.bench.config.ts",
     "type:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cliui/dom": "workspace:*"
   }
 }

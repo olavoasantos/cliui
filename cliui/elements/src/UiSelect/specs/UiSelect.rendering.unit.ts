@@ -1,5 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {Event, Window} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {StyleEngine} from '@cliui/terminal';
 import {LayoutEngine} from '@cliui/terminal';
 import {Painter} from '@cliui/terminal';
@@ -7,7 +8,6 @@ import {CellBuffer} from '@cliui/terminal';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 
-import type {CustomElementConstructor} from '@cliui/dom';
 import type {Element} from '@cliui/dom';
 import type {Document} from '@cliui/dom';
 

@@ -2,6 +2,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '@cliui/terminal';
 import {MouseEvent} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../component';
 

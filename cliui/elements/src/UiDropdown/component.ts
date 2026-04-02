@@ -21,8 +21,8 @@ export class UiDropdown extends HTMLElement {
   static readonly styles = styles;
   static readonly tagName = UI_DROPDOWN_TAG_NAME;
 
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
-  private readonly boundClick = this.handleDropdownClick.bind(this) as EventListener;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
+  private readonly boundClick = this.handleDropdownClick.bind(this) as never;
 
   connectedCallback(): void {
     if (!this.hasAttribute('tabindex')) {

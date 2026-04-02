@@ -2,6 +2,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '@cliui/terminal';
 import {Event, KeyboardEvent, ToggleEvent} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiDetails} from '../component';
 
 import type {TerminalReadableInput} from '@cliui/terminal';
@@ -116,7 +117,7 @@ describe('UiDetails integration', () => {
 
     details.addEventListener('toggle', ((e: Event) => {
       events.push(e as ToggleEvent);
-    }) as EventListener);
+    }) as never);
 
     details.dispatchEvent(
       new KeyboardEvent('keydown', {

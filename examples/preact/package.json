@@ -9,7 +9,8 @@
     "dev": "vite build && node dist/main.js"
   },
   "dependencies": {
-    "@cliui/terminal": "workspace:*", "@cliui/elements": "workspace:*",
+    "@cliui/elements": "workspace:*",
+    "@cliui/terminal": "workspace:*",
     "preact": "^10.25.0"
   },
   "devDependencies": {

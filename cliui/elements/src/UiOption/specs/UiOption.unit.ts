@@ -1,9 +1,8 @@
 import {describe, expect, it} from 'vitest';
 
 import {Window} from '@cliui/dom';
-import {UiOption} from '../component';
-
 import type {CustomElementConstructor} from '@cliui/dom';
+import {UiOption} from '../component';
 
 function createOption(
   window = new Window(),

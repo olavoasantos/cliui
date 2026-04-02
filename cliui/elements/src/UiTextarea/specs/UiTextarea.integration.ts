@@ -2,6 +2,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '@cliui/terminal';
 import {Event, KeyboardEvent} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiTextarea} from '../component';
 
 import type {Element} from '@cliui/dom';
@@ -83,7 +84,7 @@ describe('UiTextarea integration', () => {
 
     textarea.addEventListener('input', ((event: Event) => {
       inputEvents.push(event);
-    }) as EventListener);
+    }) as never);
 
     typeKey(textarea, 'h');
     typeKey(textarea, 'i');
@@ -176,7 +177,7 @@ describe('UiTextarea integration', () => {
 
     textarea.addEventListener('change', ((event: Event) => {
       changeEvents.push(event);
-    }) as EventListener);
+    }) as never);
 
     typeKey(textarea, 'a');
     typeKey(textarea, 'Enter');

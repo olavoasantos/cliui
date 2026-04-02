@@ -28,8 +28,8 @@ export class UiForm extends HTMLElement {
   static readonly tagName = UI_FORM_TAG_NAME;
 
   /** Bound event handlers for cleanup. */
-  private readonly boundClick = this.handleClick.bind(this) as EventListener;
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
+  private readonly boundClick = this.handleClick.bind(this) as never;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
 
   connectedCallback(): void {
     this.addEventListener('click', this.boundClick);

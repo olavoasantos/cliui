@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 
 import {Window} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiTbody} from '../../UiTbody/component';
 import {UiTd} from '../../UiTd/component';
 import {UiTfoot} from '../../UiTfoot/component';
@@ -9,7 +10,6 @@ import {UiThead} from '../../UiThead/component';
 import {UiTr} from '../../UiTr/component';
 import {UiTable} from '../component';
 
-import type {CustomElementConstructor} from '@cliui/dom';
 import type {Element} from '@cliui/dom';
 import type {Document} from '@cliui/dom';
 

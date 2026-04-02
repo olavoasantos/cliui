@@ -2,7 +2,6 @@
   "name": "@cliui/dom",
   "version": "0.0.0",
   "description": "Standalone DOM polyfill for Node.js — Window, Document, Element, Event, MutationObserver, and more",
-  "type": "module",
   "license": "MIT",
   "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
   "repository": {
@@ -10,7 +9,10 @@
     "url": "https://github.com/olavoasantos/cliui.git",
     "directory": "cliui/dom"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",

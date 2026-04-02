@@ -1,12 +1,8 @@
 {
   "extends": "../internals/tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
-    "paths": {
-      "@cliui/dom": ["../dom/src/index.ts"],
-      "@cliui/terminal": ["../terminal/src/index.ts"]
-    }
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo"
   },
-  "include": ["src", "*.ts", "../dom/src/register.d.ts", "../terminal/src/register.d.ts"],
+  "include": ["src", "*.ts", "../internals/dom-globals.d.ts", "../terminal/src/register.d.ts"],
   "exclude": ["dist", "node_modules"]
 }

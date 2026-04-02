@@ -60,13 +60,13 @@ export class UiSelect extends HTMLElement {
   private typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** Bound event handlers for cleanup. */
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
-  private readonly boundMouseDown = this.handleMouseDown.bind(this) as EventListener;
-  private readonly boundClick = this.handleClick.bind(this) as EventListener;
-  private readonly boundFocus = this.handleFocus.bind(this) as EventListener;
-  private readonly boundBlur = this.handleBlur.bind(this) as EventListener;
-  private readonly boundFocusOut = this.handleBlur.bind(this) as EventListener;
-  private readonly boundDocClick = this.handleDocumentClick.bind(this) as EventListener;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
+  private readonly boundMouseDown = this.handleMouseDown.bind(this) as never;
+  private readonly boundClick = this.handleClick.bind(this) as never;
+  private readonly boundFocus = this.handleFocus.bind(this) as never;
+  private readonly boundBlur = this.handleBlur.bind(this) as never;
+  private readonly boundFocusOut = this.handleBlur.bind(this) as never;
+  private readonly boundDocClick = this.handleDocumentClick.bind(this) as never;
 
   connectedCallback(): void {
     if (!this.isDisabled()) {

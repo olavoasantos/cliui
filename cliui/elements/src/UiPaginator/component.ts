@@ -19,7 +19,7 @@ export class UiPaginator extends HTMLElement {
   static readonly styles = styles;
   static readonly tagName = UI_PAGINATOR_TAG_NAME;
 
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
 
   connectedCallback(): void {
     this.ensureTabIndex();

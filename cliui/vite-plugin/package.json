@@ -2,7 +2,6 @@
   "name": "@cliui/vite-plugin",
   "version": "0.0.0",
   "description": "Vite plugin for @cliui/terminal — dev mode, HMR, and build support",
-  "type": "module",
   "license": "MIT",
   "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
   "repository": {
@@ -10,7 +9,10 @@
     "url": "https://github.com/olavoasantos/cliui.git",
     "directory": "cliui/vite-plugin"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,11 +23,11 @@
       "require": "./dist/index.cjs"
     }
   },
-  "peerDependencies": {
-    "@cliui/terminal": "workspace:*"
-  },
   "scripts": {
     "build": "vite build",
     "type:check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@cliui/terminal": "workspace:*"
   }
 }

@@ -2,6 +2,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '@cliui/terminal';
 import {Event, KeyboardEvent} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiInput} from '../component';
 
 import type {TerminalReadableInput} from '@cliui/terminal';
@@ -66,7 +67,7 @@ describe('UiInput integration', () => {
 
     input.addEventListener('input', ((event: Event) => {
       inputEvents.push(event);
-    }) as EventListener);
+    }) as never);
 
     input.dispatchEvent(
       new KeyboardEvent('keydown', {
@@ -123,7 +124,7 @@ describe('UiInput integration', () => {
 
     input.addEventListener('change', ((event: Event) => {
       changeEvents.push(event);
-    }) as EventListener);
+    }) as never);
 
     input.dispatchEvent(
       new KeyboardEvent('keydown', {

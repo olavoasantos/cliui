@@ -37,8 +37,8 @@ export class UiTabs extends HTMLElement {
   /** Tab header elements inside the bar. */
   private tabHeaders: Element[] = [];
 
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
-  private readonly boundClick = this.handleClick.bind(this) as EventListener;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
+  private readonly boundClick = this.handleClick.bind(this) as never;
 
   connectedCallback(): void {
     if (!this.hasAttribute('tabindex')) {

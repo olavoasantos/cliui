@@ -54,8 +54,8 @@ export class UiTree extends HTMLElement {
   /** The original tree-item children (preserved for hierarchy). */
   private sourceItems: UiTreeItem[] = [];
 
-  private readonly boundKeyDown = this.handleKeyDown.bind(this) as EventListener;
-  private readonly boundClick = this.handleClick.bind(this) as EventListener;
+  private readonly boundKeyDown = this.handleKeyDown.bind(this) as never;
+  private readonly boundClick = this.handleClick.bind(this) as never;
 
   connectedCallback(): void {
     this.ensureTabIndex();

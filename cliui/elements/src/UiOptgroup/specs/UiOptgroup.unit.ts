@@ -4,8 +4,8 @@ import {UiOptgroup} from '../component';
 import {UiOption} from '../../UiOption/component';
 import {UiSelect} from '../../UiSelect/component';
 import {KeyboardEvent, Window} from '@cliui/dom';
-
 import type {CustomElementConstructor} from '@cliui/dom';
+
 import type {Element} from '@cliui/dom';
 
 function createEnv() {

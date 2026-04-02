@@ -1,3 +1,4 @@
+import type {CustomElementConstructor} from '@cliui/dom';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '@cliui/terminal';

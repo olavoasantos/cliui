@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 
 import {Window} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiProgress} from '../component';
 
 function createProgress(window = new Window(), attributes: Record<string, string | boolean> = {}) {

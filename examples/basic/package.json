@@ -8,7 +8,8 @@
     "demo:comp": "node src/comp-demo.ts"
   },
   "dependencies": {
-    "@cliui/terminal": "workspace:*", "@cliui/elements": "workspace:*"
+    "@cliui/elements": "workspace:*",
+    "@cliui/terminal": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

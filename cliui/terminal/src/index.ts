@@ -14,7 +14,15 @@ polyfillEnvironment(new Window());
 
 export {Terminal} from './classes/Terminal';
 
-export {ClipboardEvent, Document, Element, Event, KeyboardEvent, MouseEvent, Window} from '@cliui/dom';
+export {
+  ClipboardEvent,
+  Document,
+  Element,
+  Event,
+  KeyboardEvent,
+  MouseEvent,
+  Window,
+} from '@cliui/dom';
 
 export {polyfillEnvironment} from '@cliui/dom';
 

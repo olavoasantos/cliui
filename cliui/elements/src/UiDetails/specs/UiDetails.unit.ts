@@ -1,9 +1,9 @@
 import {describe, expect, it} from 'vitest';
 
 import {Event, KeyboardEvent, ToggleEvent, Window} from '@cliui/dom';
+import type {CustomElementConstructor} from '@cliui/dom';
 import {UiDetails} from '../component';
 
-import type {CustomElementConstructor} from '@cliui/dom';
 import type {Element} from '@cliui/dom';
 
 function createDetails(
@@ -308,7 +308,7 @@ describe('UiDetails', () => {
 
       details.addEventListener('toggle', ((e: Event) => {
         events.push(e as ToggleEvent);
-      }) as EventListener);
+      }) as never);
 
       details.setAttribute('open', '');
 
@@ -323,7 +323,7 @@ describe('UiDetails', () => {
 
       details.addEventListener('toggle', ((e: Event) => {
         events.push(e as ToggleEvent);
-      }) as EventListener);
+      }) as never);
 
       details.removeAttribute('open');
 
@@ -338,7 +338,7 @@ describe('UiDetails', () => {
 
       details.addEventListener('toggle', ((e: Event) => {
         events.push(e as ToggleEvent);
-      }) as EventListener);
+      }) as never);
 
       keyDown(details, 'Enter');
 
@@ -353,7 +353,7 @@ describe('UiDetails', () => {
 
       details.addEventListener('toggle', ((e: Event) => {
         events.push(e as ToggleEvent);
-      }) as EventListener);
+      }) as never);
 
       const summaryRow = details.childNodes[0] as Element;
       summaryRow.dispatchEvent(new Event('click', {bubbles: true}));
@@ -369,7 +369,7 @@ describe('UiDetails', () => {
 
       details.ownerDocument!.body.addEventListener('toggle', ((e: Event) => {
         events.push(e as ToggleEvent);
-      }) as EventListener);
+      }) as never);
 
       details.toggle();
 
@@ -382,7 +382,7 @@ describe('UiDetails', () => {
 
       details.addEventListener('toggle', ((e: Event) => {
         events.push(e as ToggleEvent);
-      }) as EventListener);
+      }) as never);
 
       details.setAttribute('open', '');
 
@@ -419,7 +419,7 @@ describe('UiDetails', () => {
 
       details.addEventListener('toggle', ((e: Event) => {
         events.push(e);
-      }) as EventListener);
+      }) as never);
 
       details.parentNode?.removeChild(details);
       keyDown(details, 'Enter');

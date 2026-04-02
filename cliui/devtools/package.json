@@ -2,7 +2,6 @@
   "name": "@cliui/devtools",
   "version": "0.0.0",
   "description": "Chrome DevTools Protocol bridge for @cliui/terminal",
-  "type": "module",
   "license": "MIT",
   "author": "Olavo Amorim Santos<olavo.santos@micra.dev>",
   "repository": {
@@ -10,7 +9,10 @@
     "url": "https://github.com/olavoasantos/cliui.git",
     "directory": "cliui/devtools"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,11 +23,11 @@
       "require": "./dist/index.cjs"
     }
   },
-  "peerDependencies": {
-    "@cliui/terminal": "workspace:*"
-  },
   "scripts": {
     "build": "vite build",
     "type:check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@cliui/terminal": "workspace:*"
   }
 }

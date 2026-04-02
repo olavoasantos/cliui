@@ -87,3 +87,5 @@ export type {
   UIEventInit,
   WheelEventInit,
 } from './types';
+
+export type {CustomElementConstructor} from './types';
