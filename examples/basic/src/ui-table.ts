@@ -13,8 +13,8 @@ window.customElements.define(UiTd.tagName, UiTd);
 const style = document.createElement('style');
 style.textContent = `
   ui-table { padding: 0 1; }
-  ui-th { color: #c4b5fd; }
-  ui-td { color: #e5e7eb; }
+  ui-th { color: #c4b5fd; border-style: single; border-color: #475569; padding: 0 1; flex-grow: 1; }
+  ui-td { color: #e5e7eb; border-style: single; border-color: #475569; padding: 0 1; flex-grow: 1; }
 `;
 document.head.appendChild(style);
 
