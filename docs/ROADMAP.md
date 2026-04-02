@@ -439,3 +439,23 @@ T148. Color scheme detection: `window.matchMedia('(prefers-color-scheme: dark)')
 T149. CWD reporting: `window.location.pathname` setter → OSC 7. Initial emission on `run()` with `process.cwd()`. Enables terminal "New Tab Here" features.
 
 T150. CSS cursor property: `cursor: text` → bar, `cursor: default` → block, `cursor: wait` → blinking block, `cursor: none` → hidden. Follows `document.activeElement`. Restored on exit.
+
+### Phase 14: Media Queries & Container Queries
+
+> Responsive styling for terminal UIs. `@media` queries evaluate against terminal dimensions (columns × rows) and user preferences (`prefers-color-scheme`, `prefers-reduced-motion`). `@container` queries evaluate against a parent element's resolved dimensions. Units are cells — no px/em conversion. Re-evaluates on resize.
+
+T151. Nested at-rule rule parsing: Extend CSS parser for at-rules containing nested CSS rules (not just flat declarations). Shared by `@media`, `@container`, and `@keyframes`. May already exist from M9T3.
+
+T152. Media condition parser and evaluator: Parse `(min-width: 120)`, `(prefers-color-scheme: dark)`, boolean combinators (`and`, `or`/comma, `not`). Evaluate against a `MediaValues` map. Cell-unit comparisons.
+
+T153. Container condition parser and evaluator: Same grammar as media conditions, evaluated against container element's resolved dimensions. Named container targeting. No preference features. _(parallel with T152)_
+
+T154. Viewport media queries in the style engine: Wire `@media` rules into the cascade. Evaluate conditions against terminal columns/rows during `collectStylesheets()`. Re-evaluate on SIGWINCH resize. Mark affected elements style-dirty.
+
+T155. Preference media queries: `prefers-color-scheme` from OSC 11 detection (M13T6). `prefers-reduced-motion` from environment variable. Re-evaluate on color scheme change. Informs animation system (M9).
+
+T156. Container query CSS properties: `container-type` (`normal`, `inline-size`, `size`), `container-name`, `container` shorthand. Track container elements in style engine.
+
+T157. Container query resolution in layout: Two-pass approach — resolve container size first, then re-compute children's styles with `@container` matches. Only affected subtrees recompute. Named container lookup. Nested containers.
+
+T158. Container query integration and edge cases: `@media` wrapping `@container` and vice versa. Animation/transition interaction on container resize. Circular containment prevention. Performance benchmarks.
