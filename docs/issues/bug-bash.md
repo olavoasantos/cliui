@@ -166,6 +166,20 @@ Table cells (`ui-th`, `ui-td`) with `display: inline` inside a `ui-tr` (`display
 
 ---
 
+### BUG-14: Shift+Arrow selection in textarea is extremely slow
+
+**Summary**
+
+Performing text selection in `<ui-textarea>` via Shift+Arrow keys causes multi-second lag before the selection renders. The final selection is correct, but the processing time between each keypress is 2–3 seconds.
+
+**Discovered in:** `ui-textarea` example — Shift+Right in a pre-filled textarea with 3 lines of text.
+
+**Expected behavior:** Selection should render at frame rate (30fps) with no perceptible lag.
+
+**Likely cause:** The caret manager's `resolveSelectionRanges` or the multi-line visual line computation (`computeVisualLines`) is doing expensive work on every selection change. May involve redundant layout passes, grapheme segmentation, or O(n²) range computation. Needs profiling of `Terminal.renderFrame()` and `CaretManager.getOverlays()` during selection.
+
+---
+
 ### BUG-11: `<ui-log>` cannot use native scroll — uses internal tail window as workaround
 
 **Summary**
