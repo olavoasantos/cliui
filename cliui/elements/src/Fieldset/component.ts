@@ -1,6 +1,6 @@
 import styles from './styles.css?inline';
 
-import {UI_FIELDSET_OBSERVED_ATTRIBUTES, UI_FIELDSET_TAG_NAME} from './constants';
+import {FIELDSET_OBSERVED_ATTRIBUTES, FIELDSET_TAG_NAME} from './constants';
 import {HTMLElement} from '@cliui/dom';
 import type {Element, Node} from '@cliui/dom';
 
@@ -9,16 +9,16 @@ import type {Element, Node} from '@cliui/dom';
  * fields with an optional legend.
  *
  * Renders a bordered block container. When a `legend` attribute is set,
- * it displays a title row above the content. The element is always
- * expanded — unlike `<ui-details>`, it is non-collapsible.
+ * it displays a title row above the content. When `disabled` is set,
+ * all child form controls are visually disabled.
  *
- * Register with `window.customElements.define(UiFieldset.tagName, UiFieldset)`
- * before creating `<ui-fieldset>` elements in a window.
+ * Register with `registerHTMLElements(window)` or
+ * `window.customElements.define('fieldset', Fieldset)`.
  */
-export class UiFieldset extends HTMLElement {
-  static override readonly observedAttributes = UI_FIELDSET_OBSERVED_ATTRIBUTES;
+export class Fieldset extends HTMLElement {
+  static override readonly observedAttributes = FIELDSET_OBSERVED_ATTRIBUTES;
   static readonly styles = styles;
-  static readonly tagName = UI_FIELDSET_TAG_NAME;
+  static readonly tagName = FIELDSET_TAG_NAME;
 
   /** Internal legend element rendered above content. */
   private legendEl: Element | null = null;
@@ -41,6 +41,23 @@ export class UiFieldset extends HTMLElement {
     if (name === 'legend') {
       this.syncLegend();
     }
+
+    if (name === 'disabled') {
+      this.propagateDisabled(newValue != null);
+    }
+  }
+
+  /** Whether the fieldset is currently disabled. */
+  get disabled(): boolean {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value: boolean) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
   }
 
   /* ── Private: DOM structure ─────────────────────────────── */
@@ -60,13 +77,13 @@ export class UiFieldset extends HTMLElement {
 
     /* Build legend element (hidden by default) */
     this.legendEl = doc.createElement('div');
-    this.legendEl.setAttribute('class', 'ui-fieldset-legend');
+    this.legendEl.setAttribute('class', 'fieldset-legend');
     this.legendEl.style.display = 'none';
     this.legendEl.style.fontWeight = 'bold';
 
     /* Build content wrapper */
     this.contentWrapper = doc.createElement('div');
-    this.contentWrapper.setAttribute('class', 'ui-fieldset-content');
+    this.contentWrapper.setAttribute('class', 'fieldset-content');
     this.contentWrapper.style.display = 'block';
 
     for (const child of children) {
@@ -91,6 +108,23 @@ export class UiFieldset extends HTMLElement {
     } else {
       this.legendEl.textContent = '';
       this.legendEl.style.display = 'none';
+    }
+  }
+
+  /**
+   * Propagates disabled state to child form controls.
+   */
+  private propagateDisabled(isDisabled: boolean): void {
+    for (const tag of ['input', 'textarea', 'select', 'button']) {
+      const controls = this.querySelectorAll(tag);
+
+      for (const control of controls) {
+        if (isDisabled) {
+          control.setAttribute('disabled', '');
+        } else {
+          control.removeAttribute('disabled');
+        }
+      }
     }
   }
 }

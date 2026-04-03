@@ -1,7 +1,7 @@
-ui-label {
+label {
   display: block;
 }
 
-ui-label:disabled {
+label:disabled {
   opacity: 0.5;
 }

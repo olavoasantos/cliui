@@ -1,2 +1,2 @@
 /** Observed attribute names for the built-in fieldset component. */
-export type UiFieldsetObservedAttribute = 'legend' | 'disabled';
+export type FieldsetObservedAttribute = 'legend' | 'disabled';

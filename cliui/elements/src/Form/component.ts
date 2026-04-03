@@ -1,6 +1,6 @@
 import styles from './styles.css?inline';
 
-import {UI_FORM_OBSERVED_ATTRIBUTES, UI_FORM_TAG_NAME} from './constants';
+import {FORM_OBSERVED_ATTRIBUTES, FORM_TAG_NAME} from './constants';
 import {Event, HTMLElement} from '@cliui/dom';
 import type {Element, KeyboardEvent} from '@cliui/dom';
 import {EDITABLE} from '@cliui/terminal';
@@ -10,22 +10,25 @@ import {EDITABLE} from '@cliui/terminal';
  *
  * Acts as a block container that:
  * - Dispatches a bubbling `submit` event when a child
- *   `<ui-button type="submit">` is clicked.
+ *   `<button type="submit">` is clicked.
  * - Dispatches a bubbling `submit` event when **Enter** is pressed
  *   inside a child editable element (single-line input).
  * - Provides a `reset()` method that clears the `value` attribute on
- *   all child `<ui-input>` and `<ui-textarea>` elements.
+ *   all child `<input>` and `<textarea>` elements and dispatches a
+ *   `reset` event.
+ * - Provides a `submit()` method that dispatches a `submit` event.
+ * - Provides an `elements` getter returning contained form controls.
  *
  * All submit dispatching is suppressed while the `disabled` attribute
  * is present.
  *
- * Register with `window.customElements.define(UiForm.tagName, UiForm)`
- * before creating `<ui-form>` elements in a window.
+ * Register with `registerHTMLElements(window)` or
+ * `window.customElements.define('form', Form)`.
  */
-export class UiForm extends HTMLElement {
-  static override readonly observedAttributes = UI_FORM_OBSERVED_ATTRIBUTES;
+export class Form extends HTMLElement {
+  static override readonly observedAttributes = FORM_OBSERVED_ATTRIBUTES;
   static readonly styles = styles;
-  static readonly tagName = UI_FORM_TAG_NAME;
+  static readonly tagName = FORM_TAG_NAME;
 
   /** Bound event handlers for cleanup. */
   private readonly boundClick = this.handleClick.bind(this) as never;
@@ -47,12 +50,30 @@ export class UiForm extends HTMLElement {
   }
 
   /**
-   * Clears the `value` attribute on all child `<ui-input>` and
-   * `<ui-textarea>` elements within this form.
+   * Returns all contained form control elements (`<input>`,
+   * `<textarea>`, `<select>`, `<button>`).
+   */
+  get elements(): Element[] {
+    const controls: Element[] = [];
+
+    for (const tag of ['input', 'textarea', 'select', 'button']) {
+      const found = this.querySelectorAll(tag);
+
+      for (const el of found) {
+        controls.push(el);
+      }
+    }
+
+    return controls;
+  }
+
+  /**
+   * Clears the `value` attribute on all child `<input>` and
+   * `<textarea>` elements and dispatches a `reset` event.
    */
   reset(): void {
-    const inputs = this.querySelectorAll('ui-input');
-    const textareas = this.querySelectorAll('ui-textarea');
+    const inputs = this.querySelectorAll('input');
+    const textareas = this.querySelectorAll('textarea');
 
     for (const input of inputs) {
       input.setAttribute('value', '');
@@ -61,6 +82,20 @@ export class UiForm extends HTMLElement {
     for (const textarea of textareas) {
       textarea.setAttribute('value', '');
     }
+
+    this.dispatchEvent(
+      new Event('reset', {
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+  }
+
+  /**
+   * Dispatches a `submit` event on the form.
+   */
+  submit(): void {
+    this.dispatchSubmit();
   }
 
   /* ── Private ────────────────────────────────────────────── */
@@ -92,7 +127,7 @@ export class UiForm extends HTMLElement {
   private isSubmitButton(target: Element | null): boolean {
     if (!target) return false;
 
-    return target.localName === 'ui-button' && target.getAttribute('type') === 'submit';
+    return target.localName === 'button' && target.getAttribute('type') === 'submit';
   }
 
   private isSingleLineEditable(target: Element | null): boolean {

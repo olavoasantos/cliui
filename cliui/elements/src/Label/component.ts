@@ -1,6 +1,6 @@
 import styles from './styles.css?inline';
 
-import {UI_LABEL_OBSERVED_ATTRIBUTES, UI_LABEL_TAG_NAME} from './constants';
+import {LABEL_OBSERVED_ATTRIBUTES, LABEL_TAG_NAME} from './constants';
 import {Event, HTMLElement} from '@cliui/dom';
 
 import type {Document, Element} from '@cliui/dom';
@@ -8,17 +8,17 @@ import type {Document, Element} from '@cliui/dom';
 /**
  * Built-in terminal label custom element for form fields.
  *
- * Associates with an input element via the `for` attribute. When the
- * label is clicked, focus is forwarded to the target input identified
- * by its `id` attribute.
+ * Associates with an input element via the `for` attribute (also
+ * accessible as `htmlFor`). When the label is clicked, focus is
+ * forwarded to the target input identified by its `id` attribute.
  *
- * Register with `window.customElements.define(UiLabel.tagName, UiLabel)`
- * before creating `<ui-label>` elements in a window.
+ * Register with `registerHTMLElements(window)` or
+ * `window.customElements.define('label', Label)`.
  */
-export class UiLabel extends HTMLElement {
-  static override readonly observedAttributes = UI_LABEL_OBSERVED_ATTRIBUTES;
+export class Label extends HTMLElement {
+  static override readonly observedAttributes = LABEL_OBSERVED_ATTRIBUTES;
   static readonly styles = styles;
-  static readonly tagName = UI_LABEL_TAG_NAME;
+  static readonly tagName = LABEL_TAG_NAME;
 
   private readonly boundMouseDown = this.handleMouseDown.bind(this) as never;
   private readonly boundClick = this.handleClick.bind(this) as never;
@@ -31,6 +31,18 @@ export class UiLabel extends HTMLElement {
   disconnectedCallback(): void {
     this.removeEventListener('mousedown', this.boundMouseDown);
     this.removeEventListener('click', this.boundClick);
+  }
+
+  /**
+   * Alias for the `for` attribute, matching the standard
+   * `HTMLLabelElement.htmlFor` property.
+   */
+  get htmlFor(): string {
+    return this.getAttribute('for') ?? '';
+  }
+
+  set htmlFor(value: string) {
+    this.setAttribute('for', value);
   }
 
   /**
@@ -48,8 +60,6 @@ export class UiLabel extends HTMLElement {
   /* ── Private ────────────────────────────────────────────── */
 
   private handleMouseDown(event: Event): void {
-    // Prevent EventDispatcher from focusing an ancestor on mousedown;
-    // the click handler will focus the target input instead.
     if (this.getAttribute('for') && !this.hasAttribute('disabled')) {
       event.preventDefault();
     }
