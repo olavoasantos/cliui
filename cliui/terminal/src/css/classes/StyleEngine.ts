@@ -389,6 +389,12 @@ export class StyleEngine {
 
       if (parent !== null && parent.nodeType === NodeType.ELEMENT_NODE) {
         this.layoutDirty.add(parent as unknown as Element);
+
+        // A <style> element's text changed — re-parse all stylesheets
+        if (parent.localName === 'style') {
+          this.invalidateStylesheets();
+          this.markAllDirty();
+        }
       }
     };
 
@@ -398,7 +404,20 @@ export class StyleEngine {
         const el = node as unknown as Element;
         this.markStyleDirty(el);
         walkElements(el, (child) => this.markStyleDirty(child));
+
+        // A <style> element was inserted — re-parse all stylesheets
+        if (el.localName === 'style') {
+          this.invalidateStylesheets();
+          this.markAllDirty();
+        }
       }
+
+      // A child of a <style> element changed (textContent was set) — re-parse
+      if (parent.localName === 'style') {
+        this.invalidateStylesheets();
+        this.markAllDirty();
+      }
+
       // Structural changes can affect sibling selectors and layout
       this.markStyleDirty(parent);
       this.layoutDirty.add(parent);
@@ -406,6 +425,23 @@ export class StyleEngine {
 
     hooks.removeChild = (parent, node, index) => {
       prevRemoveChild?.(parent, node, index);
+
+      // A <style> element was removed — re-parse all stylesheets
+      if (node.nodeType === NodeType.ELEMENT_NODE) {
+        const el = node as unknown as Element;
+
+        if (el.localName === 'style') {
+          this.invalidateStylesheets();
+          this.markAllDirty();
+        }
+      }
+
+      // A child of a <style> element changed (textContent was set) — re-parse
+      if (parent.localName === 'style') {
+        this.invalidateStylesheets();
+        this.markAllDirty();
+      }
+
       // Structural changes can affect sibling selectors on remaining children
       this.markStyleDirty(parent);
       this.layoutDirty.add(parent);

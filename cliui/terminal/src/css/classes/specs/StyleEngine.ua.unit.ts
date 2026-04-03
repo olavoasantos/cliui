@@ -216,4 +216,68 @@ describe('StyleEngine — user-agent stylesheet', () => {
       expect(engine.getComputedStyle(h1).get('font-weight')).toBe('normal');
     });
   });
+
+  describe('dynamic stylesheet changes', () => {
+    it('picks up a newly added <style> element', () => {
+      const {document, engine} = createEnv();
+
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      // Initial computation — no user styles
+      engine.recomputeDirty();
+      expect(engine.getComputedStyle(div).get('color')).not.toBe('red');
+
+      // Add a new <style> element
+      const style = document.createElement('style');
+      style.textContent = 'div { color: red; }';
+      document.head.appendChild(style);
+
+      engine.recomputeDirty();
+
+      expect(engine.getComputedStyle(div).get('color')).toBe('red');
+    });
+
+    it('picks up textContent changes to an existing <style> element', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = 'div { color: red; }';
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      engine.recomputeDirty();
+      expect(engine.getComputedStyle(div).get('color')).toBe('red');
+
+      // Update the style element's content
+      style.textContent = 'div { color: blue; }';
+
+      engine.recomputeDirty();
+
+      expect(engine.getComputedStyle(div).get('color')).toBe('blue');
+    });
+
+    it('picks up removal of a <style> element', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = 'div { color: red; }';
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      engine.recomputeDirty();
+      expect(engine.getComputedStyle(div).get('color')).toBe('red');
+
+      // Remove the style element
+      document.head.removeChild(style);
+
+      engine.recomputeDirty();
+
+      expect(engine.getComputedStyle(div).get('color')).not.toBe('red');
+    });
+  });
 });

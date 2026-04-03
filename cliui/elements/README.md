@@ -24,15 +24,15 @@ All components are implemented as custom elements via `CustomElementRegistry`. T
 
 ### Components
 
-| Category | Elements |
-|----------|----------|
-| **Form** | `<ui-button>`, `<ui-input>`, `<ui-textarea>`, `<ui-select>`, `<ui-option>`, `<ui-optgroup>`, `<ui-label>`, `<ui-fieldset>`, `<ui-form>` |
-| **Data** | `<ui-table>`, `<ui-thead>`, `<ui-tbody>`, `<ui-tfoot>`, `<ui-tr>`, `<ui-th>`, `<ui-td>`, `<ui-list>`, `<ui-tree>` |
-| **Feedback** | `<ui-progress>`, `<ui-meter>`, `<ui-spinner>`, `<ui-skeleton>`, `<ui-toast>`, `<ui-message>` |
-| **Navigation** | `<ui-tabs>`, `<ui-tab>`, `<ui-menu>`, `<ui-menuitem>`, `<ui-dropdown>`, `<ui-breadcrumbs>`, `<ui-paginator>` |
-| **Layout** | `<ui-card>`, `<ui-sidebar>`, `<ui-toolbar>`, `<ui-statusline>` |
-| **Overlay** | `<ui-confirmation>`, `<ui-prompt>`, `<ui-details>` |
-| **Content** | `<ui-badge>`, `<ui-codeblock>`, `<ui-diff>`, `<ui-log>` |
+| Category       | Elements                                                                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Form**       | `<ui-button>`, `<ui-input>`, `<ui-textarea>`, `<ui-select>`, `<ui-option>`, `<ui-optgroup>`, `<ui-label>`, `<ui-fieldset>`, `<ui-form>` |
+| **Data**       | `<ui-table>`, `<ui-thead>`, `<ui-tbody>`, `<ui-tfoot>`, `<ui-tr>`, `<ui-th>`, `<ui-td>`, `<ui-list>`, `<ui-tree>`                       |
+| **Feedback**   | `<ui-progress>`, `<ui-meter>`, `<ui-spinner>`, `<ui-skeleton>`, `<ui-toast>`, `<ui-message>`                                            |
+| **Navigation** | `<ui-tabs>`, `<ui-tab>`, `<ui-menu>`, `<ui-menuitem>`, `<ui-dropdown>`, `<ui-breadcrumbs>`, `<ui-paginator>`                            |
+| **Layout**     | `<ui-card>`, `<ui-sidebar>`, `<ui-toolbar>`, `<ui-statusline>`                                                                          |
+| **Overlay**    | `<ui-confirmation>`, `<ui-prompt>`, `<ui-details>`                                                                                      |
+| **Content**    | `<ui-badge>`, `<ui-codeblock>`, `<ui-diff>`, `<ui-log>`                                                                                 |
 
 ## Usage
 
