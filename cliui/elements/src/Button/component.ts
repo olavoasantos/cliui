@@ -1,17 +1,17 @@
 import styles from './styles.css?inline';
 
 import {
-  DEFAULT_UI_BUTTON_TONE,
-  DEFAULT_UI_BUTTON_VARIANT,
-  UI_BUTTON_FLASH_FRAMES,
-  UI_BUTTON_OBSERVED_ATTRIBUTES,
-  UI_BUTTON_TAG_NAME,
+  DEFAULT_BUTTON_TONE,
+  DEFAULT_BUTTON_VARIANT,
+  BUTTON_FLASH_FRAMES,
+  BUTTON_OBSERVED_ATTRIBUTES,
+  BUTTON_TAG_NAME,
 } from './constants';
 import {Event, HTMLElement, MouseEvent} from '@cliui/dom';
-import type {KeyboardEvent} from '@cliui/dom';
+import type {Element, KeyboardEvent} from '@cliui/dom';
 
 import type {TerminalFrameAware} from '@cliui/terminal';
-import type {UiButtonTone, UiButtonVariant} from './types';
+import type {ButtonTone, ButtonVariant} from './types';
 
 /**
  * Built-in terminal button custom element.
@@ -23,17 +23,15 @@ import type {UiButtonTone, UiButtonVariant} from './types';
  * - **Mouse click** dispatches `click` with standard bubbling.
  * - All activation is blocked while `disabled` is set.
  *
- * The button is focusable by default — `tabindex="0"` is set
- * automatically on connect unless the element is disabled. Focus and
- * active states are targetable via `:focus` and `:active` pseudo-classes.
+ * Standard DOM properties: `type`, `disabled`, `form`.
  *
- * Register with `window.customElements.define(UiButton.tagName, UiButton)`
- * before creating `<ui-button>` elements in a window.
+ * Register with `registerHTMLElements(window)` or
+ * `window.customElements.define('button', Button)`.
  */
-export class UiButton extends HTMLElement implements TerminalFrameAware {
-  static override readonly observedAttributes = UI_BUTTON_OBSERVED_ATTRIBUTES;
+export class Button extends HTMLElement implements TerminalFrameAware {
+  static override readonly observedAttributes = BUTTON_OBSERVED_ATTRIBUTES;
   static readonly styles = styles;
-  static readonly tagName = UI_BUTTON_TAG_NAME;
+  static readonly tagName = BUTTON_TAG_NAME;
 
   /** Whether the Space key is currently held down. */
   private spacePressed = false;
@@ -48,7 +46,7 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
   private readonly boundBlur = this.handleBlur.bind(this) as never;
 
   connectedCallback(): void {
-    if (!this.isDisabled()) {
+    if (!this.disabled) {
       this.ensureTabIndex();
     }
 
@@ -85,40 +83,71 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
     }
   }
 
+  /** The button type — defaults to `'button'`. */
+  get type(): string {
+    return this.getAttribute('type') ?? 'button';
+  }
+
+  set type(value: string) {
+    this.setAttribute('type', value);
+  }
+
+  /** Whether the button is currently disabled. */
+  get disabled(): boolean {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value: boolean) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
+  }
+
+  /** Returns the nearest ancestor `<form>` element, or `null`. */
+  get form(): Element | null {
+    let current = this.parentElement as Element | null;
+
+    while (current !== null) {
+      if (current.localName === 'form') {
+        return current;
+      }
+
+      current = current.parentElement as Element | null;
+    }
+
+    return null;
+  }
+
   /** Returns the current variant, falling back to the default. */
-  getVariant(): UiButtonVariant {
+  getVariant(): ButtonVariant {
     const raw = this.getAttribute('variant');
 
     if (raw === 'primary' || raw === 'secondary') {
       return raw;
     }
 
-    return DEFAULT_UI_BUTTON_VARIANT;
+    return DEFAULT_BUTTON_VARIANT;
   }
 
   /** Returns the current tone, falling back to the default. */
-  getTone(): UiButtonTone {
+  getTone(): ButtonTone {
     const raw = this.getAttribute('tone');
 
     if (raw === 'default' || raw === 'dangerous') {
       return raw;
     }
 
-    return DEFAULT_UI_BUTTON_TONE;
-  }
-
-  /** Whether the button is currently disabled. */
-  isDisabled(): boolean {
-    return this.hasAttribute('disabled');
+    return DEFAULT_BUTTON_TONE;
   }
 
   /**
    * Suppresses click events while the button is disabled so that
-   * no listeners — including those registered before the element
-   * connected — observe the event.
+   * no listeners observe the event.
    */
   override dispatchEvent(event: Event): boolean {
-    if (this.isDisabled() && event.type === 'click') {
+    if (this.disabled && event.type === 'click') {
       return false;
     }
 
@@ -145,13 +174,13 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
   /* ── Private ────────────────────────────────────────────── */
 
   private handleKeyDown(event: Event): void {
-    if (this.isDisabled()) return;
+    if (this.disabled) return;
 
     const key = (event as KeyboardEvent).key;
 
     if (key === 'Enter') {
       this.setAttribute('pressed', '');
-      this.flashFramesRemaining = UI_BUTTON_FLASH_FRAMES;
+      this.flashFramesRemaining = BUTTON_FLASH_FRAMES;
       this.dispatchClick();
       return;
     }
@@ -173,7 +202,7 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
     if (key === ' ' && this.spacePressed) {
       this.clearPressed();
 
-      if (!this.isDisabled()) {
+      if (!this.disabled) {
         this.dispatchClick();
       }
     }
@@ -181,8 +210,7 @@ export class UiButton extends HTMLElement implements TerminalFrameAware {
 
   private handleClick(_event: Event): void {
     /* Click suppression for disabled state is handled by the
-       dispatchEvent override. This handler is retained for
-       future non-disabled click behavior if needed. */
+       dispatchEvent override. */
   }
 
   private handleBlur(): void {

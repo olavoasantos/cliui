@@ -3,7 +3,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 import {Terminal} from '@cliui/terminal';
 import {Event, KeyboardEvent} from '@cliui/dom';
 import type {CustomElementConstructor} from '@cliui/dom';
-import {UiButton} from '../component';
+import {Button} from '../component';
 
 import type {TerminalReadableInput} from '@cliui/terminal';
 
@@ -31,7 +31,7 @@ function createStdin(): TerminalReadableInput {
 
 const stdin = createStdin();
 
-describe('UiButton integration', () => {
+describe('Button integration', () => {
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -50,11 +50,11 @@ describe('UiButton integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiButton.tagName,
-      UiButton as unknown as CustomElementConstructor,
+      Button.tagName,
+      Button as unknown as CustomElementConstructor,
     );
 
-    const button = terminal.document.createElement('ui-button') as UiButton;
+    const button = terminal.document.createElement('button') as Button;
     button.textContent = 'Submit';
     terminal.document.body.appendChild(button);
 
@@ -95,11 +95,11 @@ describe('UiButton integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiButton.tagName,
-      UiButton as unknown as CustomElementConstructor,
+      Button.tagName,
+      Button as unknown as CustomElementConstructor,
     );
 
-    const button = terminal.document.createElement('ui-button') as UiButton;
+    const button = terminal.document.createElement('button') as Button;
     button.textContent = 'Cancel';
     terminal.document.body.appendChild(button);
 
@@ -152,11 +152,11 @@ describe('UiButton integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiButton.tagName,
-      UiButton as unknown as CustomElementConstructor,
+      Button.tagName,
+      Button as unknown as CustomElementConstructor,
     );
 
-    const button = terminal.document.createElement('ui-button') as UiButton;
+    const button = terminal.document.createElement('button') as Button;
     button.setAttribute('disabled', '');
     button.textContent = 'Disabled';
     terminal.document.body.appendChild(button);

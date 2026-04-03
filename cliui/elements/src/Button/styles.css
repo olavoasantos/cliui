@@ -1,4 +1,4 @@
-ui-button {
+button {
   display: inline;
   font-weight: bold;
   padding: 0 1;
@@ -6,14 +6,14 @@ ui-button {
   text-align: center;
 }
 
-ui-button[variant='secondary'] {
+button[variant='secondary'] {
   font-weight: normal;
 }
 
-ui-button:active {
+button:active {
   font-style: italic;
 }
 
-ui-button:disabled {
+button:disabled {
   opacity: 0.5;
 }

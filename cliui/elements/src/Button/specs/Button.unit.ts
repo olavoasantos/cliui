@@ -2,14 +2,14 @@ import {describe, expect, it} from 'vitest';
 
 import {Event, KeyboardEvent, MouseEvent, Window} from '@cliui/dom';
 import type {CustomElementConstructor} from '@cliui/dom';
-import {UiButton} from '../component';
+import {Button} from '../component';
 
 function createButton(
   window = new Window(),
   attributes: Record<string, string | boolean> = {},
-): {window: Window; button: UiButton} {
-  window.customElements.define(UiButton.tagName, UiButton as unknown as CustomElementConstructor);
-  const button = window.document.createElement('ui-button') as UiButton;
+): {window: Window; button: Button} {
+  window.customElements.define(Button.tagName, Button as unknown as CustomElementConstructor);
+  const button = window.document.createElement('button') as Button;
 
   for (const [name, value] of Object.entries(attributes)) {
     if (typeof value === 'boolean') {
@@ -26,7 +26,7 @@ function createButton(
   return {window, button};
 }
 
-function keyDown(button: UiButton, key: string): KeyboardEvent {
+function keyDown(button: Button, key: string): KeyboardEvent {
   const event = new KeyboardEvent('keydown', {
     bubbles: true,
     cancelable: true,
@@ -38,7 +38,7 @@ function keyDown(button: UiButton, key: string): KeyboardEvent {
   return event;
 }
 
-function keyUp(button: UiButton, key: string): void {
+function keyUp(button: Button, key: string): void {
   button.dispatchEvent(
     new KeyboardEvent('keyup', {
       bubbles: true,
@@ -48,15 +48,13 @@ function keyUp(button: UiButton, key: string): void {
   );
 }
 
-describe('UiButton', () => {
+describe('Button', () => {
   it('registers the custom element under its tag name', () => {
     const window = new Window();
 
-    window.customElements.define(UiButton.tagName, UiButton as unknown as CustomElementConstructor);
+    window.customElements.define(Button.tagName, Button as unknown as CustomElementConstructor);
 
-    expect(window.customElements.get('ui-button')).toBe(
-      UiButton as unknown as CustomElementConstructor,
-    );
+    expect(window.customElements.get('button')).toBe(Button as unknown as CustomElementConstructor);
   });
 
   it('sets tabindex on connect for keyboard accessibility', () => {
@@ -377,5 +375,65 @@ describe('UiButton', () => {
 
       expect(clicks).toHaveLength(0);
     });
+  });
+});
+
+describe('Button — standard DOM properties', () => {
+  it('type property defaults to button', () => {
+    const window = new Window();
+    window.customElements.define(Button.tagName, Button as unknown as CustomElementConstructor);
+    const btn = window.document.createElement('button') as Button;
+    window.document.body.appendChild(btn);
+
+    expect(btn.type).toBe('button');
+  });
+
+  it('type property reflects the attribute', () => {
+    const window = new Window();
+    window.customElements.define(Button.tagName, Button as unknown as CustomElementConstructor);
+    const btn = window.document.createElement('button') as Button;
+    btn.type = 'submit';
+    window.document.body.appendChild(btn);
+
+    expect(btn.type).toBe('submit');
+    expect(btn.getAttribute('type')).toBe('submit');
+  });
+
+  it('disabled property reflects the attribute', () => {
+    const window = new Window();
+    window.customElements.define(Button.tagName, Button as unknown as CustomElementConstructor);
+    const btn = window.document.createElement('button') as Button;
+    window.document.body.appendChild(btn);
+
+    expect(btn.disabled).toBe(false);
+
+    btn.disabled = true;
+
+    expect(btn.hasAttribute('disabled')).toBe(true);
+    expect(btn.disabled).toBe(true);
+
+    btn.disabled = false;
+
+    expect(btn.hasAttribute('disabled')).toBe(false);
+  });
+
+  it('form property returns nearest ancestor form', () => {
+    const window = new Window();
+    window.customElements.define(Button.tagName, Button as unknown as CustomElementConstructor);
+    const form = window.document.createElement('form');
+    const btn = window.document.createElement('button') as Button;
+    form.appendChild(btn);
+    window.document.body.appendChild(form);
+
+    expect(btn.form).toBe(form);
+  });
+
+  it('form property returns null when no ancestor form', () => {
+    const window = new Window();
+    window.customElements.define(Button.tagName, Button as unknown as CustomElementConstructor);
+    const btn = window.document.createElement('button') as Button;
+    window.document.body.appendChild(btn);
+
+    expect(btn.form).toBeNull();
   });
 });
