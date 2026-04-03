@@ -3,16 +3,16 @@ import {describe, expect, it} from 'vitest';
 import {Window} from '@cliui/dom';
 import type {CustomElementConstructor} from '@cliui/dom';
 import {EDITABLE} from '@cliui/terminal';
-import {UiInput} from '../component';
+import {Input} from '../component';
 
 import type {EditableConfiguration} from '@cliui/terminal';
 
 function createInput(
   window = new Window(),
   attributes: Record<string, string | boolean> = {},
-): {window: Window; input: UiInput} {
-  window.customElements.define(UiInput.tagName, UiInput as unknown as CustomElementConstructor);
-  const input = window.document.createElement('ui-input') as UiInput;
+): {window: Window; input: Input} {
+  window.customElements.define(Input.tagName, Input as unknown as CustomElementConstructor);
+  const input = window.document.createElement('input') as Input;
 
   for (const [name, value] of Object.entries(attributes)) {
     if (typeof value === 'boolean') {
@@ -29,15 +29,13 @@ function createInput(
   return {window, input};
 }
 
-describe('UiInput', () => {
+describe('Input', () => {
   it('registers the custom element under its tag name', () => {
     const window = new Window();
 
-    window.customElements.define(UiInput.tagName, UiInput as unknown as CustomElementConstructor);
+    window.customElements.define(Input.tagName, Input as unknown as CustomElementConstructor);
 
-    expect(window.customElements.get('ui-input')).toBe(
-      UiInput as unknown as CustomElementConstructor,
-    );
+    expect(window.customElements.get('input')).toBe(Input as unknown as CustomElementConstructor);
   });
 
   it('carries an [EDITABLE] configuration', () => {

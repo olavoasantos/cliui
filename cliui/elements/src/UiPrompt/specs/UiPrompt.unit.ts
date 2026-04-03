@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 
 import {UiPrompt} from '../component';
-import {UiInput} from '../../UiInput/component';
+import {Input} from '../../Input/component';
 import {Event} from '@cliui/dom';
 import {MouseEvent} from '@cliui/dom';
 import {Window} from '@cliui/dom';
@@ -13,7 +13,7 @@ function createEnv() {
   const document = window.document;
 
   window.customElements.define(UiPrompt.tagName, UiPrompt);
-  window.customElements.define(UiInput.tagName, UiInput);
+  window.customElements.define(Input.tagName, Input);
 
   return {window, document};
 }

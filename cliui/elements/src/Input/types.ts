@@ -1,5 +1,5 @@
 /** Observed attribute names for the built-in text input component. */
-export type UiInputObservedAttribute =
+export type InputObservedAttribute =
   | 'value'
   | 'placeholder'
   | 'disabled'

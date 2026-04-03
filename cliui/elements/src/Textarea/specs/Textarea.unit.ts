@@ -3,19 +3,16 @@ import {describe, expect, it} from 'vitest';
 import {Window} from '@cliui/dom';
 import type {CustomElementConstructor} from '@cliui/dom';
 import {EDITABLE} from '@cliui/terminal';
-import {UiTextarea} from '../component';
+import {Textarea} from '../component';
 
 import type {EditableConfiguration} from '@cliui/terminal';
 
 function createTextarea(
   window = new Window(),
   attributes: Record<string, string | boolean> = {},
-): {window: Window; textarea: UiTextarea} {
-  window.customElements.define(
-    UiTextarea.tagName,
-    UiTextarea as unknown as CustomElementConstructor,
-  );
-  const textarea = window.document.createElement('ui-textarea') as UiTextarea;
+): {window: Window; textarea: Textarea} {
+  window.customElements.define(Textarea.tagName, Textarea as unknown as CustomElementConstructor);
+  const textarea = window.document.createElement('textarea') as Textarea;
 
   for (const [name, value] of Object.entries(attributes)) {
     if (typeof value === 'boolean') {
@@ -32,17 +29,14 @@ function createTextarea(
   return {window, textarea};
 }
 
-describe('UiTextarea', () => {
+describe('Textarea', () => {
   it('registers the custom element under its tag name', () => {
     const window = new Window();
 
-    window.customElements.define(
-      UiTextarea.tagName,
-      UiTextarea as unknown as CustomElementConstructor,
-    );
+    window.customElements.define(Textarea.tagName, Textarea as unknown as CustomElementConstructor);
 
-    expect(window.customElements.get('ui-textarea')).toBe(
-      UiTextarea as unknown as CustomElementConstructor,
+    expect(window.customElements.get('textarea')).toBe(
+      Textarea as unknown as CustomElementConstructor,
     );
   });
 

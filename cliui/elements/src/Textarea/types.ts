@@ -1,5 +1,5 @@
 /** Observed attribute names for the built-in textarea component. */
-export type UiTextareaObservedAttribute =
+export type TextareaObservedAttribute =
   | 'value'
   | 'placeholder'
   | 'disabled'

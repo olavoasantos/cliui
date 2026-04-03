@@ -3,7 +3,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 import {Terminal} from '@cliui/terminal';
 import {Event, KeyboardEvent} from '@cliui/dom';
 import type {CustomElementConstructor} from '@cliui/dom';
-import {UiInput} from '../component';
+import {Input} from '../component';
 
 import type {TerminalReadableInput} from '@cliui/terminal';
 
@@ -31,7 +31,7 @@ function createStdin(): TerminalReadableInput {
 
 const stdin = createStdin();
 
-describe('UiInput integration', () => {
+describe('Input integration', () => {
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -50,11 +50,11 @@ describe('UiInput integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiInput.tagName,
-      UiInput as unknown as CustomElementConstructor,
+      Input.tagName,
+      Input as unknown as CustomElementConstructor,
     );
 
-    const input = terminal.document.createElement('ui-input') as UiInput;
+    const input = terminal.document.createElement('input') as Input;
     input.setAttribute('tabindex', '0');
     input.setAttribute('width', '15');
     terminal.document.body.appendChild(input);
@@ -108,11 +108,11 @@ describe('UiInput integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiInput.tagName,
-      UiInput as unknown as CustomElementConstructor,
+      Input.tagName,
+      Input as unknown as CustomElementConstructor,
     );
 
-    const input = terminal.document.createElement('ui-input') as UiInput;
+    const input = terminal.document.createElement('input') as Input;
     input.setAttribute('tabindex', '0');
     terminal.document.body.appendChild(input);
 
@@ -155,11 +155,11 @@ describe('UiInput integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiInput.tagName,
-      UiInput as unknown as CustomElementConstructor,
+      Input.tagName,
+      Input as unknown as CustomElementConstructor,
     );
 
-    const input = terminal.document.createElement('ui-input') as UiInput;
+    const input = terminal.document.createElement('input') as Input;
     input.setAttribute('tabindex', '0');
     input.setAttribute('maxlength', '3');
     terminal.document.body.appendChild(input);

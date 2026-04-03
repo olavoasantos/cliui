@@ -1,7 +1,7 @@
 import {describe, expect, it, vi} from 'vitest';
 
 import {Form} from '../component';
-import {UiInput} from '../../UiInput/component';
+import {Input} from '../../Input/component';
 import {KeyboardEvent} from '@cliui/dom';
 import {MouseEvent} from '@cliui/dom';
 import {Window} from '@cliui/dom';
@@ -11,7 +11,7 @@ function createEnv() {
   const document = window.document;
 
   window.customElements.define(Form.tagName, Form);
-  window.customElements.define(UiInput.tagName, UiInput);
+  window.customElements.define(Input.tagName, Input);
 
   return {window, document};
 }
@@ -67,7 +67,7 @@ describe('Form', () => {
   it('dispatches submit on Enter in a single-line input', () => {
     const {document} = createEnv();
     const form = document.createElement('form');
-    const input = document.createElement('ui-input');
+    const input = document.createElement('input');
     form.appendChild(input);
     document.body.appendChild(form);
 

@@ -1,12 +1,12 @@
 import styles from './styles.css?inline';
 
 import {
-  DEFAULT_UI_TEXTAREA_COLS,
-  DEFAULT_UI_TEXTAREA_ROWS,
-  MIN_UI_TEXTAREA_COLS,
-  MIN_UI_TEXTAREA_ROWS,
-  UI_TEXTAREA_OBSERVED_ATTRIBUTES,
-  UI_TEXTAREA_TAG_NAME,
+  DEFAULT_TEXTAREA_COLS,
+  DEFAULT_TEXTAREA_ROWS,
+  MIN_TEXTAREA_COLS,
+  MIN_TEXTAREA_ROWS,
+  TEXTAREA_OBSERVED_ATTRIBUTES,
+  TEXTAREA_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '@cliui/dom';
 import {EDITABLE} from '@cliui/terminal';
@@ -24,13 +24,13 @@ import type {EditableConfiguration} from '@cliui/terminal';
  * The `rows` and `cols` attributes control intrinsic sizing. CSS
  * `width` and `height` override the intrinsic dimensions when set.
  *
- * Register with `window.customElements.define(UiTextarea.tagName, UiTextarea)`
- * before creating `<ui-textarea>` elements in a window.
+ * Register with `window.customElements.define(Textarea.tagName, Textarea)`
+ * before creating `<textarea>` elements in a window.
  */
-export class UiTextarea extends HTMLElement {
-  static override readonly observedAttributes = UI_TEXTAREA_OBSERVED_ATTRIBUTES;
+export class Textarea extends HTMLElement {
+  static override readonly observedAttributes = TEXTAREA_OBSERVED_ATTRIBUTES;
   static readonly styles = styles;
-  static readonly tagName = UI_TEXTAREA_TAG_NAME;
+  static readonly tagName = TEXTAREA_TAG_NAME;
 
   /** Declarative editing configuration for the terminal system. */
   [EDITABLE]: EditableConfiguration = {
@@ -118,17 +118,17 @@ export class UiTextarea extends HTMLElement {
 
   private getCols(): number {
     const raw = this.getAttribute('cols');
-    if (raw == null) return DEFAULT_UI_TEXTAREA_COLS;
+    if (raw == null) return DEFAULT_TEXTAREA_COLS;
     const parsed = Number.parseInt(raw, 10);
-    if (!Number.isFinite(parsed) || parsed < MIN_UI_TEXTAREA_COLS) return DEFAULT_UI_TEXTAREA_COLS;
+    if (!Number.isFinite(parsed) || parsed < MIN_TEXTAREA_COLS) return DEFAULT_TEXTAREA_COLS;
     return parsed;
   }
 
   private getRows(): number {
     const raw = this.getAttribute('rows');
-    if (raw == null) return DEFAULT_UI_TEXTAREA_ROWS;
+    if (raw == null) return DEFAULT_TEXTAREA_ROWS;
     const parsed = Number.parseInt(raw, 10);
-    if (!Number.isFinite(parsed) || parsed < MIN_UI_TEXTAREA_ROWS) return DEFAULT_UI_TEXTAREA_ROWS;
+    if (!Number.isFinite(parsed) || parsed < MIN_TEXTAREA_ROWS) return DEFAULT_TEXTAREA_ROWS;
     return parsed;
   }
 

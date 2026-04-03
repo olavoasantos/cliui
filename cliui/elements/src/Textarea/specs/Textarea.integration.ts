@@ -3,7 +3,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 import {Terminal} from '@cliui/terminal';
 import {Event, KeyboardEvent} from '@cliui/dom';
 import type {CustomElementConstructor} from '@cliui/dom';
-import {UiTextarea} from '../component';
+import {Textarea} from '../component';
 
 import type {Element} from '@cliui/dom';
 import type {TerminalReadableInput} from '@cliui/terminal';
@@ -47,7 +47,7 @@ function typeKey(
   );
 }
 
-describe('UiTextarea integration', () => {
+describe('Textarea integration', () => {
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -66,11 +66,11 @@ describe('UiTextarea integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiTextarea.tagName,
-      UiTextarea as unknown as CustomElementConstructor,
+      Textarea.tagName,
+      Textarea as unknown as CustomElementConstructor,
     );
 
-    const textarea = terminal.document.createElement('ui-textarea') as UiTextarea;
+    const textarea = terminal.document.createElement('textarea') as Textarea;
     textarea.setAttribute('tabindex', '0');
     textarea.setAttribute('cols', '20');
     textarea.setAttribute('rows', '4');
@@ -115,11 +115,11 @@ describe('UiTextarea integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiTextarea.tagName,
-      UiTextarea as unknown as CustomElementConstructor,
+      Textarea.tagName,
+      Textarea as unknown as CustomElementConstructor,
     );
 
-    const textarea = terminal.document.createElement('ui-textarea') as UiTextarea;
+    const textarea = terminal.document.createElement('textarea') as Textarea;
     textarea.setAttribute('tabindex', '0');
     textarea.setAttribute('cols', '20');
     textarea.setAttribute('rows', '4');
@@ -161,11 +161,11 @@ describe('UiTextarea integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiTextarea.tagName,
-      UiTextarea as unknown as CustomElementConstructor,
+      Textarea.tagName,
+      Textarea as unknown as CustomElementConstructor,
     );
 
-    const textarea = terminal.document.createElement('ui-textarea') as UiTextarea;
+    const textarea = terminal.document.createElement('textarea') as Textarea;
     textarea.setAttribute('tabindex', '0');
     terminal.document.body.appendChild(textarea);
 
@@ -204,11 +204,11 @@ describe('UiTextarea integration', () => {
     });
 
     terminal.window.customElements.define(
-      UiTextarea.tagName,
-      UiTextarea as unknown as CustomElementConstructor,
+      Textarea.tagName,
+      Textarea as unknown as CustomElementConstructor,
     );
 
-    const textarea = terminal.document.createElement('ui-textarea') as UiTextarea;
+    const textarea = terminal.document.createElement('textarea') as Textarea;
     textarea.setAttribute('tabindex', '0');
     terminal.document.body.appendChild(textarea);
 

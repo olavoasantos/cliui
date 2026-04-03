@@ -1,10 +1,10 @@
 import styles from './styles.css?inline';
 
 import {
-  DEFAULT_UI_INPUT_WIDTH,
-  MIN_UI_INPUT_WIDTH,
-  UI_INPUT_OBSERVED_ATTRIBUTES,
-  UI_INPUT_TAG_NAME,
+  DEFAULT_INPUT_WIDTH,
+  MIN_INPUT_WIDTH,
+  INPUT_OBSERVED_ATTRIBUTES,
+  INPUT_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '@cliui/dom';
 import {GRAPHEME_SEGMENTER} from '@cliui/terminal';
@@ -20,13 +20,13 @@ import type {EditableConfiguration} from '@cliui/terminal';
  * manages cursor, caret, keyboard handling, paste, scrolling, and
  * content rendering automatically.
  *
- * Register with `window.customElements.define(UiInput.tagName, UiInput)`
- * before creating `<ui-input>` elements in a window.
+ * Register with `window.customElements.define(Input.tagName, Input)`
+ * before creating `<input>` elements in a window.
  */
-export class UiInput extends HTMLElement {
-  static override readonly observedAttributes = UI_INPUT_OBSERVED_ATTRIBUTES;
+export class Input extends HTMLElement {
+  static override readonly observedAttributes = INPUT_OBSERVED_ATTRIBUTES;
   static readonly styles = styles;
-  static readonly tagName = UI_INPUT_TAG_NAME;
+  static readonly tagName = INPUT_TAG_NAME;
 
   /** Declarative editing configuration for the terminal system. */
   [EDITABLE]: EditableConfiguration = {
@@ -114,9 +114,9 @@ export class UiInput extends HTMLElement {
 
   private getWidth(): number {
     const rawWidth = this.getAttribute('width');
-    if (rawWidth == null) return DEFAULT_UI_INPUT_WIDTH;
+    if (rawWidth == null) return DEFAULT_INPUT_WIDTH;
     const parsed = Number.parseInt(rawWidth, 10);
-    if (!Number.isFinite(parsed) || parsed < MIN_UI_INPUT_WIDTH) return DEFAULT_UI_INPUT_WIDTH;
+    if (!Number.isFinite(parsed) || parsed < MIN_INPUT_WIDTH) return DEFAULT_INPUT_WIDTH;
     return parsed;
   }
 
