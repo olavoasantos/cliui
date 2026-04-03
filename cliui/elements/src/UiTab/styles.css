@@ -1,7 +1,0 @@
-ui-tab {
-  display: block;
-}
-
-ui-tab[hidden] {
-  display: none;
-}

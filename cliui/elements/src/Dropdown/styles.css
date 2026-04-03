@@ -1,0 +1,7 @@
+dropdown {
+  display: inline;
+}
+
+dropdown:disabled {
+  opacity: 0.5;
+}

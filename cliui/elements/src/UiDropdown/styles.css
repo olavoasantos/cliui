@@ -1,7 +1,0 @@
-ui-dropdown {
-  display: inline;
-}
-
-ui-dropdown:disabled {
-  opacity: 0.5;
-}

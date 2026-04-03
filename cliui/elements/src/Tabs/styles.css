@@ -1,0 +1,7 @@
+tabs {
+  display: block;
+}
+
+tabs:focus .tabs-bar {
+  color: #c4b5fd;
+}

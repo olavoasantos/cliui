@@ -1,0 +1,11 @@
+navmenu {
+  display: none;
+  position: absolute;
+  border-style: single;
+  padding: 0;
+  z-index: 100;
+}
+
+navmenu[open] {
+  display: block;
+}

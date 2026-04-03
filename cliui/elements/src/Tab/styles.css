@@ -1,0 +1,7 @@
+tab {
+  display: block;
+}
+
+tab[hidden] {
+  display: none;
+}

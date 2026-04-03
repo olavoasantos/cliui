@@ -1,7 +1,0 @@
-ui-tabs {
-  display: block;
-}
-
-ui-tabs:focus .ui-tabs-bar {
-  color: #c4b5fd;
-}
