@@ -1,10 +1,10 @@
-import {UiPrompt, UiButton, UiInput} from '@cliui/elements';
+import {UiPrompt, Button, Input} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
 window.customElements.define(UiPrompt.tagName, UiPrompt);
-window.customElements.define(UiButton.tagName, UiButton);
-window.customElements.define(UiInput.tagName, UiInput);
+window.customElements.define(Button.tagName, Button);
+window.customElements.define(Input.tagName, Input);
 
 const app = createShell(
   document,
@@ -15,7 +15,7 @@ const status = createStatus(document, 'Status: idle');
 
 /* ── Basic prompt ──────────────────────────────────────── */
 const s1 = createSection(document, 'Basic prompt');
-const btn1 = document.createElement('ui-button');
+const btn1 = document.createElement('button');
 btn1.setAttribute('variant', 'primary');
 btn1.setAttribute('tabindex', '0');
 btn1.textContent = 'Ask name';
@@ -32,7 +32,7 @@ app.appendChild(s1);
 
 /* ── With inline message ───────────────────────────────── */
 const s2 = createSection(document, 'Prompt with dynamic message');
-const btn2 = document.createElement('ui-button');
+const btn2 = document.createElement('button');
 btn2.setAttribute('variant', 'primary');
 btn2.setAttribute('tabindex', '0');
 btn2.textContent = 'Rename file';
@@ -49,7 +49,7 @@ app.appendChild(s2);
 
 /* ── Sequential prompts ────────────────────────────────── */
 const s3 = createSection(document, 'Sequential prompts');
-const btn3 = document.createElement('ui-button');
+const btn3 = document.createElement('button');
 btn3.setAttribute('variant', 'primary');
 btn3.setAttribute('tabindex', '0');
 btn3.textContent = 'Setup wizard';

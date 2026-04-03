@@ -1,10 +1,10 @@
-import {UiMeter} from '@cliui/elements';
+import {Meter} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
-window.customElements.define(UiMeter.tagName, UiMeter);
+window.customElements.define(Meter.tagName, Meter);
 
-const app = createShell(document, 'ui-meter', 'Scalar gauge displaying a value within a range.');
+const app = createShell(document, 'meter', 'Scalar gauge displaying a value within a range.');
 const status = createStatus(document, 'Value: 0.5');
 
 /* ── Default range (0–1) ───────────────────────────────── */
@@ -15,7 +15,7 @@ for (const v of [0, 0.25, 0.5, 0.75, 1]) {
   const lbl = document.createElement('span');
   lbl.textContent = `${v}:`;
   lbl.style.width = '5';
-  const meter = document.createElement('ui-meter');
+  const meter = document.createElement('meter');
   meter.setAttribute('value', String(v));
   meter.setAttribute('width', '20');
   row.appendChild(lbl);
@@ -32,7 +32,7 @@ for (const v of [0, 25, 50, 80, 100]) {
   const lbl = document.createElement('span');
   lbl.textContent = `${v}%:`;
   lbl.style.width = '5';
-  const meter = document.createElement('ui-meter');
+  const meter = document.createElement('meter');
   meter.setAttribute('min', '0');
   meter.setAttribute('max', '100');
   meter.setAttribute('value', String(v));
@@ -51,7 +51,7 @@ for (const w of [10, 20, 40, 60]) {
   const lbl = document.createElement('span');
   lbl.textContent = `w=${w}:`;
   lbl.style.width = '6';
-  const meter = document.createElement('ui-meter');
+  const meter = document.createElement('meter');
   meter.setAttribute('value', '0.6');
   meter.setAttribute('width', String(w));
   row.appendChild(lbl);

@@ -1,20 +1,20 @@
-import {UiDetails} from '@cliui/elements';
+import {Details} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
-window.customElements.define(UiDetails.tagName, UiDetails);
+window.customElements.define(Details.tagName, Details);
 
 const style = document.createElement('style');
 style.textContent = `
-  ui-details { padding: 0 1; border-style: rounded; border-color: #475569; }
-  ui-details:focus { border-color: #7c3aed; }
-  ui-details ui-summary { color: #fbbf24; font-weight: bold; }
+  details { padding: 0 1; border-style: rounded; border-color: #475569; }
+  details:focus { border-color: #7c3aed; }
+  details summary { color: #fbbf24; font-weight: bold; }
 `;
 document.head.appendChild(style);
 
 const app = createShell(
   document,
-  'ui-details',
+  'details',
   'Tab to focus, Enter/Space to toggle. Click summary to toggle.',
 );
 
@@ -23,10 +23,10 @@ const status = createStatus(document, 'Status: idle');
 /* ── Open by default ───────────────────────────────────── */
 
 const s1 = createSection(document, 'Initially open');
-const details1 = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+const details1 = document.createElement('details') as InstanceType<typeof Details>;
 details1.setAttribute('tabindex', '0');
 details1.setAttribute('open', '');
-const sum1 = document.createElement('ui-summary');
+const sum1 = document.createElement('summary');
 sum1.textContent = 'Configuration';
 const content1 = document.createElement('div');
 content1.textContent = 'Debug mode: on\nLog level: verbose\nTheme: dark';
@@ -41,9 +41,9 @@ app.appendChild(s1);
 /* ── Collapsed by default ──────────────────────────────── */
 
 const s2 = createSection(document, 'Initially collapsed');
-const details2 = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+const details2 = document.createElement('details') as InstanceType<typeof Details>;
 details2.setAttribute('tabindex', '0');
-const sum2 = document.createElement('ui-summary');
+const sum2 = document.createElement('summary');
 sum2.textContent = 'Advanced options';
 const content2 = document.createElement('div');
 content2.textContent = 'These options are for power users only.\nProceed with caution.';
@@ -58,10 +58,10 @@ app.appendChild(s2);
 /* ── Disabled ──────────────────────────────────────────── */
 
 const s3 = createSection(document, 'Disabled (cannot toggle)');
-const details3 = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+const details3 = document.createElement('details') as InstanceType<typeof Details>;
 details3.setAttribute('disabled', '');
 details3.setAttribute('open', '');
-const sum3 = document.createElement('ui-summary');
+const sum3 = document.createElement('summary');
 sum3.textContent = 'Locked section';
 const content3 = document.createElement('div');
 content3.textContent = 'This section is disabled and cannot be toggled.';
@@ -73,14 +73,14 @@ app.appendChild(s3);
 /* ── Nested details ────────────────────────────────────── */
 
 const s4 = createSection(document, 'Nested');
-const outer = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+const outer = document.createElement('details') as InstanceType<typeof Details>;
 outer.setAttribute('tabindex', '0');
 outer.setAttribute('open', '');
-const sumOuter = document.createElement('ui-summary');
+const sumOuter = document.createElement('summary');
 sumOuter.textContent = 'Outer';
-const inner = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+const inner = document.createElement('details') as InstanceType<typeof Details>;
 inner.setAttribute('tabindex', '0');
-const sumInner = document.createElement('ui-summary');
+const sumInner = document.createElement('summary');
 sumInner.textContent = 'Inner (collapsed)';
 const innerContent = document.createElement('div');
 innerContent.textContent = 'Nested content here.';

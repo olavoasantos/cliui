@@ -5,10 +5,10 @@ const props = defineProps<{terminal: {exit: () => void}; doc: any}>();
 
 const count = ref(0);
 
-function handler(event: Event) {
-  const key = (event as KeyboardEvent).key;
+function handler(event: KeyboardEvent) {
+  const key = event.key;
 
-  if (key === 'c' && (event as KeyboardEvent).ctrlKey) {
+  if (key === 'c' && event.ctrlKey) {
     props.terminal.exit();
     process.exit(0);
   }

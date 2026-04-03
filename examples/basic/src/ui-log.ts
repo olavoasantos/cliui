@@ -1,9 +1,9 @@
-import {UiLog, UiButton} from '@cliui/elements';
+import {UiLog, Button} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
 window.customElements.define(UiLog.tagName, UiLog);
-window.customElements.define(UiButton.tagName, UiButton);
+window.customElements.define(Button.tagName, Button);
 
 const style = document.createElement('style');
 style.textContent = `
@@ -26,7 +26,7 @@ const log1 = document.createElement('ui-log') as InstanceType<typeof UiLog>;
 log1.setAttribute('height', '8');
 const btnRow1 = document.createElement('div');
 btnRow1.className = 'row';
-const addBtn = document.createElement('ui-button');
+const addBtn = document.createElement('button');
 addBtn.setAttribute('variant', 'primary');
 addBtn.setAttribute('tabindex', '0');
 addBtn.textContent = 'Add line';
@@ -35,7 +35,7 @@ addBtn.addEventListener('click', () => {
   log1.append(`[${new Date().toISOString().slice(11, 19)}] Log entry #${lineNum}`);
   status.textContent = `Lines: ${log1.getLineCount()} (showing last 8)`;
 });
-const add10 = document.createElement('ui-button');
+const add10 = document.createElement('button');
 add10.setAttribute('variant', 'primary');
 add10.setAttribute('tabindex', '0');
 add10.textContent = 'Add 10';
@@ -46,7 +46,7 @@ add10.addEventListener('click', () => {
   }
   status.textContent = `Lines: ${log1.getLineCount()} (showing last 8)`;
 });
-const clearBtn = document.createElement('ui-button');
+const clearBtn = document.createElement('button');
 clearBtn.setAttribute('variant', 'secondary');
 clearBtn.setAttribute('tabindex', '0');
 clearBtn.textContent = 'Clear';
@@ -70,7 +70,7 @@ hint2.textContent = 'Only 5 lines are kept in memory. Oldest are discarded.';
 const log2 = document.createElement('ui-log') as InstanceType<typeof UiLog>;
 log2.setAttribute('max-lines', '5');
 let maxNum = 0;
-const addMax = document.createElement('ui-button');
+const addMax = document.createElement('button');
 addMax.setAttribute('variant', 'primary');
 addMax.setAttribute('tabindex', '0');
 addMax.textContent = 'Add line';
@@ -91,7 +91,7 @@ hint3.className = 'hint';
 hint3.textContent = 'No height attribute — all lines shown, container grows.';
 const log3 = document.createElement('ui-log') as InstanceType<typeof UiLog>;
 let unlimNum = 0;
-const addUnlim = document.createElement('ui-button');
+const addUnlim = document.createElement('button');
 addUnlim.setAttribute('variant', 'primary');
 addUnlim.setAttribute('tabindex', '0');
 addUnlim.textContent = 'Add line';

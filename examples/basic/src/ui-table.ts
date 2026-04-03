@@ -1,64 +1,64 @@
-import {UiTable, UiThead, UiTbody, UiTfoot, UiTr, UiTh, UiTd} from '@cliui/elements';
+import {Table, Thead, Tbody, Tfoot, Tr, Th, Td} from '@cliui/elements';
 import {createDemo, createShell, createSection} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
-window.customElements.define(UiTable.tagName, UiTable);
-window.customElements.define(UiThead.tagName, UiThead);
-window.customElements.define(UiTbody.tagName, UiTbody);
-window.customElements.define(UiTfoot.tagName, UiTfoot);
-window.customElements.define(UiTr.tagName, UiTr);
-window.customElements.define(UiTh.tagName, UiTh);
-window.customElements.define(UiTd.tagName, UiTd);
+window.customElements.define(Table.tagName, Table);
+window.customElements.define(Thead.tagName, Thead);
+window.customElements.define(Tbody.tagName, Tbody);
+window.customElements.define(Tfoot.tagName, Tfoot);
+window.customElements.define(Tr.tagName, Tr);
+window.customElements.define(Th.tagName, Th);
+window.customElements.define(Td.tagName, Td);
 
 const style = document.createElement('style');
 style.textContent = `
-  ui-table { padding: 0 1; }
-  ui-th { color: #c4b5fd; }
-  ui-td { color: #e5e7eb; }
+  table { padding: 0 1; }
+  th { color: #c4b5fd; }
+  td { color: #e5e7eb; }
 `;
 document.head.appendChild(style);
 
 const app = createShell(
   document,
-  'ui-table',
+  'table',
   'HTML-inspired table structure with thead, tbody, tfoot.',
 );
 
 /* ── Full table ────────────────────────────────────────── */
 const s1 = createSection(document, 'Full table with header, body, footer');
-const table = document.createElement('ui-table');
-const thead = document.createElement('ui-thead');
-const headRow = document.createElement('ui-tr');
+const table = document.createElement('table');
+const thead = document.createElement('thead');
+const headRow = document.createElement('tr');
 for (const h of ['Name', 'Role', 'Status']) {
-  const th = document.createElement('ui-th');
+  const th = document.createElement('th');
   th.textContent = h;
   headRow.appendChild(th);
 }
 thead.appendChild(headRow);
 
-const tbody = document.createElement('ui-tbody');
+const tbody = document.createElement('tbody');
 for (const [name, role, stat] of [
   ['Alice', 'Engineer', 'Active'],
   ['Bob', 'Designer', 'Active'],
   ['Charlie', 'Manager', 'Away'],
   ['Diana', 'QA Lead', 'Active'],
 ]) {
-  const tr = document.createElement('ui-tr');
+  const tr = document.createElement('tr');
   for (const cell of [name, role, stat]) {
-    const td = document.createElement('ui-td');
+    const td = document.createElement('td');
     td.textContent = cell!;
     tr.appendChild(td);
   }
   tbody.appendChild(tr);
 }
 
-const tfoot = document.createElement('ui-tfoot');
-const footRow = document.createElement('ui-tr');
-const total = document.createElement('ui-td');
+const tfoot = document.createElement('tfoot');
+const footRow = document.createElement('tr');
+const total = document.createElement('td');
 total.textContent = 'Total';
-const count = document.createElement('ui-td');
+const count = document.createElement('td');
 count.textContent = '4 members';
-const blank = document.createElement('ui-td');
+const blank = document.createElement('td');
 footRow.appendChild(total);
 footRow.appendChild(count);
 footRow.appendChild(blank);
@@ -72,18 +72,18 @@ app.appendChild(s1);
 
 /* ── Body only ─────────────────────────────────────────── */
 const s2 = createSection(document, 'Body only (no header/footer)');
-const table2 = document.createElement('ui-table');
-const tbody2 = document.createElement('ui-tbody');
+const table2 = document.createElement('table');
+const tbody2 = document.createElement('tbody');
 for (const [key, val] of [
   ['CPU', '42%'],
   ['Memory', '3.2 GB'],
   ['Disk', '67%'],
 ]) {
-  const tr = document.createElement('ui-tr');
-  const k = document.createElement('ui-td');
+  const tr = document.createElement('tr');
+  const k = document.createElement('td');
   k.textContent = key!;
   k.style.fontWeight = 'bold';
-  const v = document.createElement('ui-td');
+  const v = document.createElement('td');
   v.textContent = val!;
   tr.appendChild(k);
   tr.appendChild(v);

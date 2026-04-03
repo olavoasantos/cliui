@@ -1,18 +1,18 @@
-import {UiStatusline} from '@cliui/elements';
+import {Statusline} from '@cliui/elements';
 import {createDemo, createShell, createSection} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
-window.customElements.define(UiStatusline.tagName, UiStatusline);
+window.customElements.define(Statusline.tagName, Statusline);
 
 const style = document.createElement('style');
 style.textContent = `
-  ui-statusline { background-color: #1e293b; color: #e5e7eb; padding: 0 1; gap: 1; }
+  statusline { background-color: #1e293b; color: #e5e7eb; padding: 0 1; gap: 1; }
 `;
 document.head.appendChild(style);
 
 const app = createShell(
   document,
-  'ui-statusline',
+  'statusline',
   'Status bar anchored at the bottom of the viewport. Scroll down to see it fixed.',
 );
 
@@ -27,7 +27,7 @@ app.appendChild(s1);
 document.body.appendChild(app);
 
 /* ── The statusline ────────────────────────────────────── */
-const bar = document.createElement('ui-statusline');
+const bar = document.createElement('statusline');
 
 const left = document.createElement('span');
 left.style.display = 'inline';

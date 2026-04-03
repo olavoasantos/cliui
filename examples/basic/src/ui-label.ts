@@ -1,19 +1,19 @@
-import {UiLabel, UiInput} from '@cliui/elements';
+import {Label, Input} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
-window.customElements.define(UiLabel.tagName, UiLabel);
-window.customElements.define(UiInput.tagName, UiInput);
+window.customElements.define(Label.tagName, Label);
+window.customElements.define(Input.tagName, Input);
 
-const app = createShell(document, 'ui-label', 'Click labels to focus their associated inputs.');
+const app = createShell(document, 'label', 'Click labels to focus their associated inputs.');
 const status = createStatus(document, 'Focus: none');
 
 /* ── Basic label → input ───────────────────────────────── */
 const s1 = createSection(document, 'Label focuses input on click');
-const lbl1 = document.createElement('ui-label');
+const lbl1 = document.createElement('label');
 lbl1.setAttribute('for', 'name-input');
 lbl1.textContent = 'Name:';
-const inp1 = document.createElement('ui-input');
+const inp1 = document.createElement('input');
 inp1.setAttribute('id', 'name-input');
 inp1.setAttribute('tabindex', '0');
 inp1.setAttribute('width', '25');
@@ -32,10 +32,10 @@ for (const [label, id] of [
   ['Phone:', 'phone-input'],
   ['Address:', 'addr-input'],
 ]) {
-  const lbl = document.createElement('ui-label');
+  const lbl = document.createElement('label');
   lbl.setAttribute('for', id!);
   lbl.textContent = label!;
-  const inp = document.createElement('ui-input');
+  const inp = document.createElement('input');
   inp.setAttribute('id', id!);
   inp.setAttribute('tabindex', '0');
   inp.setAttribute('width', '25');
@@ -49,11 +49,11 @@ app.appendChild(s2);
 
 /* ── Disabled label ────────────────────────────────────── */
 const s3 = createSection(document, 'Disabled label (no focus forward)');
-const lbl3 = document.createElement('ui-label');
+const lbl3 = document.createElement('label');
 lbl3.setAttribute('for', 'disabled-target');
 lbl3.setAttribute('disabled', '');
 lbl3.textContent = 'Disabled label:';
-const inp3 = document.createElement('ui-input');
+const inp3 = document.createElement('input');
 inp3.setAttribute('id', 'disabled-target');
 inp3.setAttribute('tabindex', '0');
 inp3.setAttribute('width', '25');

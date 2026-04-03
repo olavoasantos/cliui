@@ -1,25 +1,25 @@
-import {UiSelect, UiOption, UiOptgroup} from '@cliui/elements';
+import {Select, Option, Optgroup} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
-window.customElements.define(UiSelect.tagName, UiSelect);
-window.customElements.define(UiOption.tagName, UiOption);
-window.customElements.define(UiOptgroup.tagName, UiOptgroup);
+window.customElements.define(Select.tagName, Select);
+window.customElements.define(Option.tagName, Option);
+window.customElements.define(Optgroup.tagName, Optgroup);
 
 const app = createShell(
   document,
-  'ui-select + ui-optgroup',
+  'select + optgroup',
   'Enter/Space opens. Arrows navigate. Enter selects. Escape closes. Type-ahead search.',
 );
 const status = createStatus(document, 'Selected: (none)');
 
 /* ── Basic select ──────────────────────────────────────── */
 const s1 = createSection(document, 'Basic select');
-const sel1 = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
+const sel1 = document.createElement('select') as InstanceType<typeof Select>;
 sel1.setAttribute('tabindex', '0');
 sel1.setAttribute('value', 'blue');
 for (const c of ['Red', 'Green', 'Blue', 'Purple', 'Orange']) {
-  const opt = document.createElement('ui-option');
+  const opt = document.createElement('option');
   opt.setAttribute('value', c.toLowerCase());
   opt.textContent = c;
   sel1.appendChild(opt);
@@ -32,7 +32,7 @@ app.appendChild(s1);
 
 /* ── With disabled options ─────────────────────────────── */
 const s2 = createSection(document, 'Disabled options');
-const sel2 = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
+const sel2 = document.createElement('select') as InstanceType<typeof Select>;
 sel2.setAttribute('tabindex', '0');
 sel2.setAttribute('value', 'medium');
 for (const [v, l, d] of [
@@ -41,7 +41,7 @@ for (const [v, l, d] of [
   ['large', 'Large', false],
   ['xl', 'XL (out of stock)', true],
 ] as const) {
-  const opt = document.createElement('ui-option');
+  const opt = document.createElement('option');
   opt.setAttribute('value', v);
   opt.textContent = l;
   if (d) opt.setAttribute('disabled', '');
@@ -55,21 +55,21 @@ app.appendChild(s2);
 
 /* ── Optgroups ─────────────────────────────────────────── */
 const s3 = createSection(document, 'With optgroups');
-const sel3 = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
+const sel3 = document.createElement('select') as InstanceType<typeof Select>;
 sel3.setAttribute('tabindex', '0');
 sel3.setAttribute('value', 'apple');
-const fruits = document.createElement('ui-optgroup');
+const fruits = document.createElement('optgroup');
 fruits.setAttribute('label', 'Fruits');
 for (const f of ['Apple', 'Banana', 'Cherry']) {
-  const opt = document.createElement('ui-option');
+  const opt = document.createElement('option');
   opt.setAttribute('value', f.toLowerCase());
   opt.textContent = f;
   fruits.appendChild(opt);
 }
-const vegs = document.createElement('ui-optgroup');
+const vegs = document.createElement('optgroup');
 vegs.setAttribute('label', 'Vegetables');
 for (const v of ['Carrot', 'Broccoli', 'Spinach']) {
-  const opt = document.createElement('ui-option');
+  const opt = document.createElement('option');
   opt.setAttribute('value', v.toLowerCase());
   opt.textContent = v;
   vegs.appendChild(opt);
@@ -87,7 +87,7 @@ const s4 = createSection(document, 'Type-ahead (many options)');
 const hint = document.createElement('div');
 hint.className = 'hint';
 hint.textContent = 'Open and start typing to jump to matching options.';
-const sel4 = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
+const sel4 = document.createElement('select') as InstanceType<typeof Select>;
 sel4.setAttribute('tabindex', '0');
 for (const country of [
   'Argentina',
@@ -110,7 +110,7 @@ for (const country of [
   'Ukraine',
   'Vietnam',
 ]) {
-  const opt = document.createElement('ui-option');
+  const opt = document.createElement('option');
   opt.setAttribute('value', country.toLowerCase());
   opt.textContent = country;
   sel4.appendChild(opt);

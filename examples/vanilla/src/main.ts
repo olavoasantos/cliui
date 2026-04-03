@@ -39,10 +39,10 @@ app.appendChild(counter);
 app.appendChild(hint);
 document.body.appendChild(app);
 
-document.body.addEventListener('keydown', (event: Event) => {
-  const key = (event as KeyboardEvent).key;
+document.body.addEventListener('keydown', (event: KeyboardEvent) => {
+  const key = event.key;
 
-  if (key === 'c' && (event as KeyboardEvent).ctrlKey) {
+  if (key === 'c' && event.ctrlKey) {
     terminal.exit();
     process.exit(0);
   }

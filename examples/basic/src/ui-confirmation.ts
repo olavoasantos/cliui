@@ -1,9 +1,9 @@
-import {UiConfirmation, UiButton} from '@cliui/elements';
+import {UiConfirmation, Button} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
 window.customElements.define(UiConfirmation.tagName, UiConfirmation);
-window.customElements.define(UiButton.tagName, UiButton);
+window.customElements.define(Button.tagName, Button);
 
 const app = createShell(
   document,
@@ -16,7 +16,7 @@ const status = createStatus(document, 'Status: idle');
 /* ── Basic confirm ─────────────────────────────────────── */
 
 const s1 = createSection(document, 'Basic confirmation');
-const btn1 = document.createElement('ui-button');
+const btn1 = document.createElement('button');
 btn1.setAttribute('variant', 'primary');
 btn1.setAttribute('tabindex', '0');
 btn1.textContent = 'Delete item';
@@ -38,7 +38,7 @@ app.appendChild(s1);
 /* ── Custom labels ─────────────────────────────────────── */
 
 const s2 = createSection(document, 'Custom button labels');
-const btn2 = document.createElement('ui-button');
+const btn2 = document.createElement('button');
 btn2.setAttribute('variant', 'primary');
 btn2.setAttribute('tabindex', '0');
 btn2.textContent = 'Save changes';
@@ -62,7 +62,7 @@ const s3 = createSection(document, 'Sequential confirmations');
 const hint = document.createElement('div');
 hint.className = 'hint';
 hint.textContent = 'Opens two confirmations in sequence.';
-const btn3 = document.createElement('ui-button');
+const btn3 = document.createElement('button');
 btn3.setAttribute('variant', 'primary');
 btn3.setAttribute('tabindex', '0');
 btn3.textContent = 'Multi-step';

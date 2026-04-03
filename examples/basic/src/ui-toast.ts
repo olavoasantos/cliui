@@ -1,9 +1,9 @@
-import {UiToast, UiButton} from '@cliui/elements';
+import {UiToast, Button} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
 window.customElements.define(UiToast.tagName, UiToast);
-window.customElements.define(UiButton.tagName, UiButton);
+window.customElements.define(Button.tagName, Button);
 
 const style = document.createElement('style');
 style.textContent = `
@@ -37,7 +37,7 @@ for (const [tone, duration] of [
   ['warning', 4000],
   ['error', 5000],
 ] as const) {
-  const btn = document.createElement('ui-button');
+  const btn = document.createElement('button');
   btn.setAttribute('variant', 'primary');
   btn.setAttribute('tabindex', '0');
   btn.textContent = `${tone} (${duration / 1000}s)`;
@@ -59,7 +59,7 @@ app.appendChild(s1);
 
 /* ── Rapid fire ────────────────────────────────────────── */
 const s2 = createSection(document, 'Rapid fire (5 at once)');
-const rapidBtn = document.createElement('ui-button');
+const rapidBtn = document.createElement('button');
 rapidBtn.setAttribute('variant', 'primary');
 rapidBtn.setAttribute('tabindex', '0');
 rapidBtn.textContent = 'Fire 5 toasts';

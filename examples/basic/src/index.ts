@@ -1,19 +1,19 @@
 import {Terminal} from '@cliui/terminal';
 import {
-  UiButton,
+  Button,
   UiCodeblock,
-  UiDetails,
-  UiInput,
-  UiOption,
-  UiSelect,
-  UiTable,
-  UiTbody,
-  UiTd,
-  UiTextarea,
-  UiTfoot,
-  UiTh,
-  UiThead,
-  UiTr,
+  Details,
+  Input,
+  Option,
+  Select,
+  Table,
+  Tbody,
+  Td,
+  Textarea,
+  Tfoot,
+  Th,
+  Thead,
+  Tr,
 } from '@cliui/elements';
 
 /* Load Shiki highlighter before starting the app */
@@ -34,20 +34,20 @@ const terminal = new Terminal({
 
 const {document, window} = terminal;
 
-window.customElements.define(UiButton.tagName, UiButton);
+window.customElements.define(Button.tagName, Button);
 window.customElements.define(UiCodeblock.tagName, UiCodeblock);
-window.customElements.define(UiDetails.tagName, UiDetails);
-window.customElements.define(UiInput.tagName, UiInput);
-window.customElements.define(UiOption.tagName, UiOption);
-window.customElements.define(UiSelect.tagName, UiSelect);
-window.customElements.define(UiTable.tagName, UiTable);
-window.customElements.define(UiTbody.tagName, UiTbody);
-window.customElements.define(UiTd.tagName, UiTd);
-window.customElements.define(UiTextarea.tagName, UiTextarea);
-window.customElements.define(UiTfoot.tagName, UiTfoot);
-window.customElements.define(UiTh.tagName, UiTh);
-window.customElements.define(UiThead.tagName, UiThead);
-window.customElements.define(UiTr.tagName, UiTr);
+window.customElements.define(Details.tagName, Details);
+window.customElements.define(Input.tagName, Input);
+window.customElements.define(Option.tagName, Option);
+window.customElements.define(Select.tagName, Select);
+window.customElements.define(Table.tagName, Table);
+window.customElements.define(Tbody.tagName, Tbody);
+window.customElements.define(Td.tagName, Td);
+window.customElements.define(Textarea.tagName, Textarea);
+window.customElements.define(Tfoot.tagName, Tfoot);
+window.customElements.define(Th.tagName, Th);
+window.customElements.define(Thead.tagName, Thead);
+window.customElements.define(Tr.tagName, Tr);
 
 const style = document.createElement('style');
 style.textContent = `
@@ -87,117 +87,117 @@ style.textContent = `
 
   /* ── Button styles ─────────────────────────────────────── */
 
-  ui-button {
+  button {
     padding: 0 2;
   }
 
-  ui-button[variant="primary"] {
+  button[variant="primary"] {
     color: #ffffff;
     background-color: #7c3aed;
   }
 
-  ui-button[variant="primary"]:focus {
+  button[variant="primary"]:focus {
     background-color: #6d28d9;
   }
 
-  ui-button[variant="secondary"] {
+  button[variant="secondary"] {
     color: #e5e7eb;
     background-color: #334155;
   }
 
-  ui-button[variant="secondary"]:focus {
+  button[variant="secondary"]:focus {
     background-color: #475569;
   }
 
   /* ── Input styles ──────────────────────────────────────── */
 
-  ui-input {
+  input {
     color: #e5e7eb;
     background-color: #1e293b;
   }
 
-  ui-input:focus {
+  input:focus {
     background-color: #334155;
   }
 
   /* ── Textarea styles ───────────────────────────────────── */
 
-  ui-textarea {
+  textarea {
     color: #e5e7eb;
     background-color: #1e293b;
   }
 
-  ui-textarea:focus {
+  textarea:focus {
     background-color: #334155;
   }
 
   /* ── Select styles ─────────────────────────────────────── */
 
-  ui-select {
+  select {
     color: #e5e7eb;
     background-color: #1e293b;
     text-decoration: none;
     width: 20;
   }
 
-  ui-select:focus {
+  select:focus {
     background-color: #334155;
   }
 
-  ui-select .ui-select-listbox {
+  select .select-listbox {
     background-color: #1e293b;
   }
 
-  ui-option {
+  option {
     display: block;
     color: #e5e7eb;
   }
 
-  ui-option[highlighted] {
+  option[highlighted] {
     background-color: #7c3aed;
     color: #ffffff;
   }
 
-  ui-option[selected] {
+  option[selected] {
     font-weight: bold;
   }
 
-  ui-option[disabled] {
+  option[disabled] {
     color: #64748b;
   }
 
   /* ── Details styles ────────────────────────────────────── */
 
-  ui-details {
+  details {
     padding: 0 1;
     border-style: rounded;
     border-color: #475569;
   }
 
-  ui-details:focus {
+  details:focus {
     border-color: #7c3aed;
   }
 
-  ui-details ui-summary {
+  details summary {
     color: #fbbf24;
     font-weight: bold;
   }
 
-  ui-details .ui-details-content {
+  details .details-content {
     color: #cbd5e1;
   }
 
   /* ── Table styles ──────────────────────────────────────── */
 
-  ui-table {
+  table {
     padding: 0 1;
   }
 
-  ui-th {
+  th {
     color: #c4b5fd;
   }
 
-  ui-td {
+  td {
     color: #e5e7eb;
   }
 `;
@@ -218,18 +218,18 @@ hint.textContent = 'Tab to cycle. Arrow keys to navigate. Enter/Space to activat
 
 /* ── Form details ──────────────────────────────────────── */
 
-const formDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+const formDetails = document.createElement('details') as InstanceType<typeof Details>;
 formDetails.setAttribute('tabindex', '0');
 formDetails.setAttribute('open', '');
 
-const formSummary = document.createElement('ui-summary');
+const formSummary = document.createElement('summary');
 formSummary.textContent = 'Form';
 
 const nameLabel = document.createElement('div');
 nameLabel.className = 'label';
 nameLabel.textContent = 'Name:';
 
-const nameInput = document.createElement('ui-input') as InstanceType<typeof UiInput>;
+const nameInput = document.createElement('input') as InstanceType<typeof Input>;
 nameInput.setAttribute('tabindex', '1');
 nameInput.setAttribute('width', '25');
 nameInput.setAttribute('placeholder', 'Enter your name');
@@ -238,7 +238,7 @@ const colorLabel = document.createElement('div');
 colorLabel.className = 'label';
 colorLabel.textContent = 'Favorite color:';
 
-const colorSelect = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
+const colorSelect = document.createElement('select') as InstanceType<typeof Select>;
 colorSelect.setAttribute('tabindex', '2');
 colorSelect.setAttribute('value', 'blue');
 
@@ -249,7 +249,7 @@ for (const [value, label] of [
   ['purple', 'Purple'],
   ['orange', 'Orange'],
 ]) {
-  const opt = document.createElement('ui-option') as InstanceType<typeof UiOption>;
+  const opt = document.createElement('option') as InstanceType<typeof Option>;
   opt.setAttribute('value', value!);
   opt.textContent = label!;
   colorSelect.appendChild(opt);
@@ -259,7 +259,7 @@ const sizeLabel = document.createElement('div');
 sizeLabel.className = 'label';
 sizeLabel.textContent = 'Size:';
 
-const sizeSelect = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
+const sizeSelect = document.createElement('select') as InstanceType<typeof Select>;
 sizeSelect.setAttribute('tabindex', '3');
 sizeSelect.setAttribute('value', 'medium');
 
@@ -269,7 +269,7 @@ for (const [value, label, disabled] of [
   ['large', 'Large', false],
   ['xl', 'Extra Large (out of stock)', true],
 ]) {
-  const opt = document.createElement('ui-option') as InstanceType<typeof UiOption>;
+  const opt = document.createElement('option') as InstanceType<typeof Option>;
   opt.setAttribute('value', value as string);
   opt.textContent = label as string;
 
@@ -282,7 +282,7 @@ const notesLabel = document.createElement('div');
 notesLabel.className = 'label';
 notesLabel.textContent = 'Notes:';
 
-const notesTextarea = document.createElement('ui-textarea') as InstanceType<typeof UiTextarea>;
+const notesTextarea = document.createElement('textarea') as InstanceType<typeof Textarea>;
 notesTextarea.setAttribute('tabindex', '4');
 notesTextarea.setAttribute('cols', '30');
 notesTextarea.setAttribute('rows', '3');
@@ -300,27 +300,27 @@ formDetails.appendChild(notesTextarea);
 
 /* ── Table details ─────────────────────────────────────── */
 
-const tableDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+const tableDetails = document.createElement('details') as InstanceType<typeof Details>;
 tableDetails.setAttribute('tabindex', '5');
 tableDetails.setAttribute('open', '');
 
-const tableSummary = document.createElement('ui-summary');
+const tableSummary = document.createElement('summary');
 tableSummary.textContent = 'Team roster';
 
-const teamTable = document.createElement('ui-table') as InstanceType<typeof UiTable>;
+const teamTable = document.createElement('table') as InstanceType<typeof Table>;
 
-const thead = document.createElement('ui-thead');
-const headerRow = document.createElement('ui-tr');
+const thead = document.createElement('thead');
+const headerRow = document.createElement('tr');
 
 for (const heading of ['Name', 'Role', 'Status']) {
-  const th = document.createElement('ui-th');
+  const th = document.createElement('th');
   th.textContent = heading;
   headerRow.appendChild(th);
 }
 
 thead.appendChild(headerRow);
 
-const tbody = document.createElement('ui-tbody');
+const tbody = document.createElement('tbody');
 const teamData = [
   ['Alice', 'Engineer', 'Active'],
   ['Bob', 'Designer', 'Active'],
@@ -329,10 +329,10 @@ const teamData = [
 ];
 
 for (const row of teamData) {
-  const tr = document.createElement('ui-tr');
+  const tr = document.createElement('tr');
 
   for (const cell of row) {
-    const td = document.createElement('ui-td');
+    const td = document.createElement('td');
     td.textContent = cell!;
     tr.appendChild(td);
   }
@@ -340,13 +340,13 @@ for (const row of teamData) {
   tbody.appendChild(tr);
 }
 
-const tfoot = document.createElement('ui-tfoot');
-const footerRow = document.createElement('ui-tr');
-const totalCell = document.createElement('ui-td');
+const tfoot = document.createElement('tfoot');
+const footerRow = document.createElement('tr');
+const totalCell = document.createElement('td');
 totalCell.textContent = 'Total';
-const countCell = document.createElement('ui-td');
+const countCell = document.createElement('td');
 countCell.textContent = `${teamData.length} members`;
-const blankCell = document.createElement('ui-td');
+const blankCell = document.createElement('td');
 blankCell.textContent = '';
 footerRow.appendChild(totalCell);
 footerRow.appendChild(countCell);
@@ -362,11 +362,11 @@ tableDetails.appendChild(teamTable);
 
 /* ── Code details ──────────────────────────────────────── */
 
-const codeDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+const codeDetails = document.createElement('details') as InstanceType<typeof Details>;
 codeDetails.setAttribute('tabindex', '6');
 codeDetails.setAttribute('open', '');
 
-const codeSummary = document.createElement('ui-summary');
+const codeSummary = document.createElement('summary');
 codeSummary.textContent = 'Code example';
 
 const codeblock = document.createElement('ui-codeblock') as InstanceType<typeof UiCodeblock>;
@@ -392,10 +392,10 @@ codeDetails.appendChild(codeblock);
 
 /* ── Help details (collapsed) ──────────────────────────── */
 
-const helpDetails = document.createElement('ui-details') as InstanceType<typeof UiDetails>;
+const helpDetails = document.createElement('details') as InstanceType<typeof Details>;
 helpDetails.setAttribute('tabindex', '7');
 
-const helpSummary = document.createElement('ui-summary');
+const helpSummary = document.createElement('summary');
 helpSummary.textContent = 'Help & shortcuts';
 
 const helpContent = document.createElement('div');
@@ -410,12 +410,12 @@ helpDetails.appendChild(helpContent);
 const buttonRow = document.createElement('div');
 buttonRow.className = 'row';
 
-const submitBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
+const submitBtn = document.createElement('button') as InstanceType<typeof Button>;
 submitBtn.setAttribute('variant', 'primary');
 submitBtn.setAttribute('tabindex', '8');
 submitBtn.textContent = 'Submit';
 
-const resetBtn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
+const resetBtn = document.createElement('button') as InstanceType<typeof Button>;
 resetBtn.setAttribute('variant', 'secondary');
 resetBtn.setAttribute('tabindex', '9');
 resetBtn.textContent = 'Reset';

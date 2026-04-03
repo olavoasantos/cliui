@@ -1,22 +1,22 @@
-import {UiBreadcrumbs, UiBreadcrumb} from '@cliui/elements';
+import {Breadcrumbs, Breadcrumb} from '@cliui/elements';
 import {createDemo, createShell, createSection} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
-window.customElements.define(UiBreadcrumbs.tagName, UiBreadcrumbs);
-window.customElements.define(UiBreadcrumb.tagName, UiBreadcrumb);
+window.customElements.define(Breadcrumbs.tagName, Breadcrumbs);
+window.customElements.define(Breadcrumb.tagName, Breadcrumb);
 
 const app = createShell(
   document,
-  'ui-breadcrumbs',
+  'breadcrumbs',
   'Navigation breadcrumbs with configurable separator.',
 );
 
 /* ── Default separator ─────────────────────────────────── */
 
 const s1 = createSection(document, 'Default separator (›)');
-const crumbs1 = document.createElement('ui-breadcrumbs');
+const crumbs1 = document.createElement('breadcrumbs');
 for (const text of ['Home', 'Projects', 'terminal-dom', 'src']) {
-  const seg = document.createElement('ui-breadcrumb');
+  const seg = document.createElement('breadcrumb');
   seg.textContent = text;
   crumbs1.appendChild(seg);
 }
@@ -26,10 +26,10 @@ app.appendChild(s1);
 /* ── Custom separator ──────────────────────────────────── */
 
 const s2 = createSection(document, 'Custom separator (/)');
-const crumbs2 = document.createElement('ui-breadcrumbs');
+const crumbs2 = document.createElement('breadcrumbs');
 crumbs2.setAttribute('separator', '/');
 for (const text of ['usr', 'local', 'bin', 'node']) {
-  const seg = document.createElement('ui-breadcrumb');
+  const seg = document.createElement('breadcrumb');
   seg.textContent = text;
   crumbs2.appendChild(seg);
 }
@@ -39,10 +39,10 @@ app.appendChild(s2);
 /* ── Arrow separator ───────────────────────────────────── */
 
 const s3 = createSection(document, 'Arrow separator (→)');
-const crumbs3 = document.createElement('ui-breadcrumbs');
+const crumbs3 = document.createElement('breadcrumbs');
 crumbs3.setAttribute('separator', '→');
 for (const text of ['Start', 'Processing', 'Complete']) {
-  const seg = document.createElement('ui-breadcrumb');
+  const seg = document.createElement('breadcrumb');
   seg.textContent = text;
   crumbs3.appendChild(seg);
 }
@@ -52,8 +52,8 @@ app.appendChild(s3);
 /* ── Single segment ────────────────────────────────────── */
 
 const s4 = createSection(document, 'Single segment (no separator)');
-const crumbs4 = document.createElement('ui-breadcrumbs');
-const seg = document.createElement('ui-breadcrumb');
+const crumbs4 = document.createElement('breadcrumbs');
+const seg = document.createElement('breadcrumb');
 seg.textContent = 'Dashboard';
 crumbs4.appendChild(seg);
 s4.appendChild(crumbs4);

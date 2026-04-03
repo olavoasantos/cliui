@@ -1,12 +1,12 @@
-import {UiButton} from '@cliui/elements';
+import {Button} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
-window.customElements.define(UiButton.tagName, UiButton);
+window.customElements.define(Button.tagName, Button);
 
 const app = createShell(
   document,
-  'ui-button',
+  'button',
   'Tab to cycle buttons. Enter activates (flash). Space activates on release. Ctrl+Q quit.',
 );
 
@@ -18,7 +18,7 @@ const s1 = createSection(document, 'Variants');
 const row1 = document.createElement('div');
 row1.className = 'row';
 for (const variant of ['primary', 'secondary'] as const) {
-  const btn = document.createElement('ui-button') as InstanceType<typeof UiButton>;
+  const btn = document.createElement('button') as InstanceType<typeof Button>;
   btn.setAttribute('variant', variant);
   btn.setAttribute('tabindex', '0');
   btn.textContent = variant.charAt(0).toUpperCase() + variant.slice(1);
@@ -35,15 +35,15 @@ app.appendChild(s1);
 const s2 = createSection(document, 'Tones');
 const style = document.createElement('style');
 style.textContent = `
-  ui-button[tone="dangerous"] { background-color: #dc2626; color: #fff; }
-  ui-button[tone="dangerous"]:focus { background-color: #b91c1c; }
+  button[tone="dangerous"] { background-color: #dc2626; color: #fff; }
+  button[tone="dangerous"]:focus { background-color: #b91c1c; }
 `;
 document.head.appendChild(style);
 
 const row2 = document.createElement('div');
 row2.className = 'row';
 for (const tone of ['default', 'dangerous'] as const) {
-  const btn = document.createElement('ui-button');
+  const btn = document.createElement('button');
   btn.setAttribute('variant', 'primary');
   btn.setAttribute('tone', tone);
   btn.setAttribute('tabindex', '0');
@@ -59,7 +59,7 @@ app.appendChild(s2);
 /* ── Disabled ──────────────────────────────────────────── */
 
 const s3 = createSection(document, 'Disabled');
-const disabledBtn = document.createElement('ui-button');
+const disabledBtn = document.createElement('button');
 disabledBtn.setAttribute('variant', 'primary');
 disabledBtn.setAttribute('disabled', '');
 disabledBtn.textContent = 'Disabled';
@@ -76,7 +76,7 @@ const hint = document.createElement('div');
 hint.className = 'hint';
 hint.textContent =
   'Focus the button, try Enter (brief flash) vs Space (hold pressed, release fires).';
-const kbBtn = document.createElement('ui-button');
+const kbBtn = document.createElement('button');
 kbBtn.setAttribute('variant', 'primary');
 kbBtn.setAttribute('tabindex', '0');
 kbBtn.textContent = 'Press me';

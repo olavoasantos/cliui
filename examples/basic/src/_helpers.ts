@@ -40,26 +40,26 @@ export function createDemo() {
     }
     .label { color: #cbd5e1; }
 
-    ui-button { padding: 0 2; }
-    ui-button[variant="primary"] { color: #fff; background-color: #7c3aed; }
-    ui-button[variant="primary"]:focus { background-color: #6d28d9; }
-    ui-button[variant="secondary"] { color: #e5e7eb; background-color: #334155; }
-    ui-button[variant="secondary"]:focus { background-color: #475569; }
+    button { padding: 0 2; }
+    button[variant="primary"] { color: #fff; background-color: #7c3aed; }
+    button[variant="primary"]:focus { background-color: #6d28d9; }
+    button[variant="secondary"] { color: #e5e7eb; background-color: #334155; }
+    button[variant="secondary"]:focus { background-color: #475569; }
 
-    ui-input { color: #e5e7eb; background-color: #1e293b; }
-    ui-input:focus { background-color: #334155; }
+    input { color: #e5e7eb; background-color: #1e293b; }
+    input:focus { background-color: #334155; }
 
-    ui-textarea { color: #e5e7eb; background-color: #1e293b; }
-    ui-textarea:focus { background-color: #334155; }
+    textarea { color: #e5e7eb; background-color: #1e293b; }
+    textarea:focus { background-color: #334155; }
 
-    ui-select { color: #e5e7eb; background-color: #1e293b; text-decoration: none; width: 25; }
-    ui-select:focus { background-color: #334155; }
-    ui-select .ui-select-listbox { background-color: #1e293b; }
-    ui-option { display: block; color: #e5e7eb; }
-    ui-option[highlighted] { background-color: #7c3aed; color: #fff; }
-    ui-option[selected] { font-weight: bold; }
-    ui-option[disabled] { color: #64748b; }
-    .ui-optgroup-label { color: #c4b5fd; }
+    select { color: #e5e7eb; background-color: #1e293b; text-decoration: none; width: 25; }
+    select:focus { background-color: #334155; }
+    select .select-listbox { background-color: #1e293b; }
+    option { display: block; color: #e5e7eb; }
+    option[highlighted] { background-color: #7c3aed; color: #fff; }
+    option[selected] { font-weight: bold; }
+    option[disabled] { color: #64748b; }
+    .optgroup-label { color: #c4b5fd; }
 
     dialog { background-color: #1e293b; border-color: #7c3aed; color: #e5e7eb; width: 50; }
     dialog[modal] { border-color: #f59e0b; }

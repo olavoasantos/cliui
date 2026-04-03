@@ -1,22 +1,22 @@
-import {UiList} from '@cliui/elements';
+import {Listbox} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
-window.customElements.define(UiList.tagName, UiList);
+window.customElements.define(Listbox.tagName, Listbox);
 
 const style = document.createElement('style');
 style.textContent = `
-  ui-list { border-style: single; border-color: #475569; padding: 0 1; width: 30; }
-  ui-list:focus { border-color: #7c3aed; }
-  ui-list div[highlighted] { background-color: #7c3aed; color: #fff; }
-  ui-list div[selected] { color: #4ade80; font-weight: bold; }
-  ui-list div[selected][highlighted] { background-color: #7c3aed; color: #4ade80; }
+  listbox { border-style: single; border-color: #475569; padding: 0 1; width: 30; }
+  listbox:focus { border-color: #7c3aed; }
+  listbox div[highlighted] { background-color: #7c3aed; color: #fff; }
+  listbox div[selected] { color: #4ade80; font-weight: bold; }
+  listbox div[selected][highlighted] { background-color: #7c3aed; color: #4ade80; }
 `;
 document.head.appendChild(style);
 
 const app = createShell(
   document,
-  'ui-list',
+  'listbox',
   'Arrow Up/Down to navigate. Enter or click to select. Ctrl+Q quit.',
 );
 const status = createStatus(document, 'Selected: (none)');
@@ -26,7 +26,7 @@ const s1 = createSection(document, 'Single selection');
 const hint1 = document.createElement('div');
 hint1.className = 'hint';
 hint1.textContent = 'Arrow keys move highlight. Enter or click selects one item.';
-const list1 = document.createElement('ui-list') as InstanceType<typeof UiList>;
+const list1 = document.createElement('listbox') as InstanceType<typeof Listbox>;
 list1.setAttribute('tabindex', '0');
 for (const item of ['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry', 'Fig', 'Grape']) {
   const div = document.createElement('div');
@@ -47,7 +47,7 @@ const hint2 = document.createElement('div');
 hint2.className = 'hint';
 hint2.textContent =
   'Enter/Space/Click toggles item. Shift+Arrow extends range. Shift+Click selects range. Ctrl+A selects all.';
-const list2 = document.createElement('ui-list') as InstanceType<typeof UiList>;
+const list2 = document.createElement('listbox') as InstanceType<typeof Listbox>;
 list2.setAttribute('tabindex', '0');
 list2.setAttribute('mode', 'multi');
 for (const item of ['Read', 'Write', 'Execute', 'Delete', 'Admin']) {

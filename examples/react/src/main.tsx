@@ -18,10 +18,10 @@ function App() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const handler = (event: Event) => {
-      const key = (event as KeyboardEvent).key;
+    const handler = (event: KeyboardEvent) => {
+      const key = event.key;
 
-      if (key === 'c' && (event as KeyboardEvent).ctrlKey) {
+      if (key === 'c' && event.ctrlKey) {
         terminal.exit();
         process.exit(0);
       }

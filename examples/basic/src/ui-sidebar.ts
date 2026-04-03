@@ -1,9 +1,9 @@
-import {UiSidebar, UiButton} from '@cliui/elements';
+import {UiSidebar, Button} from '@cliui/elements';
 import {createDemo, createShell, createSection, createStatus} from './_helpers.ts';
 
 const {terminal, document, window} = createDemo();
 window.customElements.define(UiSidebar.tagName, UiSidebar);
-window.customElements.define(UiButton.tagName, UiButton);
+window.customElements.define(Button.tagName, Button);
 
 const style = document.createElement('style');
 style.textContent = `
@@ -42,7 +42,7 @@ content.textContent = 'Main content area. Toggle the sidebar with the button bel
 layout.appendChild(sidebar);
 layout.appendChild(content);
 
-const toggleBtn = document.createElement('ui-button');
+const toggleBtn = document.createElement('button');
 toggleBtn.setAttribute('variant', 'primary');
 toggleBtn.setAttribute('tabindex', '0');
 toggleBtn.textContent = 'Toggle sidebar';

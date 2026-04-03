@@ -1,21 +1,21 @@
 import {Terminal} from '@cliui/terminal';
 import {
   UiBadge,
-  UiButton,
-  UiDropdown,
-  UiFieldset,
-  UiForm,
-  UiInput,
-  UiLabel,
-  UiList,
-  UiMenu,
-  UiMenuItem,
+  Button,
+  Dropdown,
+  Fieldset,
+  Form,
+  Input,
+  Label,
+  Listbox,
+  Navmenu,
+  NavmenuItem,
   UiMessage,
-  UiOptgroup,
-  UiOption,
-  UiSelect,
-  UiTab,
-  UiTabs,
+  Optgroup,
+  Option,
+  Select,
+  Tab,
+  Tabs,
   UiToast,
 } from '@cliui/elements';
 
@@ -33,21 +33,21 @@ const terminal = new Terminal({
 const {document, window} = terminal;
 
 window.customElements.define(UiBadge.tagName, UiBadge);
-window.customElements.define(UiButton.tagName, UiButton);
-window.customElements.define(UiDropdown.tagName, UiDropdown);
-window.customElements.define(UiFieldset.tagName, UiFieldset);
-window.customElements.define(UiForm.tagName, UiForm);
-window.customElements.define(UiInput.tagName, UiInput);
-window.customElements.define(UiLabel.tagName, UiLabel);
-window.customElements.define(UiList.tagName, UiList);
-window.customElements.define(UiMenu.tagName, UiMenu);
-window.customElements.define(UiMenuItem.tagName, UiMenuItem);
+window.customElements.define(Button.tagName, Button);
+window.customElements.define(Dropdown.tagName, Dropdown);
+window.customElements.define(Fieldset.tagName, Fieldset);
+window.customElements.define(Form.tagName, Form);
+window.customElements.define(Input.tagName, Input);
+window.customElements.define(Label.tagName, Label);
+window.customElements.define(Listbox.tagName, Listbox);
+window.customElements.define(Navmenu.tagName, Navmenu);
+window.customElements.define(NavmenuItem.tagName, NavmenuItem);
 window.customElements.define(UiMessage.tagName, UiMessage);
-window.customElements.define(UiOptgroup.tagName, UiOptgroup);
-window.customElements.define(UiOption.tagName, UiOption);
-window.customElements.define(UiSelect.tagName, UiSelect);
-window.customElements.define(UiTab.tagName, UiTab);
-window.customElements.define(UiTabs.tagName, UiTabs);
+window.customElements.define(Optgroup.tagName, Optgroup);
+window.customElements.define(Option.tagName, Option);
+window.customElements.define(Select.tagName, Select);
+window.customElements.define(Tab.tagName, Tab);
+window.customElements.define(Tabs.tagName, Tabs);
 window.customElements.define(UiToast.tagName, UiToast);
 
 const style = document.createElement('style');
@@ -73,47 +73,47 @@ style.textContent = `
   .hint { color: #64748b; }
   .status { color: #86efac; }
 
-  ui-button[variant="primary"] {
+  button[variant="primary"] {
     color: #ffffff; background-color: #7c3aed; padding: 0 2;
   }
-  ui-button[variant="primary"]:focus { background-color: #6d28d9; }
-  ui-button[variant="secondary"] {
+  button[variant="primary"]:focus { background-color: #6d28d9; }
+  button[variant="secondary"] {
     color: #e5e7eb; background-color: #334155; padding: 0 2;
   }
-  ui-button[variant="secondary"]:focus { background-color: #475569; }
+  button[variant="secondary"]:focus { background-color: #475569; }
 
-  ui-input {
+  input {
     color: #e5e7eb; background-color: #1e293b;
   }
-  ui-input:focus { background-color: #334155; }
+  input:focus { background-color: #334155; }
 
-  ui-select {
+  select {
     color: #e5e7eb; background-color: #1e293b;
     text-decoration: none; width: 25;
   }
-  ui-select:focus { background-color: #334155; }
-  ui-select .ui-select-listbox { background-color: #1e293b; }
-  ui-option { display: block; color: #e5e7eb; }
-  ui-option[highlighted] { background-color: #7c3aed; color: #ffffff; }
-  ui-option[selected] { font-weight: bold; }
-  ui-option[disabled] { color: #64748b; }
-  .ui-optgroup-label { color: #c4b5fd; }
+  select:focus { background-color: #334155; }
+  select .select-listbox { background-color: #1e293b; }
+  option { display: block; color: #e5e7eb; }
+  option[highlighted] { background-color: #7c3aed; color: #ffffff; }
+  option[selected] { font-weight: bold; }
+  option[disabled] { color: #64748b; }
+  .optgroup-label { color: #c4b5fd; }
 
-  ui-fieldset { border-color: #475569; }
-  ui-fieldset .ui-fieldset-legend { color: #fbbf24; }
+  fieldset { border-color: #475569; }
+  fieldset .fieldset-legend { color: #fbbf24; }
 
-  ui-tabs:focus .ui-tabs-bar div[data-active] { color: #c4b5fd; }
+  tabs:focus .tabs-bar div[data-active] { color: #c4b5fd; }
 
-  ui-list {
+  listbox {
     border-style: single; border-color: #475569;
     padding: 0 1; width: 30;
   }
-  ui-list:focus { border-color: #7c3aed; }
-  ui-list div[highlighted] { background-color: #7c3aed; color: #ffffff; }
-  ui-list div[selected] { font-weight: bold; }
+  listbox:focus { border-color: #7c3aed; }
+  listbox div[highlighted] { background-color: #7c3aed; color: #ffffff; }
+  listbox div[selected] { font-weight: bold; }
 
-  ui-menu { background-color: #1e293b; border-color: #475569; width: 20; }
-  ui-menu-item[highlighted] { background-color: #7c3aed; color: #ffffff; }
+  navmenu { background-color: #1e293b; border-color: #475569; width: 20; }
+  navmenuitem[highlighted] { background-color: #7c3aed; color: #ffffff; }
 
   ui-message[tone='info'] { border-color: #60a5fa; color: #60a5fa; }
   ui-message[tone='success'] { border-color: #4ade80; color: #4ade80; }
@@ -233,11 +233,11 @@ s4.container.appendChild(belowHr);
 
 /* ── COMP-5: Label ─────────────────────────────────────── */
 
-const s5 = section('COMP-5: <ui-label>');
+const s5 = section('COMP-5: <label>');
 const s5Hint = document.createElement('div');
 s5Hint.className = 'hint';
 s5Hint.textContent = 'Click the label to focus the input.';
-const label = document.createElement('ui-label');
+const label = document.createElement('label');
 label.setAttribute('for', 'label-target');
 label.textContent = '→ Click me to focus input ←';
 const labelTarget = document.createElement('div');
@@ -260,19 +260,19 @@ s5.container.appendChild(labelStatus);
 
 /* ── COMP-6: Fieldset & Form ───────────────────────────── */
 
-const s6 = section('COMP-6: <ui-fieldset> + <ui-form>');
+const s6 = section('COMP-6: <fieldset> + <form>');
 const s6Hint = document.createElement('div');
 s6Hint.className = 'hint';
 s6Hint.textContent = 'Enter in input or click Submit to dispatch submit. Reset clears values.';
 
-const form = document.createElement('ui-form') as InstanceType<typeof UiForm>;
+const form = document.createElement('form') as InstanceType<typeof Form>;
 
-const fieldset1 = document.createElement('ui-fieldset');
+const fieldset1 = document.createElement('fieldset');
 fieldset1.setAttribute('legend', 'Account');
-const nameLabel = document.createElement('ui-label');
+const nameLabel = document.createElement('label');
 nameLabel.setAttribute('for', 'form-name');
 nameLabel.textContent = 'Name:';
-const nameInput = document.createElement('ui-input') as InstanceType<typeof UiInput>;
+const nameInput = document.createElement('input') as InstanceType<typeof Input>;
 nameInput.setAttribute('id', 'form-name');
 nameInput.setAttribute('tabindex', '0');
 nameInput.setAttribute('width', '20');
@@ -280,12 +280,12 @@ nameInput.setAttribute('placeholder', 'Your name');
 fieldset1.appendChild(nameLabel);
 fieldset1.appendChild(nameInput);
 
-const fieldset2 = document.createElement('ui-fieldset');
+const fieldset2 = document.createElement('fieldset');
 fieldset2.setAttribute('legend', 'Preferences');
-const colorLabel = document.createElement('ui-label');
+const colorLabel = document.createElement('label');
 colorLabel.setAttribute('for', 'form-color');
 colorLabel.textContent = 'Color:';
-const colorInput = document.createElement('ui-input') as InstanceType<typeof UiInput>;
+const colorInput = document.createElement('input') as InstanceType<typeof Input>;
 colorInput.setAttribute('id', 'form-color');
 colorInput.setAttribute('tabindex', '0');
 colorInput.setAttribute('width', '20');
@@ -295,12 +295,12 @@ fieldset2.appendChild(colorInput);
 
 const formBtnRow = document.createElement('div');
 formBtnRow.className = 'row';
-const submitBtn = document.createElement('ui-button');
+const submitBtn = document.createElement('button');
 submitBtn.setAttribute('type', 'submit');
 submitBtn.setAttribute('variant', 'primary');
 submitBtn.setAttribute('tabindex', '0');
 submitBtn.textContent = 'Submit';
-const resetBtn = document.createElement('ui-button');
+const resetBtn = document.createElement('button');
 resetBtn.setAttribute('variant', 'secondary');
 resetBtn.setAttribute('tabindex', '0');
 resetBtn.textContent = 'Reset';
@@ -320,7 +320,7 @@ form.addEventListener('submit', () => {
   formStatus.textContent = `Form: submitted name="${name}" color="${color}"`;
 });
 resetBtn.addEventListener('click', () => {
-  (form as UiForm).reset();
+  (form as Form).reset();
   formStatus.textContent = 'Form: reset';
 });
 
@@ -330,28 +330,28 @@ s6.container.appendChild(formStatus);
 
 /* ── COMP-7: Optgroup ──────────────────────────────────── */
 
-const s7 = section('COMP-7: <ui-optgroup>');
+const s7 = section('COMP-7: <optgroup>');
 const s7Hint = document.createElement('div');
 s7Hint.className = 'hint';
 s7Hint.textContent = 'Select with grouped options. Group headers are not selectable.';
 
-const groupedSelect = document.createElement('ui-select') as InstanceType<typeof UiSelect>;
+const groupedSelect = document.createElement('select') as InstanceType<typeof Select>;
 groupedSelect.setAttribute('tabindex', '0');
 groupedSelect.setAttribute('value', 'apple');
 
-const fruitsGroup = document.createElement('ui-optgroup');
+const fruitsGroup = document.createElement('optgroup');
 fruitsGroup.setAttribute('label', 'Fruits');
 for (const fruit of ['Apple', 'Banana', 'Cherry']) {
-  const opt = document.createElement('ui-option');
+  const opt = document.createElement('option');
   opt.setAttribute('value', fruit.toLowerCase());
   opt.textContent = fruit;
   fruitsGroup.appendChild(opt);
 }
 
-const vegsGroup = document.createElement('ui-optgroup');
+const vegsGroup = document.createElement('optgroup');
 vegsGroup.setAttribute('label', 'Vegetables');
 for (const veg of ['Carrot', 'Broccoli', 'Spinach']) {
-  const opt = document.createElement('ui-option');
+  const opt = document.createElement('option');
   opt.setAttribute('value', veg.toLowerCase());
   opt.textContent = veg;
   vegsGroup.appendChild(opt);
@@ -443,7 +443,7 @@ for (const [tone, label, duration] of [
   ['warning', 'Warning (4s)', '4000'],
   ['error', 'Error (5s)', '5000'],
 ] as const) {
-  const btn = document.createElement('ui-button');
+  const btn = document.createElement('button');
   btn.setAttribute('variant', 'primary');
   btn.setAttribute('tabindex', '0');
   btn.textContent = label;
@@ -465,18 +465,18 @@ s12.container.appendChild(toastContainer);
 
 /* ── COMP-22: Tabs ─────────────────────────────────────── */
 
-const s22 = section('COMP-22: <ui-tabs>');
+const s22 = section('COMP-22: <tabs>');
 const s22Hint = document.createElement('div');
 s22Hint.className = 'hint';
 s22Hint.textContent = 'Focus tabs → Arrow Left/Right to switch.';
-const tabs = document.createElement('ui-tabs') as InstanceType<typeof UiTabs>;
+const tabs = document.createElement('tabs') as InstanceType<typeof Tabs>;
 tabs.setAttribute('tabindex', '0');
 for (const [tabTitle, content] of [
   ['Overview', 'General information goes here.'],
   ['Details', 'More specific information and data.'],
   ['Settings', 'Configure preferences and options.'],
 ]) {
-  const tab = document.createElement('ui-tab');
+  const tab = document.createElement('tab');
   tab.setAttribute('title', tabTitle!);
   tab.textContent = content!;
   tabs.appendChild(tab);
@@ -486,7 +486,7 @@ tabStatus.className = 'status';
 tabStatus.textContent = 'Active tab: Overview';
 tabs.addEventListener('input', () => {
   const names = ['Overview', 'Details', 'Settings'];
-  tabStatus.textContent = `Active tab: ${names[(tabs as UiTabs).getActiveIndex()] ?? '?'}`;
+  tabStatus.textContent = `Active tab: ${names[(tabs as Tabs).getActiveIndex()] ?? '?'}`;
 });
 s22.container.appendChild(s22Hint);
 s22.container.appendChild(tabs);
@@ -494,11 +494,11 @@ s22.container.appendChild(tabStatus);
 
 /* ── COMP-17: List ─────────────────────────────────────── */
 
-const s17 = section('COMP-17: <ui-list>');
+const s17 = section('COMP-17: <listbox>');
 const s17Hint = document.createElement('div');
 s17Hint.className = 'hint';
 s17Hint.textContent = 'Arrow Up/Down to highlight. Enter or click to select.';
-const list = document.createElement('ui-list') as InstanceType<typeof UiList>;
+const list = document.createElement('listbox') as InstanceType<typeof Listbox>;
 list.setAttribute('tabindex', '0');
 for (const item of ['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry']) {
   const div = document.createElement('div');
@@ -510,7 +510,7 @@ const listStatus = document.createElement('div');
 listStatus.className = 'status';
 listStatus.textContent = 'Selected: (none)';
 list.addEventListener('select', () => {
-  listStatus.textContent = `Selected: ${(list as UiList).getSelectedValue()}`;
+  listStatus.textContent = `Selected: ${(list as Listbox).getSelectedValue()}`;
 });
 s17.container.appendChild(s17Hint);
 s17.container.appendChild(list);
@@ -518,21 +518,21 @@ s17.container.appendChild(listStatus);
 
 /* ── COMP-24: Menu / Dropdown ──────────────────────────── */
 
-const s24 = section('COMP-24: <ui-dropdown> + <ui-menu>');
+const s24 = section('COMP-24: <dropdown> + <navmenu>');
 const s24Hint = document.createElement('div');
 s24Hint.className = 'hint';
 s24Hint.textContent = 'Enter/click to open. Arrows navigate. Enter selects. Escape closes.';
-const dropdown = document.createElement('ui-dropdown') as InstanceType<typeof UiDropdown>;
+const dropdown = document.createElement('dropdown') as InstanceType<typeof Dropdown>;
 dropdown.setAttribute('tabindex', '0');
 dropdown.textContent = '▼ Actions';
-const menu = document.createElement('ui-menu') as InstanceType<typeof UiMenu>;
+const menu = document.createElement('navmenu') as InstanceType<typeof Navmenu>;
 for (const [value, label] of [
   ['copy', 'Copy'],
   ['paste', 'Paste'],
   ['cut', 'Cut'],
   ['delete', 'Delete'],
 ]) {
-  const item = document.createElement('ui-menu-item');
+  const item = document.createElement('navmenuitem');
   item.setAttribute('value', value!);
   item.textContent = label!;
   menu.appendChild(item);
@@ -542,7 +542,7 @@ const menuStatus = document.createElement('div');
 menuStatus.className = 'status';
 menuStatus.textContent = 'Menu: (none selected)';
 menu.addEventListener('select', () => {
-  menuStatus.textContent = `Menu: selected "${(menu as UiMenu).getHighlightedValue()}"`;
+  menuStatus.textContent = `Menu: selected "${(menu as Navmenu).getHighlightedValue()}"`;
 });
 s24.container.appendChild(s24Hint);
 s24.container.appendChild(dropdown);
@@ -557,11 +557,11 @@ s9Hint.textContent = 'Buttons open dialogs. Escape closes modals.';
 
 const dialogBtnRow = document.createElement('div');
 dialogBtnRow.className = 'row';
-const showBtn = document.createElement('ui-button');
+const showBtn = document.createElement('button');
 showBtn.setAttribute('variant', 'primary');
 showBtn.setAttribute('tabindex', '0');
 showBtn.textContent = 'Non-modal';
-const showModalBtn = document.createElement('ui-button');
+const showModalBtn = document.createElement('button');
 showModalBtn.setAttribute('variant', 'primary');
 showModalBtn.setAttribute('tabindex', '0');
 showModalBtn.textContent = 'Modal';
@@ -576,7 +576,7 @@ const dialog = document.createElement('dialog');
 dialog.style.zIndex = '10';
 const dialogMsg = document.createElement('p');
 dialogMsg.textContent = 'Non-modal dialog. Tab to Close, press Enter.';
-const closeBtn = document.createElement('ui-button');
+const closeBtn = document.createElement('button');
 closeBtn.setAttribute('variant', 'primary');
 closeBtn.setAttribute('tabindex', '0');
 closeBtn.textContent = 'Close';
@@ -588,11 +588,11 @@ const modalDialog = document.createElement('dialog');
 modalDialog.style.zIndex = '10';
 const modalMsg = document.createElement('p');
 modalMsg.textContent = 'MODAL: Focus trapped. Escape or buttons to close.';
-const confirmBtn = document.createElement('ui-button');
+const confirmBtn = document.createElement('button');
 confirmBtn.setAttribute('variant', 'primary');
 confirmBtn.setAttribute('tabindex', '0');
 confirmBtn.textContent = 'Confirm';
-const cancelBtn = document.createElement('ui-button');
+const cancelBtn = document.createElement('button');
 cancelBtn.setAttribute('variant', 'primary');
 cancelBtn.setAttribute('tabindex', '0');
 cancelBtn.textContent = 'Cancel';
