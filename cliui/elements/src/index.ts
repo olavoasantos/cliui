@@ -42,3 +42,7 @@ export {Toolbar} from './Toolbar/component';
 export {Tr} from './Tr/component';
 export {Tree} from './Tree/component';
 export {TreeItem} from './TreeItem/component';
+export {registerHTMLElements} from './registerHTMLElements';
+export {registerPrimitives} from './registerPrimitives';
+export {registerStyledComponents} from './registerStyledComponents';
+export {registerAll} from './registerAll';

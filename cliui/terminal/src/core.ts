@@ -38,6 +38,7 @@ export {CellBuffer} from './renderer/classes/CellBuffer';
 export {Painter} from './renderer/classes/Painter';
 export {Renderer} from './renderer/classes/Renderer';
 export {StyleEngine} from './css/classes/StyleEngine';
+export {appendUserAgentStyles} from './css/utilities/appendUserAgentStyles';
 export {LayoutEngine} from './layout/classes/LayoutEngine';
 export {cellWidth} from './layout/utilities/cellWidth';
 export {graphemeWidth} from './layout/utilities/graphemeWidth';
