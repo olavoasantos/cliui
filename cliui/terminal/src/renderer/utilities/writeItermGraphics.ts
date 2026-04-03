@@ -25,10 +25,12 @@ export const itermGraphicsProtocol: GraphicsProtocol = {
     let output = `${ESC}[${y + 1};${x + 1}H`;
 
     // OSC 1337 ; File=[args] : base64data BEL
+    // preserveAspectRatio=0 ensures the image fits exactly in the
+    // cell region rather than overflowing to maintain its native ratio.
     output += `${OSC}1337;File=inline=1`;
     output += `;width=${cellWidth}`;
     output += `;height=${cellHeight}`;
-    output += `;preserveAspectRatio=1`;
+    output += `;preserveAspectRatio=0`;
     output += `:${encoded}${BEL}`;
 
     return output;
