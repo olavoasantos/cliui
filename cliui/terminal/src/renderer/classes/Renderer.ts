@@ -46,6 +46,9 @@ export class Renderer {
   /** Pending image render requests for the current frame. */
   private readonly pendingImages: ImageRenderRequest[] = [];
 
+  /** Whether the previous frame had image render requests. */
+  private hadImagesLastFrame = false;
+
   /** The border style registry shared with the style engine. */
   get borderStyles(): BorderStyleRegistry {
     return this.painter.borderStyles;
@@ -99,20 +102,33 @@ export class Renderer {
     const changedRegions = this.differ.diff(this.previousBuffer, this.currentBuffer);
     let output = this.ansiWriter.write(changedRegions);
 
-    // Append graphics protocol sequences for any pending image requests
+    // Append graphics protocol sequences for any pending image requests.
+    // The cell buffer already contains fallback characters (░ / alt text)
+    // that scroll and diff correctly. Graphics protocol output overlays
+    // on top only when a capable protocol is detected.
+    const KITTY_DELETE_ALL = `\x1B_Ga=d,d=A\x1B\\`;
+
     if (this.pendingImages.length > 0) {
       const protocol = this.selectGraphicsProtocol();
 
-      for (const request of this.pendingImages) {
-        // Use the graphics protocol for images with data,
-        // always use fallback for images without data
-        if (request.data.length > 0 && protocol.name !== 'fallback') {
-          output += protocol.render(request);
-        } else {
-          output += fallbackGraphicsProtocol.render(request);
+      if (protocol.name !== 'fallback') {
+        // Delete previous Kitty image placements before re-emitting
+        if (protocol.name === 'kitty' && this.hadImagesLastFrame) {
+          output += KITTY_DELETE_ALL;
+        }
+
+        for (const request of this.pendingImages) {
+          if (request.data.length > 0) {
+            output += protocol.render(request);
+          }
         }
       }
+    } else if (this.hadImagesLastFrame && this.graphicsCapability === 'kitty') {
+      // No images this frame but had them last frame — clean up
+      output += KITTY_DELETE_ALL;
     }
+
+    this.hadImagesLastFrame = this.pendingImages.length > 0;
 
     this.swapBuffers();
 

@@ -276,28 +276,42 @@ export class Painter {
     const y = box.contentY;
     const w = box.contentWidth;
     const h = box.contentHeight;
+    const alt = box.element.getAttribute('alt') ?? '';
 
-    // Fill the content area with spaces to reserve the region
-    for (let row = 0; row < h; row++) {
+    const placeholderCell: Cell = {
+      char: '░',
+      fg: null,
+      bg: null,
+      bold: false,
+      italic: false,
+      underline: 'none',
+      underlineColor: null,
+      strikethrough: false,
+      faint: false,
+      hyperlink: null,
+    };
+
+    if (alt.length > 0) {
+      // Paint alt text on the first row, pad/truncate to fit
+      const truncated = alt.length > w ? alt.slice(0, w - 1) + '…' : alt;
+
       for (let col = 0; col < w; col++) {
-        this.writeCell(
-          buffer,
-          x + col,
-          y + row,
-          {
-            char: ' ',
-            fg: null,
-            bg: null,
-            bold: false,
-            italic: false,
-            underline: 'none',
-            underlineColor: null,
-            strikethrough: false,
-            faint: false,
-            hyperlink: null,
-          },
-          clipRect,
-        );
+        const char = col < truncated.length ? truncated[col]! : ' ';
+        this.writeCell(buffer, x + col, y, {...placeholderCell, char}, clipRect);
+      }
+
+      // Fill remaining rows with spaces
+      for (let row = 1; row < h; row++) {
+        for (let col = 0; col < w; col++) {
+          this.writeCell(buffer, x + col, y + row, {...placeholderCell, char: ' '}, clipRect);
+        }
+      }
+    } else {
+      // Fill entire region with placeholder characters
+      for (let row = 0; row < h; row++) {
+        for (let col = 0; col < w; col++) {
+          this.writeCell(buffer, x + col, y + row, placeholderCell, clipRect);
+        }
       }
     }
 
@@ -310,7 +324,7 @@ export class Painter {
         y,
         cellWidth: w,
         cellHeight: h,
-        alt: box.element.getAttribute('alt') ?? '',
+        alt,
       });
     }
   }
