@@ -301,9 +301,9 @@ export class Painter {
       }
     }
 
-    if (this.onImageRequest && element.imageData && element.imageData.length > 0) {
+    if (this.onImageRequest && w > 0 && h > 0) {
       this.onImageRequest({
-        data: element.imageData,
+        data: element.imageData ?? new Uint8Array(0),
         naturalWidth: element.naturalWidth ?? 0,
         naturalHeight: element.naturalHeight ?? 0,
         x,

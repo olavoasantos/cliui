@@ -104,7 +104,13 @@ export class Renderer {
       const protocol = this.selectGraphicsProtocol();
 
       for (const request of this.pendingImages) {
-        output += protocol.render(request);
+        // Use the graphics protocol for images with data,
+        // always use fallback for images without data
+        if (request.data.length > 0 && protocol.name !== 'fallback') {
+          output += protocol.render(request);
+        } else {
+          output += fallbackGraphicsProtocol.render(request);
+        }
       }
     }
 

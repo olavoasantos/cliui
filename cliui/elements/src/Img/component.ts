@@ -37,6 +37,8 @@ export class Img extends HTMLElement {
   naturalHeight = 0;
 
   connectedCallback(): void {
+    this.syncDimensionStyle('width', this.getAttribute('width'));
+    this.syncDimensionStyle('height', this.getAttribute('height'));
     this.loadImage();
   }
 
@@ -49,6 +51,10 @@ export class Img extends HTMLElement {
 
     if (name === 'src') {
       this.loadImage();
+    }
+
+    if (name === 'width' || name === 'height') {
+      this.syncDimensionStyle(name, newValue);
     }
   }
 
@@ -91,6 +97,21 @@ export class Img extends HTMLElement {
   }
 
   /* ── Private ────────────────────────────────────────────── */
+
+  /**
+   * Syncs a `width` or `height` HTML attribute to the corresponding
+   * inline CSS property so the layout engine sizes the element.
+   *
+   * In browsers, `<img width="20">` maps to `width: 20px`. Here
+   * we map to cell units: `style.width = '20'`.
+   */
+  private syncDimensionStyle(name: 'width' | 'height', value: string | null): void {
+    if (value !== null && value.length > 0) {
+      this.style[name] = value;
+    } else {
+      this.style[name] = '';
+    }
+  }
 
   private loadImage(): void {
     const src = this.getAttribute('src');
