@@ -2,7 +2,6 @@ import type {LayoutBox} from '../../layout/types';
 import type {TerminalColorProfile, TerminalGraphicsProtocol} from '../../terminal/types';
 import type {CaretOverlay} from '../../terminal/types/CaretOverlay';
 import type {GraphicsProtocol} from '../types/GraphicsProtocol';
-import type {ImageRenderRequest} from '../types/ImageRenderRequest';
 import {kittyGraphicsProtocol} from '../utilities/writeKittyGraphics';
 import {itermGraphicsProtocol} from '../utilities/writeItermGraphics';
 import {fallbackGraphicsProtocol} from '../utilities/writeImageFallback';
@@ -43,12 +42,6 @@ export class Renderer {
   private graphicsCapability: TerminalGraphicsProtocol = 'none';
   private readonly graphicsProtocols: GraphicsProtocol[] = [];
 
-  /** Pending image render requests for the current frame. */
-  private readonly pendingImages: ImageRenderRequest[] = [];
-
-  /** Whether the previous frame had image render requests. */
-  private hadImagesLastFrame = false;
-
   /** The border style registry shared with the style engine. */
   get borderStyles(): BorderStyleRegistry {
     return this.painter.borderStyles;
@@ -73,7 +66,6 @@ export class Renderer {
     this.currentBuffer = new CellBuffer(cols, rows);
     this.previousBuffer = new CellBuffer(cols, rows);
     this.painter = painter;
-    this.painter.onImageRequest = (request) => this.enqueueImage(request);
     this.differ = differ;
     this.ansiWriter = ansiWriter;
 
@@ -92,7 +84,6 @@ export class Renderer {
    */
   render(boxes: LayoutBox | LayoutBox[], caretOverlays?: CaretOverlay[]): string {
     this.currentBuffer.clear();
-    this.pendingImages.length = 0;
     this.painter.paint(boxes, this.currentBuffer);
 
     if (caretOverlays) {
@@ -100,35 +91,7 @@ export class Renderer {
     }
 
     const changedRegions = this.differ.diff(this.previousBuffer, this.currentBuffer);
-    let output = this.ansiWriter.write(changedRegions);
-
-    // Append graphics protocol sequences for any pending image requests.
-    // The cell buffer already contains fallback characters (░ / alt text)
-    // that scroll and diff correctly. Graphics protocol output overlays
-    // on top only when a capable protocol is detected.
-    const KITTY_DELETE_ALL = `\x1B_Ga=d,d=A\x1B\\`;
-
-    if (this.pendingImages.length > 0) {
-      const protocol = this.selectGraphicsProtocol();
-
-      if (protocol.name !== 'fallback') {
-        // Delete previous Kitty image placements before re-emitting
-        if (protocol.name === 'kitty' && this.hadImagesLastFrame) {
-          output += KITTY_DELETE_ALL;
-        }
-
-        for (const request of this.pendingImages) {
-          if (request.data.length > 0) {
-            output += protocol.render(request);
-          }
-        }
-      }
-    } else if (this.hadImagesLastFrame && this.graphicsCapability === 'kitty') {
-      // No images this frame but had them last frame — clean up
-      output += KITTY_DELETE_ALL;
-    }
-
-    this.hadImagesLastFrame = this.pendingImages.length > 0;
+    const output = this.ansiWriter.write(changedRegions);
 
     this.swapBuffers();
 
@@ -192,20 +155,6 @@ export class Renderer {
     } else {
       this.graphicsProtocols.push(protocol);
     }
-  }
-
-  /**
-   * Enqueues an image render request for the current frame.
-   *
-   * Called by the {@link Painter} when it encounters an `<img>` element
-   * with loaded image data. The request is processed after cell-based
-   * painting and diffing, appending graphics protocol sequences to the
-   * frame output.
-   *
-   * @param request - Image data and target cell region.
-   */
-  enqueueImage(request: ImageRenderRequest): void {
-    this.pendingImages.push(request);
   }
 
   /**
@@ -274,8 +223,11 @@ export class Renderer {
    *
    * Returns the first protocol whose name matches the detected capability,
    * falling through to the fallback protocol if no match is found.
+   *
+   * Currently unused — reserved for future `<img>` element support
+   * when proper image lifecycle management is implemented.
    */
-  private selectGraphicsProtocol(): GraphicsProtocol {
+  selectGraphicsProtocol(): GraphicsProtocol {
     if (this.graphicsCapability !== 'none') {
       for (const protocol of this.graphicsProtocols) {
         if (protocol.name === this.graphicsCapability) {
