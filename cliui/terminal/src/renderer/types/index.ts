@@ -65,3 +65,6 @@ export interface ChangedRegion {
   /** Cells from left to right within the changed run. */
   cells: Cell[];
 }
+
+export type {GraphicsProtocol, GraphicsProtocolName} from './GraphicsProtocol';
+export type {ImageRenderRequest} from './ImageRenderRequest';

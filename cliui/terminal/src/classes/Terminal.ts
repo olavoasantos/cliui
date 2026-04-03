@@ -37,6 +37,7 @@ import type {LayoutBox} from '../layout/types';
 import type {TerminalFrameAware} from '../types/TerminalFrameAware';
 import type {EditableStateElement} from '../types/EditableStateElement';
 import type {TerminalOptions} from '../types';
+import type {TerminalPlugin, TerminalPluginContext} from '../types/TerminalPlugin';
 import type {Editable} from '../terminal/types/Editable';
 import type {EditableConfiguration} from '../terminal/types/EditableConfiguration';
 import type {EditableState} from '../terminal/types/EditableState';
@@ -119,6 +120,7 @@ export class Terminal {
 
     this.wireCaretListeners();
     this.wireBodyScrollListener();
+    this.installPlugins(options.plugins);
   }
 
   /**
@@ -886,6 +888,7 @@ export class Terminal {
 
     this.renderer.setSynchronizedOutputEnabled(capabilities.synchronizedOutput);
     this.renderer.setColorProfile(capabilities.colorProfile);
+    this.renderer.setGraphicsCapability(capabilities.graphicsProtocol);
 
     const caretOverlays = carets.size > 0 ? this.caretManager.getOverlays(layout) : [];
     const output = this.renderer.render(layout, caretOverlays);
@@ -990,5 +993,24 @@ export class Terminal {
     }
 
     return Math.floor(value);
+  }
+
+  /**
+   * Installs terminal plugins, giving them access to extensible internals.
+   */
+  private installPlugins(plugins: TerminalPlugin[] | undefined): void {
+    if (!plugins || plugins.length === 0) {
+      return;
+    }
+
+    const context: TerminalPluginContext = {
+      registerGraphicsProtocol: (protocol) => {
+        this.renderer.registerGraphicsProtocol(protocol);
+      },
+    };
+
+    for (const plugin of plugins) {
+      plugin.install(context);
+    }
   }
 }

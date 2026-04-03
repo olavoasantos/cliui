@@ -1,6 +1,11 @@
 import type {LayoutBox} from '../../layout/types';
-import type {TerminalColorProfile} from '../../terminal/types';
+import type {TerminalColorProfile, TerminalGraphicsProtocol} from '../../terminal/types';
 import type {CaretOverlay} from '../../terminal/types/CaretOverlay';
+import type {GraphicsProtocol} from '../types/GraphicsProtocol';
+import type {ImageRenderRequest} from '../types/ImageRenderRequest';
+import {kittyGraphicsProtocol} from '../utilities/writeKittyGraphics';
+import {itermGraphicsProtocol} from '../utilities/writeItermGraphics';
+import {fallbackGraphicsProtocol} from '../utilities/writeImageFallback';
 import {ANSIWriter} from './ANSIWriter';
 import {CellBuffer} from './CellBuffer';
 import {Differ} from './Differ';
@@ -35,6 +40,11 @@ export class Renderer {
   private ansiWriter: ANSIWriter;
   private synchronizedOutputEnabled = false;
   private colorProfile: TerminalColorProfile = 'truecolor';
+  private graphicsCapability: TerminalGraphicsProtocol = 'none';
+  private readonly graphicsProtocols: GraphicsProtocol[] = [];
+
+  /** Pending image render requests for the current frame. */
+  private readonly pendingImages: ImageRenderRequest[] = [];
 
   /** The border style registry shared with the style engine. */
   get borderStyles(): BorderStyleRegistry {
@@ -60,8 +70,14 @@ export class Renderer {
     this.currentBuffer = new CellBuffer(cols, rows);
     this.previousBuffer = new CellBuffer(cols, rows);
     this.painter = painter;
+    this.painter.onImageRequest = (request) => this.enqueueImage(request);
     this.differ = differ;
     this.ansiWriter = ansiWriter;
+
+    // Register built-in graphics protocols in preference order
+    this.graphicsProtocols.push(kittyGraphicsProtocol);
+    this.graphicsProtocols.push(itermGraphicsProtocol);
+    this.graphicsProtocols.push(fallbackGraphicsProtocol);
   }
 
   /**
@@ -73,6 +89,7 @@ export class Renderer {
    */
   render(boxes: LayoutBox | LayoutBox[], caretOverlays?: CaretOverlay[]): string {
     this.currentBuffer.clear();
+    this.pendingImages.length = 0;
     this.painter.paint(boxes, this.currentBuffer);
 
     if (caretOverlays) {
@@ -80,7 +97,16 @@ export class Renderer {
     }
 
     const changedRegions = this.differ.diff(this.previousBuffer, this.currentBuffer);
-    const output = this.ansiWriter.write(changedRegions);
+    let output = this.ansiWriter.write(changedRegions);
+
+    // Append graphics protocol sequences for any pending image requests
+    if (this.pendingImages.length > 0) {
+      const protocol = this.selectGraphicsProtocol();
+
+      for (const request of this.pendingImages) {
+        output += protocol.render(request);
+      }
+    }
 
     this.swapBuffers();
 
@@ -115,6 +141,49 @@ export class Renderer {
     this.colorProfile = profile;
     this.ansiWriter.setColorProfile(profile);
     this.invalidate();
+  }
+
+  /**
+   * Sets the detected terminal graphics protocol capability.
+   *
+   * @param protocol - The best available graphics protocol.
+   */
+  setGraphicsCapability(protocol: TerminalGraphicsProtocol): void {
+    this.graphicsCapability = protocol;
+  }
+
+  /**
+   * Registers a graphics protocol implementation.
+   *
+   * Protocols are inserted before the fallback protocol so that
+   * externally registered protocols (e.g., Sixel) take priority
+   * over the text fallback but not over built-in protocols.
+   *
+   * @param protocol - The graphics protocol to register.
+   */
+  registerGraphicsProtocol(protocol: GraphicsProtocol): void {
+    // Insert before fallback (last entry)
+    const fallbackIndex = this.graphicsProtocols.findIndex((p) => p.name === 'fallback');
+
+    if (fallbackIndex >= 0) {
+      this.graphicsProtocols.splice(fallbackIndex, 0, protocol);
+    } else {
+      this.graphicsProtocols.push(protocol);
+    }
+  }
+
+  /**
+   * Enqueues an image render request for the current frame.
+   *
+   * Called by the {@link Painter} when it encounters an `<img>` element
+   * with loaded image data. The request is processed after cell-based
+   * painting and diffing, appending graphics protocol sequences to the
+   * frame output.
+   *
+   * @param request - Image data and target cell region.
+   */
+  enqueueImage(request: ImageRenderRequest): void {
+    this.pendingImages.push(request);
   }
 
   /**
@@ -176,5 +245,24 @@ export class Renderer {
         }
       }
     }
+  }
+
+  /**
+   * Selects the best graphics protocol based on detected capability.
+   *
+   * Returns the first protocol whose name matches the detected capability,
+   * falling through to the fallback protocol if no match is found.
+   */
+  private selectGraphicsProtocol(): GraphicsProtocol {
+    if (this.graphicsCapability !== 'none') {
+      for (const protocol of this.graphicsProtocols) {
+        if (protocol.name === this.graphicsCapability) {
+          return protocol;
+        }
+      }
+    }
+
+    // Fall through to fallback
+    return this.graphicsProtocols[this.graphicsProtocols.length - 1] ?? fallbackGraphicsProtocol;
   }
 }

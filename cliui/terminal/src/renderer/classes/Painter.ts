@@ -4,6 +4,7 @@ import {createLinearGradient} from '../utilities/createLinearGradient';
 import {parseColor} from '../utilities/parseColor';
 import {parseGradientStops} from '../utilities/parseGradientStops';
 import type {Cell, UnderlineStyle} from '../types';
+import type {ImageRenderRequest} from '../types/ImageRenderRequest';
 import {BorderStyleRegistry} from './BorderStyleRegistry';
 import {CellBuffer} from './CellBuffer';
 
@@ -36,6 +37,10 @@ const MAX_TEXT_LINE_CACHE_SIZE = 2048;
 export class Painter {
   /** Border style registry for resolving `border-style` values. */
   readonly borderStyles = new BorderStyleRegistry();
+
+  /** Callback invoked when an `<img>` element needs graphics protocol rendering. */
+  onImageRequest: ((request: ImageRenderRequest) => void) | null = null;
+
   private readonly styledCellCache = new WeakMap<ComputedStyle, Cell>();
   private readonly textLineCache = new Map<string, CachedTextLine>();
   /**
@@ -72,6 +77,8 @@ export class Painter {
     // <hr> elements fill their content row with horizontal line characters
     if (box.element.localName === 'hr') {
       this.paintHorizontalRule(box, textCell, buffer, clipRect);
+    } else if (box.element.localName === 'img') {
+      this.paintImage(box, buffer, clipRect);
     } else {
       this.paintText(box, textCell, buffer, contentClipRect);
     }
@@ -250,6 +257,64 @@ export class Painter {
    * Paints a horizontal rule (`<hr>`) by filling the content row with
    * horizontal line characters (`─`).
    */
+  /**
+   * Reserves a cell region for an `<img>` element and enqueues a
+   * graphics protocol render request.
+   *
+   * The content area is filled with spaces to prevent text from
+   * bleeding through. The actual image is rendered out-of-band
+   * via the graphics protocol selected by the Renderer.
+   */
+  private paintImage(box: LayoutBox, buffer: CellBuffer, clipRect: ClipRect | null): void {
+    const element = box.element as unknown as {
+      imageData?: Uint8Array;
+      naturalWidth?: number;
+      naturalHeight?: number;
+    };
+
+    const x = box.contentX;
+    const y = box.contentY;
+    const w = box.contentWidth;
+    const h = box.contentHeight;
+
+    // Fill the content area with spaces to reserve the region
+    for (let row = 0; row < h; row++) {
+      for (let col = 0; col < w; col++) {
+        this.writeCell(
+          buffer,
+          x + col,
+          y + row,
+          {
+            char: ' ',
+            fg: null,
+            bg: null,
+            bold: false,
+            italic: false,
+            underline: 'none',
+            underlineColor: null,
+            strikethrough: false,
+            faint: false,
+            hyperlink: null,
+          },
+          clipRect,
+        );
+      }
+    }
+
+    if (this.onImageRequest && element.imageData && element.imageData.length > 0) {
+      this.onImageRequest({
+        data: element.imageData,
+        naturalWidth: element.naturalWidth ?? 0,
+        naturalHeight: element.naturalHeight ?? 0,
+        x,
+        y,
+        cellWidth: w,
+        cellHeight: h,
+        alt: box.element.getAttribute('alt') ?? '',
+      });
+    }
+  }
+
   private paintHorizontalRule(
     box: LayoutBox,
     textCell: Cell,

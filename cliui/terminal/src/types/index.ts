@@ -1,4 +1,5 @@
 import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
+import type {TerminalPlugin} from './TerminalPlugin';
 
 import type {Window} from '@cliui/dom';
 
@@ -30,4 +31,21 @@ export interface TerminalOptions {
    * side-effect-free `@cliui/terminal/core` entry point.
    */
   window?: Window;
+
+  /**
+   * Terminal plugins to install after construction.
+   *
+   * Plugins are installed in order and can register graphics protocols,
+   * extend capabilities, or hook into the frame loop.
+   *
+   * @example
+   * ```ts
+   * import {sixelProtocol} from '@cliui/sixel';
+   *
+   * const terminal = new Terminal({
+   *   plugins: [sixelProtocol()],
+   * });
+   * ```
+   */
+  plugins?: TerminalPlugin[];
 }

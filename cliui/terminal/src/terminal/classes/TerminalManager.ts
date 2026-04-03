@@ -18,6 +18,7 @@ import {ESCAPE} from '../constants/escape';
 import type {
   TerminalCapabilities,
   TerminalColorProfile,
+  TerminalGraphicsProtocol,
   TerminalInput,
   TerminalManagerOptions,
   TerminalOutput,
@@ -40,6 +41,7 @@ export class TerminalManager {
     colorProfile: 'truecolor',
     synchronizedOutput: false,
     unicodeWidth: false,
+    graphicsProtocol: 'none',
   };
 
   /**
@@ -92,11 +94,13 @@ export class TerminalManager {
       this.queryModeSupport(2026, timeoutMs),
       this.queryModeSupport(2027, timeoutMs),
     ]);
+    const graphicsProtocol = await this.detectGraphicsProtocol(timeoutMs);
 
     this.capabilities = {
       colorProfile,
       synchronizedOutput,
       unicodeWidth,
+      graphicsProtocol,
     };
 
     return this.getCapabilities();
@@ -209,5 +213,80 @@ export class TerminalManager {
 
   private write(sequence: string): void {
     this.output.write(sequence);
+  }
+
+  /**
+   * Detects the best available terminal graphics protocol.
+   *
+   * Preference order: Kitty > iTerm2 > none.
+   * Kitty is detected via the graphics protocol query (`_Gi=31,s=1,v=1,a=q,t=d,f=24;AAAA`).
+   * iTerm2 is detected via the `TERM_PROGRAM` environment variable.
+   */
+  private async detectGraphicsProtocol(timeoutMs: number): Promise<TerminalGraphicsProtocol> {
+    const kitty = await this.queryKittyGraphics(timeoutMs);
+
+    if (kitty) {
+      return 'kitty';
+    }
+
+    if (this.detectItermFromEnv()) {
+      return 'iterm2';
+    }
+
+    return 'none';
+  }
+
+  /**
+   * Queries Kitty graphics protocol support by sending a minimal
+   * query action and checking for a valid response.
+   */
+  private async queryKittyGraphics(timeoutMs: number): Promise<boolean> {
+    if (this.input.on === undefined || this.input.off === undefined) {
+      return false;
+    }
+
+    return await new Promise<boolean>((resolve) => {
+      let settled = false;
+      let buffer = '';
+      const timer = setTimeout(
+        () => {
+          finish(false);
+        },
+        Math.max(0, timeoutMs),
+      );
+      const finish = (supported: boolean): void => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        clearTimeout(timer);
+        this.input.off?.('data', onData);
+        resolve(supported);
+      };
+      const onData = (chunk: Buffer | string): void => {
+        buffer += typeof chunk === 'string' ? chunk : chunk.toString('utf8');
+
+        // Kitty responds with _G... to graphics queries
+        if (buffer.includes('_G')) {
+          finish(true);
+        }
+      };
+
+      this.input.on?.('data', onData);
+      // Send a minimal Kitty graphics query (action=query, id=31)
+      this.write(`${ESCAPE}_Gi=31,s=1,v=1,a=q,t=d,f=24;AAAA${ESCAPE}\\`);
+    });
+  }
+
+  /**
+   * Detects iTerm2 from the TERM_PROGRAM environment variable.
+   */
+  private detectItermFromEnv(): boolean {
+    try {
+      return process.env['TERM_PROGRAM'] === 'iTerm.app';
+    } catch {
+      return false;
+    }
   }
 }

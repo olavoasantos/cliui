@@ -10,6 +10,7 @@ export {UiDiff} from './UiDiff/component';
 export {Dropdown} from './Dropdown/component';
 export {Fieldset} from './Fieldset/component';
 export {Form} from './Form/component';
+export {Img} from './Img/component';
 export {Input} from './Input/component';
 export {Label} from './Label/component';
 export {Listbox} from './Listbox/component';

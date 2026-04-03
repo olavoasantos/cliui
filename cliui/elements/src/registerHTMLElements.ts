@@ -3,6 +3,7 @@ import {Button} from './Button/component';
 import {Details} from './Details/component';
 import {Fieldset} from './Fieldset/component';
 import {Form} from './Form/component';
+import {Img} from './Img/component';
 import {Input} from './Input/component';
 import {Label} from './Label/component';
 import {Meter} from './Meter/component';
@@ -34,6 +35,7 @@ const HTML_ELEMENTS: Array<[string, StyledComponent]> = [
   ['details', Details],
   ['fieldset', Fieldset],
   ['form', Form],
+  ['img', Img],
   ['input', Input],
   ['label', Label],
   ['meter', Meter],

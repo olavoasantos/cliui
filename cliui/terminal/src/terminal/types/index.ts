@@ -188,6 +188,11 @@ export type TerminalInputEvent =
 export type TerminalColorProfile = 'truecolor' | 'ansi256' | 'ansi16' | 'none';
 
 /**
+ * Supported terminal graphics protocol capability levels.
+ */
+export type TerminalGraphicsProtocol = 'kitty' | 'iterm2' | 'none';
+
+/**
  * Detected terminal capabilities used by the rendering pipeline.
  */
 export interface TerminalCapabilities {
@@ -199,6 +204,9 @@ export interface TerminalCapabilities {
 
   /** Whether unicode width mode 2027 is supported. */
   unicodeWidth: boolean;
+
+  /** The best available terminal graphics protocol for inline images. */
+  graphicsProtocol: TerminalGraphicsProtocol;
 }
 
 /**

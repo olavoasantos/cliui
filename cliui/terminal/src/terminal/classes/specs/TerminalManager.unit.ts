@@ -171,6 +171,7 @@ describe('TerminalManager', () => {
       colorProfile: 'truecolor',
       synchronizedOutput: false,
       unicodeWidth: false,
+      graphicsProtocol: 'none',
     });
   });
 
@@ -200,6 +201,7 @@ describe('TerminalManager', () => {
       colorProfile: 'ansi256',
       synchronizedOutput: true,
       unicodeWidth: true,
+      graphicsProtocol: 'none',
     });
   });
 
@@ -221,6 +223,7 @@ describe('TerminalManager', () => {
       colorProfile: 'ansi16',
       synchronizedOutput: false,
       unicodeWidth: false,
+      graphicsProtocol: 'none',
     });
   });
 
@@ -242,6 +245,9 @@ describe('TerminalManager', () => {
 
       const detection = manager.detectCapabilities(5);
 
+      // Advance past the mode probes (synchronizedOutput + unicodeWidth)
+      await vi.advanceTimersByTimeAsync(5);
+      // Advance past the graphics protocol probe (Kitty query)
       await vi.advanceTimersByTimeAsync(5);
       await detection;
 
@@ -249,6 +255,7 @@ describe('TerminalManager', () => {
         colorProfile: 'none',
         synchronizedOutput: false,
         unicodeWidth: false,
+        graphicsProtocol: 'none',
       });
     } finally {
       vi.useRealTimers();
@@ -280,7 +287,8 @@ describe('TerminalManager', () => {
       colorProfile: 'none',
       synchronizedOutput: false,
       unicodeWidth: false,
+      graphicsProtocol: 'none',
     });
-    expect(input.stream.off).toHaveBeenCalledTimes(2);
+    expect(input.stream.off).toHaveBeenCalledTimes(3);
   });
 });
