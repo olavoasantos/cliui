@@ -66,7 +66,7 @@ describe('UiPrompt', () => {
     const dialogEl = dialog as unknown as Element;
 
     /* Simulate typing by setting the input value */
-    const input = dialogEl.querySelector('ui-input')!;
+    const input = dialogEl.querySelector('input')!;
     input.setAttribute('value', 'Alice');
 
     const confirmBtn = dialogEl.querySelector('.ui-prompt-confirm')!;

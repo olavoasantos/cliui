@@ -81,7 +81,7 @@ export class UiPrompt extends HTMLElement {
     messageEl.setAttribute('class', 'ui-prompt-message');
     messageEl.style.display = 'block';
 
-    this.inputEl = doc.createElement('ui-input');
+    this.inputEl = doc.createElement('input');
     this.inputEl.setAttribute('tabindex', '0');
     this.inputEl.setAttribute('width', String(DEFAULT_UI_PROMPT_INPUT_WIDTH));
     this.inputEl.setAttribute('placeholder', 'Type here...');
@@ -91,12 +91,12 @@ export class UiPrompt extends HTMLElement {
     btnRow.style.flexDirection = 'row';
     btnRow.style.gap = '2';
 
-    const confirmBtn = doc.createElement('ui-button');
+    const confirmBtn = doc.createElement('button');
     confirmBtn.setAttribute('class', 'ui-prompt-confirm');
     confirmBtn.setAttribute('variant', 'primary');
     confirmBtn.setAttribute('tabindex', '1');
 
-    const cancelBtn = doc.createElement('ui-button');
+    const cancelBtn = doc.createElement('button');
     cancelBtn.setAttribute('class', 'ui-prompt-cancel');
     cancelBtn.setAttribute('variant', 'secondary');
     cancelBtn.setAttribute('tabindex', '2');
