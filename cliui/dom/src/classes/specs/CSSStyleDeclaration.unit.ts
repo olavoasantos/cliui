@@ -270,4 +270,58 @@ describe('expandShorthand', () => {
       'padding-left': '4',
     });
   });
+
+  it('expands transition shorthand', () => {
+    const result = expandShorthand('transition', 'color 200ms ease 100ms');
+    expect(result).toEqual({
+      'transition-property': 'color',
+      'transition-duration': '200ms',
+      'transition-timing-function': 'ease',
+      'transition-delay': '100ms',
+    });
+  });
+
+  it('expands multi-value transition shorthand', () => {
+    const result = expandShorthand(
+      'transition',
+      'color 200ms ease, background-color 300ms ease-in 50ms',
+    );
+    expect(result).toEqual({
+      'transition-property': 'color, background-color',
+      'transition-duration': '200ms, 300ms',
+      'transition-timing-function': 'ease, ease-in',
+      'transition-delay': '0ms, 50ms',
+    });
+  });
+
+  it('expands animation shorthand', () => {
+    const result = expandShorthand('animation', 'fadeIn 1s ease-out');
+    expect(result).toEqual({
+      'animation-name': 'fadeIn',
+      'animation-duration': '1s',
+      'animation-timing-function': 'ease-out',
+      'animation-delay': '0ms',
+      'animation-iteration-count': '1',
+      'animation-direction': 'normal',
+      'animation-fill-mode': 'none',
+      'animation-play-state': 'running',
+    });
+  });
+
+  it('expands animation shorthand with all values', () => {
+    const result = expandShorthand(
+      'animation',
+      'pulse 2s linear 100ms infinite alternate both paused',
+    );
+    expect(result).toEqual({
+      'animation-name': 'pulse',
+      'animation-duration': '2s',
+      'animation-timing-function': 'linear',
+      'animation-delay': '100ms',
+      'animation-iteration-count': 'infinite',
+      'animation-direction': 'alternate',
+      'animation-fill-mode': 'both',
+      'animation-play-state': 'paused',
+    });
+  });
 });
