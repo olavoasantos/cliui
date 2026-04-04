@@ -3,6 +3,7 @@ import {EDITABLE_STATE} from '../constants/editableState';
 import {StyleEngine} from '../css';
 import {Event, InputEvent, Window} from '@cliui/dom';
 import {CHILD, NEXT, PARENT} from '@cliui/dom';
+import {FrameInstrumentation} from './FrameInstrumentation';
 
 import type {ClipboardEvent} from '@cliui/dom';
 import type {MouseEvent} from '@cliui/dom';
@@ -74,6 +75,7 @@ export class Terminal {
   private readonly inputReader: InputReader;
   private readonly eventDispatcher: EventDispatcher;
   private readonly caretManager = new CaretManager();
+  private readonly frameInstrumentation: FrameInstrumentation;
   private readonly trackedScrollOffsets = new Map<Element, number>();
   private clipboardBuffer = '';
   private readonly boundResizeListener = (): void => {
@@ -113,6 +115,7 @@ export class Terminal {
     });
     this.inputReader = new InputReader(this.input);
     this.eventDispatcher = new EventDispatcher(this.document);
+    this.frameInstrumentation = new FrameInstrumentation(this.window.performance);
 
     /* Body acts as the viewport — enable scroll so content that
      * exceeds the terminal height can be scrolled rather than clipped. */
@@ -793,6 +796,7 @@ export class Terminal {
     }
 
     this.running = true;
+    this.frameInstrumentation.setRunStartTime(this.window.performance.now());
     this.terminalManager.start();
     void this.terminalManager.detectCapabilities().then(() => {
       if (!this.running) {
@@ -803,6 +807,7 @@ export class Terminal {
       this.renderFrame();
     });
     this.inputReader.start((event) => {
+      this.frameInstrumentation.freezeLcp();
       this.eventDispatcher.dispatch(event);
     });
     process.on('SIGWINCH', this.boundResizeListener);
@@ -853,49 +858,88 @@ export class Terminal {
 
     this.advanceFrameAwareNodes(now);
 
-    const caretChanged = this.caretManager.tick(now);
-    const resized = columns !== this.renderer.cols || rows !== this.renderer.rows;
-    const hasStyleChanges = this.styleEngine.getDirtyElements().size > 0;
-    const hasLayoutChanges = this.styleEngine.getLayoutDirtyElements().size > 0;
-    const hasScrollChanges = this.hasTrackedScrollChanges();
+    let dirtyCount = 0;
+    let resizedFlag = false;
+    let hasStyleFlag = false;
+    let hasLayoutFlag = false;
+    let hasScrollFlag = false;
+    let caretFlag = false;
 
-    if (!resized && !hasStyleChanges && !hasLayoutChanges && !hasScrollChanges && !caretChanged) {
-      return;
+    this.frameInstrumentation.instrumentFrame({
+      checkDirty: () => {
+        caretFlag = this.caretManager.tick(now);
+        resizedFlag = columns !== this.renderer.cols || rows !== this.renderer.rows;
+        hasStyleFlag = this.styleEngine.getDirtyElements().size > 0;
+        hasLayoutFlag = this.styleEngine.getLayoutDirtyElements().size > 0;
+        hasScrollFlag = this.hasTrackedScrollChanges();
+        dirtyCount = this.styleEngine.getDirtyElements().size;
+
+        return {
+          resized: resizedFlag,
+          hasStyleChanges: hasStyleFlag,
+          hasLayoutChanges: hasLayoutFlag,
+          hasScrollChanges: hasScrollFlag,
+          caretChanged: caretFlag,
+          dirtyCount,
+        };
+      },
+      runResize: () => {
+        this.renderer.resize(columns, rows);
+        this.layoutEngine.clearCache();
+        this.styleEngine.markAllDirty();
+        this.output.write('\u001B[2J\u001B[H');
+      },
+      runStyle: () => {
+        if (hasStyleFlag || resizedFlag) {
+          this.styleEngine.recomputeDirty();
+        }
+      },
+      runLayout: () => {
+        return this.layoutEngine.layout(this.document.body, columns, rows);
+      },
+      runPostLayout: (layout) => {
+        this.eventDispatcher.setLayoutRoot(layout);
+        this.syncTrackedScrollOffsets(layout);
+
+        const carets = this.caretManager.getCarets();
+
+        if (carets.size > 0) {
+          this.resolveEditableViewports(layout);
+        }
+
+        const capabilities = this.terminalManager.getCapabilities();
+        this.renderer.setSynchronizedOutputEnabled(capabilities.synchronizedOutput);
+        this.renderer.setColorProfile(capabilities.colorProfile);
+        this.renderer.setGraphicsCapability(capabilities.graphicsProtocol);
+      },
+      runPaint: (layout) => {
+        const carets = this.caretManager.getCarets();
+        const caretOverlays = carets.size > 0 ? this.caretManager.getOverlays(layout) : [];
+        return this.renderer.render(layout, caretOverlays);
+      },
+      runWrite: (output) => {
+        if (output.length > 0) {
+          this.output.write(output);
+        }
+      },
+      totalElements: () => this.countElements(),
+    });
+  }
+
+  private countElements(): number {
+    let count = 0;
+    const pending: Element[] = [this.document.body];
+
+    while (pending.length > 0) {
+      const el = pending.pop()!;
+      count += 1;
+
+      for (let i = 0; i < el.children.length; i++) {
+        pending.push(el.children[i] as Element);
+      }
     }
 
-    if (resized) {
-      this.renderer.resize(columns, rows);
-      this.layoutEngine.clearCache();
-      this.styleEngine.markAllDirty();
-      this.output.write('\u001B[2J\u001B[H');
-    }
-
-    if (hasStyleChanges || resized) {
-      this.styleEngine.recomputeDirty();
-    }
-
-    const layout = this.layoutEngine.layout(this.document.body, columns, rows);
-    this.eventDispatcher.setLayoutRoot(layout);
-    this.syncTrackedScrollOffsets(layout);
-
-    const carets = this.caretManager.getCarets();
-
-    if (carets.size > 0) {
-      this.resolveEditableViewports(layout);
-    }
-
-    const capabilities = this.terminalManager.getCapabilities();
-
-    this.renderer.setSynchronizedOutputEnabled(capabilities.synchronizedOutput);
-    this.renderer.setColorProfile(capabilities.colorProfile);
-    this.renderer.setGraphicsCapability(capabilities.graphicsProtocol);
-
-    const caretOverlays = carets.size > 0 ? this.caretManager.getOverlays(layout) : [];
-    const output = this.renderer.render(layout, caretOverlays);
-
-    if (output.length > 0) {
-      this.output.write(output);
-    }
+    return count;
   }
 
   private hasTrackedScrollChanges(): boolean {
