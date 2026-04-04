@@ -28,6 +28,9 @@ export {CSSStyleDeclaration} from './classes/CSSStyleDeclaration';
 export {DOMTokenList} from './classes/DOMTokenList';
 export {CustomElementRegistryImplementation as CustomElementRegistry} from './classes/CustomElementRegistry';
 export {MutationObserver} from './classes/MutationObserver';
+export {PerformanceEntry} from './classes/PerformanceEntry';
+export {PerformanceMark} from './classes/PerformanceMark';
+export {PerformanceMeasure} from './classes/PerformanceMeasure';
 export {HTMLElement} from './classes/HTMLElement';
 export {HTMLAnchorElement} from './classes/HTMLAnchorElement';
 export {HTMLBodyElement} from './classes/HTMLBodyElement';
@@ -89,3 +92,5 @@ export type {
 } from './types';
 
 export type {CustomElementConstructor} from './types';
+export type {PerformanceMarkOptions} from './types/PerformanceMarkOptions';
+export type {PerformanceMeasureOptions} from './types/PerformanceMeasureOptions';

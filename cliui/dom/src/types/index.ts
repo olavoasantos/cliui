@@ -163,3 +163,6 @@ export interface Hooks {
 export interface CustomElementConstructor {
   new (): HTMLElement;
 }
+
+export type {PerformanceMarkOptions} from './PerformanceMarkOptions';
+export type {PerformanceMeasureOptions} from './PerformanceMeasureOptions';
