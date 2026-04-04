@@ -10,5 +10,4 @@ export const INHERITABLE_PROPERTIES = new Set([
   'overflow-wrap',
   'word-break',
   'tab-size',
-  'opacity',
 ]);

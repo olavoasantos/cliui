@@ -125,7 +125,6 @@ describe('StyleResolver', () => {
         ['text-decoration', 'underline'],
         ['text-align', 'center'],
         ['white-space', 'pre'],
-        ['opacity', '0.5'],
       ]);
 
       const style = resolver.resolve([], null, parentStyle);
@@ -136,7 +135,6 @@ describe('StyleResolver', () => {
       expect(style.get('text-decoration')).toBe('underline');
       expect(style.get('text-align')).toBe('center');
       expect(style.get('white-space')).toBe('pre');
-      expect(style.get('opacity')).toBe('0.5');
     });
 
     it('does not inherit non-inheritable properties', () => {
@@ -172,7 +170,6 @@ describe('StyleResolver', () => {
       expect(style.get('text-decoration')).toBe('none');
       expect(style.get('text-align')).toBe('left');
       expect(style.get('white-space')).toBe('normal');
-      expect(style.get('opacity')).toBe('1');
     });
 
     it('resolves inherit keyword to parent value', () => {

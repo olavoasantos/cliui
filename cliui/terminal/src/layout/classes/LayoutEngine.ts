@@ -104,11 +104,7 @@ export class LayoutEngine {
       const cached = this.cache.get(element);
 
       if (cached) {
-        // Refresh computedStyle references throughout the cached subtree —
-        // the style engine may have recomputed non-layout properties
-        // (color, opacity, etc.) since the last layout pass.
-        this.refreshComputedStyles(cached);
-        return this.cloneLocalizedBox(cached);
+        return this.cloneWithFreshStyles(cached);
       }
     }
 
@@ -611,6 +607,26 @@ export class LayoutEngine {
    * Creates a deep clone of a cached box tree and normalizes it back to the
    * local `(0, 0)` coordinate space expected by parent layout passes.
    */
+  /**
+   * Clones a cached layout box subtree with fresh computedStyle references.
+   *
+   * The cached original is never mutated. Each clone gets the latest
+   * ComputedStyle from the style engine, so non-layout property changes
+   * (color, opacity, etc.) are visible to the painter.
+   */
+  private cloneWithFreshStyles(box: LayoutBox): LayoutBox {
+    const cloneChildren = box.children.map((child) => this.cloneWithFreshStyles(child));
+    const clone: LayoutBox = {
+      ...box,
+      computedStyle: this.styleEngine.getComputedStyle(box.element),
+      textLines: box.textLines === undefined ? undefined : [...box.textLines],
+      children: cloneChildren,
+    };
+
+    this.offsetBox(clone, -box.x, -box.y);
+    return clone;
+  }
+
   private cloneLocalizedBox(box: LayoutBox): LayoutBox {
     const cloneChildren = box.children.map((child) => this.cloneLocalizedBox(child));
     const clone: LayoutBox = {
@@ -623,21 +639,6 @@ export class LayoutEngine {
     this.offsetBox(clone, -box.x, -box.y);
 
     return clone;
-  }
-
-  /**
-   * Refreshes computedStyle references on a cached layout box subtree.
-   *
-   * When the style engine recomputes non-layout properties (color, opacity,
-   * etc.), the cached LayoutBox still holds the old ComputedStyle Map.
-   * This updates each box to reference the latest style from the engine.
-   */
-  private refreshComputedStyles(box: LayoutBox): void {
-    box.computedStyle = this.styleEngine.getComputedStyle(box.element);
-
-    for (const child of box.children) {
-      this.refreshComputedStyles(child);
-    }
   }
 
   /**
