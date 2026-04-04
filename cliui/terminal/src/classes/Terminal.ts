@@ -798,7 +798,6 @@ export class Terminal {
     }
 
     this.running = true;
-    this.frameInstrumentation.setRunStartTime(this.window.performance.now());
     this.terminalManager.start();
     void this.terminalManager.detectCapabilities().then(() => {
       if (!this.running) {

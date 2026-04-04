@@ -31,7 +31,6 @@ describe('FrameInstrumentation', () => {
   beforeEach(() => {
     perf = new Performance();
     instr = new FrameInstrumentation(perf);
-    instr.setRunStartTime(perf.now());
   });
 
   it('records a terminal.frame measure with idle detail on no-op frames', () => {

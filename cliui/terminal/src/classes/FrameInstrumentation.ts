@@ -24,15 +24,9 @@ export class FrameInstrumentation {
   #fcpRecorded = false;
   #lcpSize = 0;
   #lcpFrozen = false;
-  #runStartTime = 0;
 
   constructor(performance: Performance) {
     this.#performance = performance;
-  }
-
-  /** Records the time when `terminal.run()` was invoked (FCP baseline). */
-  setRunStartTime(time: number): void {
-    this.#runStartTime = time;
   }
 
   /** Freezes LCP tracking — called on first user interaction. */
@@ -117,13 +111,14 @@ export class FrameInstrumentation {
     const outputBytes = Buffer.byteLength(output, 'utf8');
     const frameEnd = perf.now();
 
-    // Record FCP on first non-empty ANSI output
+    // Record FCP on first non-empty ANSI output.
+    // frameEnd is a raw performance.now() value — milliseconds since
+    // process start — so it captures the full startup cost (module
+    // loading, DOM construction, style setup, run()), matching how
+    // browser FCP is measured from navigation start.
     if (!this.#fcpRecorded && outputBytes > 0) {
       this.#fcpRecorded = true;
-      const fcp = new PerformancePaintTiming(
-        'first-contentful-paint',
-        frameEnd - this.#runStartTime,
-      );
+      const fcp = new PerformancePaintTiming('first-contentful-paint', frameEnd);
       perf.recordEntry(fcp);
     }
 
