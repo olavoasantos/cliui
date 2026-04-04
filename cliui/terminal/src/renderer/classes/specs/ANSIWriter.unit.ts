@@ -24,15 +24,15 @@ function region(x: number, y: number, cells: Cell[]): ChangedRegion {
 }
 
 describe('ANSIWriter', () => {
-  const writer = new ANSIWriter();
-
   it('emits cursor movement and character data for plain cells', () => {
+    const writer = new ANSIWriter();
     const output = writer.write([region(2, 1, [createCell({char: 'A'}), createCell({char: 'B'})])]);
 
     expect(output).toBe('\u001B[2;3HAB');
   });
 
   it('emits SGR sequences for styled cells', () => {
+    const writer = new ANSIWriter();
     const output = writer.write([
       region(0, 0, [
         createCell({
@@ -53,6 +53,7 @@ describe('ANSIWriter', () => {
   });
 
   it('resets attributes efficiently when styles change between adjacent cells', () => {
+    const writer = new ANSIWriter();
     const output = writer.write([
       region(0, 0, [
         createCell({char: 'A', bold: true, fg: {r: 255, g: 0, b: 0}}),
@@ -64,6 +65,7 @@ describe('ANSIWriter', () => {
   });
 
   it('emits underline resets and color resets when returning to defaults', () => {
+    const writer = new ANSIWriter();
     const output = writer.write([
       region(0, 0, [
         createCell({char: 'A', underline: 'solid', underlineColor: {r: 9, g: 8, b: 7}}),
@@ -75,6 +77,7 @@ describe('ANSIWriter', () => {
   });
 
   it('emits hyperlink OSC 8 sequences when hyperlink targets change', () => {
+    const writer = new ANSIWriter();
     const output = writer.write([
       region(0, 0, [
         createCell({char: 'A', hyperlink: 'https://example.com'}),
@@ -86,6 +89,7 @@ describe('ANSIWriter', () => {
   });
 
   it('carries style state across regions and emits only the needed delta', () => {
+    const writer = new ANSIWriter();
     const output = writer.write([
       region(0, 0, [createCell({char: 'A', fg: {r: 10, g: 20, b: 30}})]),
       region(4, 1, [createCell({char: 'B', fg: {r: 10, g: 20, b: 30}})]),
@@ -95,6 +99,7 @@ describe('ANSIWriter', () => {
   });
 
   it('wraps output in synchronized mode sequences when enabled', () => {
+    const writer = new ANSIWriter();
     writer.setSynchronizedOutputEnabled(true);
 
     const output = writer.write([region(0, 0, [createCell({char: 'A'})])]);
@@ -103,6 +108,7 @@ describe('ANSIWriter', () => {
   });
 
   it('does not emit synchronized mode sequences when disabled', () => {
+    const writer = new ANSIWriter();
     writer.setSynchronizedOutputEnabled(false);
 
     const output = writer.write([region(0, 0, [createCell({char: 'A'})])]);
@@ -111,6 +117,7 @@ describe('ANSIWriter', () => {
   });
 
   it('emits 256-color sequences when the color profile is ansi256', () => {
+    const writer = new ANSIWriter();
     writer.setColorProfile('ansi256');
 
     const output = writer.write([
@@ -121,6 +128,7 @@ describe('ANSIWriter', () => {
   });
 
   it('emits 16-color sequences when the color profile is ansi16', () => {
+    const writer = new ANSIWriter();
     writer.setColorProfile('ansi16');
 
     const output = writer.write([
@@ -131,6 +139,7 @@ describe('ANSIWriter', () => {
   });
 
   it('omits color output entirely when the color profile is none', () => {
+    const writer = new ANSIWriter();
     writer.setColorProfile('none');
 
     const output = writer.write([

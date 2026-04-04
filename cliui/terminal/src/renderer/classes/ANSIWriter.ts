@@ -55,6 +55,16 @@ export class ANSIWriter {
   private state: StyleState = this.createDefaultState();
 
   /**
+   * Resets the internal SGR state tracker to defaults.
+   *
+   * Called when the terminal's actual SGR state is unknown or invalidated
+   * (e.g., after a color profile change, resize, or full screen clear).
+   */
+  reset(): void {
+    this.resetState(this.state);
+  }
+
+  /**
    * Enables or disables synchronized output wrapping.
    *
    * @param enabled - Whether frame output should be wrapped in mode 2026.
@@ -81,8 +91,6 @@ export class ANSIWriter {
   write(regions: ChangedRegion[]): string {
     let output = '';
     const state = this.state;
-
-    this.resetState(state);
 
     for (const region of regions) {
       output += `${CSI}${region.y + 1};${region.x + 1}H`;

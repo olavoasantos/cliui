@@ -61,7 +61,7 @@ function addDemo(label: string, key: string, className: string, content: string)
   return el;
 }
 
-// 1. Color pulse — infinite ease-in-out
+// 1. Background color pulse — infinite ease-in-out
 addDemo(
   '1. Color Pulse (2s ease-in-out infinite)',
   'P',
@@ -69,28 +69,28 @@ addDemo(
   'Background color pulses between gray and purple',
 );
 
-// 2. Width slide — infinite alternate
+// 2. Rainbow text — infinite linear, 6 color stops
 addDemo(
-  '2. Width Slide (2s ease-in-out infinite alternate)',
-  'S',
-  'slide-box',
-  'Width bounces 10 ↔ 50',
-);
-
-// 3. Rainbow text — infinite linear
-addDemo(
-  '3. Rainbow Text (3s linear infinite)',
+  '2. Rainbow Text (3s linear infinite)',
   'R',
   'rainbow-text',
   'Text color cycles through the spectrum',
 );
 
-// 4. Border color — infinite ease
+// 3. Border color — infinite ease
 addDemo(
-  '4. Border Cycle (2s ease infinite)',
+  '3. Border Cycle (2s ease infinite)',
   'B',
   'border-box',
   'Border color cycles purple → green → red',
+);
+
+// 4. Text color pulse — infinite ease-in-out
+addDemo(
+  '4. Text Pulse (1.5s ease-in-out infinite)',
+  'T',
+  'text-pulse',
+  'Text color pulses dim → bright → dim',
 );
 
 // ── Event log ───────────────────────────────────────────────────
@@ -111,7 +111,7 @@ for (const type of ['animationstart', 'animationend', 'animationiteration', 'ani
 // ── Controls ────────────────────────────────────────────────────
 
 app.appendChild(separator());
-app.appendChild(text('hint', 'P/F/S/R/B/U = toggle each animation  A = all on/off  Ctrl+C = quit'));
+app.appendChild(text('hint', 'P/R/B/T = toggle each animation  A = all on/off  Ctrl+C = quit'));
 
 doc.body.appendChild(app);
 

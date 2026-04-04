@@ -77,7 +77,10 @@ describe('Renderer', () => {
       }),
     );
 
-    expect(output).toBe('\u001B[1;2H\u001B[38;2;255;0;0mX');
+    // The ANSIWriter persists SGR state across frames — the terminal already
+    // has red foreground from the first render, so only the cursor move and
+    // changed character are needed.
+    expect(output).toBe('\u001B[1;2HX');
   });
 
   it('resizes both internal buffers and re-renders against the new dimensions', () => {

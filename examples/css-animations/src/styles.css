@@ -41,12 +41,6 @@
   100% { background-color: #334155; }
 }
 
-@keyframes slideWidth {
-  from { width: 10; }
-  50% { width: 50; }
-  to { width: 10; }
-}
-
 @keyframes rainbow {
   0% { color: #ef4444; }
   16% { color: #f97316; }
@@ -64,6 +58,12 @@
   100% { border-color: #7c3aed; }
 }
 
+@keyframes textPulse {
+  0% { color: #94a3b8; }
+  50% { color: #ffffff; }
+  100% { color: #94a3b8; }
+}
+
 /* ── Animation targets ──────────────────────────────────────── */
 
 .pulse-box {
@@ -74,17 +74,6 @@
 
 .pulse-box.running {
   animation: pulse 2s ease-in-out infinite;
-}
-
-.slide-box {
-  padding: 0 1;
-  background-color: #059669;
-  color: #d1fae5;
-  width: 10;
-}
-
-.slide-box.running {
-  animation: slideWidth 2s ease-in-out infinite alternate;
 }
 
 .rainbow-text {
@@ -105,4 +94,14 @@
 
 .border-box.running {
   animation: borderCycle 2s ease infinite;
+}
+
+.text-pulse {
+  padding: 0 2;
+  background-color: #1e293b;
+  color: #94a3b8;
+}
+
+.text-pulse.running {
+  animation: textPulse 1.5s ease-in-out infinite;
 }

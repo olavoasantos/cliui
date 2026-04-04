@@ -171,10 +171,12 @@ export class Renderer {
     this.previousBuffer.resize(cols, rows);
     this.currentBuffer.clear();
     this.previousBuffer.clear();
+    this.ansiWriter.reset();
   }
 
   private invalidate(): void {
     this.previousBuffer.clear();
+    this.ansiWriter.reset();
   }
 
   private swapBuffers(): void {
