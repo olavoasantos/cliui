@@ -859,6 +859,9 @@ export class Terminal {
 
     this.advanceFrameAwareNodes(now);
 
+    // Advance animation system — marks animated elements as style-dirty
+    this.styleEngine.tick(now);
+
     let dirtyCount = 0;
     let resizedFlag = false;
     let hasStyleFlag = false;
