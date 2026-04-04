@@ -24,6 +24,7 @@ import {HTMLTemplateElement} from './HTMLTemplateElement';
 import {CustomElementRegistryImplementation} from './CustomElementRegistry';
 import {MutationObserver} from './MutationObserver';
 import {Performance} from './Performance';
+import {PerformanceObserver} from './PerformanceObserver';
 import {HOOKS} from '../constants';
 
 import type {Hooks} from '../types';
@@ -65,6 +66,7 @@ export class Window extends EventTarget {
   SVGElement = SVGElement;
   HTMLTemplateElement = HTMLTemplateElement;
   MutationObserver = MutationObserver;
+  PerformanceObserver = PerformanceObserver;
   Navigator = Navigator;
   Location = Location;
 
