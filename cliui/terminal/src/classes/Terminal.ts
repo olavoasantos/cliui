@@ -3,6 +3,7 @@ import {EDITABLE_STATE} from '../constants/editableState';
 import {StyleEngine} from '../css';
 import {Event, InputEvent, Window} from '@cliui/dom';
 import {CHILD, NEXT, PARENT} from '@cliui/dom';
+import {PerformanceEventTiming} from '@cliui/dom';
 import {FrameInstrumentation} from './FrameInstrumentation';
 
 import type {ClipboardEvent} from '@cliui/dom';
@@ -115,6 +116,7 @@ export class Terminal {
     });
     this.inputReader = new InputReader(this.input);
     this.eventDispatcher = new EventDispatcher(this.document);
+    this.eventDispatcher.setPerformance(this.window.performance);
     this.frameInstrumentation = new FrameInstrumentation(this.window.performance);
 
     /* Body acts as the viewport — enable scroll so content that
@@ -808,7 +810,7 @@ export class Terminal {
     });
     this.inputReader.start((event) => {
       this.frameInstrumentation.freezeLcp();
-      this.eventDispatcher.dispatch(event);
+      this.eventDispatcher.dispatchTimed(event, this.window.performance.now());
     });
     process.on('SIGWINCH', this.boundResizeListener);
 
@@ -924,6 +926,27 @@ export class Terminal {
       },
       totalElements: () => this.countElements(),
     });
+
+    this.finalizePendingEventTimings();
+  }
+
+  private finalizePendingEventTimings(): void {
+    const pending = this.eventDispatcher.takePendingTimings();
+
+    if (pending.length === 0) {
+      return;
+    }
+
+    const frameEndTime = this.window.performance.now();
+
+    for (const timing of pending) {
+      const duration = frameEndTime - timing.options.startTime;
+      const entry = new PerformanceEventTiming({
+        ...timing.options,
+        duration,
+      });
+      this.window.performance.recordEntry(entry);
+    }
   }
 
   private countElements(): number {

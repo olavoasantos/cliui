@@ -4,6 +4,7 @@ import {FrameInstrumentation} from '../FrameInstrumentation';
 
 import type {LayoutBox} from '../../layout/types';
 import type {Element} from '@cliui/dom';
+import type {FrameDetail} from '../FrameInstrumentation';
 
 function createLayoutBox(overrides: Partial<LayoutBox> = {}): LayoutBox {
   return {
@@ -57,7 +58,7 @@ describe('FrameInstrumentation', () => {
     const measure = entries[0]!;
     expect(measure.entryType).toBe('measure');
 
-    const detail = (measure as {detail: unknown}).detail as {idle: boolean; totalElements: number};
+    const detail = (measure as unknown as {detail: FrameDetail}).detail;
     expect(detail.idle).toBe(true);
     expect(detail.totalElements).toBe(5);
     expect(detail.dirtyElements).toBe(0);
@@ -91,11 +92,7 @@ describe('FrameInstrumentation', () => {
 
     const frame = perf.getEntriesByName('terminal.frame');
     expect(frame).toHaveLength(1);
-    const detail = (frame[0] as {detail: unknown}).detail as {
-      idle: boolean;
-      dirtyElements: number;
-      outputBytes: number;
-    };
+    const detail = (frame[0] as unknown as {detail: FrameDetail}).detail;
     expect(detail.idle).toBe(false);
     expect(detail.dirtyElements).toBe(3);
     expect(detail.outputBytes).toBeGreaterThan(0);
@@ -179,7 +176,7 @@ describe('FrameInstrumentation', () => {
 
     const lcpEntries = perf.getEntriesByType('largest-contentful-paint');
     expect(lcpEntries).toHaveLength(1);
-    expect((lcpEntries[0] as {size?: number}).size).toBe(200);
+    expect((lcpEntries[0] as unknown as {size: number}).size).toBe(200);
   });
 
   it('updates LCP when a larger element renders on subsequent frame', () => {

@@ -1,7 +1,8 @@
 import {ClipboardEvent, FocusEvent, KeyboardEvent, MouseEvent, WheelEvent} from '@cliui/dom';
 
-import type {Document, Element} from '@cliui/dom';
+import type {Document, Element, Performance} from '@cliui/dom';
 import type {LayoutBox} from '../../layout/types';
+import type {PendingEventTiming} from '../types/PendingEventTiming';
 import type {
   TerminalInputEvent,
   TerminalKeyEvent,
@@ -29,8 +30,12 @@ interface ClipRect {
  */
 export class EventDispatcher {
   private document: Document;
+  private performance: Performance | null = null;
   private layoutRoot: LayoutBox | null = null;
   private activeMousePress: {target: Element; button: TerminalMouseButton} | null = null;
+  private pendingTimings: PendingEventTiming[] = [];
+  private nextInteractionId = 1;
+  private firstInputRecorded = false;
 
   /**
    * Creates a new dispatcher bound to a DOM document.
@@ -39,6 +44,24 @@ export class EventDispatcher {
    */
   constructor(document: Document) {
     this.document = document;
+  }
+
+  /**
+   * Sets the Performance instance for recording event timing entries.
+   *
+   * @param performance - The window.performance instance.
+   */
+  setPerformance(performance: Performance): void {
+    this.performance = performance;
+  }
+
+  /**
+   * Returns and clears all pending event timings awaiting frame finalization.
+   */
+  takePendingTimings(): PendingEventTiming[] {
+    const timings = this.pendingTimings;
+    this.pendingTimings = [];
+    return timings;
   }
 
   /**
@@ -64,6 +87,93 @@ export class EventDispatcher {
 
     if (event.type === 'paste') {
       this.dispatchPasteEvent(event);
+    }
+  }
+
+  /**
+   * Dispatches one parsed terminal input event with performance timing capture.
+   *
+   * Records `startTime` before dispatch and `processingStart`/`processingEnd`
+   * around handler execution. The resulting `PendingEventTiming` entries are
+   * finalized by the Terminal after the next `renderFrame()` completes.
+   *
+   * @param event - Parsed terminal key or paste event.
+   * @param inputTimestamp - High-resolution timestamp when raw input bytes arrived.
+   */
+  dispatchTimed(event: TerminalInputEvent, inputTimestamp: number): void {
+    // Focus events are not user interactions — no timing
+    if (event.type === 'focus') {
+      this.dispatchWindowFocusEvent(event.focus);
+      return;
+    }
+
+    const perf = this.performance;
+    if (!perf) {
+      this.dispatch(event);
+      return;
+    }
+
+    const interactionId = this.nextInteractionId++;
+    const processingStart = perf.now();
+
+    this.dispatch(event);
+
+    const processingEnd = perf.now();
+    const isFirst = !this.firstInputRecorded;
+
+    if (isFirst) {
+      this.firstInputRecorded = true;
+    }
+
+    const eventName = this.getEventName(event);
+
+    // Record 'event' entry
+    this.pendingTimings.push({
+      options: {
+        name: eventName,
+        startTime: inputTimestamp,
+        processingStart,
+        processingEnd,
+        duration: 0, // finalized after next frame
+        interactionId,
+        entryType: 'event',
+      },
+      isFirstInput: false,
+    });
+
+    // Record 'first-input' entry
+    if (isFirst) {
+      this.pendingTimings.push({
+        options: {
+          name: eventName,
+          startTime: inputTimestamp,
+          processingStart,
+          processingEnd,
+          duration: 0,
+          interactionId,
+          entryType: 'first-input',
+        },
+        isFirstInput: true,
+      });
+    }
+  }
+
+  private getEventName(event: TerminalInputEvent): string {
+    switch (event.type) {
+      case 'key':
+        return 'keydown';
+      case 'mouse':
+        return event.eventType === 'wheel'
+          ? 'wheel'
+          : event.eventType === 'press'
+            ? 'mousedown'
+            : event.eventType === 'release'
+              ? 'mouseup'
+              : 'mousemove';
+      case 'paste':
+        return 'paste';
+      default:
+        return 'unknown';
     }
   }
 
