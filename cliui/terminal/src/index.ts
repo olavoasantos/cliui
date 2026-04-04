@@ -22,6 +22,15 @@ export {
   Event,
   KeyboardEvent,
   MouseEvent,
+  Performance,
+  PerformanceEntry,
+  PerformanceEventTiming,
+  PerformanceMark,
+  PerformanceMeasure,
+  PerformanceObserver,
+  PerformanceObserverEntryList,
+  PerformancePaintTiming,
+  LargestContentfulPaint,
   Window,
 } from '@cliui/dom';
 

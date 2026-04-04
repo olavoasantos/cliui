@@ -37,10 +37,6 @@ catalogs:
 importers:
 
   .:
-    dependencies:
-      '@cliui/dom':
-        specifier: workspace:*
-        version: link:cliui/dom
     devDependencies:
       '@changesets/cli':
         specifier: ^2.30.0
@@ -291,6 +287,22 @@ importers:
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
+
+  examples/performance-vitals:
+    dependencies:
+      '@cliui/elements':
+        specifier: workspace:*
+        version: link:../../cliui/elements
+      '@cliui/terminal':
+        specifier: workspace:*
+        version: link:../../cliui/terminal
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.15
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.1(@types/node@22.19.15)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   examples/preact:
     dependencies:

@@ -1,0 +1,75 @@
+.app {
+  padding: 1 2;
+  border-style: rounded;
+  border-color: #7c3aed;
+  color: #e5e7eb;
+  background-color: #1e1b2e;
+  display: flex;
+  flex-direction: column;
+  gap: 1;
+}
+
+.header {
+  color: #c4b5fd;
+  font-weight: bold;
+}
+
+.section-title {
+  color: #facc15;
+  font-weight: bold;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 1;
+}
+
+.label {
+  color: #94a3b8;
+  width: 28;
+}
+
+.value {
+  color: #86efac;
+  font-weight: bold;
+  width: 14;
+}
+
+.value-warn {
+  color: #fbbf24;
+  font-weight: bold;
+  width: 14;
+}
+
+.value-bad {
+  color: #f87171;
+  font-weight: bold;
+  width: 14;
+}
+
+.separator {
+  color: #334155;
+}
+
+.hint {
+  color: #64748b;
+}
+
+.counter-box {
+  border-style: single;
+  border-color: #475569;
+  padding: 0 1;
+  display: flex;
+  flex-direction: row;
+  gap: 2;
+}
+
+.counter-label {
+  color: #94a3b8;
+}
+
+.counter-value {
+  color: #e2e8f0;
+  font-weight: bold;
+}
