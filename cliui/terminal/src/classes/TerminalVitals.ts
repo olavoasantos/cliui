@@ -15,7 +15,7 @@ import type {TerminalVitalsCallback, TerminalVitalsMetricName} from '../types/Te
  * @example
  * ```ts
  * const vitals = new TerminalVitals(window.performance, { fps: 60 });
- * vitals.onMetric('fcp', (metric) => console.log(metric));
+ * vitals.onMetric('first-contentful-paint', (metric) => console.log(metric));
  * ```
  */
 export class TerminalVitals {
@@ -114,7 +114,7 @@ export class TerminalVitals {
     const paintObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         if (entry.name === 'first-contentful-paint') {
-          this.#emit('fcp', entry.startTime);
+          this.#emit('first-contentful-paint', entry.startTime);
         }
       }
     });
@@ -128,7 +128,7 @@ export class TerminalVitals {
 
       if (latest) {
         const renderTime = (latest as unknown as {renderTime: number}).renderTime;
-        this.#emit('lcp', renderTime);
+        this.#emit('largest-contentful-paint', renderTime);
       }
     });
 
@@ -200,7 +200,7 @@ export class TerminalVitals {
     this.#emit('input-dispatch-latency', latency);
 
     this.#eventDurations.push(entry.duration);
-    this.#emit('inp', this.#percentile(this.#eventDurations, 98));
+    this.#emit('interaction-to-next-paint', this.#percentile(this.#eventDurations, 98));
   }
 
   #percentile(sorted: number[], p: number): number {

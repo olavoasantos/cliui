@@ -156,10 +156,10 @@ function setValueClass(el: HTMLElement, level: 'good' | 'warn' | 'bad'): void {
 }
 
 const metricHandlers: Record<TerminalVitalsMetricName, (value: number) => void> = {
-  'fcp': (v) => {
+  'first-contentful-paint': (v) => {
     fcpRow.valueEl.textContent = fmtMs(v);
   },
-  'lcp': (v) => {
+  'largest-contentful-paint': (v) => {
     lcpRow.valueEl.textContent = fmtMs(v);
   },
   'dropped-frames': (v) => {
@@ -183,7 +183,7 @@ const metricHandlers: Record<TerminalVitalsMetricName, (value: number) => void> 
     latencyRow.valueEl.textContent = fmtMs(v);
     setValueClass(latencyRow.valueEl, v < 1 ? 'good' : v < 5 ? 'warn' : 'bad');
   },
-  'inp': (v) => {
+  'interaction-to-next-paint': (v) => {
     inpRow.valueEl.textContent = fmtMs(v);
     setValueClass(inpRow.valueEl, v < 50 ? 'good' : v < 200 ? 'warn' : 'bad');
   },

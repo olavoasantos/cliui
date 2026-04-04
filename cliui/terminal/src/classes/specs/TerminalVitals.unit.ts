@@ -148,10 +148,10 @@ describe('TerminalVitals', () => {
     });
   });
 
-  describe('INP', () => {
+  describe('interaction-to-next-paint', () => {
     it('reports p98 of event durations', async () => {
       const cb = vi.fn();
-      vitals.onMetric('inp', cb);
+      vitals.onMetric('interaction-to-next-paint', cb);
 
       // Record 100 events with varying durations
       for (let i = 1; i <= 100; i++) {
@@ -175,10 +175,10 @@ describe('TerminalVitals', () => {
     });
   });
 
-  describe('FCP', () => {
+  describe('first-contentful-paint', () => {
     it('reports startTime from first-contentful-paint entry', async () => {
       const cb = vi.fn();
-      vitals.onMetric('fcp', cb);
+      vitals.onMetric('first-contentful-paint', cb);
 
       perf.recordEntry(new PerformancePaintTiming('first-contentful-paint', 42));
       await Promise.resolve();
@@ -188,10 +188,10 @@ describe('TerminalVitals', () => {
     });
   });
 
-  describe('LCP', () => {
+  describe('largest-contentful-paint', () => {
     it('reports renderTime from largest-contentful-paint entry', async () => {
       const cb = vi.fn();
-      vitals.onMetric('lcp', cb);
+      vitals.onMetric('largest-contentful-paint', cb);
 
       const win = new Window();
       const el = win.document.createElement('div');
@@ -206,7 +206,7 @@ describe('TerminalVitals', () => {
   describe('disconnect', () => {
     it('stops all observation and clears listeners', async () => {
       const cb = vi.fn();
-      vitals.onMetric('fcp', cb);
+      vitals.onMetric('first-contentful-paint', cb);
       vitals.disconnect();
 
       perf.recordEntry(new PerformancePaintTiming('first-contentful-paint', 42));
@@ -219,8 +219,8 @@ describe('TerminalVitals', () => {
   describe('offMetric', () => {
     it('removes a specific listener', async () => {
       const cb = vi.fn();
-      vitals.onMetric('fcp', cb);
-      vitals.offMetric('fcp', cb);
+      vitals.onMetric('first-contentful-paint', cb);
+      vitals.offMetric('first-contentful-paint', cb);
 
       perf.recordEntry(new PerformancePaintTiming('first-contentful-paint', 42));
       await Promise.resolve();
