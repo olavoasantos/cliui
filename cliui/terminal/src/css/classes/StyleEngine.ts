@@ -264,10 +264,7 @@ export class StyleEngine {
 
       this.cache.set(element, newStyle);
 
-      // Mark layout-dirty for any style change. Even non-layout changes
-      // (color, opacity) need the layout engine to refresh its cached
-      // LayoutBox.computedStyle reference so the painter sees new values.
-      if (oldStyle === undefined || this.hasAnyStyleChange(oldStyle, newStyle)) {
+      if (hasLayoutChange(oldStyle ?? null, newStyle)) {
         this.layoutDirty.add(element);
       }
 
@@ -659,16 +656,5 @@ export class StyleEngine {
       this.markStyleDirty(current);
       current = current.parentElement as Element | null;
     }
-  }
-
-  private hasAnyStyleChange(oldStyle: ComputedStyle | undefined, newStyle: ComputedStyle): boolean {
-    if (!oldStyle) return true;
-    if (oldStyle.size !== newStyle.size) return true;
-
-    for (const [key, value] of newStyle) {
-      if (oldStyle.get(key) !== value) return true;
-    }
-
-    return false;
   }
 }
