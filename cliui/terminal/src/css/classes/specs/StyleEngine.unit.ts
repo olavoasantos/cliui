@@ -479,7 +479,7 @@ describe('StyleEngine', () => {
       expect(engine.getLayoutDirtyElements().has(div)).toBe(true);
     });
 
-    it('does not mark layout-dirty when only non-layout properties change', () => {
+    it('marks layout-dirty when non-layout properties change so renderer picks up new values', () => {
       const {document, engine} = createEnv();
       const div = document.createElement('div');
       div.style.color = 'red';
@@ -491,7 +491,7 @@ describe('StyleEngine', () => {
       engine.markStyleDirty(div);
       engine.recomputeDirty();
 
-      expect(engine.getLayoutDirtyElements().has(div)).toBe(false);
+      expect(engine.getLayoutDirtyElements().has(div)).toBe(true);
     });
 
     it('marks layout-dirty when padding changes', () => {

@@ -46,6 +46,8 @@ export class StyleEngine {
   private readonly keyframeRegistry = new Map<string, KeyframeRule>();
   private currentTimestamp = 0;
   private readonly activeAnimationNames = new WeakMap<Element, Set<string>>();
+  /** Stores cascade-only computed styles (before transition/animation overrides). */
+  private readonly cascadeCache = new WeakMap<Element, ComputedStyle>();
 
   /**
    * Registers a handler for a specific at-rule identifier.
@@ -219,15 +221,26 @@ export class StyleEngine {
 
     for (const element of this.styleDirty) {
       const oldStyle = this.cache.get(element);
+      const oldCascade = this.cascadeCache.get(element);
       this.cache.delete(element);
 
       const parentStyle = this.getParentComputedStyle(element);
       const matchedDeclarations = this.selectorMatcher.match(this.parsedRules, element);
       const newStyle = this.styleResolver.resolve(matchedDeclarations, element.style, parentStyle);
 
-      // Detect transitions: compare old and new cascaded values
-      if (oldStyle) {
-        this.transitionController.detectChanges(element, oldStyle, newStyle, this.currentTimestamp);
+      // Store cascade-only style before applying overrides
+      const cascadeCopy = new Map(newStyle);
+      this.cascadeCache.set(element, cascadeCopy);
+
+      // Detect transitions: compare OLD cascade-only vs NEW cascade-only
+      // This prevents re-triggering transitions every frame while one is running
+      if (oldCascade) {
+        this.transitionController.detectChanges(
+          element,
+          oldCascade,
+          cascadeCopy,
+          this.currentTimestamp,
+        );
       }
 
       // Detect animation changes
@@ -251,7 +264,10 @@ export class StyleEngine {
 
       this.cache.set(element, newStyle);
 
-      if (hasLayoutChange(oldStyle ?? null, newStyle)) {
+      // Mark layout-dirty for any style change. Even non-layout changes
+      // (color, opacity) need the layout engine to refresh its cached
+      // LayoutBox.computedStyle reference so the painter sees new values.
+      if (oldStyle === undefined || this.hasAnyStyleChange(oldStyle, newStyle)) {
         this.layoutDirty.add(element);
       }
 
@@ -643,5 +659,16 @@ export class StyleEngine {
       this.markStyleDirty(current);
       current = current.parentElement as Element | null;
     }
+  }
+
+  private hasAnyStyleChange(oldStyle: ComputedStyle | undefined, newStyle: ComputedStyle): boolean {
+    if (!oldStyle) return true;
+    if (oldStyle.size !== newStyle.size) return true;
+
+    for (const [key, value] of newStyle) {
+      if (oldStyle.get(key) !== value) return true;
+    }
+
+    return false;
   }
 }
