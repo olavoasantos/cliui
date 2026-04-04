@@ -13,6 +13,7 @@ import {polyfillEnvironment} from '@cliui/dom';
 polyfillEnvironment(new Window());
 
 export {Terminal} from './classes/Terminal';
+export {TerminalVitals} from './classes/TerminalVitals';
 
 export {
   ClipboardEvent,
@@ -28,6 +29,11 @@ export {polyfillEnvironment} from '@cliui/dom';
 
 export type {TerminalOptions} from './types';
 export type {TerminalFrameAware} from './types/TerminalFrameAware';
+export type {
+  TerminalVitalsCallback,
+  TerminalVitalsMetric,
+  TerminalVitalsMetricName,
+} from './types/TerminalVitalsMetric';
 export type {
   TerminalInput,
   TerminalInputEvent,
@@ -50,6 +56,7 @@ export {graphemeWidth} from './layout/utilities/graphemeWidth';
 export {GRAPHEME_SEGMENTER} from './layout/constants/cellWidth';
 export {EDITABLE} from './terminal/constants/editable';
 
+export type {FrameDetail} from './classes/FrameInstrumentation';
 export type {TerminalPlugin, TerminalPluginContext} from './types/TerminalPlugin';
 export type {GraphicsProtocol, GraphicsProtocolName} from './renderer/types/GraphicsProtocol';
 export type {ImageRenderRequest} from './renderer/types/ImageRenderRequest';
