@@ -1,0 +1,104 @@
+/* ── Base layout ─────────────────────────────────────────────── */
+
+.app {
+  padding: 1 2;
+  border-style: rounded;
+  border-color: #7c3aed;
+  color: #e5e7eb;
+  background-color: #1e1b2e;
+  display: flex;
+  flex-direction: column;
+  gap: 1;
+}
+
+.header {
+  color: #c4b5fd;
+  font-weight: bold;
+}
+
+.hint {
+  color: #64748b;
+}
+
+.separator {
+  color: #334155;
+}
+
+/* ── Color transition demo ──────────────────────────────────── */
+
+.color-box {
+  padding: 0 2;
+  color: #e2e8f0;
+  background-color: #334155;
+  transition: background-color 500ms ease, color 500ms ease;
+}
+
+.color-box.state-a {
+  background-color: #7c3aed;
+  color: #ffffff;
+}
+
+.color-box.state-b {
+  background-color: #059669;
+  color: #d1fae5;
+}
+
+.color-box.state-c {
+  background-color: #dc2626;
+  color: #fef2f2;
+}
+
+/* ── Width transition demo ──────────────────────────────────── */
+
+.width-box {
+  padding: 0 1;
+  background-color: #1e40af;
+  color: #bfdbfe;
+  width: 20;
+  transition: width 400ms ease-in-out;
+}
+
+.width-box.wide {
+  width: 50;
+}
+
+/* ── Opacity transition demo ────────────────────────────────── */
+
+.opacity-box {
+  padding: 0 2;
+  background-color: #7c3aed;
+  color: #ffffff;
+  opacity: 1;
+  transition: opacity 600ms ease;
+}
+
+.opacity-box.faded {
+  opacity: 0;
+}
+
+/* ── Multi-property transition demo ─────────────────────────── */
+
+.multi-box {
+  padding: 0 2;
+  background-color: #334155;
+  color: #94a3b8;
+  width: 30;
+  transition: background-color 300ms ease, color 300ms ease, width 500ms ease-in-out;
+}
+
+.multi-box.active {
+  background-color: #7c3aed;
+  color: #ffffff;
+  width: 50;
+}
+
+/* ── Section labels ─────────────────────────────────────────── */
+
+.section-label {
+  color: #facc15;
+  font-weight: bold;
+}
+
+.event-log {
+  color: #6ee7b7;
+}

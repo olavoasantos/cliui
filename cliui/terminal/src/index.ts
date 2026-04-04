@@ -16,6 +16,7 @@ export {Terminal} from './classes/Terminal';
 export {TerminalVitals} from './classes/TerminalVitals';
 
 export {
+  AnimationEvent,
   ClipboardEvent,
   Document,
   Element,
@@ -31,6 +32,7 @@ export {
   PerformanceObserverEntryList,
   PerformancePaintTiming,
   LargestContentfulPaint,
+  TransitionEvent,
   Window,
 } from '@cliui/dom';
 

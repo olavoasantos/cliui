@@ -1,0 +1,136 @@
+/* ── Base layout ─────────────────────────────────────────────── */
+
+.app {
+  padding: 1 2;
+  border-style: rounded;
+  border-color: #7c3aed;
+  color: #e5e7eb;
+  background-color: #1e1b2e;
+  display: flex;
+  flex-direction: column;
+  gap: 1;
+}
+
+.header {
+  color: #c4b5fd;
+  font-weight: bold;
+}
+
+.hint {
+  color: #64748b;
+}
+
+.separator {
+  color: #334155;
+}
+
+.section-label {
+  color: #facc15;
+  font-weight: bold;
+}
+
+.event-log {
+  color: #6ee7b7;
+}
+
+/* ── Keyframe definitions ───────────────────────────────────── */
+
+@keyframes pulse {
+  0% { background-color: #334155; }
+  50% { background-color: #7c3aed; }
+  100% { background-color: #334155; }
+}
+
+@keyframes fadeInOut {
+  from { opacity: 0; }
+  50% { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideWidth {
+  from { width: 10; }
+  50% { width: 50; }
+  to { width: 10; }
+}
+
+@keyframes rainbow {
+  0% { color: #ef4444; }
+  16% { color: #f97316; }
+  33% { color: #eab308; }
+  50% { color: #22c55e; }
+  66% { color: #3b82f6; }
+  83% { color: #8b5cf6; }
+  100% { color: #ef4444; }
+}
+
+@keyframes borderCycle {
+  0% { border-color: #7c3aed; }
+  33% { border-color: #059669; }
+  66% { border-color: #dc2626; }
+  100% { border-color: #7c3aed; }
+}
+
+/* ── Animation targets ──────────────────────────────────────── */
+
+.pulse-box {
+  padding: 0 2;
+  color: #e2e8f0;
+  background-color: #334155;
+}
+
+.pulse-box.running {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.fade-box {
+  padding: 0 2;
+  background-color: #1e40af;
+  color: #bfdbfe;
+  opacity: 1;
+}
+
+.fade-box.running {
+  animation: fadeInOut 1.5s linear infinite;
+}
+
+.slide-box {
+  padding: 0 1;
+  background-color: #059669;
+  color: #d1fae5;
+  width: 10;
+}
+
+.slide-box.running {
+  animation: slideWidth 2s ease-in-out infinite alternate;
+}
+
+.rainbow-text {
+  font-weight: bold;
+  color: #e2e8f0;
+}
+
+.rainbow-text.running {
+  animation: rainbow 3s linear infinite;
+}
+
+.border-box {
+  padding: 0 2;
+  border-style: rounded;
+  border-color: #7c3aed;
+  color: #e2e8f0;
+}
+
+.border-box.running {
+  animation: borderCycle 2s ease infinite;
+}
+
+.multi-anim {
+  padding: 0 2;
+  color: #e2e8f0;
+  background-color: #334155;
+  opacity: 1;
+}
+
+.multi-anim.running {
+  animation: pulse 2s ease infinite, fadeInOut 3s linear infinite;
+}
