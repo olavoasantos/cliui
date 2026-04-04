@@ -3,9 +3,12 @@ import {USER_AGENT_STYLESHEET} from '../constants/userAgentStylesheet';
 import {collectStyleElements} from '../utilities/collectStyleElements';
 import {hasLayoutChange} from '../utilities/hasLayoutChange';
 import {walkElements} from '../utilities/walkElements';
+import {AnimationController} from './AnimationController';
 import {CSSParser} from './CSSParser';
 import {SelectorMatcher} from './SelectorMatcher';
 import {StyleResolver} from './StyleResolver';
+import {TransitionController} from './TransitionController';
+import {parseTimeValue} from '../utilities/parseTimeValue';
 
 import type {Node} from '@cliui/dom';
 import type {Element} from '@cliui/dom';
@@ -14,6 +17,7 @@ import type {Window} from '@cliui/dom';
 import type {HTMLStyleElement} from '@cliui/dom';
 import type {Hooks} from '@cliui/dom';
 import type {CSSAtRule, CSSRule, ComputedStyle} from '../types';
+import type {KeyframeRule} from '../types/KeyframeRule';
 
 /**
  * Orchestrates the full style computation pipeline:
@@ -37,16 +41,14 @@ export class StyleEngine {
   private stylesheetsDirty = true;
   private previousHooks: Partial<Hooks> | null = null;
   private readonly atRuleHandlers = new Map<string, Array<(rule: CSSAtRule) => void>>();
+  private readonly transitionController = new TransitionController();
+  private readonly animationController = new AnimationController();
+  private readonly keyframeRegistry = new Map<string, KeyframeRule>();
+  private currentTimestamp = 0;
+  private readonly activeAnimationNames = new WeakMap<Element, Set<string>>();
 
   /**
    * Registers a handler for a specific at-rule identifier.
-   *
-   * During stylesheet collection, each parsed `@identifier` at-rule is
-   * dispatched to all handlers registered for that identifier.  This
-   * keeps the style engine decoupled from specific at-rule semantics.
-   *
-   * @param identifier - The at-rule keyword without `@` (e.g. `"border-style"`).
-   * @param handler - Callback invoked with the parsed at-rule.
    */
   onAtRule(identifier: string, handler: (rule: CSSAtRule) => void): void {
     let handlers = this.atRuleHandlers.get(identifier);
@@ -57,6 +59,46 @@ export class StyleEngine {
     }
 
     handlers.push(handler);
+  }
+
+  /** Returns the transition controller for external access. */
+  getTransitionController(): TransitionController {
+    return this.transitionController;
+  }
+
+  /** Returns the animation controller for external access. */
+  getAnimationController(): AnimationController {
+    return this.animationController;
+  }
+
+  /**
+   * Advances the animation system by one frame.
+   *
+   * Marks elements with active animations or transitions as style-dirty
+   * so their computed styles are recomputed with updated animated values.
+   * When no animations or transitions are active, this is a no-op.
+   *
+   * @param timestamp - Current frame timestamp in milliseconds.
+   */
+  tick(timestamp: number): void {
+    this.currentTimestamp = timestamp;
+
+    if (!this.transitionController.hasActive && !this.animationController.hasActive) {
+      return;
+    }
+
+    for (const element of this.transitionController.getActiveElements()) {
+      this.styleDirty.add(element);
+    }
+
+    for (const element of this.animationController.getActiveElements()) {
+      this.styleDirty.add(element);
+    }
+  }
+
+  /** Returns true when there are active animations or transitions. */
+  hasActiveAnimations(): boolean {
+    return this.transitionController.hasActive || this.animationController.hasActive;
   }
 
   /**
@@ -183,6 +225,30 @@ export class StyleEngine {
       const matchedDeclarations = this.selectorMatcher.match(this.parsedRules, element);
       const newStyle = this.styleResolver.resolve(matchedDeclarations, element.style, parentStyle);
 
+      // Detect transitions: compare old and new cascaded values
+      if (oldStyle) {
+        this.transitionController.detectChanges(element, oldStyle, newStyle, this.currentTimestamp);
+      }
+
+      // Detect animation changes
+      this.syncAnimations(element, newStyle);
+
+      // Apply animation overrides (animation > normal cascade)
+      const animValues = this.animationController.getValues(
+        element,
+        this.currentTimestamp,
+        newStyle,
+      );
+      for (const [prop, val] of animValues) {
+        newStyle.set(prop, val);
+      }
+
+      // Apply transition overrides (transition > animation > cascade)
+      const transValues = this.transitionController.getValues(element, this.currentTimestamp);
+      for (const [prop, val] of transValues) {
+        newStyle.set(prop, val);
+      }
+
       this.cache.set(element, newStyle);
 
       if (hasLayoutChange(oldStyle ?? null, newStyle)) {
@@ -192,6 +258,10 @@ export class StyleEngine {
       // Also recompute children whose styles depend on this element via inheritance
       this.recomputeChildrenIfNeeded(element, newStyle);
     }
+
+    // Remove completed transitions and animations
+    this.transitionController.removeCompleted(this.currentTimestamp);
+    this.animationController.removeCompleted(this.currentTimestamp);
 
     this.styleDirty.clear();
   }
@@ -282,6 +352,10 @@ export class StyleEngine {
             }
           }
         }
+
+        for (const keyframeRule of result.keyframeRules) {
+          this.keyframeRegistry.set(keyframeRule.name, keyframeRule);
+        }
       }
     }
   }
@@ -345,6 +419,87 @@ export class StyleEngine {
     const parent = element.parentElement as Element | null;
     if (!parent) return null;
     return this.getComputedStyle(parent);
+  }
+
+  /**
+   * Syncs active animations for an element based on its computed animation-name.
+   */
+  private syncAnimations(element: Element, style: ComputedStyle): void {
+    const animationName = style.get('animation-name');
+    const previousNames = this.activeAnimationNames.get(element);
+
+    if (!animationName || animationName === 'none') {
+      if (previousNames && previousNames.size > 0) {
+        this.animationController.removeElement(element);
+        this.activeAnimationNames.delete(element);
+      }
+      return;
+    }
+
+    const names = animationName.split(',').map((s) => s.trim());
+    const durations = (style.get('animation-duration') ?? '0ms').split(',').map((s) => s.trim());
+    const easings = (style.get('animation-timing-function') ?? 'ease')
+      .split(',')
+      .map((s) => s.trim());
+    const delays = (style.get('animation-delay') ?? '0ms').split(',').map((s) => s.trim());
+    const iterations = (style.get('animation-iteration-count') ?? '1')
+      .split(',')
+      .map((s) => s.trim());
+    const directions = (style.get('animation-direction') ?? 'normal')
+      .split(',')
+      .map((s) => s.trim());
+    const fillModes = (style.get('animation-fill-mode') ?? 'none').split(',').map((s) => s.trim());
+    const playStates = (style.get('animation-play-state') ?? 'running')
+      .split(',')
+      .map((s) => s.trim());
+
+    const newNames = new Set(names);
+
+    // Remove animations that are no longer listed
+    if (previousNames) {
+      for (const prevName of previousNames) {
+        if (!newNames.has(prevName)) {
+          this.animationController.removeAnimation(element, prevName);
+        }
+      }
+    }
+
+    // Start new animations
+    for (let i = 0; i < names.length; i++) {
+      const name = names[i]!;
+      if (previousNames?.has(name)) continue;
+
+      const keyframeRule = this.keyframeRegistry.get(name);
+      if (!keyframeRule) continue;
+
+      const iterCount = iterations[i % iterations.length]!;
+
+      this.animationController.startAnimation(
+        element,
+        name,
+        keyframeRule.blocks,
+        {
+          duration: parseTimeValue(durations[i % durations.length] ?? '0ms'),
+          delay: parseTimeValue(delays[i % delays.length] ?? '0ms'),
+          easing: easings[i % easings.length] ?? 'ease',
+          iterationCount: iterCount === 'infinite' ? Infinity : parseFloat(iterCount) || 1,
+          direction: (directions[i % directions.length] ?? 'normal') as
+            | 'normal'
+            | 'reverse'
+            | 'alternate'
+            | 'alternate-reverse',
+          fillMode: (fillModes[i % fillModes.length] ?? 'none') as
+            | 'none'
+            | 'forwards'
+            | 'backwards'
+            | 'both',
+          playState: (playStates[i % playStates.length] ?? 'running') as 'running' | 'paused',
+        },
+        this.currentTimestamp,
+      );
+    }
+
+    this.activeAnimationNames.set(element, newNames);
   }
 
   /**
