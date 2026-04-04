@@ -192,15 +192,19 @@ describe('CSSParser', () => {
 
   describe('edge cases and malformed input', () => {
     it('returns empty result for empty string', () => {
-      expect(parser.parse('')).toEqual({rules: [], atRules: []});
+      expect(parser.parse('')).toEqual({rules: [], atRules: [], keyframeRules: []});
     });
 
     it('returns empty result for whitespace only', () => {
-      expect(parser.parse('   \n\t  ')).toEqual({rules: [], atRules: []});
+      expect(parser.parse('   \n\t  ')).toEqual({rules: [], atRules: [], keyframeRules: []});
     });
 
     it('returns empty result for comments only', () => {
-      expect(parser.parse('/* nothing here */')).toEqual({rules: [], atRules: []});
+      expect(parser.parse('/* nothing here */')).toEqual({
+        rules: [],
+        atRules: [],
+        keyframeRules: [],
+      });
     });
 
     it('handles missing closing brace gracefully', () => {
@@ -361,6 +365,63 @@ describe('CSSParser', () => {
       expect(result.atRules[0]!.identifier).toBe('border-style');
       expect(result.atRules[0]!.prelude).toBe('empty');
       expect(result.atRules[0]!.declarations).toHaveLength(0);
+    });
+  });
+
+  describe('@keyframes', () => {
+    it('parses a basic @keyframes rule with from/to', () => {
+      const result = parser.parse(`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `);
+
+      expect(result.keyframeRules).toHaveLength(1);
+      expect(result.keyframeRules[0]!.name).toBe('fadeIn');
+      expect(result.keyframeRules[0]!.blocks).toHaveLength(2);
+      expect(result.keyframeRules[0]!.blocks[0]!.offsets).toEqual([0]);
+      expect(result.keyframeRules[0]!.blocks[1]!.offsets).toEqual([100]);
+    });
+
+    it('parses multiple @keyframes rules', () => {
+      const result = parser.parse(`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes pulse {
+          0% { color: red; }
+          50% { color: blue; }
+          100% { color: red; }
+        }
+      `);
+
+      expect(result.keyframeRules).toHaveLength(2);
+      expect(result.keyframeRules[0]!.name).toBe('fadeIn');
+      expect(result.keyframeRules[1]!.name).toBe('pulse');
+      expect(result.keyframeRules[1]!.blocks).toHaveLength(3);
+    });
+
+    it('does not treat @keyframes as a regular at-rule', () => {
+      const result = parser.parse(`
+        @keyframes slide { from { top: 0; } to { top: 10; } }
+      `);
+
+      expect(result.atRules).toHaveLength(0);
+      expect(result.keyframeRules).toHaveLength(1);
+    });
+
+    it('coexists with regular rules and at-rules', () => {
+      const result = parser.parse(`
+        .box { color: red; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @border-style custom { top: "*"; }
+      `);
+
+      expect(result.rules).toHaveLength(1);
+      expect(result.keyframeRules).toHaveLength(1);
+      expect(result.atRules).toHaveLength(1);
     });
   });
 });

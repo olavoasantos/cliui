@@ -1,10 +1,12 @@
 import {findClosingBrace} from '../utilities/findClosingBrace';
 import {parseDeclarations} from '../utilities/parseDeclarations';
+import {parseKeyframeBlocks} from '../utilities/parseKeyframeBlocks';
 import {parseSelectorList} from '../utilities/parseSelectorList';
 import {skipBlock} from '../utilities/skipBlock';
 import {skipWhitespaceAndComments} from '../utilities/skipWhitespaceAndComments';
 
 import type {CSSParseResult} from '../types';
+import type {KeyframeRule} from '../types/KeyframeRule';
 
 /**
  * Hand-written CSS parser that takes CSS text and produces a list of rules.
@@ -15,9 +17,9 @@ import type {CSSParseResult} from '../types';
  * Consumers decide what to do with each identifier.
  */
 export class CSSParser {
-  /** Parses a CSS string into rules and at-rules. */
+  /** Parses a CSS string into rules, at-rules, and keyframe rules. */
   parse(css: string): CSSParseResult {
-    const result: CSSParseResult = {rules: [], atRules: []};
+    const result: CSSParseResult = {rules: [], atRules: [], keyframeRules: []};
     let pos = 0;
     const len = css.length;
 
@@ -43,9 +45,13 @@ export class CSSParser {
         const spaceIdx = prelude.indexOf(' ');
         const identifier = spaceIdx === -1 ? prelude.slice(1) : prelude.slice(1, spaceIdx);
         const atPrelude = spaceIdx === -1 ? '' : prelude.slice(spaceIdx + 1).trim();
-        const declarations = parseDeclarations(bodyText);
 
-        result.atRules.push({identifier, prelude: atPrelude, declarations});
+        if (identifier === 'keyframes') {
+          this.parseKeyframes(atPrelude, bodyText, result.keyframeRules);
+        } else {
+          const declarations = parseDeclarations(bodyText);
+          result.atRules.push({identifier, prelude: atPrelude, declarations});
+        }
       } else {
         const declarations = parseDeclarations(bodyText);
         const selectors = parseSelectorList(prelude);
@@ -59,5 +65,15 @@ export class CSSParser {
     }
 
     return result;
+  }
+
+  private parseKeyframes(name: string, body: string, output: KeyframeRule[]): void {
+    if (!name) return;
+
+    const blocks = parseKeyframeBlocks(body);
+
+    if (blocks.length > 0) {
+      output.push({name, blocks});
+    }
   }
 }

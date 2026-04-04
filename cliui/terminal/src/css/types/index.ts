@@ -37,10 +37,14 @@ export interface CSSAtRule {
   declarations: CSSDeclaration[];
 }
 
+import type {KeyframeRule} from './KeyframeRule';
+
 /** Result of parsing a CSS stylesheet. */
 export interface CSSParseResult {
   /** Standard selector-based rules. */
   rules: CSSRule[];
   /** At-rules (`@identifier prelude { declarations }`). */
   atRules: CSSAtRule[];
+  /** Parsed `@keyframes` rules. */
+  keyframeRules: KeyframeRule[];
 }
