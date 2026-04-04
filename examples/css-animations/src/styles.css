@@ -41,12 +41,6 @@
   100% { background-color: #334155; }
 }
 
-@keyframes fadeInOut {
-  from { opacity: 0; }
-  50% { opacity: 1; }
-  to { opacity: 0; }
-}
-
 @keyframes slideWidth {
   from { width: 10; }
   50% { width: 50; }
@@ -82,17 +76,6 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
-.fade-box {
-  padding: 0 2;
-  background-color: #1e40af;
-  color: #bfdbfe;
-  opacity: 1;
-}
-
-.fade-box.running {
-  animation: fadeInOut 1.5s linear infinite;
-}
-
 .slide-box {
   padding: 0 1;
   background-color: #059669;
@@ -122,15 +105,4 @@
 
 .border-box.running {
   animation: borderCycle 2s ease infinite;
-}
-
-.multi-anim {
-  padding: 0 2;
-  color: #e2e8f0;
-  background-color: #334155;
-  opacity: 1;
-}
-
-.multi-anim.running {
-  animation: pulse 2s ease infinite, fadeInOut 3s linear infinite;
 }

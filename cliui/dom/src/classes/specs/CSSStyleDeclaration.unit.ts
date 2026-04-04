@@ -324,4 +324,31 @@ describe('expandShorthand', () => {
       'animation-play-state': 'paused',
     });
   });
+
+  it('expands transition shorthand with leading-dot time values', () => {
+    const result = expandShorthand(
+      'transition',
+      'background-color .5s ease, color .3s ease-in .1s',
+    );
+    expect(result).toEqual({
+      'transition-property': 'background-color, color',
+      'transition-duration': '.5s, .3s',
+      'transition-timing-function': 'ease, ease-in',
+      'transition-delay': '0ms, .1s',
+    });
+  });
+
+  it('expands animation shorthand with leading-dot time values', () => {
+    const result = expandShorthand('animation', 'fadeIn .5s ease-out');
+    expect(result).toEqual({
+      'animation-name': 'fadeIn',
+      'animation-duration': '.5s',
+      'animation-timing-function': 'ease-out',
+      'animation-delay': '0ms',
+      'animation-iteration-count': '1',
+      'animation-direction': 'normal',
+      'animation-fill-mode': 'none',
+      'animation-play-state': 'running',
+    });
+  });
 });

@@ -56,7 +56,7 @@ export function expandShorthand(property: string, value: string): Record<string,
   }
 }
 
-const TIME_RE = /^\d+(\.\d+)?(ms|s)$/;
+const TIME_RE = /^\d*\.?\d+(ms|s)$/;
 const EASING_KEYWORDS = new Set(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']);
 const DIRECTION_KEYWORDS = new Set(['normal', 'reverse', 'alternate', 'alternate-reverse']);
 const FILL_MODE_KEYWORDS = new Set(['none', 'forwards', 'backwards', 'both']);

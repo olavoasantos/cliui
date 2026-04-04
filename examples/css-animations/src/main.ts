@@ -69,44 +69,28 @@ addDemo(
   'Background color pulses between gray and purple',
 );
 
-// 2. Fade in/out — infinite linear
+// 2. Width slide — infinite alternate
 addDemo(
-  '2. Fade In/Out (1.5s linear infinite)',
-  'F',
-  'fade-box',
-  'Opacity cycles 0 → 1 → 0',
-);
-
-// 3. Width slide — infinite alternate
-addDemo(
-  '3. Width Slide (2s ease-in-out infinite alternate)',
+  '2. Width Slide (2s ease-in-out infinite alternate)',
   'S',
   'slide-box',
   'Width bounces 10 ↔ 50',
 );
 
-// 4. Rainbow text — infinite linear
+// 3. Rainbow text — infinite linear
 addDemo(
-  '4. Rainbow Text (3s linear infinite)',
+  '3. Rainbow Text (3s linear infinite)',
   'R',
   'rainbow-text',
   'Text color cycles through the spectrum',
 );
 
-// 5. Border color — infinite ease
+// 4. Border color — infinite ease
 addDemo(
-  '5. Border Cycle (2s ease infinite)',
+  '4. Border Cycle (2s ease infinite)',
   'B',
   'border-box',
   'Border color cycles purple → green → red',
-);
-
-// 6. Multi-animation — pulse + fadeInOut
-addDemo(
-  '6. Multi-Animation (pulse 2s + fadeInOut 3s)',
-  'U',
-  'multi-anim',
-  'Two animations on one element simultaneously',
 );
 
 // ── Event log ───────────────────────────────────────────────────
