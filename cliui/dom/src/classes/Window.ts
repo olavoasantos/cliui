@@ -23,6 +23,7 @@ import {DocumentFragment} from './DocumentFragment';
 import {HTMLTemplateElement} from './HTMLTemplateElement';
 import {CustomElementRegistryImplementation} from './CustomElementRegistry';
 import {MutationObserver} from './MutationObserver';
+import {Performance} from './Performance';
 import {HOOKS} from '../constants';
 
 import type {Hooks} from '../types';
@@ -66,6 +67,8 @@ export class Window extends EventTarget {
   MutationObserver = MutationObserver;
   Navigator = Navigator;
   Location = Location;
+
+  performance = new Performance();
 
   HTMLIFrameElement = HTMLIFrameElement;
 
