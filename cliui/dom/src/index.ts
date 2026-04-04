@@ -24,6 +24,8 @@ export {ClipboardEvent} from './classes/ClipboardEvent';
 export {ErrorEvent} from './classes/ErrorEvent';
 export {PromiseRejectionEvent} from './classes/PromiseRejectionEvent';
 export {ToggleEvent} from './classes/ToggleEvent';
+export {TransitionEvent} from './classes/TransitionEvent';
+export {AnimationEvent} from './classes/AnimationEvent';
 export {CSSStyleDeclaration} from './classes/CSSStyleDeclaration';
 export {DOMTokenList} from './classes/DOMTokenList';
 export {CustomElementRegistryImplementation as CustomElementRegistry} from './classes/CustomElementRegistry';
