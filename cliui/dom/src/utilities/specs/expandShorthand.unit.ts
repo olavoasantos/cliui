@@ -153,4 +153,34 @@ describe('expandShorthand', () => {
       });
     });
   });
+
+  describe('container shorthand', () => {
+    it('expands container with name and type', () => {
+      expect(expandShorthand('container', 'sidebar / inline-size')).toEqual({
+        'container-name': 'sidebar',
+        'container-type': 'inline-size',
+      });
+    });
+
+    it('expands container with type only', () => {
+      expect(expandShorthand('container', 'inline-size')).toEqual({
+        'container-name': 'none',
+        'container-type': 'inline-size',
+      });
+    });
+
+    it('expands container with size type', () => {
+      expect(expandShorthand('container', 'panel / size')).toEqual({
+        'container-name': 'panel',
+        'container-type': 'size',
+      });
+    });
+
+    it('handles whitespace around slash', () => {
+      expect(expandShorthand('container', '  sidebar  /  inline-size  ')).toEqual({
+        'container-name': 'sidebar',
+        'container-type': 'inline-size',
+      });
+    });
+  });
 });

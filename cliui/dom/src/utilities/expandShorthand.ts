@@ -51,6 +51,8 @@ export function expandShorthand(property: string, value: string): Record<string,
       return expandTransitionShorthand(value);
     case 'animation':
       return expandAnimationShorthand(value);
+    case 'container':
+      return expandContainerShorthand(value);
     default:
       return null;
   }
@@ -267,4 +269,34 @@ function tokenize(layer: string): string[] {
   }
 
   return tokens;
+}
+
+/**
+ * Expands the `container` shorthand into `container-name` and `container-type`.
+ *
+ * `container: sidebar / inline-size`
+ * → `container-name: sidebar`
+ *   `container-type: inline-size`
+ *
+ * `container: inline-size`
+ * → `container-name: none`
+ *   `container-type: inline-size`
+ */
+function expandContainerShorthand(value: string): Record<string, string> {
+  const slashIndex = value.indexOf('/');
+
+  if (slashIndex !== -1) {
+    const name = value.slice(0, slashIndex).trim() || 'none';
+    const type = value.slice(slashIndex + 1).trim() || 'normal';
+    return {
+      'container-name': name,
+      'container-type': type,
+    };
+  }
+
+  // No slash — value is just the type
+  return {
+    'container-name': 'none',
+    'container-type': value.trim() || 'normal',
+  };
 }

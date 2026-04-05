@@ -36,4 +36,6 @@ export const LAYOUT_PROPERTIES = new Set([
   'white-space',
   'text-align',
   'vertical-align',
+  'container-type',
+  'container-name',
 ]);
