@@ -1,4 +1,4 @@
-import type {CSSDeclaration, CSSRule} from './index';
+import type {CSSRule} from './index';
 
 /**
  * A parsed CSS conditional at-rule (`@media` or `@container`) that contains

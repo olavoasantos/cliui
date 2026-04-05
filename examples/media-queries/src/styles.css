@@ -1,0 +1,190 @@
+/* ─── Base styles ────────────────────────────────────────────── */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  padding: 1;
+  gap: 1;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 1;
+  border-style: rounded;
+  border-color: #7c3aed;
+}
+
+.title {
+  font-weight: bold;
+  color: #7c3aed;
+}
+
+.status {
+  color: #666;
+}
+
+.dashboard {
+  display: flex;
+  gap: 1;
+}
+
+.sidebar {
+  container-type: inline-size;
+  container-name: sidebar;
+  width: 30;
+  border-style: rounded;
+  border-color: #4a9eff;
+  padding: 1;
+}
+
+.sidebar-title {
+  font-weight: bold;
+  color: #4a9eff;
+}
+
+.nav-item {
+  padding-left: 1;
+}
+
+.main {
+  container-type: inline-size;
+  container-name: main;
+  flex-grow: 1;
+  border-style: rounded;
+  border-color: #22c55e;
+  padding: 1;
+}
+
+.main-title {
+  font-weight: bold;
+  color: #22c55e;
+}
+
+.card {
+  border-style: single;
+  border-color: #666;
+  padding: 1;
+  margin-top: 1;
+}
+
+.card-title {
+  font-weight: bold;
+}
+
+.card-detail {
+  color: #888;
+}
+
+.footer {
+  padding: 1;
+  border-style: rounded;
+  border-color: #666;
+  color: #888;
+}
+
+/* ─── Viewport media queries ────────────────────────────────── */
+
+/* Wide terminal: side-by-side layout */
+@media (min-width: 100) {
+  .dashboard {
+    flex-direction: row;
+  }
+}
+
+/* Narrow terminal: stacked layout */
+@media (max-width: 99) {
+  .dashboard {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: auto;
+  }
+}
+
+/* Short terminal: compact header */
+@media (max-height: 20) {
+  .header {
+    padding: 0;
+    border-style: none;
+  }
+  .footer {
+    display: none;
+  }
+}
+
+/* Orientation */
+@media (orientation: portrait) {
+  .status {
+    display: none;
+  }
+}
+
+/* ─── Preference media queries ──────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+  .app {
+    color: #e0e0e0;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .app {
+    color: #1a1a1a;
+  }
+  .card {
+    border-color: #ccc;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation-name: none;
+  }
+}
+
+/* ─── Container queries ─────────────────────────────────────── */
+
+/* Sidebar is wide enough to show icons */
+@container sidebar (min-width: 25) {
+  .nav-item {
+    color: #4a9eff;
+  }
+}
+
+/* Sidebar is narrow — hide icons */
+@container sidebar (max-width: 15) {
+  .nav-item {
+    display: none;
+  }
+}
+
+/* Main content area is wide: show details */
+@container main (min-width: 50) {
+  .card {
+    display: flex;
+    flex-direction: row;
+    gap: 2;
+  }
+  .card-detail {
+    flex-grow: 1;
+  }
+}
+
+/* Main content area is narrow: hide details */
+@container main (max-width: 49) {
+  .card-detail {
+    display: none;
+  }
+}
+
+/* ─── Nested: @media wrapping @container ────────────────────── */
+
+@media (min-width: 120) {
+  @container main (min-width: 60) {
+    .card-title {
+      color: #22c55e;
+    }
+  }
+}

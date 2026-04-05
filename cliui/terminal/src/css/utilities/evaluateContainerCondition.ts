@@ -15,7 +15,10 @@ import type {ContainerValues} from '../types/ContainerValues';
  * @param values - The container element's resolved content dimensions.
  * @returns `true` if the condition matches, `false` otherwise.
  */
-export function evaluateContainerCondition(condition: MediaCondition, values: ContainerValues): boolean {
+export function evaluateContainerCondition(
+  condition: MediaCondition,
+  values: ContainerValues,
+): boolean {
   switch (condition.type) {
     case 'feature':
       return evaluateContainerFeature(condition.name, condition.value, values);

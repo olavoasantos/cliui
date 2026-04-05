@@ -183,7 +183,6 @@ export class StyleEngine {
    * @param values - Partial media values to merge with current values.
    */
   setMediaValues(values: Partial<MediaValues>): void {
-    const prev = {...this.mediaValues};
     Object.assign(this.mediaValues, values);
 
     // Recompute orientation if dimensions changed

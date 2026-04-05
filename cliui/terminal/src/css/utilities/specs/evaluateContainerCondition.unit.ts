@@ -87,13 +87,21 @@ describe('evaluateContainerCondition', () => {
 
   describe('preference features are rejected', () => {
     it('returns false for prefers-color-scheme', () => {
-      const condition: MediaCondition = {type: 'feature', name: 'prefers-color-scheme', value: 'dark'};
+      const condition: MediaCondition = {
+        type: 'feature',
+        name: 'prefers-color-scheme',
+        value: 'dark',
+      };
 
       expect(evaluateContainerCondition(condition, defaultValues)).toBe(false);
     });
 
     it('returns false for prefers-reduced-motion', () => {
-      const condition: MediaCondition = {type: 'feature', name: 'prefers-reduced-motion', value: 'reduce'};
+      const condition: MediaCondition = {
+        type: 'feature',
+        name: 'prefers-reduced-motion',
+        value: 'reduce',
+      };
 
       expect(evaluateContainerCondition(condition, defaultValues)).toBe(false);
     });

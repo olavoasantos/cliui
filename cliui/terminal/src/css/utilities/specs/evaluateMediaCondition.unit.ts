@@ -99,7 +99,12 @@ describe('evaluateMediaCondition', () => {
 
     it('matches portrait when height > width', () => {
       const condition: MediaCondition = {type: 'feature', name: 'orientation', value: 'portrait'};
-      const values: MediaValues = {...defaultValues, width: 30, height: 80, orientation: 'portrait'};
+      const values: MediaValues = {
+        ...defaultValues,
+        width: 30,
+        height: 80,
+        orientation: 'portrait',
+      };
 
       expect(evaluateMediaCondition(condition, values)).toBe(true);
     });
@@ -107,25 +112,41 @@ describe('evaluateMediaCondition', () => {
 
   describe('preference features', () => {
     it('matches prefers-color-scheme: dark', () => {
-      const condition: MediaCondition = {type: 'feature', name: 'prefers-color-scheme', value: 'dark'};
+      const condition: MediaCondition = {
+        type: 'feature',
+        name: 'prefers-color-scheme',
+        value: 'dark',
+      };
 
       expect(evaluateMediaCondition(condition, defaultValues)).toBe(true);
     });
 
     it('does not match prefers-color-scheme: light when dark', () => {
-      const condition: MediaCondition = {type: 'feature', name: 'prefers-color-scheme', value: 'light'};
+      const condition: MediaCondition = {
+        type: 'feature',
+        name: 'prefers-color-scheme',
+        value: 'light',
+      };
 
       expect(evaluateMediaCondition(condition, defaultValues)).toBe(false);
     });
 
     it('matches prefers-reduced-motion: no-preference', () => {
-      const condition: MediaCondition = {type: 'feature', name: 'prefers-reduced-motion', value: 'no-preference'};
+      const condition: MediaCondition = {
+        type: 'feature',
+        name: 'prefers-reduced-motion',
+        value: 'no-preference',
+      };
 
       expect(evaluateMediaCondition(condition, defaultValues)).toBe(true);
     });
 
     it('matches prefers-reduced-motion: reduce when set', () => {
-      const condition: MediaCondition = {type: 'feature', name: 'prefers-reduced-motion', value: 'reduce'};
+      const condition: MediaCondition = {
+        type: 'feature',
+        name: 'prefers-reduced-motion',
+        value: 'reduce',
+      };
       const values: MediaValues = {...defaultValues, 'prefers-reduced-motion': 'reduce'};
 
       expect(evaluateMediaCondition(condition, values)).toBe(true);

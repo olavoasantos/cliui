@@ -192,11 +192,21 @@ describe('CSSParser', () => {
 
   describe('edge cases and malformed input', () => {
     it('returns empty result for empty string', () => {
-      expect(parser.parse('')).toEqual({rules: [], atRules: [], keyframeRules: [], conditionalRules: []});
+      expect(parser.parse('')).toEqual({
+        rules: [],
+        atRules: [],
+        keyframeRules: [],
+        conditionalRules: [],
+      });
     });
 
     it('returns empty result for whitespace only', () => {
-      expect(parser.parse('   \n\t  ')).toEqual({rules: [], atRules: [], keyframeRules: [], conditionalRules: []});
+      expect(parser.parse('   \n\t  ')).toEqual({
+        rules: [],
+        atRules: [],
+        keyframeRules: [],
+        conditionalRules: [],
+      });
     });
 
     it('returns empty result for comments only', () => {

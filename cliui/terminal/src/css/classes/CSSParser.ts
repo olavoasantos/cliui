@@ -27,8 +27,19 @@ const CONDITIONAL_AT_RULES = new Set(['media', 'container']);
 export class CSSParser {
   /** Parses a CSS string into rules, at-rules, keyframe rules, and conditional rules. */
   parse(css: string): CSSParseResult {
-    const result: CSSParseResult = {rules: [], atRules: [], keyframeRules: [], conditionalRules: []};
-    this.parseBlock(css, result.rules, result.atRules, result.keyframeRules, result.conditionalRules);
+    const result: CSSParseResult = {
+      rules: [],
+      atRules: [],
+      keyframeRules: [],
+      conditionalRules: [],
+    };
+    this.parseBlock(
+      css,
+      result.rules,
+      result.atRules,
+      result.keyframeRules,
+      result.conditionalRules,
+    );
     return result;
   }
 
@@ -95,7 +106,11 @@ export class CSSParser {
    * Parses a conditional at-rule body into nested rules and sub-conditional rules.
    * Supports arbitrary nesting depth (`@media` inside `@container` inside `@media`).
    */
-  private parseConditionalRule(identifier: string, prelude: string, body: string): CSSConditionalRule {
+  private parseConditionalRule(
+    identifier: string,
+    prelude: string,
+    body: string,
+  ): CSSConditionalRule {
     const result: CSSConditionalRule = {
       identifier,
       prelude,
