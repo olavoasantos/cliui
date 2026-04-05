@@ -76,9 +76,26 @@ export class CSSParser {
       const bodyText = css.slice(braceIdx + 1, closeIdx);
 
       if (prelude.charCodeAt(0) === 0x40 /* @ */) {
-        const spaceIdx = prelude.indexOf(' ');
-        const identifier = spaceIdx === -1 ? prelude.slice(1) : prelude.slice(1, spaceIdx);
-        const atPrelude = spaceIdx === -1 ? '' : prelude.slice(spaceIdx + 1).trim();
+        // Find the end of the identifier: first space or '(' (for minified CSS
+        // where @media(... has no space between identifier and condition).
+        const afterAt = prelude.slice(1);
+        const spaceIdx = afterAt.indexOf(' ');
+        const parenIdx = afterAt.indexOf('(');
+
+        let splitIdx: number;
+        if (spaceIdx === -1 && parenIdx === -1) {
+          splitIdx = -1;
+        } else if (spaceIdx === -1) {
+          splitIdx = parenIdx;
+        } else if (parenIdx === -1) {
+          splitIdx = spaceIdx;
+        } else {
+          splitIdx = Math.min(spaceIdx, parenIdx);
+        }
+
+        const identifier = splitIdx === -1 ? afterAt : afterAt.slice(0, splitIdx);
+        const atPrelude =
+          splitIdx === -1 ? '' : afterAt.slice(splitIdx === parenIdx ? splitIdx : splitIdx + 1).trim();
 
         if (identifier === 'keyframes') {
           this.parseKeyframes(atPrelude, bodyText, keyframeRules);

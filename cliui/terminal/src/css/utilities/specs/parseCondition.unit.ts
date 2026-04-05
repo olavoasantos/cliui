@@ -155,5 +155,23 @@ describe('parseCondition', () => {
 
       expect(result).toEqual({type: 'feature', name: 'min-width', value: '80'});
     });
+
+    it('parses minified condition without spaces', () => {
+      const result = parseCondition('(min-width:70)');
+
+      expect(result).toEqual({type: 'feature', name: 'min-width', value: '70'});
+    });
+
+    it('parses minified and combinator', () => {
+      const result = parseCondition('(min-width:80) and (max-height:40)');
+
+      expect(result).toEqual({
+        type: 'and',
+        conditions: [
+          {type: 'feature', name: 'min-width', value: '80'},
+          {type: 'feature', name: 'max-height', value: '40'},
+        ],
+      });
+    });
   });
 });

@@ -573,6 +573,50 @@ describe('CSSParser', () => {
       expect(result.conditionalRules[0]!.rules).toHaveLength(0);
       expect(result.conditionalRules[0]!.conditionalRules).toHaveLength(0);
     });
+
+    it('parses minified @media without space before paren', () => {
+      const result = parser.parse(`@media(min-width:70){.wide{flex-direction:row}}`);
+
+      expect(result.conditionalRules).toHaveLength(1);
+
+      const rule = result.conditionalRules[0]!;
+      expect(rule.identifier).toBe('media');
+      expect(rule.prelude).toBe('(min-width:70)');
+      expect(rule.rules).toHaveLength(1);
+      expect(rule.rules[0]!.declarations).toEqual([{property: 'flex-direction', value: 'row'}]);
+    });
+
+    it('parses minified @container without space before paren', () => {
+      const result = parser.parse(`@container(min-width:40){.item{color:red}}`);
+
+      expect(result.conditionalRules).toHaveLength(1);
+
+      const rule = result.conditionalRules[0]!;
+      expect(rule.identifier).toBe('container');
+      expect(rule.prelude).toBe('(min-width:40)');
+      expect(rule.rules).toHaveLength(1);
+    });
+
+    it('parses minified named @container without space', () => {
+      const result = parser.parse(`@container sidebar(min-width:30){.item{color:red}}`);
+
+      expect(result.conditionalRules).toHaveLength(1);
+
+      const rule = result.conditionalRules[0]!;
+      expect(rule.identifier).toBe('container');
+      expect(rule.prelude).toBe('sidebar(min-width:30)');
+    });
+
+    it('parses fully minified CSS with multiple @media blocks', () => {
+      const result = parser.parse(
+        `.base{color:red}@media(min-width:80){.wide{display:flex}}@media(max-width:79){.narrow{display:none}}`
+      );
+
+      expect(result.rules).toHaveLength(1);
+      expect(result.conditionalRules).toHaveLength(2);
+      expect(result.conditionalRules[0]!.prelude).toBe('(min-width:80)');
+      expect(result.conditionalRules[1]!.prelude).toBe('(max-width:79)');
+    });
   });
 
   describe('@keyframes', () => {

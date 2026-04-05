@@ -3,15 +3,13 @@
 .app {
   display: flex;
   flex-direction: column;
-  padding: 1;
-  gap: 1;
 }
 
 .header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: 1;
+  padding: 0 1;
   border-style: rounded;
   border-color: #7c3aed;
 }
@@ -22,21 +20,20 @@
 }
 
 .status {
-  color: #666;
+  color: #888;
 }
 
 .dashboard {
   display: flex;
-  gap: 1;
+  flex-direction: column;
 }
 
 .sidebar {
   container-type: inline-size;
   container-name: sidebar;
-  width: 30;
   border-style: rounded;
   border-color: #4a9eff;
-  padding: 1;
+  padding: 0 1;
 }
 
 .sidebar-title {
@@ -46,6 +43,7 @@
 
 .nav-item {
   padding-left: 1;
+  color: #555;
 }
 
 .main {
@@ -54,7 +52,7 @@
   flex-grow: 1;
   border-style: rounded;
   border-color: #22c55e;
-  padding: 1;
+  padding: 0 1;
 }
 
 .main-title {
@@ -64,9 +62,8 @@
 
 .card {
   border-style: single;
-  border-color: #666;
-  padding: 1;
-  margin-top: 1;
+  border-color: #444;
+  padding: 0 1;
 }
 
 .card-title {
@@ -78,89 +75,75 @@
 }
 
 .footer {
-  padding: 1;
-  border-style: rounded;
-  border-color: #666;
+  padding: 0 1;
+  border-style: single;
+  border-color: #444;
   color: #888;
+  text-align: center;
 }
 
-/* ─── Viewport media queries ────────────────────────────────── */
-
-/* Wide terminal: side-by-side layout */
-@media (min-width: 100) {
+/* ─── Wide terminal: side-by-side dashboard ─────────────────── */
+@media (min-width: 70) {
   .dashboard {
     flex-direction: row;
   }
-}
-
-/* Narrow terminal: stacked layout */
-@media (max-width: 99) {
-  .dashboard {
-    flex-direction: column;
-  }
   .sidebar {
-    width: auto;
+    width: 25;
   }
 }
 
-/* Short terminal: compact header */
-@media (max-height: 20) {
-  .header {
-    padding: 0;
-    border-style: none;
+/* ─── Narrow terminal: stacked, compact ─────────────────────── */
+@media (max-width: 69) {
+  .sidebar {
+    display: none;
   }
+  .footer {
+    color: #ff6b6b;
+  }
+}
+
+/* ─── Very wide terminal: extra room ────────────────────────── */
+@media (min-width: 120) {
+  .sidebar {
+    width: 35;
+  }
+  .header {
+    border-color: #22c55e;
+  }
+}
+
+/* ─── Short terminal: ultra-compact ─────────────────────────── */
+@media (max-height: 15) {
   .footer {
     display: none;
   }
-}
-
-/* Orientation */
-@media (orientation: portrait) {
-  .status {
-    display: none;
+  .header {
+    border-style: none;
   }
 }
 
-/* ─── Preference media queries ──────────────────────────────── */
-
+/* ─── Preference: dark scheme ───────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   .app {
-    color: #e0e0e0;
+    color: #d4d4d4;
   }
 }
 
-@media (prefers-color-scheme: light) {
-  .app {
-    color: #1a1a1a;
-  }
-  .card {
-    border-color: #ccc;
-  }
-}
-
+/* ─── Preference: reduced motion ────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .card {
     animation-name: none;
   }
 }
 
-/* ─── Container queries ─────────────────────────────────────── */
-
-/* Sidebar is wide enough to show icons */
-@container sidebar (min-width: 25) {
+/* ─── Container: sidebar wide enough for detail ─────────────── */
+@container sidebar (min-width: 20) {
   .nav-item {
     color: #4a9eff;
   }
 }
 
-/* Sidebar is narrow — hide icons */
-@container sidebar (max-width: 15) {
-  .nav-item {
-    display: none;
-  }
-}
-
-/* Main content area is wide: show details */
+/* ─── Container: main panel wide → row cards ────────────────── */
 @container main (min-width: 50) {
   .card {
     display: flex;
@@ -169,18 +152,18 @@
   }
   .card-detail {
     flex-grow: 1;
+    text-align: right;
   }
 }
 
-/* Main content area is narrow: hide details */
+/* ─── Container: main panel narrow → hide detail ────────────── */
 @container main (max-width: 49) {
   .card-detail {
     display: none;
   }
 }
 
-/* ─── Nested: @media wrapping @container ────────────────────── */
-
+/* ─── Nested: very wide viewport AND wide main panel ────────── */
 @media (min-width: 120) {
   @container main (min-width: 60) {
     .card-title {

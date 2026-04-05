@@ -25,7 +25,7 @@ header.className = 'header';
 
 const title = doc.createElement('div');
 title.className = 'title';
-title.textContent = '📊 Media & Container Queries Demo';
+title.textContent = 'Media & Container Queries';
 
 const status = doc.createElement('div');
 status.className = 'status';
@@ -48,11 +48,11 @@ sidebarTitle.textContent = 'Navigation';
 
 sidebar.appendChild(sidebarTitle);
 
-const navItems = ['Dashboard', 'Reports', 'Settings', 'Help'];
+const navItems = ['Dashboard', 'Reports', 'Settings', 'Users', 'Help'];
 for (const label of navItems) {
   const item = doc.createElement('div');
   item.className = 'nav-item';
-  item.textContent = `→ ${label}`;
+  item.textContent = label;
   sidebar.appendChild(item);
 }
 
@@ -64,15 +64,16 @@ main.className = 'main';
 
 const mainTitle = doc.createElement('div');
 mainTitle.className = 'main-title';
-mainTitle.textContent = 'Content Area';
+mainTitle.textContent = 'Overview';
 
 main.appendChild(mainTitle);
 
 // Cards
 const cards = [
-  {title: 'Server Status', detail: 'All systems operational. 99.9% uptime.'},
-  {title: 'Active Users', detail: '1,247 users online. Peak: 3,891 today.'},
-  {title: 'Disk Usage', detail: '67% used. 128 GB free of 384 GB total.'},
+  {title: 'Server Status', detail: 'All systems operational'},
+  {title: 'Active Users', detail: '1,247 online'},
+  {title: 'Disk Usage', detail: '67% of 384 GB'},
+  {title: 'CPU Load', detail: '23% average'},
 ];
 
 for (const cardData of cards) {
@@ -98,17 +99,22 @@ app.appendChild(dashboard);
 // Footer
 const footer = doc.createElement('div');
 footer.className = 'footer';
-footer.textContent = 'Resize your terminal to see responsive layout changes!';
 app.appendChild(footer);
 
 doc.body.appendChild(app);
 
-// ── Update status bar with current dimensions ───────────────
+// ── Update status + footer ──────────────────────────────────
 function updateStatus(): void {
   const cols = process.stdout.columns ?? 80;
   const rows = process.stdout.rows ?? 24;
-  const orientation = cols > rows ? 'landscape' : 'portrait';
-  status.textContent = `${cols}×${rows} ${orientation}`;
+  const o = cols > rows ? 'landscape' : 'portrait';
+  status.textContent = `${cols}x${rows} ${o}`;
+
+  const hints: string[] = [];
+  if (cols >= 70) hints.push('row layout');
+  else hints.push('stacked (sidebar hidden)');
+  if (cols >= 120) hints.push('extra-wide');
+  footer.textContent = `[${cols}x${rows}] ${hints.join(' | ')} — resize terminal to see changes, q to quit`;
 }
 
 updateStatus();
