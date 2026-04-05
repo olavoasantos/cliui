@@ -1,4 +1,9 @@
-import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../constants/terminal';
+import {
+  DEFAULT_COLUMNS,
+  DEFAULT_FPS,
+  DEFAULT_ROWS,
+  MAX_FPS_WITHOUT_SYNC_OUTPUT,
+} from '../constants/terminal';
 import {EDITABLE_STATE} from '../constants/editableState';
 import {StyleEngine} from '../css';
 import {Event, InputEvent, Window} from '@cliui/dom';
@@ -806,6 +811,14 @@ export class Terminal {
 
       this.styleEngine.markAllDirty();
       this.renderFrame();
+
+      // When the terminal lacks synchronized output, reduce the frame rate
+      // to avoid visible tearing from incremental ANSI rendering.
+      const capabilities = this.terminalManager.getCapabilities();
+
+      if (!capabilities.synchronizedOutput && this.fps > MAX_FPS_WITHOUT_SYNC_OUTPUT) {
+        this.restartFrameLoop(MAX_FPS_WITHOUT_SYNC_OUTPUT);
+      }
     });
     this.inputReader.start((event) => {
       this.frameInstrumentation.freezeLcp();
@@ -814,12 +827,7 @@ export class Terminal {
     process.on('SIGWINCH', this.boundResizeListener);
 
     this.renderFrame();
-
-    const interval = Math.max(1, Math.floor(1000 / this.fps));
-
-    this.loop = setInterval(() => {
-      this.renderFrame();
-    }, interval);
+    this.startFrameLoop(this.fps);
   }
 
   /**
@@ -839,6 +847,26 @@ export class Terminal {
     process.off('SIGWINCH', this.boundResizeListener);
     this.terminalManager.stop();
     this.running = false;
+  }
+
+  private startFrameLoop(fps: number): void {
+    if (this.loop !== null) {
+      clearInterval(this.loop);
+    }
+
+    const interval = Math.max(1, Math.floor(1000 / fps));
+
+    this.loop = setInterval(() => {
+      this.renderFrame();
+    }, interval);
+  }
+
+  private restartFrameLoop(fps: number): void {
+    if (!this.running) {
+      return;
+    }
+
+    this.startFrameLoop(fps);
   }
 
   private handleResize(): void {
