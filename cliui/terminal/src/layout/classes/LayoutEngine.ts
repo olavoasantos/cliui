@@ -34,6 +34,9 @@ export class LayoutEngine {
   private viewportColumns = 0;
   private viewportRows = 0;
 
+  /** Guard against recursive container query re-evaluation. */
+  private containerLayoutInProgress = new WeakSet<Element>();
+
   /**
    * Creates a new layout engine backed by the given style engine.
    *
@@ -387,6 +390,46 @@ export class LayoutEngine {
     }
 
     this.cache.set(element, box);
+
+    // Container query two-pass resolution:
+    // If this element is a container and its size was just determined,
+    // evaluate @container conditions. If matches changed, re-compute
+    // children's styles and re-layout the entire subtree.
+    if (
+      this.styleEngine.isContainerElement(element) &&
+      !this.containerLayoutInProgress.has(element)
+    ) {
+      const sizeChanged = this.styleEngine.setContainerSize(element, {
+        width: box.contentWidth,
+        height: box.contentHeight,
+      });
+
+      if (sizeChanged) {
+        // Guard against infinite recursion
+        this.containerLayoutInProgress.add(element);
+
+        // Invalidate style cache for descendants
+        this.styleEngine.invalidateSubtree(element);
+
+        // Re-layout this element — children will now pick up
+        // container-query-matched rules via getComputedStyle
+        this.cache.delete(element);
+        const relaid = this.layoutElement(
+          element,
+          availableWidth,
+          availableHeight,
+          x,
+          y,
+          incremental,
+          dirtySet,
+        );
+
+        this.containerLayoutInProgress.delete(element);
+
+        // Return the re-laid box instead
+        return relaid;
+      }
+    }
 
     return box;
   }

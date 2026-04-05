@@ -16,12 +16,15 @@ import type {Document} from '@cliui/dom';
 import type {Window} from '@cliui/dom';
 import type {HTMLStyleElement} from '@cliui/dom';
 import type {Hooks} from '@cliui/dom';
+import {evaluateContainerCondition} from '../utilities/evaluateContainerCondition';
 import {evaluateMediaCondition} from '../utilities/evaluateMediaCondition';
 import {parseCondition} from '../utilities/parseCondition';
 
 import type {CSSAtRule, CSSConditionalRule, CSSRule, ComputedStyle} from '../types';
+import type {ContainerValues} from '../types/ContainerValues';
 import type {MediaCondition} from '../types/MediaCondition';
 import type {MediaValues} from '../types/MediaValues';
+import type {MatchedDeclaration} from '../types/MatchedDeclaration';
 import type {KeyframeRule} from '../types/KeyframeRule';
 
 /**
@@ -72,6 +75,16 @@ export class StyleEngine {
     condition: MediaCondition;
     matched: boolean;
   }> = [];
+
+  /** Parsed @container rules with their conditions and optional name. */
+  private containerRules: Array<{
+    source: CSSConditionalRule;
+    condition: MediaCondition;
+    name: string | null;
+  }> = [];
+
+  /** Resolved container sizes from the layout engine. */
+  private readonly containerSizes = new WeakMap<Element, ContainerValues>();
 
   /**
    * Registers a handler for a specific at-rule identifier.
@@ -194,6 +207,100 @@ export class StyleEngine {
   }
 
   /**
+   * Records the resolved size of a container element.
+   *
+   * Called by the layout engine after computing a container element's
+   * dimensions. Returns true if any `@container` conditions now match
+   * that didn't before (or vice versa), indicating that the container's
+   * subtree needs style recomputation and re-layout.
+   *
+   * @param element - The container element.
+   * @param values - The container's resolved content dimensions.
+   * @returns Whether any container query matches changed.
+   */
+  setContainerSize(element: Element, values: ContainerValues): boolean {
+    const prev = this.containerSizes.get(element);
+
+    if (prev && prev.width === values.width && prev.height === values.height) {
+      return false;
+    }
+
+    this.containerSizes.set(element, values);
+
+    // Check if any container rules targeting this container changed match state
+    return this.containerRules.length > 0;
+  }
+
+  /**
+   * Returns the resolved container size for an element, if set.
+   */
+  getContainerSize(element: Element): ContainerValues | undefined {
+    return this.containerSizes.get(element);
+  }
+
+  /**
+   * Returns CSS rules from `@container` blocks that match the given element's
+   * nearest container ancestor. Used during style computation to include
+   * container-query-matched rules in the cascade.
+   */
+  getContainerMatchedRules(element: Element): CSSRule[] {
+    if (this.containerRules.length === 0) return [];
+
+    const matched: CSSRule[] = [];
+
+    for (const rule of this.containerRules) {
+      const container = this.findContainerAncestor(element, rule.name);
+      if (!container) continue;
+
+      const size = this.containerSizes.get(container);
+      if (!size) continue;
+
+      if (evaluateContainerCondition(rule.condition, size)) {
+        matched.push(...rule.source.rules);
+      }
+    }
+
+    return matched;
+  }
+
+  /**
+   * Checks whether an element has `container-type` set.
+   */
+  isContainerElement(element: Element): boolean {
+    const style = this.getComputedStyle(element);
+    const containerType = style.get('container-type');
+    return containerType !== undefined && containerType !== '' && containerType !== 'normal';
+  }
+
+  /**
+   * Walks up the tree to find the nearest ancestor with `container-type` set.
+   * Optionally matches a specific `container-name`.
+   */
+  private findContainerAncestor(element: Element, name: string | null): Element | null {
+    let current = element.parentElement as Element | null;
+
+    while (current) {
+      const style = this.getComputedStyle(current);
+      const containerType = style.get('container-type');
+
+      if (containerType && containerType !== 'normal') {
+        if (name === null) {
+          return current;
+        }
+
+        const containerName = style.get('container-name');
+        if (containerName === name) {
+          return current;
+        }
+      }
+
+      current = current.parentElement as Element | null;
+    }
+
+    return null;
+  }
+
+  /**
    * Invalidates the cached computed style for an element, causing
    * recomputation on the next getComputedStyle call.
    */
@@ -283,7 +390,7 @@ export class StyleEngine {
       this.cache.delete(element);
 
       const parentStyle = this.getParentComputedStyle(element);
-      const matchedDeclarations = this.selectorMatcher.match(this.parsedRules, element);
+      const matchedDeclarations = this.matchAllRules(element);
       const newStyle = this.styleResolver.resolve(matchedDeclarations, element.style, parentStyle);
 
       // Store cascade-only style before applying overrides
@@ -350,7 +457,7 @@ export class StyleEngine {
     }
 
     const parentStyle = this.getParentComputedStyle(element);
-    const matchedDeclarations = this.selectorMatcher.match(this.parsedRules, element);
+    const matchedDeclarations = this.matchAllRules(element);
     const computed = this.styleResolver.resolve(matchedDeclarations, element.style, parentStyle);
 
     this.cache.set(element, computed);
@@ -405,6 +512,7 @@ export class StyleEngine {
   private collectStylesheets(): void {
     this.parsedRules = [];
     this.conditionalEntries = [];
+    this.containerRules = [];
     this.stylesheetsDirty = false;
 
     if (!this.document) return;
@@ -459,11 +567,12 @@ export class StyleEngine {
           }
         }
       } else if (rule.identifier === 'container') {
-        // Container rules are tracked but not evaluated during stylesheet
-        // collection — they require container dimensions from layout.
-        // Stored in conditionalEntries for later evaluation in M14T7.
-        const condition = parseCondition(rule.prelude);
+        // Parse the prelude to extract optional name and condition
+        const {name, conditionText} = this.parseContainerPrelude(rule.prelude);
+        const condition = parseCondition(conditionText);
+
         if (condition) {
+          this.containerRules.push({source: rule, condition, name});
           this.conditionalEntries.push({source: rule, condition, matched: false});
         }
       }
@@ -491,10 +600,57 @@ export class StyleEngine {
   }
 
   /**
+   * Parses a `@container` prelude to extract optional name and condition text.
+   *
+   * `@container sidebar (min-width: 30)` → `{ name: 'sidebar', conditionText: '(min-width: 30)' }`
+   * `@container (min-width: 40)` → `{ name: null, conditionText: '(min-width: 40)' }`
+   */
+  private parseContainerPrelude(prelude: string): {name: string | null; conditionText: string} {
+    const trimmed = prelude.trim();
+    const parenIdx = trimmed.indexOf('(');
+
+    if (parenIdx === -1) {
+      // No condition — just a name (unusual but handle gracefully)
+      return {name: trimmed || null, conditionText: ''};
+    }
+
+    if (parenIdx === 0) {
+      // Starts with paren — no name
+      return {name: null, conditionText: trimmed};
+    }
+
+    // Text before the paren is the container name
+    const name = trimmed.slice(0, parenIdx).trim();
+    const conditionText = trimmed.slice(parenIdx).trim();
+
+    return {name: name || null, conditionText};
+  }
+
+  /**
+   * Returns all matched declarations for an element, including container-query-matched rules.
+   * Combines normal stylesheet rules with any @container rules whose conditions
+   * match the element's nearest container ancestor.
+   */
+  private matchAllRules(element: Element): MatchedDeclaration[] {
+    const matched = this.selectorMatcher.match(this.parsedRules, element);
+
+    if (this.containerRules.length > 0) {
+      const containerRules = this.getContainerMatchedRules(element);
+
+      if (containerRules.length > 0) {
+        const containerMatched = this.selectorMatcher.match(containerRules, element);
+        matched.push(...containerMatched);
+      }
+    }
+
+    return matched;
+  }
+
+  /**
    * Recursively computes styles for an element and its children.
    */
   private computeElement(element: Element, parentStyle: ComputedStyle | null): void {
-    const matchedDeclarations = this.selectorMatcher.match(this.parsedRules, element);
+    const matchedDeclarations = this.matchAllRules(element);
     const computed = this.styleResolver.resolve(matchedDeclarations, element.style, parentStyle);
     this.cache.set(element, computed);
 
@@ -521,7 +677,7 @@ export class StyleEngine {
           const oldChildStyle = this.cache.get(childEl);
           this.cache.delete(childEl);
 
-          const matchedDeclarations = this.selectorMatcher.match(this.parsedRules, childEl);
+          const matchedDeclarations = this.matchAllRules(childEl);
           const newChildStyle = this.styleResolver.resolve(
             matchedDeclarations,
             childEl.style,

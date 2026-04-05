@@ -1155,4 +1155,169 @@ describe('StyleEngine', () => {
       expect(computed.get('background-color')).toBe('#1a1a2e');
     });
   });
+
+  describe('@container queries', () => {
+    it('includes container-matched rules when container size is set', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .panel { container-type: inline-size; }
+        @container (min-width: 40) {
+          .panel-content { display: flex; flex-direction: row; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      document.body.appendChild(panel);
+
+      const content = document.createElement('div');
+      content.className = 'panel-content';
+      panel.appendChild(content);
+
+      // Before setting container size, rule doesn't match
+      let computed = engine.getComputedStyle(content);
+      expect(computed.get('flex-direction')).not.toBe('row');
+
+      // Set container size >= 40
+      engine.setContainerSize(panel, {width: 60, height: 20});
+      engine.invalidateSubtree(panel);
+
+      computed = engine.getComputedStyle(content);
+      expect(computed.get('flex-direction')).toBe('row');
+    });
+
+    it('does not match when container size is too small', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .panel { container-type: inline-size; }
+        @container (min-width: 40) {
+          .item { color: green; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      document.body.appendChild(panel);
+
+      const item = document.createElement('div');
+      item.className = 'item';
+      panel.appendChild(item);
+
+      engine.setContainerSize(panel, {width: 20, height: 10});
+      engine.invalidateSubtree(panel);
+
+      const computed = engine.getComputedStyle(item);
+      expect(computed.get('color')).not.toBe('green');
+    });
+
+    it('supports named container targeting', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .sidebar { container-type: inline-size; container-name: sidebar; }
+        @container sidebar (min-width: 30) {
+          .nav-item { font-weight: bold; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const sidebar = document.createElement('div');
+      sidebar.className = 'sidebar';
+      document.body.appendChild(sidebar);
+
+      const navItem = document.createElement('div');
+      navItem.className = 'nav-item';
+      sidebar.appendChild(navItem);
+
+      engine.setContainerSize(sidebar, {width: 35, height: 10});
+      engine.invalidateSubtree(sidebar);
+
+      const computed = engine.getComputedStyle(navItem);
+      expect(computed.get('font-weight')).toBe('bold');
+    });
+
+    it('named container does not match wrong name', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .sidebar { container-type: inline-size; container-name: sidebar; }
+        @container main (min-width: 30) {
+          .item { color: red; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const sidebar = document.createElement('div');
+      sidebar.className = 'sidebar';
+      document.body.appendChild(sidebar);
+
+      const item = document.createElement('div');
+      item.className = 'item';
+      sidebar.appendChild(item);
+
+      engine.setContainerSize(sidebar, {width: 60, height: 10});
+      engine.invalidateSubtree(sidebar);
+
+      const computed = engine.getComputedStyle(item);
+      expect(computed.get('color')).not.toBe('red');
+    });
+
+    it('does not match container when container-type is normal', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .panel { container-type: normal; }
+        @container (min-width: 40) {
+          .item { color: red; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      document.body.appendChild(panel);
+
+      const item = document.createElement('div');
+      item.className = 'item';
+      panel.appendChild(item);
+
+      engine.setContainerSize(panel, {width: 60, height: 20});
+      engine.invalidateSubtree(panel);
+
+      const computed = engine.getComputedStyle(item);
+      expect(computed.get('color')).not.toBe('red');
+    });
+
+    it('isContainerElement returns true for inline-size', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = `.panel { container-type: inline-size; }`;
+      document.head.appendChild(style);
+
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      document.body.appendChild(panel);
+
+      expect(engine.isContainerElement(panel)).toBe(true);
+    });
+
+    it('isContainerElement returns false for normal', () => {
+      const {document, engine} = createEnv();
+
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      expect(engine.isContainerElement(div)).toBe(false);
+    });
+  });
 });
