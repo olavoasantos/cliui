@@ -53,3 +53,6 @@ export interface CSSParseResult {
 }
 
 export type {CSSConditionalRule} from './CSSConditionalRule';
+export type {ContainerValues} from './ContainerValues';
+export type {MediaCondition, ConditionFeature, ConditionNot, ConditionAnd, ConditionOr} from './MediaCondition';
+export type {MediaValues} from './MediaValues';
