@@ -1019,4 +1019,140 @@ describe('StyleEngine', () => {
       expect(computed.get('padding-top')).toBe('0');
     });
   });
+
+  describe('@media preference queries', () => {
+    it('matches prefers-color-scheme: dark', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40, 'prefers-color-scheme': 'dark'});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (prefers-color-scheme: dark) {
+          .app { background-color: #1a1a2e; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'app';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('background-color')).toBe('#1a1a2e');
+    });
+
+    it('does not match prefers-color-scheme: light when dark', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40, 'prefers-color-scheme': 'dark'});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (prefers-color-scheme: light) {
+          .app { background-color: white; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'app';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('background-color')).not.toBe('white');
+    });
+
+    it('matches prefers-reduced-motion: reduce', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40, 'prefers-reduced-motion': 'reduce'});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (prefers-reduced-motion: reduce) {
+          .animated { animation-name: none; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'animated';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('animation-name')).toBe('none');
+    });
+
+    it('matches prefers-reduced-motion: no-preference by default', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40, 'prefers-reduced-motion': 'no-preference'});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (prefers-reduced-motion: no-preference) {
+          .animated { animation-duration: 300ms; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'animated';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('animation-duration')).toBe('300ms');
+    });
+
+    it('re-evaluates on color scheme change', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40, 'prefers-color-scheme': 'dark'});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (prefers-color-scheme: dark) {
+          .app { color: #e0e0e0; }
+        }
+        @media (prefers-color-scheme: light) {
+          .app { color: #1a1a1a; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'app';
+      document.body.appendChild(div);
+
+      let computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).toBe('#e0e0e0');
+
+      // Switch to light
+      engine.setMediaValues({'prefers-color-scheme': 'light'});
+      engine.recomputeDirty();
+
+      computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).toBe('#1a1a1a');
+    });
+
+    it('combines preference and viewport conditions', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({
+        width: 120,
+        height: 40,
+        'prefers-color-scheme': 'dark',
+      });
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (min-width: 80) and (prefers-color-scheme: dark) {
+          .app { background-color: #1a1a2e; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'app';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('background-color')).toBe('#1a1a2e');
+    });
+  });
 });

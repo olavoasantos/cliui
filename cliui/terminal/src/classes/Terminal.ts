@@ -107,6 +107,8 @@ export class Terminal {
     this.styleEngine.setMediaValues({
       width: this.getColumns(),
       height: this.getRows(),
+      'prefers-color-scheme': 'dark', // Default; M13T6 would provide real detection
+      'prefers-reduced-motion': this.detectReducedMotion(),
     });
     this.styleEngine.markAllDirty();
 
@@ -1090,6 +1092,20 @@ export class Terminal {
     }
 
     return Math.floor(value);
+  }
+
+  /**
+   * Detects whether the user prefers reduced motion from environment variables.
+   * Checks `REDUCE_MOTION` and `NO_MOTION` (common terminal conventions).
+   */
+  private detectReducedMotion(): 'reduce' | 'no-preference' {
+    const reduceMotion = process.env['REDUCE_MOTION'] ?? process.env['NO_MOTION'];
+
+    if (reduceMotion !== undefined && reduceMotion !== '' && reduceMotion !== '0') {
+      return 'reduce';
+    }
+
+    return 'no-preference';
   }
 
   private normalizeFps(value: number | undefined): number {
