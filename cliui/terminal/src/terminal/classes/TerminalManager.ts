@@ -130,6 +130,7 @@ export class TerminalManager {
     }
 
     this.write(SHOW_CURSOR);
+    this.write('\u001B[0m'); // Reset all SGR attributes before leaving
 
     if (this.altScreen) {
       this.write(DISABLE_ALT_SCREEN);
