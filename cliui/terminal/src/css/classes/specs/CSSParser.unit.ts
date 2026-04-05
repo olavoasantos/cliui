@@ -192,11 +192,11 @@ describe('CSSParser', () => {
 
   describe('edge cases and malformed input', () => {
     it('returns empty result for empty string', () => {
-      expect(parser.parse('')).toEqual({rules: [], atRules: [], keyframeRules: []});
+      expect(parser.parse('')).toEqual({rules: [], atRules: [], keyframeRules: [], conditionalRules: []});
     });
 
     it('returns empty result for whitespace only', () => {
-      expect(parser.parse('   \n\t  ')).toEqual({rules: [], atRules: [], keyframeRules: []});
+      expect(parser.parse('   \n\t  ')).toEqual({rules: [], atRules: [], keyframeRules: [], conditionalRules: []});
     });
 
     it('returns empty result for comments only', () => {
@@ -204,6 +204,7 @@ describe('CSSParser', () => {
         rules: [],
         atRules: [],
         keyframeRules: [],
+        conditionalRules: [],
       });
     });
 
@@ -365,6 +366,202 @@ describe('CSSParser', () => {
       expect(result.atRules[0]!.identifier).toBe('border-style');
       expect(result.atRules[0]!.prelude).toBe('empty');
       expect(result.atRules[0]!.declarations).toHaveLength(0);
+    });
+  });
+
+  describe('conditional at-rules (@media/@container)', () => {
+    it('parses @media with nested rules into conditionalRules', () => {
+      const result = parser.parse(`
+        @media (min-width: 80) {
+          .sidebar { display: none; }
+          .main { flex-grow: 1; }
+        }
+      `);
+
+      expect(result.rules).toHaveLength(0);
+      expect(result.atRules).toHaveLength(0);
+      expect(result.conditionalRules).toHaveLength(1);
+
+      const rule = result.conditionalRules[0]!;
+      expect(rule.identifier).toBe('media');
+      expect(rule.prelude).toBe('(min-width: 80)');
+      expect(rule.rules).toHaveLength(2);
+      expect(rule.rules[0]!.declarations).toEqual([{property: 'display', value: 'none'}]);
+      expect(rule.rules[1]!.declarations).toEqual([{property: 'flex-grow', value: '1'}]);
+    });
+
+    it('parses @container with nested rules', () => {
+      const result = parser.parse(`
+        @container (min-width: 40) {
+          .panel-content { display: flex; }
+        }
+      `);
+
+      expect(result.conditionalRules).toHaveLength(1);
+
+      const rule = result.conditionalRules[0]!;
+      expect(rule.identifier).toBe('container');
+      expect(rule.prelude).toBe('(min-width: 40)');
+      expect(rule.rules).toHaveLength(1);
+    });
+
+    it('parses named @container rules', () => {
+      const result = parser.parse(`
+        @container sidebar (min-width: 30) {
+          .item { color: red; }
+        }
+      `);
+
+      const rule = result.conditionalRules[0]!;
+      expect(rule.identifier).toBe('container');
+      expect(rule.prelude).toBe('sidebar (min-width: 30)');
+    });
+
+    it('parses multiple @media rules', () => {
+      const result = parser.parse(`
+        @media (min-width: 80) {
+          .wide { display: flex; }
+        }
+        @media (max-width: 79) {
+          .narrow { display: none; }
+        }
+      `);
+
+      expect(result.conditionalRules).toHaveLength(2);
+      expect(result.conditionalRules[0]!.prelude).toBe('(min-width: 80)');
+      expect(result.conditionalRules[1]!.prelude).toBe('(max-width: 79)');
+    });
+
+    it('parses nested @container inside @media', () => {
+      const result = parser.parse(`
+        @media (min-width: 80) {
+          @container (min-width: 40) {
+            .item { color: red; }
+          }
+        }
+      `);
+
+      expect(result.conditionalRules).toHaveLength(1);
+
+      const media = result.conditionalRules[0]!;
+      expect(media.identifier).toBe('media');
+      expect(media.rules).toHaveLength(0);
+      expect(media.conditionalRules).toHaveLength(1);
+
+      const container = media.conditionalRules[0]!;
+      expect(container.identifier).toBe('container');
+      expect(container.prelude).toBe('(min-width: 40)');
+      expect(container.rules).toHaveLength(1);
+      expect(container.rules[0]!.declarations).toEqual([{property: 'color', value: 'red'}]);
+    });
+
+    it('parses nested @media inside @container', () => {
+      const result = parser.parse(`
+        @container (min-width: 40) {
+          @media (min-width: 80) {
+            .item { font-weight: bold; }
+          }
+        }
+      `);
+
+      const container = result.conditionalRules[0]!;
+      expect(container.identifier).toBe('container');
+      expect(container.conditionalRules).toHaveLength(1);
+
+      const media = container.conditionalRules[0]!;
+      expect(media.identifier).toBe('media');
+      expect(media.rules).toHaveLength(1);
+    });
+
+    it('mixes conditional at-rules with regular rules', () => {
+      const result = parser.parse(`
+        .always { color: red; }
+
+        @media (min-width: 80) {
+          .wide { display: flex; }
+        }
+
+        .also-always { padding: 1; }
+      `);
+
+      expect(result.rules).toHaveLength(2);
+      expect(result.conditionalRules).toHaveLength(1);
+    });
+
+    it('mixes conditional at-rules with flat at-rules and keyframes', () => {
+      const result = parser.parse(`
+        @border-style custom { top: "*"; }
+
+        @media (min-width: 80) {
+          .wide { display: flex; }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `);
+
+      expect(result.atRules).toHaveLength(1);
+      expect(result.conditionalRules).toHaveLength(1);
+      expect(result.keyframeRules).toHaveLength(1);
+    });
+
+    it('handles @media with boolean combinators in prelude', () => {
+      const result = parser.parse(`
+        @media (min-width: 80) and (max-height: 40) {
+          .compact { padding: 0; }
+        }
+      `);
+
+      const rule = result.conditionalRules[0]!;
+      expect(rule.prelude).toBe('(min-width: 80) and (max-height: 40)');
+      expect(rule.rules).toHaveLength(1);
+    });
+
+    it('handles @media with rules and nested conditionals mixed', () => {
+      const result = parser.parse(`
+        @media (min-width: 80) {
+          .sidebar { width: 30; }
+          @container panel (min-width: 40) {
+            .panel-content { gap: 2; }
+          }
+          .main { flex-grow: 1; }
+        }
+      `);
+
+      const media = result.conditionalRules[0]!;
+      expect(media.rules).toHaveLength(2);
+      expect(media.conditionalRules).toHaveLength(1);
+    });
+
+    it('handles three levels of nesting', () => {
+      const result = parser.parse(`
+        @media (min-width: 120) {
+          @container sidebar (min-width: 30) {
+            @container card (min-width: 20) {
+              .deep { color: blue; }
+            }
+          }
+        }
+      `);
+
+      const media = result.conditionalRules[0]!;
+      const sidebar = media.conditionalRules[0]!;
+      const card = sidebar.conditionalRules[0]!;
+      expect(card.identifier).toBe('container');
+      expect(card.rules).toHaveLength(1);
+      expect(card.rules[0]!.declarations).toEqual([{property: 'color', value: 'blue'}]);
+    });
+
+    it('handles empty conditional at-rule body', () => {
+      const result = parser.parse(`
+        @media (min-width: 80) {}
+      `);
+
+      expect(result.conditionalRules).toHaveLength(1);
+      expect(result.conditionalRules[0]!.rules).toHaveLength(0);
+      expect(result.conditionalRules[0]!.conditionalRules).toHaveLength(0);
     });
   });
 

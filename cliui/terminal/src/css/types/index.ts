@@ -37,6 +37,7 @@ export interface CSSAtRule {
   declarations: CSSDeclaration[];
 }
 
+import type {CSSConditionalRule} from './CSSConditionalRule';
 import type {KeyframeRule} from './KeyframeRule';
 
 /** Result of parsing a CSS stylesheet. */
@@ -47,4 +48,8 @@ export interface CSSParseResult {
   atRules: CSSAtRule[];
   /** Parsed `@keyframes` rules. */
   keyframeRules: KeyframeRule[];
+  /** Conditional at-rules (`@media`, `@container`) with nested rules. */
+  conditionalRules: CSSConditionalRule[];
 }
+
+export type {CSSConditionalRule} from './CSSConditionalRule';
