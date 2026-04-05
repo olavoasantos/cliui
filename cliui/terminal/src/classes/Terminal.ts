@@ -104,6 +104,10 @@ export class Terminal {
 
     this.styleEngine = new StyleEngine();
     this.styleEngine.attach(this.document);
+    this.styleEngine.setMediaValues({
+      width: this.getColumns(),
+      height: this.getRows(),
+    });
     this.styleEngine.markAllDirty();
 
     this.layoutEngine = new LayoutEngine(this.styleEngine);
@@ -875,6 +879,10 @@ export class Terminal {
     }
 
     this.layoutEngine.clearCache();
+    this.styleEngine.setMediaValues({
+      width: this.getColumns(),
+      height: this.getRows(),
+    });
     this.styleEngine.markAllDirty();
     this.renderFrame();
     this.window.dispatchEvent(new Event('resize'));

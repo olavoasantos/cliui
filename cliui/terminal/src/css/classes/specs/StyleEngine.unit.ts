@@ -816,4 +816,207 @@ describe('StyleEngine', () => {
       expect(engine.getDirtyElements().size).toBe(0);
     });
   });
+
+  describe('@media viewport queries', () => {
+    it('includes rules when @media condition matches', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (min-width: 80) {
+          .wide { color: red; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'wide';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).toBe('red');
+    });
+
+    it('excludes rules when @media condition does not match', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 60, height: 24});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (min-width: 80) {
+          .wide { color: red; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'wide';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      // color inherits as '' when no rule matches, NOT 'red'
+      expect(computed.get('color')).not.toBe('red');
+    });
+
+    it('includes rules from multiple matching @media blocks', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (min-width: 80) {
+          .item { color: red; }
+        }
+        @media (max-height: 50) {
+          .item { font-weight: bold; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'item';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).toBe('red');
+      expect(computed.get('font-weight')).toBe('bold');
+    });
+
+    it('re-evaluates on setMediaValues and marks dirty when match changes', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 60, height: 24});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (min-width: 80) {
+          .wide { color: blue; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'wide';
+      document.body.appendChild(div);
+
+      // Initially not matching
+      let computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).not.toBe('blue');
+
+      // Resize to match
+      engine.setMediaValues({width: 120, height: 40});
+      engine.recomputeDirty();
+
+      computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).toBe('blue');
+    });
+
+    it('mixes @media rules with regular rules', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .item { padding: 1; }
+        @media (min-width: 80) {
+          .item { color: red; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'item';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('padding-top')).toBe('1');
+      expect(computed.get('color')).toBe('red');
+    });
+
+    it('handles nested @media — both must match', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (min-width: 80) {
+          @media (max-height: 50) {
+            .nested { color: green; }
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'nested';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).toBe('green');
+    });
+
+    it('nested @media — outer fails, inner not evaluated', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 60, height: 40});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (min-width: 80) {
+          @media (max-height: 50) {
+            .nested { color: green; }
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'nested';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).not.toBe('green');
+    });
+
+    it('@media does not add specificity — same as outside', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .item { color: red; }
+        @media (min-width: 80) {
+          .item { color: blue; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'item';
+      document.body.appendChild(div);
+
+      // Later rule wins at equal specificity
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).toBe('blue');
+    });
+
+    it('handles and combinator in @media', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 30});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (min-width: 80) and (max-height: 40) {
+          .compact { padding: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'compact';
+      document.body.appendChild(div);
+
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('padding-top')).toBe('0');
+    });
+  });
 });

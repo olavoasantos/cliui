@@ -16,7 +16,12 @@ import type {Document} from '@cliui/dom';
 import type {Window} from '@cliui/dom';
 import type {HTMLStyleElement} from '@cliui/dom';
 import type {Hooks} from '@cliui/dom';
-import type {CSSAtRule, CSSRule, ComputedStyle} from '../types';
+import {evaluateMediaCondition} from '../utilities/evaluateMediaCondition';
+import {parseCondition} from '../utilities/parseCondition';
+
+import type {CSSAtRule, CSSConditionalRule, CSSRule, ComputedStyle} from '../types';
+import type {MediaCondition} from '../types/MediaCondition';
+import type {MediaValues} from '../types/MediaValues';
 import type {KeyframeRule} from '../types/KeyframeRule';
 
 /**
@@ -48,6 +53,25 @@ export class StyleEngine {
   private readonly activeAnimationNames = new WeakMap<Element, Set<string>>();
   /** Stores cascade-only computed styles (before transition/animation overrides). */
   private readonly cascadeCache = new WeakMap<Element, ComputedStyle>();
+
+  /** Current media values for evaluating @media conditions. */
+  private mediaValues: MediaValues = {
+    width: 80,
+    height: 24,
+    'prefers-color-scheme': 'dark',
+    'prefers-reduced-motion': 'no-preference',
+    orientation: 'landscape',
+  };
+
+  /**
+   * Tracks parsed conditional rules alongside their parsed conditions
+   * so we can re-evaluate on resize without re-parsing.
+   */
+  private conditionalEntries: Array<{
+    source: CSSConditionalRule;
+    condition: MediaCondition;
+    matched: boolean;
+  }> = [];
 
   /**
    * Registers a handler for a specific at-rule identifier.
@@ -133,6 +157,40 @@ export class StyleEngine {
    */
   invalidateStylesheets(): void {
     this.stylesheetsDirty = true;
+  }
+
+  /**
+   * Updates the media values used for `@media` condition evaluation.
+   *
+   * When the terminal dimensions or preference values change, call this
+   * method to update the values and re-evaluate all media conditions.
+   * If any condition's match state changed, affected elements are marked
+   * style-dirty and stylesheets are re-collected.
+   *
+   * @param values - Partial media values to merge with current values.
+   */
+  setMediaValues(values: Partial<MediaValues>): void {
+    const prev = {...this.mediaValues};
+    Object.assign(this.mediaValues, values);
+
+    // Recompute orientation if dimensions changed
+    if (values.width !== undefined || values.height !== undefined) {
+      this.mediaValues.orientation =
+        this.mediaValues.width > this.mediaValues.height ? 'landscape' : 'portrait';
+    }
+
+    // Re-evaluate media conditions and check for changes
+    if (this.reevaluateMediaConditions()) {
+      this.stylesheetsDirty = true;
+      this.markAllDirty();
+    }
+  }
+
+  /**
+   * Returns the current media values.
+   */
+  getMediaValues(): Readonly<MediaValues> {
+    return this.mediaValues;
   }
 
   /**
@@ -342,9 +400,11 @@ export class StyleEngine {
 
   /**
    * Collects and parses CSS text from all `<style>` elements in the document.
+   * Evaluates `@media` conditions and includes matching nested rules.
    */
   private collectStylesheets(): void {
     this.parsedRules = [];
+    this.conditionalEntries = [];
     this.stylesheetsDirty = false;
 
     if (!this.document) return;
@@ -355,6 +415,9 @@ export class StyleEngine {
       if (cssText) {
         const result = this.parser.parse(cssText);
         this.parsedRules.push(...result.rules);
+
+        // Process conditional at-rules (@media, @container)
+        this.processConditionalRules(result.conditionalRules);
 
         for (const atRule of result.atRules) {
           const handlers = this.atRuleHandlers.get(atRule.identifier);
@@ -371,6 +434,60 @@ export class StyleEngine {
         }
       }
     }
+  }
+
+  /**
+   * Processes conditional at-rules, evaluating @media conditions and
+   * including matching nested rules in parsedRules.
+   * @container rules are stored but not evaluated here — they need
+   * container dimensions from layout (handled in M14T7).
+   */
+  private processConditionalRules(conditionalRules: CSSConditionalRule[]): void {
+    for (const rule of conditionalRules) {
+      if (rule.identifier === 'media') {
+        const condition = parseCondition(rule.prelude);
+        if (!condition) continue;
+
+        const matched = evaluateMediaCondition(condition, this.mediaValues);
+        this.conditionalEntries.push({source: rule, condition, matched});
+
+        if (matched) {
+          this.parsedRules.push(...rule.rules);
+          // Recursively process nested conditional rules
+          if (rule.conditionalRules.length > 0) {
+            this.processConditionalRules(rule.conditionalRules);
+          }
+        }
+      } else if (rule.identifier === 'container') {
+        // Container rules are tracked but not evaluated during stylesheet
+        // collection — they require container dimensions from layout.
+        // Stored in conditionalEntries for later evaluation in M14T7.
+        const condition = parseCondition(rule.prelude);
+        if (condition) {
+          this.conditionalEntries.push({source: rule, condition, matched: false});
+        }
+      }
+    }
+  }
+
+  /**
+   * Re-evaluates all tracked @media conditions against current media values.
+   * Returns true if any condition's match state changed.
+   */
+  private reevaluateMediaConditions(): boolean {
+    let changed = false;
+
+    for (const entry of this.conditionalEntries) {
+      if (entry.source.identifier !== 'media') continue;
+
+      const newMatch = evaluateMediaCondition(entry.condition, this.mediaValues);
+      if (newMatch !== entry.matched) {
+        changed = true;
+        entry.matched = newMatch;
+      }
+    }
+
+    return changed;
   }
 
   /**
