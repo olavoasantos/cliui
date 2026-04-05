@@ -1319,5 +1319,160 @@ describe('StyleEngine', () => {
 
       expect(engine.isContainerElement(div)).toBe(false);
     });
+
+    it('@media wrapping @container — both conditions must match', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .panel { container-type: inline-size; }
+        @media (min-width: 80) {
+          @container (min-width: 40) {
+            .item { color: purple; }
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      document.body.appendChild(panel);
+
+      const item = document.createElement('div');
+      item.className = 'item';
+      panel.appendChild(item);
+
+      engine.setContainerSize(panel, {width: 60, height: 20});
+      engine.invalidateSubtree(panel);
+
+      const computed = engine.getComputedStyle(item);
+      expect(computed.get('color')).toBe('purple');
+    });
+
+    it('@media wrapping @container — media fails, container not evaluated', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 60, height: 24});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .panel { container-type: inline-size; }
+        @media (min-width: 80) {
+          @container (min-width: 40) {
+            .item { color: purple; }
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      document.body.appendChild(panel);
+
+      const item = document.createElement('div');
+      item.className = 'item';
+      panel.appendChild(item);
+
+      engine.setContainerSize(panel, {width: 60, height: 20});
+      engine.invalidateSubtree(panel);
+
+      const computed = engine.getComputedStyle(item);
+      expect(computed.get('color')).not.toBe('purple');
+    });
+
+    it('@container wrapping @media — both conditions must match', () => {
+      const {document, engine} = createEnv();
+      engine.setMediaValues({width: 120, height: 40});
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .panel { container-type: inline-size; }
+        @container (min-width: 40) {
+          @media (min-width: 80) {
+            .item { color: teal; }
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      document.body.appendChild(panel);
+
+      const item = document.createElement('div');
+      item.className = 'item';
+      panel.appendChild(item);
+
+      engine.setContainerSize(panel, {width: 60, height: 20});
+      engine.invalidateSubtree(panel);
+
+      const computed = engine.getComputedStyle(item);
+      expect(computed.get('color')).toBe('teal');
+    });
+
+    it('circular containment — element cannot be its own container', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .self-container { container-type: inline-size; }
+        @container (min-width: 40) {
+          .self-container { color: red; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'self-container';
+      document.body.appendChild(div);
+
+      engine.setContainerSize(div, {width: 60, height: 20});
+      engine.invalidateSubtree(div);
+
+      // The container-query rule should NOT match for the container itself
+      // because findContainerAncestor starts from parentElement
+      const computed = engine.getComputedStyle(div);
+      expect(computed.get('color')).not.toBe('red');
+    });
+
+    it('nested containers — inner element resolves against nearest', () => {
+      const {document, engine} = createEnv();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .outer { container-type: inline-size; }
+        .inner { container-type: inline-size; }
+        @container (min-width: 40) {
+          .item { color: green; }
+        }
+        @container (max-width: 20) {
+          .item { font-weight: bold; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const outer = document.createElement('div');
+      outer.className = 'outer';
+      document.body.appendChild(outer);
+
+      const inner = document.createElement('div');
+      inner.className = 'inner';
+      outer.appendChild(inner);
+
+      const item = document.createElement('div');
+      item.className = 'item';
+      inner.appendChild(item);
+
+      // Outer is wide, inner is narrow
+      engine.setContainerSize(outer, {width: 100, height: 30});
+      engine.setContainerSize(inner, {width: 15, height: 10});
+      engine.invalidateSubtree(outer);
+
+      const computed = engine.getComputedStyle(item);
+      // Nearest container is inner (width: 15), so min-width: 40 doesn't match
+      expect(computed.get('color')).not.toBe('green');
+      // max-width: 20 matches inner (width: 15)
+      expect(computed.get('font-weight')).toBe('bold');
+    });
   });
 });

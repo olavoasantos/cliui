@@ -257,6 +257,9 @@ export class StyleEngine {
 
       if (evaluateContainerCondition(rule.condition, size)) {
         matched.push(...rule.source.rules);
+
+        // Process nested conditional rules (@media inside @container)
+        this.collectNestedMatchedRules(rule.source.conditionalRules, element, matched);
       }
     }
 
@@ -270,6 +273,48 @@ export class StyleEngine {
     const style = this.getComputedStyle(element);
     const containerType = style.get('container-type');
     return containerType !== undefined && containerType !== '' && containerType !== 'normal';
+  }
+
+  /**
+   * Recursively collects rules from nested conditional at-rules within
+   * a matched @container block. Evaluates @media conditions against current
+   * media values and @container conditions against the element's container.
+   */
+  private collectNestedMatchedRules(
+    conditionalRules: CSSConditionalRule[],
+    element: Element,
+    matched: CSSRule[],
+  ): void {
+    for (const nested of conditionalRules) {
+      if (nested.identifier === 'media') {
+        const condition = parseCondition(nested.prelude);
+        if (!condition) continue;
+
+        if (evaluateMediaCondition(condition, this.mediaValues)) {
+          matched.push(...nested.rules);
+          if (nested.conditionalRules.length > 0) {
+            this.collectNestedMatchedRules(nested.conditionalRules, element, matched);
+          }
+        }
+      } else if (nested.identifier === 'container') {
+        const {name, conditionText} = this.parseContainerPrelude(nested.prelude);
+        const condition = parseCondition(conditionText);
+        if (!condition) continue;
+
+        const container = this.findContainerAncestor(element, name);
+        if (!container) continue;
+
+        const size = this.containerSizes.get(container);
+        if (!size) continue;
+
+        if (evaluateContainerCondition(condition, size)) {
+          matched.push(...nested.rules);
+          if (nested.conditionalRules.length > 0) {
+            this.collectNestedMatchedRules(nested.conditionalRules, element, matched);
+          }
+        }
+      }
+    }
   }
 
   /**
