@@ -378,26 +378,30 @@ export class DOMDomainHandler {
     }
 
     // CDP box model uses four x,y corner pairs (8 numbers): top-left, top-right, bottom-right, bottom-left
+    // Coordinates must be in pixels matching the screencast dimensions,
+    // not terminal cells.  Cell size: 8px wide × 16px tall.
+    const CW = 8;
+    const CH = 16;
     const content = [
-      box.contentX,
-      box.contentY,
-      box.contentX + box.contentWidth,
-      box.contentY,
-      box.contentX + box.contentWidth,
-      box.contentY + box.contentHeight,
-      box.contentX,
-      box.contentY + box.contentHeight,
+      box.contentX * CW,
+      box.contentY * CH,
+      (box.contentX + box.contentWidth) * CW,
+      box.contentY * CH,
+      (box.contentX + box.contentWidth) * CW,
+      (box.contentY + box.contentHeight) * CH,
+      box.contentX * CW,
+      (box.contentY + box.contentHeight) * CH,
     ];
     const padding = content; // simplified: padding edge = content edge for now
     const border = [
-      box.x,
-      box.y,
-      box.x + box.width,
-      box.y,
-      box.x + box.width,
-      box.y + box.height,
-      box.x,
-      box.y + box.height,
+      box.x * CW,
+      box.y * CH,
+      (box.x + box.width) * CW,
+      box.y * CH,
+      (box.x + box.width) * CW,
+      (box.y + box.height) * CH,
+      box.x * CW,
+      (box.y + box.height) * CH,
     ];
     const margin = border; // simplified: margin edge = border edge for now
 
@@ -407,8 +411,8 @@ export class DOMDomainHandler {
         padding,
         border,
         margin,
-        width: box.width,
-        height: box.height,
+        width: box.width * CW,
+        height: box.height * CH,
       },
     };
   }
