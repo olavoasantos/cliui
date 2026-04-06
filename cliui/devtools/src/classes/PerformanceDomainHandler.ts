@@ -40,6 +40,13 @@ export class PerformanceDomainHandler {
     this.transport.registerMethod('Performance.getMetrics', () => this.getMetrics());
     this.transport.registerMethod('Tracing.start', () => this.tracingStart());
     this.transport.registerMethod('Tracing.end', () => this.tracingEnd());
+    this.transport.registerMethod('Tracing.getCategories', () => ({
+      categories: ['devtools.timeline', 'v8.execute', 'terminal.frame'],
+    }));
+    this.transport.registerMethod('Tracing.requestMemoryDump', () => ({
+      dumpGuid: 'terminal-dom-dump',
+      success: true,
+    }));
   }
 
   /** `Performance.enable` — starts forwarding entries. */

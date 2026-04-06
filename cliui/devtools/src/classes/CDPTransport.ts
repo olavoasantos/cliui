@@ -325,9 +325,21 @@ export class CDPTransport {
     this.registerMethod('Profiler.disable', noop);
     this.registerMethod('Profiler.setSamplingInterval', noop);
     this.registerMethod('Profiler.start', noop);
-    this.registerMethod('Profiler.stop', () => ({
-      profile: {nodes: [], startTime: 0, endTime: 0, samples: [], timeDeltas: []},
-    }));
+    this.registerMethod('Profiler.stop', () => {
+      const now = Date.now() * 1000; // microseconds
+      return {
+        profile: {
+          nodes: [
+            {id: 1, callFrame: {functionName: '(root)', scriptId: '0', url: '', lineNumber: -1, columnNumber: -1}, children: [2]},
+            {id: 2, callFrame: {functionName: '(idle)', scriptId: '0', url: '', lineNumber: -1, columnNumber: -1}, children: []},
+          ],
+          startTime: now - 1000000,
+          endTime: now,
+          samples: [2],
+          timeDeltas: [1000000],
+        },
+      };
+    });
 
     // HeapProfiler domain stubs (Memory tab)
     this.registerMethod('HeapProfiler.enable', noop);
