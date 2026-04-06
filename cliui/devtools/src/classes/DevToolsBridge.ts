@@ -89,6 +89,7 @@ export class DevToolsBridge {
   private screencastInterval: ReturnType<typeof setInterval> | null = null;
   private screencastSessionId = 0;
   private injectedScriptId = 1;
+  private readonly getLayoutRoot: (() => {element: unknown; x: number; y: number; width: number; height: number; children: any[]} | null) | null;
 
   /**
    * Creates a new DevTools bridge.
@@ -120,11 +121,14 @@ export class DevToolsBridge {
       color: {r: number; g: number; b: number; a: number},
     ) => void;
     getCellBuffer?: () => {cols: number; rows: number; get(x: number, y: number): unknown} | null;
+    getLayoutRoot?: () => {element: unknown; x: number; y: number; width: number; height: number; children: any[]} | null;
     options?: DevToolsBridgeOptions;
   }) {
     const port = config.options?.port ?? DEFAULT_CDP_PORT;
     const host = config.options?.host ?? '127.0.0.1';
     const debug = config.options?.debug ?? false;
+
+    this.getLayoutRoot = config.getLayoutRoot ?? null;
 
     this.window = config.window;
     this.document = config.document;
@@ -270,6 +274,43 @@ export class DevToolsBridge {
       });
 
       this.transport.registerMethod('Page.screencastFrameAck', () => ({}));
+
+      // Input.dispatchMouseEvent — hit-test mouse coordinates against
+      // layout boxes for inspect-mode element selection.
+      this.transport.registerMethod('Input.dispatchMouseEvent', (params) => {
+        const type = params['type'] as string;
+        const x = params['x'] as number;
+        const y = params['y'] as number;
+
+        if (!this.overlayHandler.isInspectMode) return {};
+        if (!getCellBuffer) return {};
+
+        // Convert pixel coordinates to cell coordinates
+        const cellX = Math.floor(x / 8);
+        const cellY = Math.floor(y / 16);
+
+        // Hit-test: find the deepest element whose layout box contains this cell
+        const element = this.hitTestCell(cellX, cellY);
+        if (!element) return {};
+
+        const nodeId = this.nodeRegistry.register(element);
+
+        if (type === 'mouseMoved') {
+          // Highlight the element under cursor
+          this.transport.broadcastEvent({
+            method: 'Overlay.nodeHighlightRequested',
+            params: {nodeId},
+          });
+        } else if (type === 'mousePressed') {
+          // Select the element in the Elements panel
+          this.transport.broadcastEvent({
+            method: 'Overlay.inspectNodeRequested',
+            params: {backendNodeId: nodeId},
+          });
+        }
+
+        return {};
+      });
     }
 
     // Runtime.addBinding creates a function on the window that, when called,
@@ -390,6 +431,38 @@ export class DevToolsBridge {
       this.screencastInterval = null;
     }
     this.screencastSessionId++;
+  }
+
+  /**
+   * Hit-tests a cell coordinate against the layout tree and returns the
+   * deepest element whose box contains the cell.
+   */
+  private hitTestCell(cellX: number, cellY: number): import('@cliui/dom').Element | null {
+    if (!this.getLayoutRoot) return null;
+    const root = this.getLayoutRoot();
+    if (!root) return null;
+
+    let best: any = null;
+
+    const walk = (box: any): void => {
+      if (
+        cellX >= box.x &&
+        cellX < box.x + box.width &&
+        cellY >= box.y &&
+        cellY < box.y + box.height
+      ) {
+        best = box.element;
+        // Continue into children — deeper match wins
+        if (box.children) {
+          for (const child of box.children) {
+            walk(child);
+          }
+        }
+      }
+    };
+
+    walk(root);
+    return best;
   }
 
   private onClientConnect(): void {

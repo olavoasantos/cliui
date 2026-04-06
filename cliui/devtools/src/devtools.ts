@@ -47,6 +47,7 @@ export function devtools(options: DevToolsBridgeOptions = {}): TerminalPlugin {
           };
         },
         getCellBuffer: () => context.getCellBuffer(),
+        getLayoutRoot: () => context.getLayoutRoot() as any,
         options,
       });
 
