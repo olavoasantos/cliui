@@ -120,6 +120,7 @@ export class CDPTransport {
    * @param event - CDP event object.
    */
   broadcastEvent(event: CDPEvent): void {
+    this.debugLog(`⇐ EVENT ${event.method} ${JSON.stringify(event.params).slice(0, 200)}`);
     const data = JSON.stringify(event);
     for (const socket of this.clientSockets) {
       this.wsServer.send(socket, data);

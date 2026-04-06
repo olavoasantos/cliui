@@ -75,6 +75,12 @@ export class PerformanceDomainHandler {
       }
     });
 
+    // Also observe entries that were already recorded before enable
+    const existing = this.performance.getEntries();
+    if (this.tracingActive && existing.length > 0) {
+      this.tracingEntries.push(...existing);
+    }
+
     // Observe all known entry types
     try {
       this.observer.observe({
@@ -164,19 +170,31 @@ export class PerformanceDomainHandler {
 
   /** `Tracing.end` — ends the recording and sends collected entries. */
   private tracingEnd(): Record<string, unknown> {
+    // Grab entries before disabling
+    const collected = this.tracingEntries.slice();
     this.tracingActive = false;
+
+    // Also grab all current entries from Performance directly
+    // in case the observer hadn't delivered them yet
+    const allEntries = this.performance.getEntries();
+    const seen = new Set(collected);
+    for (const entry of allEntries) {
+      if (!seen.has(entry)) {
+        collected.push(entry);
+      }
+    }
 
     // Build trace events in Chrome Trace Event Format
     const traceEvents: Array<Record<string, unknown>> = [];
 
-    // Always emit metadata events that DevTools requires
+    // Metadata events that DevTools requires
     traceEvents.push(
       {cat: '__metadata', name: 'process_name', ph: 'M', ts: 0, pid: 1, tid: 1, args: {name: 'Terminal DOM'}},
       {cat: '__metadata', name: 'thread_name', ph: 'M', ts: 0, pid: 1, tid: 1, args: {name: 'Main'}},
     );
 
-    // Convert collected performance entries to trace events
-    for (const entry of this.tracingEntries) {
+    // Convert performance entries to trace events
+    for (const entry of collected) {
       traceEvents.push({
         cat: 'devtools.timeline',
         name: entry.name,
