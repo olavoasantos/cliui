@@ -122,7 +122,7 @@ const bridge = new DevToolsBridge({
   selectorMatcher: new SelectorMatcher(),
   cssParser: new CSSParser(),
   terminalInstance: terminal,
-  options: {port: 9222},
+  options: {port: 9222, debug: true},
 });
 
 await bridge.listen();

@@ -116,12 +116,14 @@ export class DevToolsBridge {
   }) {
     const port = config.options?.port ?? DEFAULT_CDP_PORT;
     const host = config.options?.host ?? '127.0.0.1';
+    const debug = config.options?.debug ?? false;
 
     this.window = config.window;
     this.document = config.document;
 
     // Create transport
     this.transport = new CDPTransport({port, host});
+    this.transport.debug = debug;
 
     // Create registries
     this.nodeRegistry = new NodeRegistry();

@@ -147,4 +147,10 @@ export interface DevToolsBridgeOptions {
 
   /** Hostname to bind to. Defaults to `'127.0.0.1'`. */
   host?: string;
+
+  /**
+   * When `true`, logs all CDP messages and responses to stderr.
+   * Useful for diagnosing which methods DevTools sends.
+   */
+  debug?: boolean;
 }

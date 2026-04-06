@@ -1,3 +1,5 @@
+import {FRAME_ID} from '../constants';
+
 import type {CDPTransport} from './CDPTransport';
 import type {NodeRegistry} from './NodeRegistry';
 import type {Element, Document} from '@cliui/dom';
@@ -53,7 +55,10 @@ export class CSSDomainHandler {
 
   /** Maps stylesheet IDs to `<style>` elements. */
   private readonly stylesheetMap = new Map<string, Element>();
+  /** Maps virtual inline-style stylesheet IDs to the element they belong to. */
+  private readonly inlineStyleMap = new Map<string, Element>();
   private nextStylesheetId = 1;
+  private nextInlineId = 1;
 
   constructor(
     transport: CDPTransport,
@@ -112,7 +117,7 @@ export class CSSDomainHandler {
       params: {
         header: {
           styleSheetId: id,
-          frameId: 'main',
+          frameId: FRAME_ID,
           sourceURL: '',
           origin: 'regular',
           title: '',
@@ -247,6 +252,15 @@ export class CSSDomainHandler {
     for (const edit of edits ?? []) {
       if (!edit.styleSheetId) continue;
 
+      // Check if this is an inline style edit
+      const inlineElement = this.inlineStyleMap.get(edit.styleSheetId);
+      if (inlineElement) {
+        inlineElement.setAttribute('style', edit.text);
+        styles.push(this.makeStyleResult(edit.styleSheetId, edit.text));
+        continue;
+      }
+
+      // Otherwise it's a <style> element edit
       const styleElement = this.stylesheetMap.get(edit.styleSheetId);
       if (!styleElement) {
         // Unknown stylesheet — return a stub so DevTools doesn't crash
@@ -306,9 +320,10 @@ export class CSSDomainHandler {
     const style = (element as any).style;
     const properties: CSSPropertyEntry[] = [];
     let line = 0;
+    let cssText = '';
 
     if (style) {
-      const cssText = typeof style.cssText === 'string' ? style.cssText : '';
+      cssText = typeof style.cssText === 'string' ? style.cssText : '';
 
       if (cssText) {
         const pairs = cssText.split(';').filter((s: string) => s.trim());
@@ -327,11 +342,29 @@ export class CSSDomainHandler {
       }
     }
 
+    // Assign a virtual inline-style stylesheet ID so DevTools can edit it
+    const inlineId = this.getInlineStylesheetId(element);
+
     return {
-      styleSheetId: undefined,
+      styleSheetId: inlineId,
       cssProperties: properties,
       shorthandEntries: [],
+      cssText,
+      range: makeRange(0, 0, Math.max(0, line - 1), cssText.length),
     };
+  }
+
+  /**
+   * Returns the virtual stylesheet ID for an element's inline style,
+   * creating one if this is the first encounter.
+   */
+  private getInlineStylesheetId(element: Element): string {
+    for (const [id, el] of this.inlineStyleMap) {
+      if (el === element) return id;
+    }
+    const id = `inline-${this.nextInlineId++}`;
+    this.inlineStyleMap.set(id, element);
+    return id;
   }
 
   /**

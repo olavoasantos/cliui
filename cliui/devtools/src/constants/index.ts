@@ -1,6 +1,9 @@
 /** Default port for the CDP WebSocket server. */
 export const DEFAULT_CDP_PORT = 9222;
 
+/** Stable frame identifier shared between Page and Runtime domains. */
+export const FRAME_ID = 'terminal-dom-frame';
+
 /** WebSocket close code for normal closure. */
 export const WS_CLOSE_NORMAL = 1000;
 

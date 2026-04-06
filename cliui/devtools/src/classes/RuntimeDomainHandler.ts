@@ -1,3 +1,5 @@
+import {FRAME_ID} from '../constants';
+
 import type {CDPTransport} from './CDPTransport';
 import type {ObjectRegistry} from './ObjectRegistry';
 import type {DOMDomainHandler} from './DOMDomainHandler';
@@ -70,7 +72,7 @@ export class RuntimeDomainHandler {
           origin: 'terminal://localhost',
           name: 'Terminal DOM',
           uniqueId: 'terminal-dom-context',
-          auxData: {isDefault: true, type: 'default', frameId: 'main'},
+          auxData: {isDefault: true, type: 'default', frameId: FRAME_ID},
         },
       },
     });

@@ -1,4 +1,4 @@
-import {DEFAULT_CDP_PORT} from '../constants';
+import {DEFAULT_CDP_PORT, FRAME_ID} from '../constants';
 import {WebSocketServer} from './WebSocketServer';
 
 import type {IncomingMessage, ServerResponse} from 'node:http';
@@ -199,6 +199,11 @@ export class CDPTransport {
   }
 
   /**
+   * When `true`, all CDP messages and responses are logged to stderr.
+   */
+  debug = false;
+
+  /**
    * Dispatches an incoming WebSocket message to the appropriate domain handler.
    */
   private async handleMessage(socket: WebSocket, data: string): Promise<void> {
@@ -209,21 +214,32 @@ export class CDPTransport {
       return; // Silently ignore malformed messages
     }
 
+    if (this.debug) {
+      process.stderr.write(`\x1b[36m← ${command.method}\x1b[0m ${JSON.stringify(command.params ?? {}).slice(0, 200)}\n`);
+    }
+
     const handler = this.handlers.get(command.method);
     if (handler) {
       try {
         const result = await handler(command.params ?? {});
-        this.sendResponse(socket, {
-          id: command.id,
-          result: result ?? {},
-        });
+        const response = {id: command.id, result: result ?? {}};
+        if (this.debug) {
+          process.stderr.write(`\x1b[32m→ ${command.method}\x1b[0m ${JSON.stringify(response.result).slice(0, 200)}\n`);
+        }
+        this.sendResponse(socket, response);
       } catch (err) {
+        if (this.debug) {
+          process.stderr.write(`\x1b[31m✗ ${command.method}\x1b[0m ${(err as Error).message}\n`);
+        }
         this.sendResponse(socket, {
           id: command.id,
           result: {error: (err as Error).message},
         });
       }
     } else {
+      if (this.debug) {
+        process.stderr.write(`\x1b[33m? ${command.method}\x1b[0m (unhandled)\n`);
+      }
       // Unknown methods get an empty response to satisfy DevTools
       this.sendResponse(socket, {
         id: command.id,
@@ -246,7 +262,7 @@ export class CDPTransport {
     this.registerMethod('Page.getResourceTree', () => ({
       frameTree: {
         frame: {
-          id: this.targetId,
+          id: FRAME_ID,
           loaderId: '1',
           url: 'terminal://localhost',
           domainAndRegistry: '',
@@ -259,7 +275,7 @@ export class CDPTransport {
     this.registerMethod('Page.getFrameTree', () => ({
       frameTree: {
         frame: {
-          id: this.targetId,
+          id: FRAME_ID,
           loaderId: '1',
           url: 'terminal://localhost',
           domainAndRegistry: '',
