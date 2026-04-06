@@ -1,4 +1,5 @@
 import {Session} from 'node:inspector';
+import {HeapProfilerWorker} from './HeapProfilerWorker';
 
 import type {CDPTransport} from './CDPTransport';
 import type {WebSocket} from 'ws';
@@ -51,6 +52,7 @@ export class V8InspectorProxy {
   private readonly transport: CDPTransport;
   private session: Session | null = null;
   private connected = false;
+  private readonly heapWorker: HeapProfilerWorker;
 
   /**
    * Maps pending V8 request callback IDs to the CDP command `id`
@@ -60,6 +62,7 @@ export class V8InspectorProxy {
 
   constructor(transport: CDPTransport) {
     this.transport = transport;
+    this.heapWorker = new HeapProfilerWorker(transport);
   }
 
   /**
@@ -106,6 +109,7 @@ export class V8InspectorProxy {
    * Disconnects the V8 inspector session.
    */
   close(): void {
+    this.heapWorker.close();
     if (this.session && this.connected) {
       try {
         this.session.disconnect();
@@ -174,9 +178,7 @@ export class V8InspectorProxy {
     }
 
     if (BLOCKED_METHODS.has(method)) {
-      return Promise.resolve({
-        error: `${method} is not supported in same-process inspector sessions (crashes V8)`,
-      });
+      return this.heapWorker.post(method, params);
     }
 
     return this.post(method, params);
