@@ -81,6 +81,7 @@ export class DevToolsBridge {
   private readonly window: Window;
   private readonly document: Document;
   private listening = false;
+  private vitalsInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
    * Creates a new DevTools bridge.
@@ -242,6 +243,10 @@ export class DevToolsBridge {
    * @returns A promise that resolves once shutdown is complete.
    */
   async close(): Promise<void> {
+    if (this.vitalsInterval) {
+      clearInterval(this.vitalsInterval);
+      this.vitalsInterval = null;
+    }
     this.logHandler.restore();
     this.mutationBridge.disable();
     this.nodeRegistry.clear();
@@ -288,6 +293,61 @@ export class DevToolsBridge {
    */
   private onClientConnect(): void {
     this.mutationBridge.enable();
+
+    // Emit vitals immediately and then periodically
+    this.emitTerminalVitals();
+    if (this.vitalsInterval) clearInterval(this.vitalsInterval);
+    this.vitalsInterval = setInterval(() => {
+      if (this.transport.clients.size > 0) {
+        this.emitTerminalVitals();
+      }
+    }, 3000);
+  }
+
+  /**
+   * Reads LCP, FCP, and INP from window.performance and emits them
+   * as `Runtime.bindingCalled` events using the web-vitals reporter
+   * binding that DevTools registered during startup.
+   */
+  private emitTerminalVitals(): void {
+    const perf = this.window.performance;
+    const entries = perf.getEntries();
+
+    // LCP
+    const lcp = entries.find((e) => e.name === 'largest-contentful-paint');
+    if (lcp) {
+      this.emitVitalsMetric('LCP', (lcp as any).renderTime ?? lcp.startTime);
+    }
+
+    // INP — use the worst event timing duration
+    const eventTimings = entries.filter((e) => e.entryType === 'event');
+    if (eventTimings.length > 0) {
+      const worst = eventTimings.reduce((max, e) => (e.duration > max.duration ? e : max));
+      this.emitVitalsMetric('INP', worst.duration);
+    }
+
+    // CLS — terminal doesn't have layout shifts, report 0
+    this.emitVitalsMetric('CLS', 0);
+  }
+
+  /**
+   * Emits a single web-vitals metric via the DevTools binding.
+   */
+  private emitVitalsMetric(name: string, value: number): void {
+    const rating = name === 'CLS'
+      ? (value <= 0.1 ? 'good' : value <= 0.25 ? 'needs-improvement' : 'poor')
+      : name === 'LCP'
+        ? (value <= 2500 ? 'good' : value <= 4000 ? 'needs-improvement' : 'poor')
+        : (value <= 200 ? 'good' : value <= 500 ? 'needs-improvement' : 'poor');
+
+    this.transport.broadcastEvent({
+      method: 'Runtime.bindingCalled',
+      params: {
+        name: '__chromium_devtools_metrics_reporter',
+        payload: JSON.stringify({name, value, rating}),
+        executionContextId: 1,
+      },
+    });
   }
 
   /**
