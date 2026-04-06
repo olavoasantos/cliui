@@ -36,7 +36,7 @@ export class RuntimeDomainHandler {
 
   /** Registers all Runtime domain method handlers. */
   register(): void {
-    this.transport.registerMethod('Runtime.enable', () => ({}));
+    this.transport.registerMethod('Runtime.enable', () => this.enable());
     this.transport.registerMethod('Runtime.disable', () => ({}));
     this.transport.registerMethod('Runtime.evaluate', (params) => this.evaluate(params));
     this.transport.registerMethod('Runtime.getProperties', (params) => this.getProperties(params));
@@ -47,10 +47,34 @@ export class RuntimeDomainHandler {
     this.transport.registerMethod('Runtime.releaseObjectGroup', (params) =>
       this.releaseObjectGroup(params),
     );
+    this.transport.registerMethod('Runtime.compileScript', () => ({}));
+    this.transport.registerMethod('Runtime.globalLexicalScopeNames', () => ({names: []}));
+    this.transport.registerMethod('Runtime.runIfWaitingForDebugger', () => ({}));
+    this.transport.registerMethod('Runtime.getIsolateId', () => ({id: 'terminal-dom'}));
     this.transport.registerMethod('Runtime.getHeapUsage', () => ({
       usedSize: process.memoryUsage().heapUsed,
       totalSize: process.memoryUsage().heapTotal,
     }));
+  }
+
+  /**
+   * `Runtime.enable` — emits the execution context that DevTools Console
+   * requires before it will accept input.
+   */
+  private enable(): Record<string, unknown> {
+    this.transport.broadcastEvent({
+      method: 'Runtime.executionContextCreated',
+      params: {
+        context: {
+          id: 1,
+          origin: 'terminal://localhost',
+          name: 'Terminal DOM',
+          uniqueId: 'terminal-dom-context',
+          auxData: {isDefault: true, type: 'default', frameId: 'main'},
+        },
+      },
+    });
+    return {};
   }
 
   /**

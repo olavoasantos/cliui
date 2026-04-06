@@ -170,6 +170,9 @@ export class DevToolsBridge {
       return this.objectRegistry.serialize(node) as any;
     };
 
+    // Wire DOM domain to mutation bridge for edit suppression
+    this.domHandler.mutationBridge = this.mutationBridge;
+
     // Wire connection/disconnection lifecycle
     this.transport.onConnect((_socket: WebSocket) => {
       this.onClientConnect();

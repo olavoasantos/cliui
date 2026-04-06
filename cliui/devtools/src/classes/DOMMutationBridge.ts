@@ -23,6 +23,14 @@ export class DOMMutationBridge {
   private enabled = false;
 
   /**
+   * When `true`, mutation events are suppressed.  Set during
+   * DevTools-initiated edits to prevent the echo loop where
+   * DevTools sends a mutation command → hooks fire → CDP event
+   * echoes back → DevTools reverts the edit.
+   */
+  suppressed = false;
+
+  /**
    * Creates a new DOM mutation bridge.
    *
    * @param transport - CDP transport for sending events.
@@ -80,7 +88,7 @@ export class DOMMutationBridge {
    * Emits `DOM.childNodeInserted` if the parent is tracked by DevTools.
    */
   private handleInsertChild(parent: Element, node: Element | Text, index: number): void {
-    if (!this.enabled) return;
+    if (!this.enabled || this.suppressed) return;
     if (!this.registry.has(parent)) return;
 
     const parentNodeId = this.registry.getId(parent)!;
@@ -114,7 +122,7 @@ export class DOMMutationBridge {
    * Cleans up the removed subtree from the registry.
    */
   private handleRemoveChild(parent: Element, node: Element | Text): void {
-    if (!this.enabled) return;
+    if (!this.enabled || this.suppressed) return;
     if (!this.registry.has(parent)) return;
 
     const parentNodeId = this.registry.getId(parent)!;
@@ -140,7 +148,7 @@ export class DOMMutationBridge {
    * Emits `DOM.attributeModified` if the element is tracked.
    */
   private handleSetAttribute(element: Element, name: string, value: string): void {
-    if (!this.enabled) return;
+    if (!this.enabled || this.suppressed) return;
     if (!this.registry.has(element)) return;
 
     const nodeId = this.registry.getId(element)!;
@@ -156,7 +164,7 @@ export class DOMMutationBridge {
    * Emits `DOM.attributeRemoved` if the element is tracked.
    */
   private handleRemoveAttribute(element: Element, name: string): void {
-    if (!this.enabled) return;
+    if (!this.enabled || this.suppressed) return;
     if (!this.registry.has(element)) return;
 
     const nodeId = this.registry.getId(element)!;
@@ -172,7 +180,7 @@ export class DOMMutationBridge {
    * Emits `DOM.characterDataModified` if the text node is tracked.
    */
   private handleSetText(text: Text, data: string): void {
-    if (!this.enabled) return;
+    if (!this.enabled || this.suppressed) return;
     if (!this.registry.has(text)) return;
 
     const nodeId = this.registry.getId(text)!;

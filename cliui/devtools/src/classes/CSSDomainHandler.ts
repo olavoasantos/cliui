@@ -229,41 +229,72 @@ export class CSSDomainHandler {
 
   /**
    * `CSS.setStyleTexts` — applies style edits.
+   *
+   * DevTools sends edits as `{styleSheetId, range, text}` objects.
+   * Each edit replaces the text within `range` of the stylesheet.
    */
   private setStyleTexts(params: Record<string, unknown>): Record<string, unknown> {
-    const edits = params['edits'] as Array<{
-      styleSheetId?: string;
-      range?: SourceRange;
-      text: string;
-      nodeId?: number;
-    }>;
+    const edits = params['edits'] as
+      | Array<{
+          styleSheetId?: string;
+          range?: SourceRange;
+          text: string;
+        }>
+      | undefined;
 
     const styles = [];
 
     for (const edit of edits ?? []) {
-      if (edit.styleSheetId) {
-        // Stylesheet edit
-        const styleElement = this.stylesheetMap.get(edit.styleSheetId);
-        if (styleElement) {
-          styleElement.textContent = edit.text;
-          styles.push({
-            styleSheetId: edit.styleSheetId,
-            cssProperties: this.parseCSSProperties(edit.text),
-          });
-        }
-      } else if (edit.nodeId !== undefined) {
-        // Inline style edit
-        const node = this.registry.getNode(edit.nodeId) as Element | undefined;
-        if (node && typeof node.setAttribute === 'function') {
-          node.setAttribute('style', edit.text);
-          styles.push({
-            cssProperties: this.parseInlineProperties(edit.text),
-          });
-        }
+      if (!edit.styleSheetId) continue;
+
+      const styleElement = this.stylesheetMap.get(edit.styleSheetId);
+      if (!styleElement) {
+        // Unknown stylesheet — return a stub so DevTools doesn't crash
+        styles.push(this.makeStyleResult(edit.styleSheetId, edit.text));
+        continue;
       }
+
+      const currentText = styleElement.textContent ?? '';
+      const newText = edit.range
+        ? this.applyRangeEdit(currentText, edit.range, edit.text)
+        : edit.text;
+
+      styleElement.textContent = newText;
+      styles.push(this.makeStyleResult(edit.styleSheetId, newText));
     }
 
     return {styles};
+  }
+
+  /**
+   * Applies a range edit to CSS text, replacing characters between
+   * `range.startLine:startColumn` and `range.endLine:endColumn`.
+   */
+  private applyRangeEdit(text: string, range: SourceRange, replacement: string): string {
+    const lines = text.split('\n');
+    const before =
+      lines.slice(0, range.startLine).join('\n') +
+      (range.startLine > 0 ? '\n' : '') +
+      (lines[range.startLine]?.slice(0, range.startColumn) ?? '');
+    const after =
+      (lines[range.endLine]?.slice(range.endColumn) ?? '') +
+      (range.endLine < lines.length - 1 ? '\n' : '') +
+      lines.slice(range.endLine + 1).join('\n');
+    return before + replacement + after;
+  }
+
+  /**
+   * Builds a CSSStyle result object from stylesheet text.
+   */
+  private makeStyleResult(styleSheetId: string, cssText: string): Record<string, unknown> {
+    const properties = this.parseCSSProperties(cssText);
+    return {
+      styleSheetId,
+      cssProperties: properties,
+      shorthandEntries: [],
+      cssText,
+      range: makeRange(0, 0, cssText.split('\n').length - 1, cssText.length),
+    };
   }
 
   // ── Private helpers ────────────────────────────────────────────────
@@ -448,26 +479,6 @@ export class CSSDomainHandler {
         });
         line++;
       }
-    }
-
-    return properties;
-  }
-
-  /**
-   * Parses inline style properties.
-   */
-  private parseInlineProperties(text: string): CSSPropertyEntry[] {
-    const properties: CSSPropertyEntry[] = [];
-    const pairs = text.split(';').filter((s) => s.trim());
-    let line = 0;
-
-    for (const pair of pairs) {
-      const colonIndex = pair.indexOf(':');
-      if (colonIndex === -1) continue;
-      const name = pair.slice(0, colonIndex).trim();
-      const value = pair.slice(colonIndex + 1).trim();
-      properties.push({name, value, range: makeRange(line, 0, line, pair.length)});
-      line++;
     }
 
     return properties;

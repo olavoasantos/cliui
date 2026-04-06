@@ -242,12 +242,14 @@ export class CDPTransport {
 
     // Page domain stubs
     this.registerMethod('Page.enable', noop);
+    this.registerMethod('Page.canScreencast', () => ({result: false}));
     this.registerMethod('Page.getResourceTree', () => ({
       frameTree: {
         frame: {
           id: this.targetId,
           loaderId: '1',
           url: 'terminal://localhost',
+          domainAndRegistry: '',
           securityOrigin: 'terminal://localhost',
           mimeType: 'text/html',
         },
@@ -260,6 +262,7 @@ export class CDPTransport {
           id: this.targetId,
           loaderId: '1',
           url: 'terminal://localhost',
+          domainAndRegistry: '',
           securityOrigin: 'terminal://localhost',
           mimeType: 'text/html',
         },
@@ -271,9 +274,46 @@ export class CDPTransport {
 
     // Network domain stubs
     this.registerMethod('Network.enable', noop);
+    this.registerMethod('Network.setCacheDisabled', noop);
+    this.registerMethod('Network.setAttachDebugStack', noop);
 
     // Target domain stubs
     this.registerMethod('Target.setAutoAttach', noop);
     this.registerMethod('Target.setDiscoverTargets', noop);
+
+    // Debugger domain stubs (Sources tab + Performance)
+    this.registerMethod('Debugger.enable', () => ({debuggerId: 'terminal-dom'}));
+    this.registerMethod('Debugger.disable', noop);
+    this.registerMethod('Debugger.setAsyncCallStackDepth', noop);
+    this.registerMethod('Debugger.setBlackboxPatterns', noop);
+    this.registerMethod('Debugger.setPauseOnExceptions', noop);
+    this.registerMethod('Debugger.setBreakpointsActive', noop);
+
+    // Profiler domain stubs (Performance tab)
+    this.registerMethod('Profiler.enable', noop);
+    this.registerMethod('Profiler.disable', noop);
+    this.registerMethod('Profiler.setSamplingInterval', noop);
+    this.registerMethod('Profiler.start', noop);
+    this.registerMethod('Profiler.stop', () => ({
+      profile: {nodes: [], startTime: 0, endTime: 0, samples: [], timeDeltas: []},
+    }));
+
+    // HeapProfiler domain stubs (Memory tab)
+    this.registerMethod('HeapProfiler.enable', noop);
+    this.registerMethod('HeapProfiler.disable', noop);
+    this.registerMethod('HeapProfiler.collectGarbage', noop);
+
+    // DOM storage / IndexedDB / ServiceWorker stubs
+    this.registerMethod('DOMStorage.enable', noop);
+    this.registerMethod('IndexedDB.enable', noop);
+    this.registerMethod('ServiceWorker.enable', noop);
+    this.registerMethod('CacheStorage.requestCacheNames', () => ({caches: []}));
+
+    // Emulation stubs
+    this.registerMethod('Emulation.setAutoDarkModeOverride', noop);
+    this.registerMethod('Emulation.setFocusEmulationEnabled', noop);
+
+    // DOM domain stubs that DevTools sends early
+    this.registerMethod('DOM.setDiscoverMode', noop);
   }
 }

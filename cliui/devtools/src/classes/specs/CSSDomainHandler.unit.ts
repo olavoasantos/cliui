@@ -188,7 +188,7 @@ describe('CSSDomainHandler', () => {
   });
 
   describe('CSS.setStyleTexts', () => {
-    it('updates a stylesheet element text content', async () => {
+    it('updates stylesheet text content', async () => {
       const style = window.document.createElement('style');
       style.textContent = '.old { color: red; }';
       window.document.head.appendChild(style);
@@ -201,18 +201,6 @@ describe('CSSDomainHandler', () => {
       });
 
       expect(style.textContent).toBe(newCSS);
-    });
-
-    it('updates inline style on a node', async () => {
-      const div = window.document.createElement('div');
-      window.document.body.appendChild(div);
-      const divId = registry.register(div);
-
-      await transport.call('CSS.setStyleTexts', {
-        edits: [{nodeId: divId, text: 'color: red; font-weight: bold'}],
-      });
-
-      expect(div.getAttribute('style')).toBe('color: red; font-weight: bold');
     });
   });
 
