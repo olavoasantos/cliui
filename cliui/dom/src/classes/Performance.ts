@@ -101,6 +101,31 @@ export class Performance {
    * @param type - Entry type to match (e.g. `'mark'`, `'measure'`).
    */
   getEntriesByType(type: string): PerformanceEntry[] {
+    if (type === 'navigation') {
+      // Return a minimal PerformanceNavigationTiming-like entry.
+      // Chrome's web-vitals script reads responseStart, activationStart,
+      // domInteractive, domContentLoadedEventStart, domComplete, and type.
+      return [
+        {
+          entryType: 'navigation',
+          name: '',
+          startTime: 0,
+          duration: 0,
+          responseStart: 1,
+          activationStart: 0,
+          domInteractive: 1,
+          domContentLoadedEventStart: 1,
+          domComplete: 1,
+          type: 'navigate',
+          fetchStart: 0,
+          workerStart: 0,
+          domainLookupStart: 0,
+          connectStart: 0,
+          connectEnd: 0,
+          toJSON() { return this; },
+        } as unknown as PerformanceEntry,
+      ];
+    }
     return this.#entries
       .filter((e) => e.entryType === type)
       .sort((a, b) => a.startTime - b.startTime);

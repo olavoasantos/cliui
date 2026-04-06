@@ -72,6 +72,35 @@ export class Window extends EventTarget {
 
   performance = new Performance();
 
+  /**
+   * Schedules a callback before the next repaint.
+   *
+   * In a terminal context, uses setTimeout(cb, 0) since there's no
+   * real vsync. Returns a numeric ID for cancellation.
+   */
+  requestAnimationFrame(callback: (timestamp: number) => void): number {
+    return setTimeout(() => callback(this.performance.now()), 0) as unknown as number;
+  }
+
+  /** Cancels a scheduled requestAnimationFrame callback. */
+  cancelAnimationFrame(id: number): void {
+    clearTimeout(id);
+  }
+
+  /**
+   * Schedules a callback during idle time.
+   *
+   * In a terminal context, uses setTimeout(cb, 0).
+   */
+  requestIdleCallback(callback: () => void): number {
+    return setTimeout(callback, 0) as unknown as number;
+  }
+
+  /** Cancels a scheduled requestIdleCallback. */
+  cancelIdleCallback(id: number): void {
+    clearTimeout(id);
+  }
+
   HTMLIFrameElement = HTMLIFrameElement;
 
   #currentOnErrorHandler: EventListener | null = null;

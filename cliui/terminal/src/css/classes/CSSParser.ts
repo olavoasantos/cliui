@@ -95,7 +95,9 @@ export class CSSParser {
 
         const identifier = splitIdx === -1 ? afterAt : afterAt.slice(0, splitIdx);
         const atPrelude =
-          splitIdx === -1 ? '' : afterAt.slice(splitIdx === parenIdx ? splitIdx : splitIdx + 1).trim();
+          splitIdx === -1
+            ? ''
+            : afterAt.slice(splitIdx === parenIdx ? splitIdx : splitIdx + 1).trim();
 
         if (identifier === 'keyframes') {
           this.parseKeyframes(atPrelude, bodyText, keyframeRules);

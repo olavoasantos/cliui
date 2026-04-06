@@ -17,6 +17,21 @@ export type PerformanceObserverCallback = (
  * @see https://developer.mozilla.org/en-US/docs/Web/API/PerformanceObserver
  */
 export class PerformanceObserver {
+  /**
+   * Returns the list of entry types this implementation supports.
+   *
+   * Chrome's web-vitals script checks this before creating any observer —
+   * without it, the entire script is a no-op.
+   */
+  static readonly supportedEntryTypes: readonly string[] = [
+    'mark',
+    'measure',
+    'paint',
+    'event',
+    'first-input',
+    'largest-contentful-paint',
+  ];
+
   #callback: PerformanceObserverCallback;
   #performance: Performance | null = null;
   #entryTypes: Set<string> = new Set();
@@ -46,8 +61,22 @@ export class PerformanceObserver {
    *
    * @param options - The entry types to observe.
    */
-  observe(options: PerformanceObserverObserveOptions & {performance: Performance}): void {
-    this.#performance = options.performance;
+  observe(options: PerformanceObserverObserveOptions & {performance?: Performance}): void {
+    if (options.performance) {
+      this.#performance = options.performance;
+    }
+
+    if (!this.#performance) {
+      // Attempt to find Performance from globalThis.window
+      const win = (globalThis as any).window;
+      if (win?.performance) {
+        this.#performance = win.performance;
+      }
+    }
+
+    if (!this.#performance) {
+      return; // No performance instance available
+    }
 
     if (options.entryTypes) {
       for (const type of options.entryTypes) {

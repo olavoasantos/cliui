@@ -29,6 +29,13 @@ export class Document extends ParentNode {
   defaultView: Window;
   activeElement: HTMLBodyElement | Element;
   hoveredElement: Element | null = null;
+
+  /** Returns the document's visibility state. Always `'visible'` for terminal. */
+  visibilityState: 'visible' | 'hidden' = 'visible';
+
+  /** Returns the document's loading state. Starts as `'loading'`, set to `'complete'` after run(). */
+  readyState: 'loading' | 'interactive' | 'complete' = 'loading';
+
   [IS_CONNECTED] = true;
 
   constructor(defaultView: Window) {

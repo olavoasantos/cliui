@@ -809,6 +809,7 @@ export class Terminal {
     }
 
     this.running = true;
+    this.document.readyState = 'complete';
     this.terminalManager.start();
     void this.terminalManager.detectCapabilities().then(() => {
       if (!this.running) {

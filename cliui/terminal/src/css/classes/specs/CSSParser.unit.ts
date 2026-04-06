@@ -609,7 +609,7 @@ describe('CSSParser', () => {
 
     it('parses fully minified CSS with multiple @media blocks', () => {
       const result = parser.parse(
-        `.base{color:red}@media(min-width:80){.wide{display:flex}}@media(max-width:79){.narrow{display:none}}`
+        `.base{color:red}@media(min-width:80){.wide{display:flex}}@media(max-width:79){.narrow{display:none}}`,
       );
 
       expect(result.rules).toHaveLength(1);
