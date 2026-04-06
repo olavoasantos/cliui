@@ -1,0 +1,54 @@
+.app {
+  padding: 1 2;
+  border-style: rounded;
+  border-color: #7c3aed;
+  color: #e5e7eb;
+  background-color: #1e1b2e;
+  display: flex;
+  flex-direction: column;
+  gap: 1;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.title {
+  color: #c4b5fd;
+  font-weight: bold;
+}
+
+.badge {
+  color: #1e1b2e;
+  background-color: #86efac;
+  font-weight: bold;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1;
+  padding: 1 0;
+}
+
+.counter {
+  color: #86efac;
+}
+
+.item {
+  padding: 0 1;
+  color: #a5b4fc;
+}
+
+.item-active {
+  padding: 0 1;
+  color: #1e1b2e;
+  background-color: #a5b4fc;
+  font-weight: bold;
+}
+
+.hint {
+  color: #64748b;
+}

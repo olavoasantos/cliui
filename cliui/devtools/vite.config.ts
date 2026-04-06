@@ -6,4 +6,5 @@ export default createViteConfig({
     index: 'src/index.ts',
   },
   pkg,
+  external: [/^ws$/],
 });
