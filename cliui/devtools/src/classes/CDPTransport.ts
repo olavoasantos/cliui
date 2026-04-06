@@ -4,7 +4,14 @@ import {WebSocketServer} from './WebSocketServer';
 
 import type {IncomingMessage, ServerResponse} from 'node:http';
 import type {WebSocket} from 'ws';
-import type {CDPCommand, CDPMethodHandler, CDPResponse, CDPEvent, TargetDescriptor} from '../types';
+import type {
+  CDPCommand,
+  CDPMethodHandler,
+  CDPResponse,
+  CDPEvent,
+  DomainProxyHandler,
+  TargetDescriptor,
+} from '../types';
 
 /**
  * CDP transport layer: HTTP discovery endpoint and WebSocket message routing.
@@ -22,6 +29,7 @@ export class CDPTransport {
   private readonly port: number;
   private readonly host: string;
   private readonly handlers = new Map<string, CDPMethodHandler>();
+  private readonly domainProxies = new Map<string, DomainProxyHandler>();
   private readonly clientSockets = new Set<WebSocket>();
 
   /** Called when a DevTools client connects. */
@@ -92,6 +100,17 @@ export class CDPTransport {
    */
   registerMethod(method: string, handler: CDPMethodHandler): void {
     this.handlers.set(method, handler);
+  }
+
+  /**
+   * Registers a proxy handler for an entire CDP domain.
+   *
+   * Any method starting with `domain.` that doesn't have a specific
+   * handler registered via {@link registerMethod} will be forwarded
+   * to the proxy handler.
+   */
+  registerDomainProxy(domain: string, handler: DomainProxyHandler): void {
+    this.domainProxies.set(domain, handler);
   }
 
   /**
@@ -252,16 +271,43 @@ export class CDPTransport {
           result: {error: (err as Error).message},
         });
       }
-    } else {
-      if (this.debug) {
-        this.debugLog(`? ${command.method} (unhandled)`);
-      }
-      // Unknown methods get an empty response to satisfy DevTools
-      this.sendResponse(socket, {
-        id: command.id,
-        result: {},
-      });
+      return;
     }
+
+    // Check for a domain-level proxy (e.g. Debugger.*, Profiler.*)
+    const dotIdx = command.method.indexOf('.');
+    if (dotIdx > 0) {
+      const domain = command.method.slice(0, dotIdx);
+      const proxy = this.domainProxies.get(domain);
+      if (proxy) {
+        try {
+          const result = await proxy(command.method, command.params ?? {}, socket, command.id);
+          const response = {id: command.id, result: result ?? {}};
+          if (this.debug) {
+            this.debugLog(`→ ${command.method} (v8) ${JSON.stringify(response.result).slice(0, 200)}`);
+          }
+          this.sendResponse(socket, response);
+        } catch (err) {
+          if (this.debug) {
+            this.debugLog(`✗ ${command.method} (v8) ${(err as Error).message}`);
+          }
+          this.sendResponse(socket, {
+            id: command.id,
+            result: {error: (err as Error).message},
+          });
+        }
+        return;
+      }
+    }
+
+    if (this.debug) {
+      this.debugLog(`? ${command.method} (unhandled)`);
+    }
+    // Unknown methods get an empty response to satisfy DevTools
+    this.sendResponse(socket, {
+      id: command.id,
+      result: {},
+    });
   }
 
   /**
@@ -313,59 +359,10 @@ export class CDPTransport {
     this.registerMethod('Target.setAutoAttach', noop);
     this.registerMethod('Target.setDiscoverTargets', noop);
 
-    // Debugger domain stubs (Sources tab + Performance)
-    this.registerMethod('Debugger.enable', () => ({debuggerId: 'terminal-dom'}));
-    this.registerMethod('Debugger.disable', noop);
-    this.registerMethod('Debugger.setAsyncCallStackDepth', noop);
-    this.registerMethod('Debugger.setBlackboxPatterns', noop);
-    this.registerMethod('Debugger.setPauseOnExceptions', noop);
-    this.registerMethod('Debugger.setBreakpointsActive', noop);
-
-    // Profiler domain stubs (Performance tab)
-    this.registerMethod('Profiler.enable', noop);
-    this.registerMethod('Profiler.disable', noop);
-    this.registerMethod('Profiler.setSamplingInterval', noop);
-    this.registerMethod('Profiler.start', noop);
-    this.registerMethod('Profiler.stop', () => {
-      const now = Date.now() * 1000; // microseconds
-      return {
-        profile: {
-          nodes: [
-            {
-              id: 1,
-              callFrame: {
-                functionName: '(root)',
-                scriptId: '0',
-                url: '',
-                lineNumber: -1,
-                columnNumber: -1,
-              },
-              children: [2],
-            },
-            {
-              id: 2,
-              callFrame: {
-                functionName: '(idle)',
-                scriptId: '0',
-                url: '',
-                lineNumber: -1,
-                columnNumber: -1,
-              },
-              children: [],
-            },
-          ],
-          startTime: now - 1000000,
-          endTime: now,
-          samples: [2],
-          timeDeltas: [1000000],
-        },
-      };
-    });
-
-    // HeapProfiler domain stubs (Memory tab)
-    this.registerMethod('HeapProfiler.enable', noop);
-    this.registerMethod('HeapProfiler.disable', noop);
-    this.registerMethod('HeapProfiler.collectGarbage', noop);
+    // Debugger, Profiler, and HeapProfiler are handled by V8InspectorProxy
+    // when available.  These stubs remain only as comments — the domain
+    // proxy in handleMessage routes to V8 first, falling back to empty
+    // responses for unhandled methods.
 
     // DOM storage / IndexedDB / ServiceWorker stubs
     this.registerMethod('DOMStorage.enable', noop);
@@ -426,10 +423,6 @@ export class CDPTransport {
     this.registerMethod('Autofill.enable', noop);
     this.registerMethod('Autofill.setAddresses', noop);
 
-    // Debugger extras (breakpoints always "fail" gracefully)
-    this.registerMethod('Debugger.setBreakpointByUrl', () => ({
-      breakpointId: 'none',
-      locations: [],
-    }));
+    // Debugger.setBreakpointByUrl is handled by V8InspectorProxy
   }
 }

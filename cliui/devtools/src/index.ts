@@ -10,6 +10,7 @@ export {OverlayDomainHandler} from './classes/OverlayDomainHandler';
 export {PerformanceDomainHandler} from './classes/PerformanceDomainHandler';
 export {RuntimeDomainHandler} from './classes/RuntimeDomainHandler';
 export {WebSocketServer} from './classes/WebSocketServer';
+export {V8InspectorProxy} from './classes/V8InspectorProxy';
 export {serializeCDPNode} from './utilities/serializeCDPNode';
 
 export type {
@@ -21,6 +22,7 @@ export type {
   CloseCallback,
   ConnectionCallback,
   DevToolsBridgeOptions,
+  DomainProxyHandler,
   ErrorCallback,
   MessageCallback,
   RemoteObject,

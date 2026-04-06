@@ -90,6 +90,19 @@ export type CDPMethodHandler = (
 ) => Record<string, unknown> | void | Promise<Record<string, unknown> | void>;
 
 /**
+ * Handler for a domain-level proxy.
+ *
+ * Receives the full method name, parameters, the originating socket,
+ * and the CDP command ID.  Returns the result to send back.
+ */
+export type DomainProxyHandler = (
+  method: string,
+  params: Record<string, unknown>,
+  socket: import('ws').WebSocket,
+  cdpId: number,
+) => Promise<Record<string, unknown>>;
+
+/**
  * A CDP `RemoteObject` describing a JavaScript value for the Runtime domain.
  */
 export interface RemoteObject {

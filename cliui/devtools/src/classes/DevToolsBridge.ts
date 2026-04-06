@@ -8,6 +8,7 @@ import {RuntimeDomainHandler} from './RuntimeDomainHandler';
 import {LogDomainHandler} from './LogDomainHandler';
 import {OverlayDomainHandler} from './OverlayDomainHandler';
 import {PerformanceDomainHandler} from './PerformanceDomainHandler';
+import {V8InspectorProxy} from './V8InspectorProxy';
 import {DEFAULT_CDP_PORT} from '../constants';
 
 import type {WebSocket} from 'ws';
@@ -77,6 +78,7 @@ export class DevToolsBridge {
   private readonly logHandler: LogDomainHandler;
   private readonly overlayHandler: OverlayDomainHandler;
   private readonly performanceHandler: PerformanceDomainHandler;
+  private readonly v8Proxy: V8InspectorProxy;
 
   private readonly window: Window;
   private readonly document: Document;
@@ -166,6 +168,10 @@ export class DevToolsBridge {
       this.window.performance,
       (this.window as any).PerformanceObserver ?? ((globalThis as any).PerformanceObserver as any),
     );
+
+    // V8 inspector proxy for Debugger, Profiler, HeapProfiler
+    this.v8Proxy = new V8InspectorProxy(this.transport);
+    this.v8Proxy.connect();
 
     // Wire the resolve callback from DOM → Runtime
     this.domHandler.resolveNodeToRemoteObject = (node) => {
@@ -267,6 +273,7 @@ export class DevToolsBridge {
    * @returns A promise that resolves once shutdown is complete.
    */
   async close(): Promise<void> {
+    this.v8Proxy.close();
     this.logHandler.restore();
     this.mutationBridge.disable();
     this.nodeRegistry.clear();
