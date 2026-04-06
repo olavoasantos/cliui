@@ -133,6 +133,50 @@ describe('RuntimeDomainHandler', () => {
       const remoteObj = result['result'] as any;
       expect(remoteObj.value).toEqual({a: 1, b: 2});
     });
+
+    it('rejects expressions with side effects when throwOnSideEffects is true', async () => {
+      const result = await transport.call('Runtime.evaluate', {
+        expression: 'process.abort()',
+        throwOnSideEffects: true,
+      });
+      expect(result['exceptionDetails']).toBeDefined();
+      const details = result['exceptionDetails'] as any;
+      expect(details.text).toContain('side-effect');
+    });
+
+    it('allows simple property access with throwOnSideEffects', async () => {
+      const result = await transport.call('Runtime.evaluate', {
+        expression: 'document',
+        throwOnSideEffects: true,
+      });
+      expect(result['exceptionDetails']).toBeUndefined();
+      const remoteObj = result['result'] as any;
+      expect(remoteObj.type).toBe('object');
+    });
+
+    it('rejects assignments with throwOnSideEffects', async () => {
+      const result = await transport.call('Runtime.evaluate', {
+        expression: 'x = 5',
+        throwOnSideEffects: true,
+      });
+      expect(result['exceptionDetails']).toBeDefined();
+    });
+
+    it('rejects new expressions with throwOnSideEffects', async () => {
+      const result = await transport.call('Runtime.evaluate', {
+        expression: 'new Error()',
+        throwOnSideEffects: true,
+      });
+      expect(result['exceptionDetails']).toBeDefined();
+    });
+
+    it('allows dotted property chains with throwOnSideEffects', async () => {
+      const result = await transport.call('Runtime.evaluate', {
+        expression: 'document.body',
+        throwOnSideEffects: true,
+      });
+      expect(result['exceptionDetails']).toBeUndefined();
+    });
   });
 
   describe('Runtime.getProperties', () => {

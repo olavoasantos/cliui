@@ -96,11 +96,32 @@ export class RuntimeDomainHandler {
 
   /**
    * `Runtime.evaluate` — evaluates an expression in the terminal scope.
+   *
+   * When `throwOnSideEffects` is `true` (DevTools autocomplete preview),
+   * only side-effect-free expressions are evaluated.  Anything that looks
+   * like a function call, assignment, or keyword statement is rejected
+   * with a synthetic error so DevTools shows no preview instead of
+   * accidentally triggering `process.abort()` while the user is still
+   * typing.
    */
   private evaluate(params: Record<string, unknown>): Record<string, unknown> {
     const expression = params['expression'] as string;
     const objectGroup = params['objectGroup'] as string | undefined;
     const returnByValue = params['returnByValue'] as boolean | undefined;
+    const throwOnSideEffects = params['throwOnSideEffects'] as boolean | undefined;
+
+    if (throwOnSideEffects && !isSideEffectFree(expression)) {
+      return {
+        result: {type: 'undefined'},
+        exceptionDetails: {
+          exceptionId: 1,
+          text: 'Possible side-effect in debug-evaluate',
+          lineNumber: 0,
+          columnNumber: 0,
+          exception: {type: 'object', subtype: 'error', description: 'EvalError: Possible side-effect in debug-evaluate'},
+        },
+      };
+    }
 
     try {
       // Build the evaluation scope
@@ -268,4 +289,30 @@ function getInheritedDescriptor(obj: object, name: string): PropertyDescriptor |
     current = Object.getPrototypeOf(current);
   }
   return undefined;
+}
+
+/**
+ * Conservative check for whether an expression is safe to evaluate
+ * during DevTools autocomplete preview (no side effects).
+ *
+ * Allows: identifiers, property access chains, numeric/string literals,
+ * `typeof x`, template literals without expressions.
+ *
+ * Rejects: function calls `()`, assignments `=`, `++`/`--`, `new`,
+ * `delete`, `throw`, `await`, and anything else that could mutate state.
+ */
+function isSideEffectFree(expression: string): boolean {
+  const trimmed = expression.trim();
+  if (trimmed === '') return true;
+
+  // Reject anything containing a call, assignment, or mutation operator
+  if (/[()]/.test(trimmed)) return false;
+  if (/[^=!<>]=[^=]/.test(trimmed)) return false;
+  if (/\+\+|--/.test(trimmed)) return false;
+  if (/\bdelete\b|\bnew\b|\bthrow\b|\bawait\b|\byield\b/.test(trimmed)) return false;
+
+  // Reject template literal interpolations (they can call toString)
+  if (/\$\{/.test(trimmed)) return false;
+
+  return true;
 }
