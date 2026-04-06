@@ -156,4 +156,21 @@ describe('NetworkDomainHandler', () => {
     // After disable, fetch should be the mock (not the interceptor)
     expect(globalThis.fetch).toBe(mockFn);
   });
+
+  it('wraps and restores http.request', async () => {
+    // Use createRequire to get the same mutable module the handler uses
+    const {createRequire: cr} = await import('node:module');
+    const req = cr(import.meta.url);
+    const httpMod = req('node:http') as typeof import('node:http');
+
+    handler.restore(); // ensure clean state
+    const original = httpMod.request;
+
+    await transport.call('Network.enable');
+    const wrapped = httpMod.request;
+    expect(wrapped).not.toBe(original);
+
+    await transport.call('Network.disable');
+    expect(httpMod.request).toBe(original);
+  });
 });
