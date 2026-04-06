@@ -382,69 +382,53 @@ export class DOMDomainHandler {
     const cellX = Math.floor(x / 8);
     const cellY = Math.floor(y / 16);
 
-    // Hit-test: find deepest element whose box contains the cell.
-    // When the point lands in a container's padding/gap but not inside
-    // any child, snap to the nearest child by vertical distance.
-    const result = this.hitTestLayout(root, cellX, cellY);
+    // Two-pass hit-test: first exact match, then with 1-cell tolerance.
+    // Terminal elements are often 1 cell tall with gaps between them,
+    // making exact hits hard with a mouse.
+    let best: Element | null = null;
 
-    if (result) {
-      const nodeId = this.registry.register(result);
+    const walk = (box: any, tolerance: number): void => {
+      if (
+        cellX >= box.x - tolerance &&
+        cellX < box.x + box.width + tolerance &&
+        cellY >= box.y - tolerance &&
+        cellY < box.y + box.height + tolerance
+      ) {
+        // Only accept Element nodes (nodeType 1), not text nodes
+        if (box.element && (box.element as any).nodeType === 1) {
+          best = box.element as Element;
+        }
+        if (box.children) {
+          for (const child of box.children) walk(child, tolerance);
+        }
+      }
+    };
+
+    // Pass 1: exact match
+    walk(root, 0);
+
+    // Pass 2: if we only got a container (no leaf element), retry with tolerance
+    if (best) {
+      const bestChildren = (best as any).childNodes;
+      const hasElementChildren = bestChildren && Array.from(bestChildren).some((c: any) => c.nodeType === 1);
+      if (hasElementChildren) {
+        // We hit a container — try again with tolerance to catch nearby children
+        const containerBest = best;
+        best = null;
+        walk(root, 1);
+        // If tolerance found a deeper element, use it; otherwise keep the container
+        if (!best || best === containerBest) {
+          best = containerBest;
+        }
+      }
+    }
+
+    if (best) {
+      const nodeId = this.registry.register(best);
       return {backendNodeId: nodeId, frameId: 'terminal-dom-frame', nodeId};
     }
 
     return {backendNodeId: 0, frameId: 'terminal-dom-frame', nodeId: 0};
-  }
-
-  /**
-   * Walks the layout tree to find the deepest element at (cellX, cellY).
-   * When a container matches but no child does, snaps to the nearest child.
-   */
-  private hitTestLayout(box: any, cellX: number, cellY: number): Element | null {
-    // Check if point is inside this box
-    if (
-      cellX < box.x ||
-      cellX >= box.x + box.width ||
-      cellY < box.y ||
-      cellY >= box.y + box.height
-    ) {
-      return null;
-    }
-
-    // Try children first (depth-first, deepest match wins)
-    if (box.children && box.children.length > 0) {
-      // Exact match in a child?
-      for (const child of box.children) {
-        const hit = this.hitTestLayout(child, cellX, cellY);
-        if (hit) return hit;
-      }
-
-      // No exact child match — snap to nearest child by distance
-      let nearest: any = null;
-      let nearestDist = Infinity;
-      for (const child of box.children) {
-        // Vertical distance from point to child's box
-        let dy = 0;
-        if (cellY < child.y) dy = child.y - cellY;
-        else if (cellY >= child.y + child.height) dy = cellY - (child.y + child.height - 1);
-
-        let dx = 0;
-        if (cellX < child.x) dx = child.x - cellX;
-        else if (cellX >= child.x + child.width) dx = cellX - (child.x + child.width - 1);
-
-        const dist = dx + dy;
-        if (dist < nearestDist) {
-          nearestDist = dist;
-          nearest = child;
-        }
-      }
-
-      // Snap if the nearest child is within a reasonable distance (3 cells)
-      if (nearest && nearestDist <= 3) {
-        return (nearest.element as Element) ?? (box.element as Element) ?? null;
-      }
-    }
-
-    return (box.element as Element) ?? null;
   }
 
   /**
