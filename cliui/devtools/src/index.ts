@@ -1,3 +1,4 @@
+export {CDPTransport} from './classes/CDPTransport';
 export {NodeRegistry} from './classes/NodeRegistry';
 export {WebSocketServer} from './classes/WebSocketServer';
 export {serializeCDPNode} from './utilities/serializeCDPNode';
