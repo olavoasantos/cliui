@@ -425,10 +425,65 @@ export class DOMDomainHandler {
 
     if (best) {
       const nodeId = this.registry.register(best);
+
+      // Ensure DevTools knows about this node and all its ancestors.
+      // If the tree hasn't been expanded to this depth, DevTools
+      // can't resolve the nodeId. Push ancestor chain via setChildNodes.
+      this.ensureAncestorsRegistered(best);
+
       return {backendNodeId: nodeId, frameId: 'terminal-dom-frame', nodeId};
     }
 
     return {backendNodeId: 0, frameId: 'terminal-dom-frame', nodeId: 0};
+  }
+
+  /**
+   * Ensures all ancestors of an element are registered in the node
+   * registry and pushed to DevTools via `DOM.setChildNodes`.
+   *
+   * Without this, DevTools can't resolve nodeIds for elements in
+   * unexpanded parts of the tree.
+   */
+  private ensureAncestorsRegistered(element: Element): void {
+    // Collect the ancestor chain (bottom up)
+    const chain: Element[] = [];
+    let current: any = element;
+    while (current && current.nodeType === 1) {
+      chain.unshift(current);
+      current = current.parentNode ?? current.parentElement;
+    }
+
+    // Walk top-down: for each ancestor, if its children aren't registered,
+    // push them to DevTools
+    for (const ancestor of chain) {
+      const parentId = this.registry.getId(ancestor);
+      if (parentId === undefined) {
+        this.registry.register(ancestor);
+      }
+
+      const childNodes = ancestor.childNodes;
+      if (!childNodes || childNodes.length === 0) continue;
+
+      // Check if children are already registered
+      let allRegistered = true;
+      for (let i = 0; i < childNodes.length; i++) {
+        if (!this.registry.has(childNodes[i])) {
+          allRegistered = false;
+          break;
+        }
+      }
+
+      if (!allRegistered) {
+        const children = [];
+        for (let i = 0; i < childNodes.length; i++) {
+          children.push(serializeCDPNode(childNodes[i], this.registry, 0));
+        }
+        this.transport.broadcastEvent({
+          method: 'DOM.setChildNodes',
+          params: {parentId: this.registry.getId(ancestor)!, nodes: children},
+        });
+      }
+    }
   }
 
   /**
