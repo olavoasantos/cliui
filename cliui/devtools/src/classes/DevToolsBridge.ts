@@ -82,6 +82,7 @@ export class DevToolsBridge {
   private readonly document: Document;
   private listening = false;
   private vitalsInterval: ReturnType<typeof setInterval> | null = null;
+  private injectedScriptId = 1;
 
   /**
    * Creates a new DevTools bridge.
@@ -192,6 +193,34 @@ export class DevToolsBridge {
     this.logHandler.register();
     this.overlayHandler.register();
     this.performanceHandler.register();
+
+    // Override addScriptToEvaluateOnNewDocument to actually execute the
+    // injected script.  DevTools injects a web-vitals library that calls
+    // __chromium_devtools_metrics_reporter — if we run it, the metric
+    // cards (LCP, CLS, INP) on the Performance tab populate with real data.
+    this.transport.registerMethod('Page.addScriptToEvaluateOnNewDocument', (params) => {
+      const source = (params['source'] as string) ?? '';
+      if (source) {
+        this.executeInjectedScript(source);
+      }
+      return {identifier: String(this.injectedScriptId++)};
+    });
+
+    // Runtime.addBinding creates a function on the window that, when called,
+    // emits a Runtime.bindingCalled event.  DevTools' web-vitals script
+    // needs this to report metrics back.
+    this.transport.registerMethod('Runtime.addBinding', (params) => {
+      const name = params['name'] as string;
+      if (name) {
+        (this.window as any)[name] = (payload: string) => {
+          this.transport.broadcastEvent({
+            method: 'Runtime.bindingCalled',
+            params: {name, payload, executionContextId: 1},
+          });
+        };
+      }
+      return {};
+    });
   }
 
   /**
@@ -348,6 +377,35 @@ export class DevToolsBridge {
         executionContextId: 1,
       },
     });
+  }
+
+  /**
+   * Executes a script injected by DevTools via addScriptToEvaluateOnNewDocument.
+   *
+   * The script runs with access to the terminal's window globals so that
+   * libraries like web-vitals can use PerformanceObserver, performance,
+   * and registered bindings.
+   */
+  private executeInjectedScript(source: string): void {
+    try {
+      const win = this.window as any;
+      const fn = new Function(
+        'window', 'document', 'performance', 'PerformanceObserver',
+        'navigator', 'location', 'self',
+        source,
+      );
+      fn(
+        win,
+        win.document,
+        win.performance,
+        win.PerformanceObserver ?? (globalThis as any).PerformanceObserver,
+        win.navigator ?? {userAgent: 'TerminalDOM'},
+        win.location ?? {href: 'terminal://localhost'},
+        win,
+      );
+    } catch {
+      // Script may use APIs we don't implement — fail silently
+    }
   }
 
   /**
