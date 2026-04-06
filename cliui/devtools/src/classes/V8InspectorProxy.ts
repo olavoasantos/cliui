@@ -7,17 +7,28 @@ import type {WebSocket} from 'ws';
  * CDP domains that are proxied to the V8 inspector instead of being
  * handled locally.  Every method under these domains is forwarded.
  */
-const PROXIED_DOMAINS = new Set([
-  'Debugger',
-  'Profiler',
-  'HeapProfiler',
-]);
+const PROXIED_DOMAINS = new Set(['Debugger', 'Profiler', 'HeapProfiler']);
 
 /**
  * Specific methods within proxied domains that we handle locally
  * instead of forwarding to V8 (because V8's context is different
  * from our terminal DOM context).
  */
+/**
+ * Methods that must NOT be forwarded to V8 because they crash the
+ * process or produce unusable results in a same-process session.
+ */
+const BLOCKED_METHODS: Set<string> = new Set([
+  // takeHeapSnapshot freezes V8 to walk the heap, but the WebSocket
+  // event loop is still running.  This causes a segfault (signal 11)
+  // when V8 tries to serialize objects that the event loop mutates.
+  'HeapProfiler.takeHeapSnapshot',
+  'HeapProfiler.startTrackingHeapObjects',
+  'HeapProfiler.stopTrackingHeapObjects',
+  'HeapProfiler.startSampling',
+  'HeapProfiler.stopSampling',
+]);
+
 const LOCAL_OVERRIDES: Set<string> = new Set([
   // Runtime.evaluate uses our terminal scope ($0, window, document)
   // so it must NOT be proxied.  But Runtime is not in PROXIED_DOMAINS
@@ -161,6 +172,12 @@ export class V8InspectorProxy {
   ): Promise<Record<string, unknown>> {
     if (LOCAL_OVERRIDES.has(method)) {
       return Promise.resolve({});
+    }
+
+    if (BLOCKED_METHODS.has(method)) {
+      return Promise.resolve({
+        error: `${method} is not supported in same-process inspector sessions (crashes V8)`,
+      });
     }
 
     return this.post(method, params);

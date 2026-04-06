@@ -45,9 +45,13 @@ export class NetworkDomainHandler {
 
     this.originalFetch = globalThis.fetch;
 
-    globalThis.fetch = async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+    globalThis.fetch = async (
+      input: string | URL | Request,
+      init?: RequestInit,
+    ): Promise<Response> => {
       const requestId = String(this.nextRequestId++);
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as any).url;
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.href : (input as any).url;
       const method = init?.method ?? 'GET';
       const timestamp = Date.now() / 1000;
 
@@ -55,8 +59,11 @@ export class NetworkDomainHandler {
       const headers: Record<string, string> = {};
       if (init?.headers) {
         const h = new Headers(init.headers as Record<string, string>);
-        h.forEach((v, k) => { headers[k] = v; });
-      }      this.transport.broadcastEvent({
+        h.forEach((v, k) => {
+          headers[k] = v;
+        });
+      }
+      this.transport.broadcastEvent({
         method: 'Network.requestWillBeSent',
         params: {
           requestId,

@@ -284,7 +284,9 @@ export class CDPTransport {
           const result = await proxy(command.method, command.params ?? {}, socket, command.id);
           const response = {id: command.id, result: result ?? {}};
           if (this.debug) {
-            this.debugLog(`→ ${command.method} (v8) ${JSON.stringify(response.result).slice(0, 200)}`);
+            this.debugLog(
+              `→ ${command.method} (v8) ${JSON.stringify(response.result).slice(0, 200)}`,
+            );
           }
           this.sendResponse(socket, response);
         } catch (err) {
