@@ -192,6 +192,7 @@ export class DevToolsBridge {
 
     // Wire DOM domain to layout lookup
     this.domHandler.layoutLookup = config.layoutLookup ?? null;
+    this.domHandler.getLayoutRoot = this.getLayoutRoot;
 
     // Wire connection/disconnection lifecycle
     this.transport.onConnect((_socket: WebSocket) => {

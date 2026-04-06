@@ -45,6 +45,11 @@ export class DOMDomainHandler {
       } | null)
     | null = null;
 
+  /** Returns the current layout root for hit-testing. */
+  getLayoutRoot:
+    | (() => {element: unknown; x: number; y: number; width: number; height: number; children: any[]} | null)
+    | null = null;
+
   /**
    * Creates a new DOM domain handler.
    *
@@ -79,6 +84,9 @@ export class DOMDomainHandler {
     );
     this.transport.registerMethod('DOM.getBoxModel', (params) => this.getBoxModel(params));
     this.transport.registerMethod('DOM.markUndoableState', () => ({}));
+    this.transport.registerMethod('DOM.getNodeForLocation', (params) =>
+      this.getNodeForLocation(params),
+    );
     this.transport.registerMethod('DOM.undo', () => ({}));
     this.transport.registerMethod('DOM.redo', () => ({}));
     this.transport.registerMethod('DOM.setAttributeValue', (params) =>
@@ -349,6 +357,54 @@ export class DOMDomainHandler {
     }
 
     return {};
+  }
+
+  /**
+   * `DOM.getNodeForLocation` — returns the node at given pixel coordinates.
+   *
+   * DevTools sends this during inspect-element mode. Coordinates are in
+   * pixels matching the screencast dimensions.
+   */
+  private getNodeForLocation(params: Record<string, unknown>): Record<string, unknown> {
+    const x = params['x'] as number;
+    const y = params['y'] as number;
+
+    if (!this.getLayoutRoot) {
+      return {backendNodeId: 0, frameId: 'terminal-dom-frame', nodeId: 0};
+    }
+
+    const root = this.getLayoutRoot();
+    if (!root) {
+      return {backendNodeId: 0, frameId: 'terminal-dom-frame', nodeId: 0};
+    }
+
+    // Convert pixel coordinates to cell coordinates
+    const cellX = Math.floor(x / 8);
+    const cellY = Math.floor(y / 16);
+
+    // Hit-test: find deepest element whose box contains the cell
+    let best: Element | null = null;
+    const walk = (box: any): void => {
+      if (
+        cellX >= box.x &&
+        cellX < box.x + box.width &&
+        cellY >= box.y &&
+        cellY < box.y + box.height
+      ) {
+        if (box.element) best = box.element as Element;
+        if (box.children) {
+          for (const child of box.children) walk(child);
+        }
+      }
+    };
+    walk(root);
+
+    if (best) {
+      const nodeId = this.registry.register(best);
+      return {backendNodeId: nodeId, frameId: 'terminal-dom-frame', nodeId};
+    }
+
+    return {backendNodeId: 0, frameId: 'terminal-dom-frame', nodeId: 0};
   }
 
   /**
