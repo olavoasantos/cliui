@@ -166,18 +166,31 @@ export class PerformanceDomainHandler {
   private tracingEnd(): Record<string, unknown> {
     this.tracingActive = false;
 
-    // Send collected entries as Tracing.dataCollected events
-    if (this.tracingEntries.length > 0) {
-      const traceEvents = this.tracingEntries.map((entry) => ({
-        cat: entry.entryType,
+    // Build trace events in Chrome Trace Event Format
+    const traceEvents: Array<Record<string, unknown>> = [];
+
+    // Always emit metadata events that DevTools requires
+    traceEvents.push(
+      {cat: '__metadata', name: 'process_name', ph: 'M', ts: 0, pid: 1, tid: 1, args: {name: 'Terminal DOM'}},
+      {cat: '__metadata', name: 'thread_name', ph: 'M', ts: 0, pid: 1, tid: 1, args: {name: 'Main'}},
+    );
+
+    // Convert collected performance entries to trace events
+    for (const entry of this.tracingEntries) {
+      traceEvents.push({
+        cat: 'devtools.timeline',
         name: entry.name,
-        ph: 'X', // complete event
-        ts: Math.round(entry.startTime * 1000), // microseconds
-        dur: Math.round(entry.duration * 1000),
+        ph: 'X',
+        ts: Math.round(entry.startTime * 1000),
+        dur: Math.max(1, Math.round(entry.duration * 1000)),
         pid: 1,
         tid: 1,
-      }));
+        args: {},
+      });
+    }
 
+    // Send events in a single batch
+    if (traceEvents.length > 0) {
       this.transport.broadcastEvent({
         method: 'Tracing.dataCollected',
         params: {value: traceEvents},
@@ -186,7 +199,7 @@ export class PerformanceDomainHandler {
 
     this.transport.broadcastEvent({
       method: 'Tracing.tracingComplete',
-      params: {},
+      params: {dataLossOccurred: false},
     });
 
     this.tracingEntries = [];
