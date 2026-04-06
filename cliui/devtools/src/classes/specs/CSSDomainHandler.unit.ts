@@ -143,6 +143,29 @@ describe('CSSDomainHandler', () => {
       expect(highlightRule.rule.style.cssProperties.length).toBeGreaterThan(0);
     });
 
+    it('includes cssText and range on matched rule style objects', async () => {
+      const style = window.document.createElement('style');
+      style.textContent = '.box { color: red; font-weight: bold; }';
+      window.document.head.appendChild(style);
+
+      const div = window.document.createElement('div');
+      div.className = 'box';
+      window.document.body.appendChild(div);
+      const divId = registry.register(div);
+
+      const result = await transport.call('CSS.getMatchedStylesForNode', {nodeId: divId});
+      const matched = result['matchedCSSRules'] as any[];
+      const boxRule = matched.find((m: any) => m.rule.selectorList.text.includes('box'));
+
+      expect(boxRule).toBeDefined();
+      // DevTools requires cssText and range on rule.style to enable editing
+      expect(boxRule.rule.style.cssText).toBeDefined();
+      expect(typeof boxRule.rule.style.cssText).toBe('string');
+      expect(boxRule.rule.style.cssText).toContain('color');
+      expect(boxRule.rule.style.range).toBeDefined();
+      expect(typeof boxRule.rule.style.range.startLine).toBe('number');
+    });
+
     it('returns inline style separately', async () => {
       const div = window.document.createElement('div');
       div.style.color = 'blue';
@@ -201,6 +224,41 @@ describe('CSSDomainHandler', () => {
       });
 
       expect(style.textContent).toBe(newCSS);
+    });
+
+    it('round-trips: getMatchedStyles returns data that setStyleTexts can use', async () => {
+      const style = window.document.createElement('style');
+      style.textContent = '.card { color: red; }';
+      window.document.head.appendChild(style);
+
+      const div = window.document.createElement('div');
+      div.className = 'card';
+      window.document.body.appendChild(div);
+      const divId = registry.register(div);
+
+      // 1. Get matched styles (what DevTools reads)
+      const matched = await transport.call('CSS.getMatchedStylesForNode', {nodeId: divId});
+      const rules = matched['matchedCSSRules'] as any[];
+      const cardRule = rules.find((r: any) => r.rule.selectorList.text.includes('card'));
+      expect(cardRule).toBeDefined();
+
+      // 2. Use the returned styleSheetId and range to send an edit (what DevTools sends)
+      const ruleStyle = cardRule.rule.style;
+      expect(ruleStyle.styleSheetId).toBeDefined();
+      expect(ruleStyle.range).toBeDefined();
+
+      const editResult = await transport.call('CSS.setStyleTexts', {
+        edits: [{
+          styleSheetId: ruleStyle.styleSheetId,
+          range: ruleStyle.range,
+          text: 'color: blue;',
+        }],
+      });
+
+      // 3. The edit should succeed and return a styles array
+      const styles = editResult['styles'] as any[];
+      expect(styles.length).toBe(1);
+      expect(styles[0].cssText).toBeDefined();
     });
   });
 

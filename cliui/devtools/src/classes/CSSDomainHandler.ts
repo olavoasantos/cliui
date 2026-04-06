@@ -417,28 +417,49 @@ export class CSSDomainHandler {
 
     for (let i = 0; i < styleElements.length; i++) {
       const styleEl = styleElements[i] as Element;
-      const cssText = styleEl.textContent ?? '';
-      if (!cssText) continue;
+      const cssSource = styleEl.textContent ?? '';
+      if (!cssSource) continue;
 
       const stylesheetId = this.getStylesheetId(styleEl);
-      const {rules} = this.cssParser.parse(cssText);
+      const {rules} = this.cssParser.parse(cssSource);
 
       for (let ruleIdx = 0; ruleIdx < rules.length; ruleIdx++) {
         const rule = rules[ruleIdx];
         const matched = this.selectorMatcher.match([rule], element);
 
         if (matched.length > 0) {
-          // Build selector text from the rule
           const selectorText = this.buildSelectorText(rule.selectors);
           const properties: CSSPropertyEntry[] = [];
 
+          // Build cssText from declarations and compute per-property ranges
+          // relative to the rule body within the stylesheet
+          const declTexts: string[] = [];
           for (let d = 0; d < rule.declarations.length; d++) {
             const decl = rule.declarations[d];
+            const declText = `${decl.property}: ${decl.value};`;
+            declTexts.push(declText);
+          }
+          const cssText = declTexts.join(' ');
+
+          // Locate this rule's body in the source text for accurate ranges
+          const bodyRange = this.findRuleBodyRange(cssSource, selectorText, ruleIdx);
+
+          // Build property entries with ranges relative to the stylesheet
+          let offset = 0;
+          for (let d = 0; d < rule.declarations.length; d++) {
+            const decl = rule.declarations[d];
+            const declText = declTexts[d];
             properties.push({
               name: decl.property,
               value: decl.value,
-              range: makeRange(ruleIdx, 0, ruleIdx, `${decl.property}: ${decl.value}`.length),
+              range: makeRange(
+                bodyRange.startLine,
+                bodyRange.startColumn + offset,
+                bodyRange.startLine,
+                bodyRange.startColumn + offset + declText.length,
+              ),
             });
+            offset += declText.length + 1; // +1 for space
           }
 
           result.push({
@@ -446,7 +467,7 @@ export class CSSDomainHandler {
               styleSheetId: stylesheetId,
               selectorList: {
                 selectors: [
-                  {text: selectorText, range: makeRange(ruleIdx, 0, ruleIdx, selectorText.length)},
+                  {text: selectorText, range: makeRange(bodyRange.startLine, 0, bodyRange.startLine, selectorText.length)},
                 ],
                 text: selectorText,
               },
@@ -454,6 +475,8 @@ export class CSSDomainHandler {
                 styleSheetId: stylesheetId,
                 cssProperties: properties,
                 shorthandEntries: [],
+                cssText,
+                range: bodyRange,
               },
             },
             matchingSelectors: [0],
@@ -561,6 +584,63 @@ export class CSSDomainHandler {
   /** Creates an empty style object. */
   private emptyStyle(): Record<string, unknown> {
     return {cssProperties: [], shorthandEntries: []};
+  }
+
+  /**
+   * Finds the source range of a rule's declaration body (`{ ... }`) in the
+   * stylesheet text.  Used to produce accurate ranges for `setStyleTexts`.
+   */
+  private findRuleBodyRange(
+    source: string,
+    _selectorText: string,
+    ruleIndex: number,
+  ): SourceRange {
+    const lines = source.split('\n');
+    let braceCount = 0;
+    let rulesSeen = 0;
+
+    for (let line = 0; line < lines.length; line++) {
+      const text = lines[line];
+      for (let col = 0; col < text.length; col++) {
+        if (text[col] === '{') {
+          if (braceCount === 0) {
+            if (rulesSeen === ruleIndex) {
+              // Found the opening brace of our rule.
+              // The body starts after '{'.
+              const startLine = line;
+              const startCol = col + 1;
+
+              // Find the matching closing brace
+              let depth = 1;
+              let endLine = line;
+              let endCol = col + 1;
+              for (let l = line; l < lines.length && depth > 0; l++) {
+                const start = l === line ? col + 1 : 0;
+                for (let c = start; c < lines[l].length && depth > 0; c++) {
+                  if (lines[l][c] === '{') depth++;
+                  else if (lines[l][c] === '}') {
+                    depth--;
+                    if (depth === 0) {
+                      endLine = l;
+                      endCol = c;
+                    }
+                  }
+                }
+              }
+
+              return makeRange(startLine, startCol, endLine, endCol);
+            }
+            rulesSeen++;
+          }
+          braceCount++;
+        } else if (text[col] === '}') {
+          braceCount--;
+        }
+      }
+    }
+
+    // Fallback — couldn't find the rule, return a zero range
+    return makeRange(0, 0, 0, 0);
   }
 }
 
