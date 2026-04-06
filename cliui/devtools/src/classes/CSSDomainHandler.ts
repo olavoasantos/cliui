@@ -304,7 +304,7 @@ export class CSSDomainHandler {
           ? this.applyInlineRangeEdit(currentCssText, edit.range, edit.text)
           : edit.text;
 
-        inlineElement.setAttribute('style', newCssText);
+        (inlineElement as any).style.cssText = newCssText;
 
         // Build response with correct range
         const newRange = makeRange(0, 0, 0, newCssText.length);

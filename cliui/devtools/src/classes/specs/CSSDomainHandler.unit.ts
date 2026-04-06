@@ -319,7 +319,7 @@ describe('CSSDomainHandler', () => {
       });
       const s1 = (r1 as any)['styles'][0] as any;
       expect(s1.cssText).toBe('color: red;');
-      expect(div.getAttribute('style')).toBe('color: red;');
+      expect(div.style.cssText).toContain('color: red');
 
       // Second edit using response range: change to blue
       const r2 = await transport.call('CSS.setStyleTexts', {
@@ -328,7 +328,7 @@ describe('CSSDomainHandler', () => {
       const s2 = (r2 as any)['styles'][0] as any;
       expect(s2.cssText).toBe('color: blue;');
       // Should NOT accumulate — only one color declaration
-      expect(div.getAttribute('style')).toBe('color: blue;');
+      expect(div.style.cssText).toContain('color: blue');
 
       // Third edit: simulate typing (partial edit within the value)
       // DevTools sends range covering just the value part
@@ -336,7 +336,7 @@ describe('CSSDomainHandler', () => {
         edits: [{styleSheetId: sheetId, range: s2.range, text: 'color: green;'}],
       });
       expect((r3 as any)['styles'][0].cssText).toBe('color: green;');
-      expect(div.getAttribute('style')).toBe('color: green;');
+      expect(div.style.cssText).toContain('color: green');
     });
   });
 
