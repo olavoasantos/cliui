@@ -11,23 +11,20 @@
  *
  * Click "Configure..." and add localhost:9222, then click "inspect"
  * on the Terminal DOM target that appears.
- *
- * You can also open DevTools directly at:
- *   devtools://devtools/bundled/inspector.html?ws=127.0.0.1:9222/devtools/terminal-dom
  */
 
 import {Terminal} from '@cliui/terminal';
-import {CSSParser, SelectorMatcher} from '@cliui/terminal/css';
-import {DevToolsBridge} from '@cliui/devtools';
+import {devtools} from '@cliui/devtools';
 import css from './styles.css?inline';
 
-// ── Terminal setup ───────────────────────────────────────────────────
+// ── Terminal setup with DevTools plugin ──────────────────────────────
 
 const terminal = new Terminal({
   altScreen: true,
   fps: 30,
   output: process.stdout,
   input: process.stdin,
+  plugins: [devtools({port: 9222, debug: true})],
 });
 
 // ── Styles ───────────────────────────────────────────────────────────
@@ -42,7 +39,6 @@ const app = document.createElement('div');
 app.className = 'app';
 app.setAttribute('id', 'app');
 
-// Header
 const header = document.createElement('div');
 header.className = 'header';
 
@@ -57,7 +53,6 @@ badge.textContent = ' CDP ';
 header.appendChild(title);
 header.appendChild(badge);
 
-// Counter section
 const section = document.createElement('div');
 section.className = 'section';
 section.setAttribute('id', 'content');
@@ -66,7 +61,6 @@ const counter = document.createElement('div');
 counter.className = 'counter';
 counter.setAttribute('id', 'counter');
 
-// List of items
 const items = ['Elements panel', 'Styles pane', 'Console', 'Performance'];
 const itemElements: HTMLElement[] = [];
 
@@ -109,34 +103,14 @@ app.appendChild(section);
 app.appendChild(hint);
 document.body.appendChild(app);
 
-// ── DevTools Bridge ──────────────────────────────────────────────────
-
-// No external StyleEngine — the CSS domain computes styles from
-// matched rules + inline styles without touching the terminal's
-// internal hooks (a second StyleEngine.attach() would overwrite them).
-
-const bridge = new DevToolsBridge({
-  window: terminal.window,
-  document: terminal.document,
-  selectorMatcher: new SelectorMatcher(),
-  cssParser: new CSSParser(),
-  terminalInstance: terminal,
-  options: {port: 9222, debug: true},
-});
-
-await bridge.listen();
-
 // ── Input handling ───────────────────────────────────────────────────
 
 document.body.addEventListener('keydown', (event: KeyboardEvent) => {
   const key = event.key;
 
   if (key === 'q' || (key === 'c' && event.ctrlKey)) {
-    bridge.close().then(() => {
-      terminal.exit();
-      process.exit(0);
-    });
-    return;
+    terminal.exit();
+    process.exit(0);
   }
 
   if (key === 'ArrowUp') {

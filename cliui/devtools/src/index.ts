@@ -13,6 +13,7 @@ export {RuntimeDomainHandler} from './classes/RuntimeDomainHandler';
 export {WebSocketServer} from './classes/WebSocketServer';
 export {V8InspectorProxy} from './classes/V8InspectorProxy';
 export {serializeCDPNode} from './utilities/serializeCDPNode';
+export {devtools} from './devtools';
 
 export type {
   CDPCommand,

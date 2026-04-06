@@ -1129,6 +1129,15 @@ export class Terminal {
       registerGraphicsProtocol: (protocol) => {
         this.renderer.registerGraphicsProtocol(protocol);
       },
+      window: this.window,
+      document: this.document,
+      styleEngine: this.styleEngine,
+      getLayoutRoot: () => this.eventDispatcher.getLayoutRoot(),
+      getLayoutBox: (element) => {
+        const root = this.eventDispatcher.getLayoutRoot();
+        if (!root) return null;
+        return this.findLayoutBox(root, element);
+      },
     };
 
     for (const plugin of plugins) {

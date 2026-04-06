@@ -1,8 +1,14 @@
+import type {GraphicsProtocol} from '../renderer/types/GraphicsProtocol';
+import type {StyleEngine} from '../css/classes/StyleEngine';
+import type {LayoutBox} from '../layout/types';
+import type {Window, Document, Element} from '@cliui/dom';
+
 /**
  * Context provided to terminal plugins during installation.
  *
  * Exposes the subset of terminal internals that plugins are allowed
- * to extend — primarily graphics protocol registration.
+ * to extend — graphics protocol registration, style engine access,
+ * layout tree access, and window/document references.
  */
 export interface TerminalPluginContext {
   /**
@@ -14,9 +20,32 @@ export interface TerminalPluginContext {
    *
    * @param protocol - The graphics protocol implementation.
    */
-  registerGraphicsProtocol(
-    protocol: import('../renderer/types/GraphicsProtocol').GraphicsProtocol,
-  ): void;
+  registerGraphicsProtocol(protocol: GraphicsProtocol): void;
+
+  /** Returns the terminal's DOM window. */
+  readonly window: Window;
+
+  /** Returns the terminal's DOM document. */
+  readonly document: Document;
+
+  /** Returns the terminal's style engine for computed style access. */
+  readonly styleEngine: StyleEngine;
+
+  /**
+   * Returns the current layout root, or `null` if layout hasn't run yet.
+   *
+   * The layout tree is rebuilt on each frame, so callers should not
+   * cache the result across frames.
+   */
+  getLayoutRoot(): LayoutBox | null;
+
+  /**
+   * Looks up the layout box for a specific DOM element.
+   *
+   * Returns `null` if the element has no layout box (e.g., `display: none`
+   * or not yet laid out).
+   */
+  getLayoutBox(element: Element): LayoutBox | null;
 }
 
 /**

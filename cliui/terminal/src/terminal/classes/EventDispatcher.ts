@@ -197,6 +197,11 @@ export class EventDispatcher {
     this.layoutRoot = layoutRoot;
   }
 
+  /** Returns the current layout root. */
+  getLayoutRoot(): LayoutBox | null {
+    return this.layoutRoot;
+  }
+
   /**
    * Returns the topmost element at the given terminal coordinates.
    *
