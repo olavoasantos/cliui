@@ -23,10 +23,9 @@ const BLOCKED_METHODS: Set<string> = new Set([
   // event loop is still running.  This causes a segfault (signal 11)
   // when V8 tries to serialize objects that the event loop mutates.
   'HeapProfiler.takeHeapSnapshot',
+  // Tracking heap objects streams snapshot chunks continuously, same risk.
   'HeapProfiler.startTrackingHeapObjects',
   'HeapProfiler.stopTrackingHeapObjects',
-  'HeapProfiler.startSampling',
-  'HeapProfiler.stopSampling',
 ]);
 
 const LOCAL_OVERRIDES: Set<string> = new Set([
