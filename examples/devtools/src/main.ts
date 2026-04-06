@@ -13,10 +13,10 @@
  * on the Terminal DOM target that appears.
  *
  * You can also open DevTools directly at:
- *   devtools://devtools/bundled/inspector.html?ws=127.0.0.1:9222/devtools/page
+ *   devtools://devtools/bundled/inspector.html?ws=127.0.0.1:9222/devtools/terminal-dom
  */
 
-import {Terminal, StyleEngine} from '@cliui/terminal';
+import {Terminal} from '@cliui/terminal';
 import {CSSParser, SelectorMatcher} from '@cliui/terminal/css';
 import {DevToolsBridge} from '@cliui/devtools';
 import css from './styles.css?inline';
@@ -111,14 +111,13 @@ document.body.appendChild(app);
 
 // ── DevTools Bridge ──────────────────────────────────────────────────
 
-// Create a StyleEngine that reads from the same document for DevTools inspection
-const inspectionStyleEngine = new StyleEngine();
-inspectionStyleEngine.attach(document);
+// No external StyleEngine — the CSS domain computes styles from
+// matched rules + inline styles without touching the terminal's
+// internal hooks (a second StyleEngine.attach() would overwrite them).
 
 const bridge = new DevToolsBridge({
   window: terminal.window,
   document: terminal.document,
-  styleEngine: inspectionStyleEngine,
   selectorMatcher: new SelectorMatcher(),
   cssParser: new CSSParser(),
   terminalInstance: terminal,

@@ -91,7 +91,7 @@ export class DevToolsBridge {
   constructor(config: {
     window: Window;
     document: Document;
-    styleEngine: StyleEngineAccessor;
+    styleEngine?: StyleEngineAccessor | null;
     selectorMatcher: SelectorMatcherAccessor;
     cssParser: CSSParserAccessor;
     terminalInstance?: unknown;
@@ -138,7 +138,7 @@ export class DevToolsBridge {
       this.transport,
       this.nodeRegistry,
       this.document,
-      config.styleEngine,
+      config.styleEngine ?? null,
       config.selectorMatcher as any,
       config.cssParser as any,
     );

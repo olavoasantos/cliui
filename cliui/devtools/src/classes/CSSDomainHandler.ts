@@ -7,6 +7,7 @@ import type {CSSPropertyEntry, SourceRange} from '../types';
 
 /**
  * Interface for the StyleEngine subset needed by the CSS domain.
+ * Optional — when absent, computed styles are derived from matched rules.
  */
 interface StyleEngineAccessor {
   getComputedStyle(element: Element): Map<string, string>;
@@ -49,7 +50,7 @@ export class CSSDomainHandler {
   private readonly transport: CDPTransport;
   private readonly registry: NodeRegistry;
   private readonly document: Document;
-  private readonly styleEngine: StyleEngineAccessor;
+  private readonly styleEngine: StyleEngineAccessor | null;
   private readonly selectorMatcher: SelectorMatcherAccessor;
   private readonly cssParser: CSSParserAccessor;
 
@@ -64,7 +65,7 @@ export class CSSDomainHandler {
     transport: CDPTransport,
     registry: NodeRegistry,
     document: Document,
-    styleEngine: StyleEngineAccessor,
+    styleEngine: StyleEngineAccessor | null,
     selectorMatcher: SelectorMatcherAccessor,
     cssParser: CSSParserAccessor,
   ) {
@@ -196,11 +197,49 @@ export class CSSDomainHandler {
       return {computedStyle: []};
     }
 
-    const computed = this.styleEngine.getComputedStyle(node);
-    const properties: Array<{name: string; value: string}> = [];
+    // Use the external style engine if available
+    if (this.styleEngine) {
+      const computed = this.styleEngine.getComputedStyle(node);
+      const properties: Array<{name: string; value: string}> = [];
+      for (const [name, value] of computed) {
+        properties.push({name, value});
+      }
+      return {computedStyle: properties};
+    }
 
-    for (const [name, value] of computed) {
-      properties.push({name, value});
+    // Fallback: derive computed style from matched rules + inline styles
+    const properties: Array<{name: string; value: string}> = [];
+    const seen = new Set<string>();
+
+    // Inline styles take highest priority
+    const style = (node as any).style;
+    if (style && typeof style.cssText === 'string' && style.cssText) {
+      const pairs = style.cssText.split(';').filter((s: string) => s.trim());
+      for (const pair of pairs) {
+        const colonIndex = pair.indexOf(':');
+        if (colonIndex === -1) continue;
+        const name = pair.slice(0, colonIndex).trim();
+        const value = pair.slice(colonIndex + 1).trim();
+        if (!seen.has(name)) {
+          properties.push({name, value});
+          seen.add(name);
+        }
+      }
+    }
+
+    // Then matched rules (already sorted by specificity)
+    const styleElements = this.document.querySelectorAll('style');
+    for (let i = 0; i < styleElements.length; i++) {
+      const cssText = (styleElements[i] as Element).textContent ?? '';
+      if (!cssText) continue;
+      const {rules} = this.cssParser.parse(cssText);
+      const matched = this.selectorMatcher.match(rules, node);
+      for (const m of matched) {
+        if (!seen.has(m.declaration.property)) {
+          properties.push({name: m.declaration.property, value: m.declaration.value});
+          seen.add(m.declaration.property);
+        }
+      }
     }
 
     return {computedStyle: properties};
