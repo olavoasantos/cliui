@@ -1,3 +1,4 @@
+import {openSync, writeSync} from 'node:fs';
 import {DEFAULT_CDP_PORT, FRAME_ID} from '../constants';
 import {WebSocketServer} from './WebSocketServer';
 
@@ -212,11 +213,9 @@ export class CDPTransport {
   private debugLog(line: string): void {
     if (!this.debug) return;
     if (this.debugFd === null) {
-      const fs = require('node:fs') as typeof import('node:fs');
-      this.debugFd = fs.openSync('cdp-debug.log', 'w');
+      this.debugFd = openSync('cdp-debug.log', 'w');
     }
-    const fs = require('node:fs') as typeof import('node:fs');
-    fs.writeSync(this.debugFd, line + '\n');
+    writeSync(this.debugFd, line + '\n');
   }
 
   /**
