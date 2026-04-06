@@ -4,6 +4,7 @@ export {DevToolsBridge} from './classes/DevToolsBridge';
 export {DOMDomainHandler} from './classes/DOMDomainHandler';
 export {DOMMutationBridge} from './classes/DOMMutationBridge';
 export {LogDomainHandler} from './classes/LogDomainHandler';
+export {NetworkDomainHandler} from './classes/NetworkDomainHandler';
 export {NodeRegistry} from './classes/NodeRegistry';
 export {ObjectRegistry} from './classes/ObjectRegistry';
 export {OverlayDomainHandler} from './classes/OverlayDomainHandler';

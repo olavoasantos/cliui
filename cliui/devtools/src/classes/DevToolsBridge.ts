@@ -9,6 +9,7 @@ import {LogDomainHandler} from './LogDomainHandler';
 import {OverlayDomainHandler} from './OverlayDomainHandler';
 import {PerformanceDomainHandler} from './PerformanceDomainHandler';
 import {V8InspectorProxy} from './V8InspectorProxy';
+import {NetworkDomainHandler} from './NetworkDomainHandler';
 import {DEFAULT_CDP_PORT} from '../constants';
 
 import type {WebSocket} from 'ws';
@@ -79,6 +80,7 @@ export class DevToolsBridge {
   private readonly overlayHandler: OverlayDomainHandler;
   private readonly performanceHandler: PerformanceDomainHandler;
   private readonly v8Proxy: V8InspectorProxy;
+  private readonly networkHandler: NetworkDomainHandler;
 
   private readonly window: Window;
   private readonly document: Document;
@@ -173,6 +175,8 @@ export class DevToolsBridge {
     this.v8Proxy = new V8InspectorProxy(this.transport);
     this.v8Proxy.connect();
 
+    this.networkHandler = new NetworkDomainHandler(this.transport);
+
     // Wire the resolve callback from DOM → Runtime
     this.domHandler.resolveNodeToRemoteObject = (node) => {
       return this.objectRegistry.serialize(node) as any;
@@ -198,6 +202,7 @@ export class DevToolsBridge {
     this.logHandler.register();
     this.overlayHandler.register();
     this.performanceHandler.register();
+    this.networkHandler.register();
 
     // DevTools injects a web-vitals measurement script, but it depends on
     // browser lifecycle APIs (navigation entries, visibility-state observers,
@@ -274,6 +279,7 @@ export class DevToolsBridge {
    */
   async close(): Promise<void> {
     this.v8Proxy.close();
+    this.networkHandler.restore();
     this.logHandler.restore();
     this.mutationBridge.disable();
     this.nodeRegistry.clear();

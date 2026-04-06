@@ -351,7 +351,8 @@ export class CDPTransport {
     this.registerMethod('Inspector.enable', noop);
 
     // Network domain stubs
-    this.registerMethod('Network.enable', noop);
+    // Network.enable/disable/getResponseBody are handled by NetworkDomainHandler.
+    // These config stubs are still needed for startup.
     this.registerMethod('Network.setCacheDisabled', noop);
     this.registerMethod('Network.setAttachDebugStack', noop);
 
