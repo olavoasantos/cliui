@@ -72,9 +72,15 @@ importers:
         specifier: ^8.20.0
         version: 8.20.0
     devDependencies:
+      '@cliui/dom':
+        specifier: workspace:*
+        version: link:../dom
       '@cliui/internals':
         specifier: workspace:*
         version: link:../internals
+      '@cliui/terminal':
+        specifier: workspace:*
+        version: link:../terminal
       '@types/node':
         specifier: 'catalog:'
         version: 25.5.0

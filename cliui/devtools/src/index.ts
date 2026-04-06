@@ -1,4 +1,6 @@
+export {NodeRegistry} from './classes/NodeRegistry';
 export {WebSocketServer} from './classes/WebSocketServer';
+export {serializeCDPNode} from './utilities/serializeCDPNode';
 
 export type {
   CDPCommand,

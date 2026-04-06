@@ -46,7 +46,9 @@
     "check": "run-p type:check lint:check format:check test:check"
   },
   "devDependencies": {
+    "@cliui/dom": "workspace:*",
     "@cliui/internals": "workspace:*",
+    "@cliui/terminal": "workspace:*",
     "@types/node": "catalog:",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "catalog:",
@@ -59,6 +61,7 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
+    "@cliui/dom": "workspace:*",
     "@cliui/terminal": "workspace:*"
   },
   "dependencies": {
