@@ -258,7 +258,49 @@ describe('CSSDomainHandler', () => {
       // 3. The edit should succeed and return a styles array
       const styles = editResult['styles'] as any[];
       expect(styles.length).toBe(1);
-      expect(styles[0].cssText).toBeDefined();
+      expect(styles[0].cssText).toBe('color: blue;');
+    });
+
+    it('setStyleTexts response has correct range for subsequent edits', async () => {
+      const style = window.document.createElement('style');
+      style.textContent = '.a{color:red}.b{padding:1}';
+      window.document.head.appendChild(style);
+
+      const div = window.document.createElement('div');
+      div.className = 'a';
+      window.document.body.appendChild(div);
+      registry.register(div);
+
+      const matched = await transport.call('CSS.getMatchedStylesForNode', {nodeId: registry.getId(div)!});
+      const aRule = (matched['matchedCSSRules'] as any[]).find((r: any) => r.rule.selectorList.text.includes('.a'));
+      const ruleStyle = aRule.rule.style;
+
+      // First edit
+      const editResult = await transport.call('CSS.setStyleTexts', {
+        edits: [{styleSheetId: ruleStyle.styleSheetId, range: ruleStyle.range, text: 'color:blue'}],
+      });
+
+      const resultStyle = editResult['styles'][0] as any;
+
+      // Response cssText should be ONLY the edited rule body, not the whole sheet
+      expect(resultStyle.cssText).toBe('color:blue');
+
+      // Response range should point to where the body is NOW in the updated source
+      const newSrc = style.textContent!;
+      expect(newSrc).toBe('.a{color:blue}.b{padding:1}');
+      const bodyFromRange = newSrc.slice(resultStyle.range.startColumn, resultStyle.range.endColumn);
+      expect(bodyFromRange).toBe('color:blue');
+
+      // Response properties should be only from this rule, not the whole sheet
+      expect(resultStyle.cssProperties.length).toBe(1);
+      expect(resultStyle.cssProperties[0].name).toBe('color');
+
+      // Second edit using the response range should also work
+      const editResult2 = await transport.call('CSS.setStyleTexts', {
+        edits: [{styleSheetId: ruleStyle.styleSheetId, range: resultStyle.range, text: 'color:green'}],
+      });
+      expect(style.textContent).toBe('.a{color:green}.b{padding:1}');
+      expect(editResult2['styles'][0].cssText).toBe('color:green');
     });
   });
 

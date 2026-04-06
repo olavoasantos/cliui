@@ -310,12 +310,34 @@ export class CSSDomainHandler {
       }
 
       const currentText = styleElement.textContent ?? '';
-      const newText = edit.range
-        ? this.applyRangeEdit(currentText, edit.range, edit.text)
+      const editRange = edit.range;
+      const newFullText = editRange
+        ? this.applyRangeEdit(currentText, editRange, edit.text)
         : edit.text;
 
-      styleElement.textContent = newText;
-      styles.push(this.makeStyleResult(edit.styleSheetId, newText));
+      styleElement.textContent = newFullText;
+
+      // The response must describe ONLY the edited style (not the whole sheet)
+      // with its new range in the updated source.
+      const newBodyStart = editRange ? editRange.startColumn : 0;
+      const newBodyEnd = newBodyStart + edit.text.length;
+      const newRange = makeRange(
+        editRange?.startLine ?? 0,
+        newBodyStart,
+        editRange?.startLine ?? 0,
+        newBodyEnd,
+      );
+
+      // Parse properties from the edited body text only
+      const bodyProperties = this.parseBodyProperties(edit.text, newRange);
+
+      styles.push({
+        styleSheetId: edit.styleSheetId,
+        cssProperties: bodyProperties,
+        shorthandEntries: [],
+        cssText: edit.text,
+        range: newRange,
+      });
     }
 
     return {styles};
@@ -620,6 +642,42 @@ export class CSSDomainHandler {
       });
     }
 
+    return properties;
+  }
+
+  /**
+   * Parses CSS property entries from a rule body string (e.g. "color:red;font-weight:700")
+   * and assigns ranges relative to the given body range.
+   */
+  private parseBodyProperties(bodyText: string, bodyRange: SourceRange): CSSPropertyEntry[] {
+    const properties: CSSPropertyEntry[] = [];
+    // Split on ; and parse each declaration
+    const parts = bodyText.split(';').filter((s) => s.trim());
+    let searchPos = 0;
+
+    for (const part of parts) {
+      const colonIdx = part.indexOf(':');
+      if (colonIdx === -1) continue;
+      const name = part.slice(0, colonIdx).trim();
+      const value = part.slice(colonIdx + 1).trim();
+
+      // Find this declaration in the body text for accurate range
+      const declStart = bodyText.indexOf(name, searchPos);
+      const declEnd = bodyText.indexOf(';', declStart);
+      const end = declEnd !== -1 ? declEnd + 1 : declStart + part.trimStart().length;
+
+      properties.push({
+        name,
+        value,
+        range: makeRange(
+          bodyRange.startLine,
+          bodyRange.startColumn + declStart,
+          bodyRange.startLine,
+          bodyRange.startColumn + end,
+        ),
+      });
+      searchPos = end;
+    }
     return properties;
   }
 
