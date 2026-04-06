@@ -1,4 +1,3 @@
-import {openSync, writeSync} from 'node:fs';
 import {CDPTransport} from './CDPTransport';
 import {NodeRegistry} from './NodeRegistry';
 import {ObjectRegistry} from './ObjectRegistry';
@@ -82,7 +81,6 @@ export class DevToolsBridge {
   private readonly window: Window;
   private readonly document: Document;
   private listening = false;
-  private vitalsInterval: ReturnType<typeof setInterval> | null = null;
   private injectedScriptId = 1;
 
   /**
@@ -195,19 +193,11 @@ export class DevToolsBridge {
     this.overlayHandler.register();
     this.performanceHandler.register();
 
-    // Override addScriptToEvaluateOnNewDocument to actually execute the
-    // injected script.  DevTools injects a web-vitals library that calls
-    // __chromium_devtools_metrics_reporter — if we run it, the metric
-    // cards (LCP, CLS, INP) on the Performance tab populate with real data.
-    this.transport.registerMethod('Page.addScriptToEvaluateOnNewDocument', (params) => {
-      const source = (params['source'] as string) ?? '';
-      if (source) {
-        // Save the script for debugging
-        if (source.includes('__chromium_devtools_metrics_reporter')) {
-          try { writeSync(openSync('cdp-vitals-script.js', 'w'), source); } catch {}
-        }
-        this.executeInjectedScript(source);
-      }
+    // DevTools injects a web-vitals measurement script, but it depends on
+    // browser lifecycle APIs (navigation entries, visibility-state observers,
+    // long-animation-frame entries, etc.) that terminal-dom doesn't implement.
+    // Acknowledge the injection without executing the script.
+    this.transport.registerMethod('Page.addScriptToEvaluateOnNewDocument', () => {
       return {identifier: String(this.injectedScriptId++)};
     });
 
@@ -277,10 +267,6 @@ export class DevToolsBridge {
    * @returns A promise that resolves once shutdown is complete.
    */
   async close(): Promise<void> {
-    if (this.vitalsInterval) {
-      clearInterval(this.vitalsInterval);
-      this.vitalsInterval = null;
-    }
     this.logHandler.restore();
     this.mutationBridge.disable();
     this.nodeRegistry.clear();
@@ -327,156 +313,6 @@ export class DevToolsBridge {
    */
   private onClientConnect(): void {
     this.mutationBridge.enable();
-
-    // Emit vitals immediately and then periodically
-    this.emitTerminalVitals();
-    if (this.vitalsInterval) clearInterval(this.vitalsInterval);
-    this.vitalsInterval = setInterval(() => {
-      if (this.transport.clients.size > 0) {
-        this.emitTerminalVitals();
-      }
-    }, 3000);
-  }
-
-  /**
-   * Reads LCP, FCP, and INP from window.performance and emits them
-   * as `Runtime.bindingCalled` events using the web-vitals reporter
-   * binding that DevTools registered during startup.
-   */
-  private emitTerminalVitals(): void {
-    const perf = this.window.performance;
-    const entries = perf.getEntries();
-
-    // LCP
-    const lcp = entries.find((e) => e.name === 'largest-contentful-paint');
-    if (lcp) {
-      this.emitVitalsMetric('LCP', (lcp as any).renderTime ?? lcp.startTime);
-    }
-
-    // INP — use the worst event timing duration
-    const eventTimings = entries.filter((e) => e.entryType === 'event');
-    if (eventTimings.length > 0) {
-      const worst = eventTimings.reduce((max, e) => (e.duration > max.duration ? e : max));
-      this.emitVitalsMetric('INP', worst.duration);
-    }
-
-    // CLS — terminal doesn't have layout shifts, report 0
-    this.emitVitalsMetric('CLS', 0);
-  }
-
-  /**
-   * Emits a single web-vitals metric via the DevTools binding.
-   */
-  private emitVitalsMetric(name: string, value: number): void {
-    const rating = name === 'CLS'
-      ? (value <= 0.1 ? 'good' : value <= 0.25 ? 'needs-improvement' : 'poor')
-      : name === 'LCP'
-        ? (value <= 2500 ? 'good' : value <= 4000 ? 'needs-improvement' : 'poor')
-        : (value <= 200 ? 'good' : value <= 500 ? 'needs-improvement' : 'poor');
-
-    this.transport.broadcastEvent({
-      method: 'Runtime.bindingCalled',
-      params: {
-        name: '__chromium_devtools_metrics_reporter',
-        payload: JSON.stringify({name, value, rating}),
-        executionContextId: 1,
-      },
-    });
-  }
-
-  /**
-   * Executes a script injected by DevTools via addScriptToEvaluateOnNewDocument.
-   *
-   * The script runs with access to the terminal's window globals so that
-   * libraries like web-vitals can use PerformanceObserver, performance,
-   * and registered bindings.
-   */
-  private executeInjectedScript(source: string): void {
-    try {
-      const win = this.window as any;
-      const doc = win.document;
-      const perf = win.performance;
-
-      // Polyfill APIs the web-vitals script needs that @cliui/dom doesn't provide
-      if (!doc.visibilityState) doc.visibilityState = 'visible';
-      if (!doc.readyState) doc.readyState = 'complete';
-      if (!doc.prerendering) doc.prerendering = false;
-      if (!doc.wasDiscarded) doc.wasDiscarded = false;
-      if (!win.requestAnimationFrame) {
-        win.requestAnimationFrame = (cb: () => void) => setTimeout(cb, 16);
-      }
-      if (!win.requestIdleCallback) {
-        win.requestIdleCallback = (cb: () => void) => setTimeout(cb, 0);
-      }
-
-      // PerformanceObserver.supportedEntryTypes is critical —
-      // the web-vitals script checks it before creating ANY observer.
-      const PO = win.PerformanceObserver ?? (globalThis as any).PerformanceObserver;
-      if (PO && !PO.supportedEntryTypes) {
-        PO.supportedEntryTypes = [
-          'mark', 'measure', 'paint', 'event', 'first-input',
-          'largest-contentful-paint', 'layout-shift',
-        ];
-      }
-
-      // performance.getEntriesByType('navigation') needs to return
-      // at least one entry for TTFB/LCP attribution
-      const origGetByType = perf.getEntriesByType?.bind(perf);
-      perf.getEntriesByType = (type: string) => {
-        if (type === 'navigation') {
-          return [{
-            entryType: 'navigation',
-            name: 'terminal://localhost',
-            startTime: 0,
-            duration: 0,
-            responseStart: 1,
-            activationStart: 0,
-            domInteractive: 1,
-            domContentLoadedEventStart: 1,
-            domComplete: 1,
-            type: 'navigate',
-          }];
-        }
-        if (type === 'visibility-state') return [];
-        if (type === 'resource') return [];
-        return origGetByType?.(type) ?? [];
-      };
-
-      // The web-vitals script calls observe({type: 'paint', buffered: true})
-      // without the {performance} property our PerformanceObserver requires.
-      // Wrap PO so that observe() auto-injects the performance instance.
-      const wrappedPO = function(this: any, callback: any) {
-        PO.call(this, callback);
-      } as any;
-      wrappedPO.prototype = Object.create(PO.prototype);
-      wrappedPO.prototype.constructor = wrappedPO;
-      wrappedPO.supportedEntryTypes = PO.supportedEntryTypes;
-      const origObserve = PO.prototype.observe;
-      wrappedPO.prototype.observe = function(options: any) {
-        if (!options.performance) options.performance = perf;
-        return origObserve.call(this, options);
-      };
-
-      const fn = new Function(
-        'window', 'document', 'performance', 'PerformanceObserver',
-        'navigator', 'location', 'self',
-        'addEventListener', 'removeEventListener',
-        source,
-      );
-      fn(
-        win,
-        doc,
-        perf,
-        wrappedPO,
-        win.navigator ?? {userAgent: 'TerminalDOM'},
-        win.location ?? {href: 'terminal://localhost'},
-        win,
-        win.addEventListener?.bind(win) ?? (() => {}),
-        win.removeEventListener?.bind(win) ?? (() => {}),
-      );
-    } catch {
-      // Script may use APIs we don't implement — fail silently
-    }
   }
 
   /**
