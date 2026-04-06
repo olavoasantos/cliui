@@ -429,38 +429,17 @@ export class CSSDomainHandler {
 
         if (matched.length > 0) {
           const selectorText = this.buildSelectorText(rule.selectors);
-          const properties: CSSPropertyEntry[] = [];
-
-          // Build cssText from declarations and compute per-property ranges
-          // relative to the rule body within the stylesheet
-          const declTexts: string[] = [];
-          for (let d = 0; d < rule.declarations.length; d++) {
-            const decl = rule.declarations[d];
-            const declText = `${decl.property}: ${decl.value};`;
-            declTexts.push(declText);
-          }
-          const cssText = declTexts.join(' ');
 
           // Locate this rule's body in the source text for accurate ranges
           const bodyRange = this.findRuleBodyRange(cssSource, selectorText, ruleIdx);
 
-          // Build property entries with ranges relative to the stylesheet
-          let offset = 0;
-          for (let d = 0; d < rule.declarations.length; d++) {
-            const decl = rule.declarations[d];
-            const declText = declTexts[d];
-            properties.push({
-              name: decl.property,
-              value: decl.value,
-              range: makeRange(
-                bodyRange.startLine,
-                bodyRange.startColumn + offset,
-                bodyRange.startLine,
-                bodyRange.startColumn + offset + declText.length,
-              ),
-            });
-            offset += declText.length + 1; // +1 for space
-          }
+          // Extract cssText directly from the source (the text between { and })
+          const cssText = this.extractRangeText(cssSource, bodyRange);
+
+          // Build per-property ranges by finding each declaration in the source
+          const properties = this.buildPropertyRangesFromSource(
+            cssSource, bodyRange, rule.declarations,
+          );
 
           result.push({
             rule: {
@@ -582,6 +561,68 @@ export class CSSDomainHandler {
   }
 
   /** Creates an empty style object. */
+  /**
+   * Extracts text from the source corresponding to a SourceRange.
+   */
+  private extractRangeText(source: string, range: SourceRange): string {
+    const lines = source.split('\n');
+    if (range.startLine === range.endLine) {
+      return (lines[range.startLine] ?? '').slice(range.startColumn, range.endColumn);
+    }
+    let text = (lines[range.startLine] ?? '').slice(range.startColumn);
+    for (let i = range.startLine + 1; i < range.endLine; i++) {
+      text += '\n' + (lines[i] ?? '');
+    }
+    text += '\n' + (lines[range.endLine] ?? '').slice(0, range.endColumn);
+    return text;
+  }
+
+  /**
+   * Builds per-property CSSPropertyEntry items with ranges that point to
+   * the actual source positions (not synthesized text).
+   */
+  private buildPropertyRangesFromSource(
+    source: string,
+    bodyRange: SourceRange,
+    declarations: Array<{property: string; value: string}>,
+  ): CSSPropertyEntry[] {
+    const bodyText = this.extractRangeText(source, bodyRange);
+    const properties: CSSPropertyEntry[] = [];
+
+    for (const decl of declarations) {
+      // Find this declaration in the body text
+      // Search for "property" followed by ":" and the value
+      const propPattern = decl.property;
+      const searchStart = properties.length > 0
+        ? (properties[properties.length - 1].range!.endColumn - bodyRange.startColumn)
+        : 0;
+
+      const propIdx = bodyText.indexOf(propPattern, searchStart);
+      if (propIdx === -1) {
+        // Fallback: can't find in source, use approximate range
+        properties.push({name: decl.property, value: decl.value, range: bodyRange});
+        continue;
+      }
+
+      // Find the end of this declaration (next ; or end of body)
+      const afterProp = bodyText.indexOf(';', propIdx);
+      const declEnd = afterProp !== -1 ? afterProp + 1 : bodyText.length;
+
+      properties.push({
+        name: decl.property,
+        value: decl.value,
+        range: makeRange(
+          bodyRange.startLine,
+          bodyRange.startColumn + propIdx,
+          bodyRange.startLine,
+          bodyRange.startColumn + declEnd,
+        ),
+      });
+    }
+
+    return properties;
+  }
+
   private emptyStyle(): Record<string, unknown> {
     return {cssProperties: [], shorthandEntries: []};
   }

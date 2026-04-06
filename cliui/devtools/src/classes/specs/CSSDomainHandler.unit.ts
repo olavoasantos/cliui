@@ -284,3 +284,75 @@ describe('CSSDomainHandler', () => {
     });
   });
 });
+
+describe('CSS range accuracy with minified CSS', () => {
+  let window2: InstanceType<typeof Window>;
+  let registry2: NodeRegistry;
+  let transport2: ReturnType<typeof createMockTransport>;
+  let handler2: CSSDomainHandler;
+
+  beforeEach(() => {
+    window2 = new Window();
+    registry2 = new NodeRegistry();
+    transport2 = createMockTransport();
+    const se = new StyleEngine();
+    se.attach(window2.document);
+    handler2 = new CSSDomainHandler(transport2 as any, registry2, window2.document, se, new SelectorMatcher(), new CSSParser());
+    handler2.register();
+  });
+
+  it('property ranges accurately point to the source text', async () => {
+    const style = window2.document.createElement('style');
+    // Minified CSS — no spaces after colons, no newlines
+    style.textContent = '.box{color:#c4b5fd;font-weight:700}';
+    window2.document.head.appendChild(style);
+
+    const div = window2.document.createElement('div');
+    div.className = 'box';
+    window2.document.body.appendChild(div);
+    registry2.register(div);
+
+    const result = await transport2.call('CSS.getMatchedStylesForNode', {nodeId: registry2.getId(div)!});
+    const rules = result['matchedCSSRules'] as any[];
+    const boxRule = rules.find((r: any) => r.rule.selectorList.text.includes('box'));
+    expect(boxRule).toBeDefined();
+
+    const src = style.textContent!;
+    const ruleStyle = boxRule.rule.style;
+
+    // Rule-level cssText should be the actual source between { and }
+    const bodyFromRange = src.slice(ruleStyle.range.startColumn, ruleStyle.range.endColumn);
+    expect(bodyFromRange).toBe('color:#c4b5fd;font-weight:700');
+
+    // Property-level ranges should point to exact positions in the source
+    for (const prop of ruleStyle.cssProperties) {
+      const propFromRange = src.slice(prop.range.startColumn, prop.range.endColumn);
+      // The range should cover exactly "property:value;" or "property:value" for the last one
+      expect(propFromRange).toContain(prop.name);
+      expect(propFromRange).toContain(prop.value);
+    }
+  });
+
+  it('setStyleTexts with rule range produces valid CSS', async () => {
+    const style = window2.document.createElement('style');
+    style.textContent = '.a{color:red}.b{padding:1}';
+    window2.document.head.appendChild(style);
+
+    const div = window2.document.createElement('div');
+    div.className = 'a';
+    window2.document.body.appendChild(div);
+    registry2.register(div);
+
+    const result = await transport2.call('CSS.getMatchedStylesForNode', {nodeId: registry2.getId(div)!});
+    const aRule = (result['matchedCSSRules'] as any[]).find((r: any) => r.rule.selectorList.text.includes('.a'));
+    const ruleStyle = aRule.rule.style;
+
+    // Edit: replace the rule body with new text
+    await transport2.call('CSS.setStyleTexts', {
+      edits: [{styleSheetId: ruleStyle.styleSheetId, range: ruleStyle.range, text: 'color:blue'}],
+    });
+
+    // The .b rule should be intact
+    expect(style.textContent).toBe('.a{color:blue}.b{padding:1}');
+  });
+});
