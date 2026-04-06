@@ -96,6 +96,11 @@ export class CSSDomainHandler {
     this.transport.registerMethod('CSS.setStyleTexts', (params) => this.setStyleTexts(params));
     this.transport.registerMethod('CSS.getEnvironmentVariables', () => ({variables: {}}));
     this.transport.registerMethod('CSS.trackComputedStyleUpdatesForNode', () => ({}));
+    this.transport.registerMethod('CSS.trackComputedStyleUpdates', () => ({}));
+    this.transport.registerMethod('CSS.takeComputedStyleUpdates', () => ({nodeIds: []}));
+    this.transport.registerMethod('CSS.getBackgroundColors', () => ({backgroundColors: [], computedFontSize: '', computedFontWeight: ''}));
+    this.transport.registerMethod('CSS.getPlatformFontsForNode', () => ({fonts: []}));
+    this.transport.registerMethod('CSS.getAnimatedStylesForNode', () => ({animatedStyles: []}));
   }
 
   /**

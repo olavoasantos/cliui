@@ -87,6 +87,11 @@ export class DOMDomainHandler {
     this.transport.registerMethod('DOM.getNodeForLocation', (params) =>
       this.getNodeForLocation(params),
     );
+    this.transport.registerMethod('DOM.pushNodesByBackendIdsToFrontend', (params) => {
+      // In our implementation, backendNodeId === nodeId
+      const backendIds = (params['backendNodeIds'] as number[]) ?? [];
+      return {nodeIds: backendIds};
+    });
     this.transport.registerMethod('DOM.undo', () => ({}));
     this.transport.registerMethod('DOM.redo', () => ({}));
     this.transport.registerMethod('DOM.setAttributeValue', (params) =>

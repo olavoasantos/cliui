@@ -425,6 +425,7 @@ export class CDPTransport {
     this.registerMethod('Animation.enable', noop);
     this.registerMethod('Autofill.enable', noop);
     this.registerMethod('Autofill.setAddresses', noop);
+    this.registerMethod('Accessibility.enable', noop);
 
     // Debugger.setBreakpointByUrl is handled by V8InspectorProxy
   }
