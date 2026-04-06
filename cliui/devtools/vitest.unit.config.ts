@@ -12,8 +12,10 @@ export default mergeConfig(
           '@cliui/dom': new URL('../dom/src/index.ts', import.meta.url).pathname,
           '@cliui/terminal/core': new URL('../terminal/src/core.ts', import.meta.url).pathname,
           '@cliui/terminal/css': new URL('../terminal/src/css/index.ts', import.meta.url).pathname,
-          '@cliui/terminal/layout': new URL('../terminal/src/layout/index.ts', import.meta.url).pathname,
-          '@cliui/terminal/renderer': new URL('../terminal/src/renderer/index.ts', import.meta.url).pathname,
+          '@cliui/terminal/layout': new URL('../terminal/src/layout/index.ts', import.meta.url)
+            .pathname,
+          '@cliui/terminal/renderer': new URL('../terminal/src/renderer/index.ts', import.meta.url)
+            .pathname,
           '@cliui/terminal': new URL('../terminal/src/index.ts', import.meta.url).pathname,
         },
       },

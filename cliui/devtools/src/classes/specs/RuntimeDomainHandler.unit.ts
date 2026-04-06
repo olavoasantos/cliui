@@ -78,6 +78,7 @@ describe('RuntimeDomainHandler', () => {
       const nodeRegistry = new NodeRegistry();
       const domHandler = new DOMDomainHandler(transport as any, nodeRegistry, window.document);
       const divId = nodeRegistry.register(div);
+      void divId; // Used only to register
       domHandler.inspectedNode = div;
 
       handler = new RuntimeDomainHandler(

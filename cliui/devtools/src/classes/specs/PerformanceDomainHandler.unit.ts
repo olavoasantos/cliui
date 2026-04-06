@@ -80,7 +80,7 @@ describe('PerformanceDomainHandler', () => {
     it('returns frame timing data after measures', async () => {
       // Simulate frame measures
       performance.mark('frame-start');
-      performance.measure('terminal.frame', 'frame-start');
+      performance.measure('terminal.frame', {start: 'frame-start'});
 
       const result = await transport.call('Performance.getMetrics');
       const metrics = result['metrics'] as Array<{name: string; value: number}>;
@@ -114,7 +114,7 @@ describe('PerformanceDomainHandler', () => {
 
       performance.mark('trace-mark');
       performance.mark('trace-start');
-      performance.measure('trace-measure', 'trace-start');
+      performance.measure('trace-measure', {start: 'trace-start'});
 
       // Wait for observer delivery
       await new Promise((r) => setTimeout(r, 50));
@@ -127,9 +127,7 @@ describe('PerformanceDomainHandler', () => {
       const traceEvents = dataEvent!.params.value as any[];
       expect(traceEvents.length).toBeGreaterThan(0);
 
-      const completeEvent = transport.events.find(
-        (e) => e.method === 'Tracing.tracingComplete',
-      );
+      const completeEvent = transport.events.find((e) => e.method === 'Tracing.tracingComplete');
       expect(completeEvent).toBeDefined();
     });
 
@@ -137,9 +135,7 @@ describe('PerformanceDomainHandler', () => {
       await transport.call('Tracing.start');
       await transport.call('Tracing.end');
 
-      const completeEvent = transport.events.find(
-        (e) => e.method === 'Tracing.tracingComplete',
-      );
+      const completeEvent = transport.events.find((e) => e.method === 'Tracing.tracingComplete');
       expect(completeEvent).toBeDefined();
     });
   });

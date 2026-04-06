@@ -39,15 +39,11 @@ export class RuntimeDomainHandler {
     this.transport.registerMethod('Runtime.enable', () => ({}));
     this.transport.registerMethod('Runtime.disable', () => ({}));
     this.transport.registerMethod('Runtime.evaluate', (params) => this.evaluate(params));
-    this.transport.registerMethod('Runtime.getProperties', (params) =>
-      this.getProperties(params),
-    );
+    this.transport.registerMethod('Runtime.getProperties', (params) => this.getProperties(params));
     this.transport.registerMethod('Runtime.callFunctionOn', (params) =>
       this.callFunctionOn(params),
     );
-    this.transport.registerMethod('Runtime.releaseObject', (params) =>
-      this.releaseObject(params),
-    );
+    this.transport.registerMethod('Runtime.releaseObject', (params) => this.releaseObject(params));
     this.transport.registerMethod('Runtime.releaseObjectGroup', (params) =>
       this.releaseObjectGroup(params),
     );
@@ -62,11 +58,7 @@ export class RuntimeDomainHandler {
    *
    * Used by the Log domain to forward console calls.
    */
-  emitConsoleAPICalled(
-    type: string,
-    args: unknown[],
-    timestamp: number,
-  ): void {
+  emitConsoleAPICalled(type: string, args: unknown[], timestamp: number): void {
     this.transport.broadcastEvent({
       method: 'Runtime.consoleAPICalled',
       params: {
@@ -136,14 +128,12 @@ export class RuntimeDomainHandler {
     }
 
     const properties: Array<Record<string, unknown>> = [];
-    const names = ownProperties
-      ? Object.getOwnPropertyNames(obj)
-      : getAllPropertyNames(obj);
+    const names = ownProperties ? Object.getOwnPropertyNames(obj) : getAllPropertyNames(obj);
 
     for (const name of names) {
       try {
-        const descriptor = Object.getOwnPropertyDescriptor(obj, name) ??
-          getInheritedDescriptor(obj, name);
+        const descriptor =
+          Object.getOwnPropertyDescriptor(obj, name) ?? getInheritedDescriptor(obj, name);
         if (!descriptor) continue;
 
         const entry: Record<string, unknown> = {
@@ -179,7 +169,9 @@ export class RuntimeDomainHandler {
   private callFunctionOn(params: Record<string, unknown>): Record<string, unknown> {
     const functionDeclaration = params['functionDeclaration'] as string;
     const objectId = params['objectId'] as string | undefined;
-    const callArguments = params['arguments'] as Array<{value?: unknown; objectId?: string}> | undefined;
+    const callArguments = params['arguments'] as
+      | Array<{value?: unknown; objectId?: string}>
+      | undefined;
     const returnByValue = params['returnByValue'] as boolean | undefined;
 
     try {
@@ -244,10 +236,7 @@ function getAllPropertyNames(obj: object): string[] {
   return [...names];
 }
 
-function getInheritedDescriptor(
-  obj: object,
-  name: string,
-): PropertyDescriptor | undefined {
+function getInheritedDescriptor(obj: object, name: string): PropertyDescriptor | undefined {
   let current: object | null = Object.getPrototypeOf(obj);
   while (current) {
     const desc = Object.getOwnPropertyDescriptor(current, name);

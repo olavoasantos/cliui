@@ -71,7 +71,7 @@ export class OverlayDomainHandler {
   private inspectModeEnabled = false;
 
   /** Callback for when inspect mode identifies a node. */
-  private onInspectNode: ((nodeId: number) => void) | null = null;
+  private inspectNodeCallback: ((nodeId: number) => void) | null = null;
 
   /** Callback to clear the current highlight from the cell buffer. */
   private clearHighlightCallback: (() => void) | null = null;
@@ -92,9 +92,7 @@ export class OverlayDomainHandler {
   register(): void {
     this.transport.registerMethod('Overlay.enable', () => this.enable());
     this.transport.registerMethod('Overlay.disable', () => this.disable());
-    this.transport.registerMethod('Overlay.highlightNode', (params) =>
-      this.highlightNode(params),
-    );
+    this.transport.registerMethod('Overlay.highlightNode', (params) => this.highlightNode(params));
     this.transport.registerMethod('Overlay.hideHighlight', () => this.hideHighlight());
     this.transport.registerMethod('Overlay.setInspectMode', (params) =>
       this.setInspectMode(params),
@@ -105,7 +103,7 @@ export class OverlayDomainHandler {
    * Registers a callback for when inspect mode selects a node.
    */
   onNodeInspected(callback: (nodeId: number) => void): void {
-    this.onInspectNode = callback;
+    this.inspectNodeCallback = callback;
   }
 
   /**
@@ -119,6 +117,7 @@ export class OverlayDomainHandler {
     if (nodeId === undefined) return;
 
     this.highlightElement(element, nodeId, DEFAULT_HIGHLIGHT_CONFIG);
+    this.inspectNodeCallback?.(nodeId);
 
     this.transport.broadcastEvent({
       method: 'Overlay.nodeHighlightRequested',
@@ -192,11 +191,7 @@ export class OverlayDomainHandler {
   /**
    * Renders box-model highlight for an element.
    */
-  private highlightElement(
-    element: Element,
-    nodeId: number,
-    config: HighlightConfig,
-  ): void {
+  private highlightElement(element: Element, nodeId: number, config: HighlightConfig): void {
     // Clear previous highlight
     if (this.clearHighlightCallback) {
       this.clearHighlightCallback();

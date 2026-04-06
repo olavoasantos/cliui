@@ -54,7 +54,7 @@ describe('LogDomainHandler', () => {
       null,
     );
 
-    handler = new LogDomainHandler(transport as any, objectRegistry, runtimeHandler);
+    handler = new LogDomainHandler(transport as any, runtimeHandler);
     handler.register();
   });
 
@@ -138,9 +138,7 @@ describe('LogDomainHandler', () => {
       await transport.call('Log.enable');
       console.log('test');
 
-      const event = transport.events.find(
-        (e) => e.method === 'Runtime.consoleAPICalled',
-      );
+      const event = transport.events.find((e) => e.method === 'Runtime.consoleAPICalled');
       expect(event).toBeDefined();
       expect(event!.params.type).toBe('log');
 

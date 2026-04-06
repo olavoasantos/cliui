@@ -70,7 +70,10 @@ export class PerformanceDomainHandler {
 
     // Observe all known entry types
     try {
-      this.observer.observe({entryTypes: ['measure', 'mark', 'paint', 'event', 'first-input'], performance: this.performance} as any);
+      this.observer.observe({
+        entryTypes: ['measure', 'mark', 'paint', 'event', 'first-input'],
+        performance: this.performance,
+      } as any);
     } catch {
       // Some entry types may not be supported; try individually
       for (const type of ['measure', 'mark']) {

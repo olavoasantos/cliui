@@ -1,6 +1,5 @@
 import type {CDPTransport} from './CDPTransport';
 import type {RuntimeDomainHandler} from './RuntimeDomainHandler';
-import type {ObjectRegistry} from './ObjectRegistry';
 
 /** Console method names we intercept. */
 const CONSOLE_METHODS = ['log', 'warn', 'error', 'info'] as const;
@@ -25,19 +24,13 @@ const LEVEL_MAP: Record<string, string> = {
  */
 export class LogDomainHandler {
   private readonly transport: CDPTransport;
-  private readonly objectRegistry: ObjectRegistry;
   private readonly runtimeHandler: RuntimeDomainHandler;
 
   private enabled = false;
   private readonly originals = new Map<string, (...args: unknown[]) => void>();
 
-  constructor(
-    transport: CDPTransport,
-    objectRegistry: ObjectRegistry,
-    runtimeHandler: RuntimeDomainHandler,
-  ) {
+  constructor(transport: CDPTransport, runtimeHandler: RuntimeDomainHandler) {
     this.transport = transport;
-    this.objectRegistry = objectRegistry;
     this.runtimeHandler = runtimeHandler;
   }
 

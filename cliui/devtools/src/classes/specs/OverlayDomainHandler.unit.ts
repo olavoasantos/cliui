@@ -33,7 +33,7 @@ describe('OverlayDomainHandler', () => {
   let handler: OverlayDomainHandler;
   const highlightedCells: Array<{x: number; y: number; w: number; h: number}> = [];
 
-  const mockLayoutLookup = (element: any) => {
+  const mockLayoutLookup = (_element: any) => {
     // Return a predictable box model for testing
     return {
       x: 0,
@@ -167,9 +167,7 @@ describe('OverlayDomainHandler', () => {
 
       handler.inspectAtCoordinates(div);
 
-      const event = transport.events.find(
-        (e) => e.method === 'Overlay.nodeHighlightRequested',
-      );
+      const event = transport.events.find((e) => e.method === 'Overlay.nodeHighlightRequested');
       expect(event).toBeDefined();
       expect(highlightedCells.length).toBeGreaterThan(0);
     });

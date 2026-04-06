@@ -66,9 +66,7 @@ export class DOMDomainHandler {
     this.transport.registerMethod('DOM.setAttributesAsText', (params) =>
       this.setAttributesAsText(params),
     );
-    this.transport.registerMethod('DOM.removeAttribute', (params) =>
-      this.removeAttribute(params),
-    );
+    this.transport.registerMethod('DOM.removeAttribute', (params) => this.removeAttribute(params));
     this.transport.registerMethod('DOM.removeNode', (params) => this.removeNode(params));
     this.transport.registerMethod('DOM.setNodeValue', (params) => this.setNodeValue(params));
     this.transport.registerMethod('DOM.setOuterHTML', (params) => this.setOuterHTML(params));
@@ -107,7 +105,7 @@ export class DOMDomainHandler {
     if (node) {
       const childNodes = (node as any).childNodes;
       if (childNodes && childNodes.length > 0) {
-        const children = [];
+        const children: ReturnType<typeof serializeCDPNode>[] = [];
         for (let i = 0; i < childNodes.length; i++) {
           children.push(serializeCDPNode(childNodes[i], this.registry, depth - 1));
         }
@@ -172,7 +170,8 @@ export class DOMDomainHandler {
     if (node) {
       // Use the node's outerHTML if available (Element), otherwise textContent
       const element = node as any;
-      const html = typeof element.outerHTML === 'string' ? element.outerHTML : (element.textContent ?? '');
+      const html =
+        typeof element.outerHTML === 'string' ? element.outerHTML : (element.textContent ?? '');
       return {outerHTML: html};
     }
 
@@ -325,7 +324,7 @@ export class DOMDomainHandler {
     const node = this.registry.getNode(nodeId) as Element | undefined;
 
     if (node && typeof node.outerHTML === 'string') {
-      node.outerHTML = outerHTML;
+      (node as any).outerHTML = outerHTML;
     }
 
     return {};
@@ -385,8 +384,7 @@ function getNodeEventListeners(
 
   // Access the internal listeners map via the LISTENERS symbol
   // The @cliui/dom EventTarget uses Symbol('listeners'), we try multiple access patterns
-  const listenersMap =
-    (target as any)[LISTENERS] ?? findListenersMap(target);
+  const listenersMap = (target as any)[LISTENERS] ?? findListenersMap(target);
 
   if (!listenersMap || !(listenersMap instanceof Map)) {
     return listeners;

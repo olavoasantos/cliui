@@ -31,10 +31,9 @@ function installHooks(
   originalHooks?: Partial<Hooks>,
 ): void {
   const merged: Partial<Hooks> = {};
-  const keys = new Set([
-    ...Object.keys(bridgeHooks),
-    ...Object.keys(originalHooks ?? {}),
-  ]) as Set<keyof Hooks>;
+  const keys = new Set([...Object.keys(bridgeHooks), ...Object.keys(originalHooks ?? {})]) as Set<
+    keyof Hooks
+  >;
 
   for (const key of keys) {
     const bridgeFn = bridgeHooks[key] as ((...args: unknown[]) => void) | undefined;

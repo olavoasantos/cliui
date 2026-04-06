@@ -4,13 +4,7 @@ import {WebSocketServer} from './WebSocketServer';
 
 import type {IncomingMessage, ServerResponse} from 'node:http';
 import type {WebSocket} from 'ws';
-import type {
-  CDPCommand,
-  CDPMethodHandler,
-  CDPResponse,
-  CDPEvent,
-  TargetDescriptor,
-} from '../types';
+import type {CDPCommand, CDPMethodHandler, CDPResponse, CDPEvent, TargetDescriptor} from '../types';
 
 /**
  * CDP transport layer: HTTP discovery endpoint and WebSocket message routing.

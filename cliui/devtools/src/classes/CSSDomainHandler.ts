@@ -17,14 +17,20 @@ interface SelectorMatcherAccessor {
   match(
     rules: Array<{selectors: unknown[][]; declarations: Array<{property: string; value: string}>}>,
     element: Element,
-  ): Array<{declaration: {property: string; value: string}; specificity: [number, number, number]; order: number}>;
+  ): Array<{
+    declaration: {property: string; value: string};
+    specificity: [number, number, number];
+    order: number;
+  }>;
 }
 
 /**
  * Interface for CSSParser subset.
  */
 interface CSSParserAccessor {
-  parse(css: string): {rules: Array<{selectors: unknown[][]; declarations: Array<{property: string; value: string}>}>};
+  parse(css: string): {
+    rules: Array<{selectors: unknown[][]; declarations: Array<{property: string; value: string}>}>;
+  };
 }
 
 /**
@@ -334,7 +340,9 @@ export class CSSDomainHandler {
             rule: {
               styleSheetId: stylesheetId,
               selectorList: {
-                selectors: [{text: selectorText, range: makeRange(ruleIdx, 0, ruleIdx, selectorText.length)}],
+                selectors: [
+                  {text: selectorText, range: makeRange(ruleIdx, 0, ruleIdx, selectorText.length)},
+                ],
                 text: selectorText,
               },
               style: {
@@ -357,7 +365,7 @@ export class CSSDomainHandler {
    */
   private getInheritedStyles(element: Element): unknown[] {
     const inherited: unknown[] = [];
-    let ancestor = element.parentElement;
+    let ancestor = element.parentElement as Element | null;
 
     while (ancestor) {
       const inlineStyle = this.getInlineStyleObject(ancestor);
@@ -368,7 +376,7 @@ export class CSSDomainHandler {
         matchedCSSRules: matchedRules,
       });
 
-      ancestor = ancestor.parentElement;
+      ancestor = ancestor.parentElement as Element | null;
     }
 
     return inherited;
@@ -474,6 +482,11 @@ export class CSSDomainHandler {
 /**
  * Creates a CDP SourceRange object.
  */
-function makeRange(startLine: number, startColumn: number, endLine: number, endColumn: number): SourceRange {
+function makeRange(
+  startLine: number,
+  startColumn: number,
+  endLine: number,
+  endColumn: number,
+): SourceRange {
   return {startLine, startColumn, endLine, endColumn};
 }

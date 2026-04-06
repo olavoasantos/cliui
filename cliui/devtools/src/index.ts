@@ -1,5 +1,14 @@
 export {CDPTransport} from './classes/CDPTransport';
+export {CSSDomainHandler} from './classes/CSSDomainHandler';
+export {DevToolsBridge} from './classes/DevToolsBridge';
+export {DOMDomainHandler} from './classes/DOMDomainHandler';
+export {DOMMutationBridge} from './classes/DOMMutationBridge';
+export {LogDomainHandler} from './classes/LogDomainHandler';
 export {NodeRegistry} from './classes/NodeRegistry';
+export {ObjectRegistry} from './classes/ObjectRegistry';
+export {OverlayDomainHandler} from './classes/OverlayDomainHandler';
+export {PerformanceDomainHandler} from './classes/PerformanceDomainHandler';
+export {RuntimeDomainHandler} from './classes/RuntimeDomainHandler';
 export {WebSocketServer} from './classes/WebSocketServer';
 export {serializeCDPNode} from './utilities/serializeCDPNode';
 
@@ -19,3 +28,5 @@ export type {
   TargetDescriptor,
   WebSocketServerOptions,
 } from './types';
+
+export type {CDPNode} from './utilities/serializeCDPNode';

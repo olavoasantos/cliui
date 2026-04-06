@@ -1,6 +1,5 @@
 import {describe, it, expect, beforeEach} from 'vitest';
 import {Window} from '@cliui/dom';
-import {HOOKS} from '@cliui/dom';
 import {StyleEngine} from '@cliui/terminal/core';
 import {SelectorMatcher} from '@cliui/terminal/css';
 import {CSSParser} from '@cliui/terminal/css';
@@ -137,7 +136,9 @@ describe('CSSDomainHandler', () => {
       const result = await transport.call('CSS.getMatchedStylesForNode', {nodeId: divId});
       const matched = result['matchedCSSRules'] as any[];
 
-      const highlightRule = matched.find((m: any) => m.rule.selectorList.text.includes('highlight'));
+      const highlightRule = matched.find((m: any) =>
+        m.rule.selectorList.text.includes('highlight'),
+      );
       expect(highlightRule).toBeDefined();
       expect(highlightRule.rule.style.cssProperties.length).toBeGreaterThan(0);
     });

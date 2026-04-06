@@ -94,7 +94,18 @@ export type CDPMethodHandler = (
  */
 export interface RemoteObject {
   type: 'object' | 'function' | 'undefined' | 'string' | 'number' | 'boolean' | 'symbol' | 'bigint';
-  subtype?: 'null' | 'array' | 'node' | 'regexp' | 'date' | 'map' | 'set' | 'error' | 'proxy' | 'promise' | 'typedarray';
+  subtype?:
+    | 'null'
+    | 'array'
+    | 'node'
+    | 'regexp'
+    | 'date'
+    | 'map'
+    | 'set'
+    | 'error'
+    | 'proxy'
+    | 'promise'
+    | 'typedarray';
   className?: string;
   value?: unknown;
   description?: string;
