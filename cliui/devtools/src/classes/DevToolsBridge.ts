@@ -234,7 +234,7 @@ export class DevToolsBridge {
       this.transport.registerMethod('Page.startScreencast', () => {
         this.stopScreencast();
         const sessionId = ++this.screencastSessionId;
-        const fps = 2; // low fps to avoid flooding
+        const fps = 10; // balance between responsiveness and CPU cost
         this.screencastInterval = setInterval(() => {
           if (this.screencastSessionId !== sessionId) return;
           const buffer = getCellBuffer();
