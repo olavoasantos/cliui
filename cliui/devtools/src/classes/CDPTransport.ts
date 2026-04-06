@@ -356,8 +356,55 @@ export class CDPTransport {
     // Emulation stubs
     this.registerMethod('Emulation.setAutoDarkModeOverride', noop);
     this.registerMethod('Emulation.setFocusEmulationEnabled', noop);
+    this.registerMethod('Emulation.setEmulatedMedia', noop);
+    this.registerMethod('Emulation.setEmulatedVisionDeficiency', noop);
 
-    // DOM domain stubs that DevTools sends early
+    // DOM domain stubs
     this.registerMethod('DOM.setDiscoverMode', noop);
+    this.registerMethod('DOMDebugger.setBreakOnCSPViolation', noop);
+
+    // Page domain — getNavigationHistory MUST return entries or DevTools crashes
+    this.registerMethod('Page.getNavigationHistory', () => ({
+      currentIndex: 0,
+      entries: [{
+        id: 0,
+        url: 'terminal://localhost',
+        userTypedURL: 'terminal://localhost',
+        title: 'Terminal DOM',
+        transitionType: 'typed',
+      }],
+    }));
+    this.registerMethod('Page.setAdBlockingEnabled', noop);
+    this.registerMethod('Page.addScriptToEvaluateOnNewDocument', () => ({identifier: '1'}));
+
+    // Overlay domain extras
+    this.registerMethod('Overlay.setShowViewportSizeOnResize', noop);
+    this.registerMethod('Overlay.setShowGridOverlays', noop);
+    this.registerMethod('Overlay.setShowFlexOverlays', noop);
+    this.registerMethod('Overlay.setShowScrollSnapOverlays', noop);
+    this.registerMethod('Overlay.setShowContainerQueryOverlays', noop);
+    this.registerMethod('Overlay.setShowIsolatedElements', noop);
+
+    // Network extras
+    this.registerMethod('Network.setBlockedURLs', noop);
+    this.registerMethod('Network.emulateNetworkConditionsByRule', noop);
+    this.registerMethod('Network.overrideNetworkState', noop);
+    this.registerMethod('Network.clearAcceptedEncodingsOverride', noop);
+
+    // Runtime extras
+    this.registerMethod('Runtime.addBinding', noop);
+
+    // Target extras
+    this.registerMethod('Target.setRemoteLocations', noop);
+
+    // Storage / Audits / Animation / Autofill
+    this.registerMethod('Storage.getStorageKey', () => ({storageKey: 'terminal://'}));
+    this.registerMethod('Audits.enable', noop);
+    this.registerMethod('Animation.enable', noop);
+    this.registerMethod('Autofill.enable', noop);
+    this.registerMethod('Autofill.setAddresses', noop);
+
+    // Debugger extras (breakpoints always "fail" gracefully)
+    this.registerMethod('Debugger.setBreakpointByUrl', () => ({breakpointId: 'none', locations: []}));
   }
 }
