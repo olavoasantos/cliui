@@ -25,7 +25,12 @@ interface CellBufferLike {
 /** Default cell dimensions in pixels. */
 const CELL_WIDTH = 8;
 const CELL_HEIGHT = 16;
-const FONT_SIZE = 14;
+/**
+ * Font stack: platform monospace font with emoji fallback.
+ * Menlo (macOS), Consolas (Windows), monospace (Linux fallback).
+ * Apple Color Emoji / Segoe UI Emoji for emoji glyphs.
+ */
+const FONT_FAMILY = '"Apple Color Emoji", "Segoe UI Emoji", Menlo, Consolas, monospace';
 
 /**
  * Renders a terminal cell buffer to a PNG image.
@@ -74,7 +79,7 @@ export function renderCellBufferToImage(buffer: CellBufferLike): string {
 
         const weight = cell.bold ? 'bold' : 'normal';
         const style = cell.italic ? 'italic' : 'normal';
-        ctx.font = `${style} ${weight} ${FONT_SIZE}px monospace`;
+        ctx.font = `${style} ${weight} 14px ${FONT_FAMILY}`;
 
         ctx.fillText(cell.char, x, y + 1);
       }
