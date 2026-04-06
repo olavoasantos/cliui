@@ -280,7 +280,7 @@ describe('CSSDomainHandler', () => {
         edits: [{styleSheetId: ruleStyle.styleSheetId, range: ruleStyle.range, text: 'color:blue'}],
       });
 
-      const resultStyle = editResult['styles'][0] as any;
+      const resultStyle = (editResult as any)['styles'][0] as any;
 
       // Response cssText should be ONLY the edited rule body, not the whole sheet
       expect(resultStyle.cssText).toBe('color:blue');
@@ -300,7 +300,43 @@ describe('CSSDomainHandler', () => {
         edits: [{styleSheetId: ruleStyle.styleSheetId, range: resultStyle.range, text: 'color:green'}],
       });
       expect(style.textContent).toBe('.a{color:green}.b{padding:1}');
-      expect(editResult2['styles'][0].cssText).toBe('color:green');
+      expect((editResult2 as any)['styles'][0].cssText).toBe('color:green');
+    });
+
+    it('inline style edits apply range-based changes without accumulating', async () => {
+      const div = window.document.createElement('div');
+      window.document.body.appendChild(div);
+      const divId = registry.register(div);
+
+      // Get inline style info (initially empty)
+      const matched = await transport.call('CSS.getMatchedStylesForNode', {nodeId: divId});
+      const inlineStyle = matched['inlineStyle'] as any;
+      const sheetId = inlineStyle.styleSheetId;
+
+      // First edit: add color: red
+      const r1 = await transport.call('CSS.setStyleTexts', {
+        edits: [{styleSheetId: sheetId, range: inlineStyle.range, text: 'color: red;'}],
+      });
+      const s1 = (r1 as any)['styles'][0] as any;
+      expect(s1.cssText).toBe('color: red;');
+      expect(div.getAttribute('style')).toBe('color: red;');
+
+      // Second edit using response range: change to blue
+      const r2 = await transport.call('CSS.setStyleTexts', {
+        edits: [{styleSheetId: sheetId, range: s1.range, text: 'color: blue;'}],
+      });
+      const s2 = (r2 as any)['styles'][0] as any;
+      expect(s2.cssText).toBe('color: blue;');
+      // Should NOT accumulate — only one color declaration
+      expect(div.getAttribute('style')).toBe('color: blue;');
+
+      // Third edit: simulate typing (partial edit within the value)
+      // DevTools sends range covering just the value part
+      const r3 = await transport.call('CSS.setStyleTexts', {
+        edits: [{styleSheetId: sheetId, range: s2.range, text: 'color: green;'}],
+      });
+      expect((r3 as any)['styles'][0].cssText).toBe('color: green;');
+      expect(div.getAttribute('style')).toBe('color: green;');
     });
   });
 

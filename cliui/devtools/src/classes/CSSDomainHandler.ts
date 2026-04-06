@@ -296,8 +296,25 @@ export class CSSDomainHandler {
       // Check if this is an inline style edit
       const inlineElement = this.inlineStyleMap.get(edit.styleSheetId);
       if (inlineElement) {
-        inlineElement.setAttribute('style', edit.text);
-        styles.push(this.makeStyleResult(edit.styleSheetId, edit.text));
+        // Get the current inline style text
+        const currentCssText = (inlineElement as any).style?.cssText ?? '';
+
+        // Apply range-based edit (DevTools sends partial edits as user types)
+        const newCssText = edit.range
+          ? this.applyInlineRangeEdit(currentCssText, edit.range, edit.text)
+          : edit.text;
+
+        inlineElement.setAttribute('style', newCssText);
+
+        // Build response with correct range
+        const newRange = makeRange(0, 0, 0, newCssText.length);
+        styles.push({
+          styleSheetId: edit.styleSheetId,
+          cssProperties: this.parseBodyProperties(newCssText, newRange),
+          shorthandEntries: [],
+          cssText: newCssText,
+          range: newRange,
+        });
         continue;
       }
 
@@ -679,6 +696,18 @@ export class CSSDomainHandler {
       searchPos = end;
     }
     return properties;
+  }
+
+  /**
+   * Applies a range edit to inline style text.
+   *
+   * Inline style ranges are always single-line with column offsets
+   * into the cssText string.
+   */
+  private applyInlineRangeEdit(text: string, range: SourceRange, replacement: string): string {
+    const before = text.slice(0, range.startColumn);
+    const after = text.slice(range.endColumn);
+    return before + replacement + after;
   }
 
   private emptyStyle(): Record<string, unknown> {
