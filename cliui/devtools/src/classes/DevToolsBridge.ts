@@ -13,7 +13,6 @@ import {DEFAULT_CDP_PORT} from '../constants';
 import type {WebSocket} from 'ws';
 import type {DevToolsBridgeOptions} from '../types';
 import type {Window, Document, Element} from '@cliui/dom';
-import type {Hooks} from '@cliui/dom';
 
 /**
  * Interface for the style engine used by the CSS domain.
@@ -172,8 +171,7 @@ export class DevToolsBridge {
       return this.objectRegistry.serialize(node) as any;
     };
 
-    // Wire DOM domain to mutation bridge for edit suppression
-    this.domHandler.mutationBridge = this.mutationBridge;
+    // Wire DOM domain to layout lookup
     this.domHandler.layoutLookup = config.layoutLookup ?? null;
 
     // Wire connection/disconnection lifecycle
@@ -185,7 +183,8 @@ export class DevToolsBridge {
       this.onClientDisconnect();
     });
 
-    // Register all domain handlers
+    // Auto-install mutation bridge hooks by chaining onto existing window hooks
+    this.mutationBridge.install(this.window);
     this.domHandler.register();
     this.cssHandler.register();
     this.runtimeHandler.register();
@@ -227,12 +226,13 @@ export class DevToolsBridge {
     const actualPort = typeof addr === 'object' && addr ? addr.port : (port ?? DEFAULT_CDP_PORT);
     const host = typeof addr === 'object' && addr && 'address' in addr ? addr.address : '127.0.0.1';
 
-    console.log(`DevTools listening on ws://${host}:${actualPort}`);
-    console.log(
-      `  Open: devtools://devtools/bundled/inspector.html?ws=${host}:${actualPort}/devtools/terminal-dom`,
+    // Log to stderr so it doesn't pollute the terminal's alt screen stdout
+    process.stderr.write(`DevTools listening on ws://${host}:${actualPort}\n`);
+    process.stderr.write(
+      `  Open: devtools://devtools/bundled/inspector.html?ws=${host}:${actualPort}/devtools/terminal-dom\n`,
     );
     if (this.transport.debug) {
-      console.log('  CDP debug log: cdp-debug.log');
+      process.stderr.write('  CDP debug log: cdp-debug.log\n');
     }
   }
 
@@ -278,15 +278,6 @@ export class DevToolsBridge {
     return this.overlayHandler;
   }
 
-  /**
-   * Returns the hooks to merge into the window's hooks bridge.
-   *
-   * The terminal should merge these hooks with the existing style engine
-   * hooks so DOM mutations flow to both the style engine and the CDP bridge.
-   */
-  getHooks(): Partial<Hooks> {
-    return this.mutationBridge.createHooks();
-  }
 
   // ── Lifecycle ──────────────────────────────────────────────────────
 

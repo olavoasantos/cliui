@@ -1,11 +1,9 @@
 import {describe, it, expect, beforeEach} from 'vitest';
 import {Window} from '@cliui/dom';
-import {HOOKS} from '@cliui/dom';
 import {NodeRegistry} from '../NodeRegistry';
 import {DOMMutationBridge} from '../DOMMutationBridge';
 
 import type {CDPEvent} from '../../types';
-import type {Hooks} from '@cliui/dom';
 
 /**
  * Minimal CDPTransport stub that captures broadcast events.
@@ -20,38 +18,6 @@ function createMockTransport() {
   };
 }
 
-/**
- * Merges DOMMutationBridge hooks with existing window hooks so that
- * original behavior (DOM manipulation) is preserved while also
- * forwarding to the bridge.
- */
-function installHooks(
-  window: InstanceType<typeof Window>,
-  bridgeHooks: Partial<Hooks>,
-  originalHooks?: Partial<Hooks>,
-): void {
-  const merged: Partial<Hooks> = {};
-  const keys = new Set([...Object.keys(bridgeHooks), ...Object.keys(originalHooks ?? {})]) as Set<
-    keyof Hooks
-  >;
-
-  for (const key of keys) {
-    const bridgeFn = bridgeHooks[key] as ((...args: unknown[]) => void) | undefined;
-    const originalFn = originalHooks?.[key] as ((...args: unknown[]) => void) | undefined;
-
-    if (bridgeFn && originalFn) {
-      (merged as any)[key] = (...args: unknown[]) => {
-        originalFn(...args);
-        bridgeFn(...args);
-      };
-    } else {
-      (merged as any)[key] = bridgeFn ?? originalFn;
-    }
-  }
-
-  (window as any)[HOOKS] = merged;
-}
-
 describe('DOMMutationBridge', () => {
   let window: InstanceType<typeof Window>;
   let registry: NodeRegistry;
@@ -63,7 +29,7 @@ describe('DOMMutationBridge', () => {
     registry = new NodeRegistry();
     transport = createMockTransport();
     bridge = new DOMMutationBridge(transport as any, registry);
-    installHooks(window, bridge.createHooks());
+    bridge.install(window);
     bridge.enable();
   });
 

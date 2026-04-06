@@ -1,7 +1,6 @@
 import {serializeCDPNode} from '../utilities/serializeCDPNode';
 
 import type {CDPTransport} from './CDPTransport';
-import type {DOMMutationBridge} from './DOMMutationBridge';
 import type {NodeRegistry} from './NodeRegistry';
 import type {Document, Element, EventTarget, Node as DomNode} from '@cliui/dom';
 
@@ -16,12 +15,6 @@ export class DOMDomainHandler {
   private readonly transport: CDPTransport;
   private readonly registry: NodeRegistry;
   private readonly document: Document;
-
-  /**
-   * Mutation bridge reference, set after construction to suppress
-   * echo events during DevTools-initiated edits.
-   */
-  mutationBridge: DOMMutationBridge | null = null;
 
   /** The most recently inspected node, accessible as `$0` in the console. */
   inspectedNode: Element | null = null;
@@ -247,7 +240,7 @@ export class DOMDomainHandler {
     const node = this.registry.getNode(nodeId) as Element | undefined;
 
     if (node && typeof node.setAttribute === 'function') {
-      this.withSuppression(() => node.setAttribute(name, value));
+      node.setAttribute(name, value);
     }
 
     return {};
@@ -269,25 +262,23 @@ export class DOMDomainHandler {
       return {};
     }
 
-    this.withSuppression(() => {
-      // If text is empty and we have a name, remove that attribute
-      if (!text && nameToRemove) {
-        node.removeAttribute(nameToRemove);
-        return;
-      }
+    // If text is empty and we have a name, remove that attribute
+    if (!text && nameToRemove) {
+      node.removeAttribute(nameToRemove);
+      return {};
+    }
 
-      // Parse key="value" pairs from the text
-      const parsed = parseAttributeString(text);
+    // Parse key="value" pairs from the text
+    const parsed = parseAttributeString(text);
 
-      // If we're replacing a specific attribute and it's not in the new text, remove it
-      if (nameToRemove && !parsed.has(nameToRemove)) {
-        node.removeAttribute(nameToRemove);
-      }
+    // If we are replacing a specific attribute and it is not in the new text, remove it
+    if (nameToRemove && !parsed.has(nameToRemove)) {
+      node.removeAttribute(nameToRemove);
+    }
 
-      for (const [name, value] of parsed) {
-        node.setAttribute(name, value);
-      }
-    });
+    for (const [name, value] of parsed) {
+      node.setAttribute(name, value);
+    }
 
     return {};
   }
@@ -301,7 +292,7 @@ export class DOMDomainHandler {
     const node = this.registry.getNode(nodeId) as Element | undefined;
 
     if (node && typeof node.removeAttribute === 'function') {
-      this.withSuppression(() => node.removeAttribute(name));
+      node.removeAttribute(name);
     }
 
     return {};
@@ -315,7 +306,7 @@ export class DOMDomainHandler {
     const node = this.registry.getNode(nodeId);
 
     if (node && node.parentNode) {
-      this.withSuppression(() => node.parentNode!.removeChild(node));
+      node.parentNode!.removeChild(node);
     }
 
     return {};
@@ -330,9 +321,7 @@ export class DOMDomainHandler {
     const node = this.registry.getNode(nodeId);
 
     if (node) {
-      this.withSuppression(() => {
-        node.nodeValue = value;
-      });
+      node.nodeValue = value;
     }
 
     return {};
@@ -347,9 +336,7 @@ export class DOMDomainHandler {
     const node = this.registry.getNode(nodeId) as Element | undefined;
 
     if (node && typeof node.outerHTML === 'string') {
-      this.withSuppression(() => {
-        (node as any).outerHTML = outerHTML;
-      });
+      (node as any).outerHTML = outerHTML;
     }
 
     return {};
@@ -403,23 +390,6 @@ export class DOMDomainHandler {
         height: box.height,
       },
     };
-  }
-
-  /**
-   * Executes a DOM mutation while suppressing the mutation bridge
-   * to prevent DevTools-initiated edits from echoing back.
-   */
-  private withSuppression(fn: () => void): void {
-    if (this.mutationBridge) {
-      this.mutationBridge.suppressed = true;
-    }
-    try {
-      fn();
-    } finally {
-      if (this.mutationBridge) {
-        this.mutationBridge.suppressed = false;
-      }
-    }
   }
 
   /**
