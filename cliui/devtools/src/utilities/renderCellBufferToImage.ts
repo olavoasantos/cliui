@@ -30,7 +30,7 @@ const CELL_HEIGHT = 16;
  * Menlo (macOS), Consolas (Windows), monospace (Linux fallback).
  * Apple Color Emoji / Segoe UI Emoji for emoji glyphs.
  */
-const FONT_FAMILY = '"Apple Color Emoji", "Segoe UI Emoji", Menlo, Consolas, monospace';
+const FONT_FAMILY = 'Menlo, Consolas, monospace, "Apple Color Emoji", "Segoe UI Emoji"';
 
 /**
  * Renders a terminal cell buffer to a PNG image.
