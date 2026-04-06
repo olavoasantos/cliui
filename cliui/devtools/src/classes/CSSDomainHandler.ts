@@ -93,6 +93,8 @@ export class CSSDomainHandler {
       this.getStyleSheetText(params),
     );
     this.transport.registerMethod('CSS.setStyleTexts', (params) => this.setStyleTexts(params));
+    this.transport.registerMethod('CSS.getEnvironmentVariables', () => ({variables: {}}));
+    this.transport.registerMethod('CSS.trackComputedStyleUpdatesForNode', () => ({}));
   }
 
   /**

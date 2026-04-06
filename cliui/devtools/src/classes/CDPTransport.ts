@@ -199,9 +199,25 @@ export class CDPTransport {
   }
 
   /**
-   * When `true`, all CDP messages and responses are logged to stderr.
+   * When `true`, all CDP messages and responses are logged.
+   * Output goes to `cdp-debug.log` in the current working directory
+   * to avoid garbling the terminal UI.
    */
   debug = false;
+
+  /** File descriptor for the debug log, opened lazily. */
+  private debugFd: number | null = null;
+
+  /** Writes a line to the debug log file. */
+  private debugLog(line: string): void {
+    if (!this.debug) return;
+    if (this.debugFd === null) {
+      const fs = require('node:fs') as typeof import('node:fs');
+      this.debugFd = fs.openSync('cdp-debug.log', 'w');
+    }
+    const fs = require('node:fs') as typeof import('node:fs');
+    fs.writeSync(this.debugFd, line + '\n');
+  }
 
   /**
    * Dispatches an incoming WebSocket message to the appropriate domain handler.
@@ -215,7 +231,7 @@ export class CDPTransport {
     }
 
     if (this.debug) {
-      process.stderr.write(`\x1b[36m← ${command.method}\x1b[0m ${JSON.stringify(command.params ?? {}).slice(0, 200)}\n`);
+      this.debugLog(`← ${command.method} ${JSON.stringify(command.params ?? {}).slice(0, 200)}`);
     }
 
     const handler = this.handlers.get(command.method);
@@ -224,12 +240,12 @@ export class CDPTransport {
         const result = await handler(command.params ?? {});
         const response = {id: command.id, result: result ?? {}};
         if (this.debug) {
-          process.stderr.write(`\x1b[32m→ ${command.method}\x1b[0m ${JSON.stringify(response.result).slice(0, 200)}\n`);
+          this.debugLog(`→ ${command.method} ${JSON.stringify(response.result).slice(0, 200)}`);
         }
         this.sendResponse(socket, response);
       } catch (err) {
         if (this.debug) {
-          process.stderr.write(`\x1b[31m✗ ${command.method}\x1b[0m ${(err as Error).message}\n`);
+          this.debugLog(`✗ ${command.method} ${(err as Error).message}`);
         }
         this.sendResponse(socket, {
           id: command.id,
@@ -238,7 +254,7 @@ export class CDPTransport {
       }
     } else {
       if (this.debug) {
-        process.stderr.write(`\x1b[33m? ${command.method}\x1b[0m (unhandled)\n`);
+        this.debugLog(`? ${command.method} (unhandled)`);
       }
       // Unknown methods get an empty response to satisfy DevTools
       this.sendResponse(socket, {

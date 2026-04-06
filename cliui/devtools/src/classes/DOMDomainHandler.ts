@@ -36,6 +36,14 @@ export class DOMDomainHandler {
     | null = null;
 
   /**
+   * A function provided externally to look up layout box metrics for a node.
+   * Set by the DevToolsBridge after the layout engine is available.
+   */
+  layoutLookup:
+    | ((element: Element) => {x: number; y: number; width: number; height: number; contentX: number; contentY: number; contentWidth: number; contentHeight: number} | null)
+    | null = null;
+
+  /**
    * Creates a new DOM domain handler.
    *
    * @param transport - CDP transport for sending responses and events.
@@ -67,6 +75,10 @@ export class DOMDomainHandler {
     this.transport.registerMethod('DOM.setInspectedNode', (params) =>
       this.setInspectedNode(params),
     );
+    this.transport.registerMethod('DOM.getBoxModel', (params) => this.getBoxModel(params));
+    this.transport.registerMethod('DOM.markUndoableState', () => ({}));
+    this.transport.registerMethod('DOM.undo', () => ({}));
+    this.transport.registerMethod('DOM.redo', () => ({}));
     this.transport.registerMethod('DOM.setAttributeValue', (params) =>
       this.setAttributeValue(params),
     );
@@ -341,6 +353,56 @@ export class DOMDomainHandler {
     }
 
     return {};
+  }
+
+  /**
+   * `DOM.getBoxModel` — returns the box model dimensions for a node.
+   *
+   * DevTools calls this constantly for element highlighting, tooltips,
+   * and the box model diagram in the Styles pane.
+   */
+  private getBoxModel(params: Record<string, unknown>): Record<string, unknown> {
+    const nodeId = params['nodeId'] as number;
+    const node = this.registry.getNode(nodeId) as Element | undefined;
+
+    if (!node || node.nodeType !== 1 || !this.layoutLookup) {
+      // Return a zero-size box rather than failing — DevTools handles this gracefully
+      const zero = [0, 0, 0, 0, 0, 0, 0, 0];
+      return {model: {content: zero, padding: zero, border: zero, margin: zero, width: 0, height: 0}};
+    }
+
+    const box = this.layoutLookup(node);
+    if (!box) {
+      const zero = [0, 0, 0, 0, 0, 0, 0, 0];
+      return {model: {content: zero, padding: zero, border: zero, margin: zero, width: 0, height: 0}};
+    }
+
+    // CDP box model uses four x,y corner pairs (8 numbers): top-left, top-right, bottom-right, bottom-left
+    const content = [
+      box.contentX, box.contentY,
+      box.contentX + box.contentWidth, box.contentY,
+      box.contentX + box.contentWidth, box.contentY + box.contentHeight,
+      box.contentX, box.contentY + box.contentHeight,
+    ];
+    const padding = content; // simplified: padding edge = content edge for now
+    const border = [
+      box.x, box.y,
+      box.x + box.width, box.y,
+      box.x + box.width, box.y + box.height,
+      box.x, box.y + box.height,
+    ];
+    const margin = border; // simplified: margin edge = border edge for now
+
+    return {
+      model: {
+        content,
+        padding,
+        border,
+        margin,
+        width: box.width,
+        height: box.height,
+      },
+    };
   }
 
   /**

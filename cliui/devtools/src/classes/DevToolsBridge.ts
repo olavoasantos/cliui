@@ -174,6 +174,7 @@ export class DevToolsBridge {
 
     // Wire DOM domain to mutation bridge for edit suppression
     this.domHandler.mutationBridge = this.mutationBridge;
+    this.domHandler.layoutLookup = config.layoutLookup ?? null;
 
     // Wire connection/disconnection lifecycle
     this.transport.onConnect((_socket: WebSocket) => {
@@ -230,6 +231,9 @@ export class DevToolsBridge {
     console.log(
       `  Open: devtools://devtools/bundled/inspector.html?ws=${host}:${actualPort}/devtools/terminal-dom`,
     );
+    if (this.transport.debug) {
+      console.log('  CDP debug log: cdp-debug.log');
+    }
   }
 
   /**
