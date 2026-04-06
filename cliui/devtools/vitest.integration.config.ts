@@ -1,0 +1,19 @@
+import {defineConfig, mergeConfig} from 'vitest/config';
+import projectConfig from './vite.config';
+import integrationBase from '@cliui/internals/vitest.integration';
+
+export default mergeConfig(
+  projectConfig,
+  mergeConfig(
+    integrationBase,
+    defineConfig({
+      resolve: {
+        alias: {
+          '@cliui/dom': new URL('../dom/src/index.ts', import.meta.url).pathname,
+          '@cliui/terminal': new URL('../terminal/src/index.ts', import.meta.url).pathname,
+          '@cliui/terminal/core': new URL('../terminal/src/core.ts', import.meta.url).pathname,
+        },
+      },
+    }),
+  ),
+);
