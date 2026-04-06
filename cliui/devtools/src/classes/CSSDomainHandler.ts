@@ -477,7 +477,9 @@ export class CSSDomainHandler {
 
           // Build per-property ranges by finding each declaration in the source
           const properties = this.buildPropertyRangesFromSource(
-            cssSource, bodyRange, rule.declarations,
+            cssSource,
+            bodyRange,
+            rule.declarations,
           );
 
           result.push({
@@ -485,7 +487,15 @@ export class CSSDomainHandler {
               styleSheetId: stylesheetId,
               selectorList: {
                 selectors: [
-                  {text: selectorText, range: makeRange(bodyRange.startLine, 0, bodyRange.startLine, selectorText.length)},
+                  {
+                    text: selectorText,
+                    range: makeRange(
+                      bodyRange.startLine,
+                      0,
+                      bodyRange.startLine,
+                      selectorText.length,
+                    ),
+                  },
                 ],
                 text: selectorText,
               },
@@ -632,9 +642,10 @@ export class CSSDomainHandler {
       // Find this declaration in the body text
       // Search for "property" followed by ":" and the value
       const propPattern = decl.property;
-      const searchStart = properties.length > 0
-        ? (properties[properties.length - 1].range!.endColumn - bodyRange.startColumn)
-        : 0;
+      const searchStart =
+        properties.length > 0
+          ? properties[properties.length - 1].range!.endColumn - bodyRange.startColumn
+          : 0;
 
       const propIdx = bodyText.indexOf(propPattern, searchStart);
       if (propIdx === -1) {
@@ -718,11 +729,7 @@ export class CSSDomainHandler {
    * Finds the source range of a rule's declaration body (`{ ... }`) in the
    * stylesheet text.  Used to produce accurate ranges for `setStyleTexts`.
    */
-  private findRuleBodyRange(
-    source: string,
-    _selectorText: string,
-    ruleIndex: number,
-  ): SourceRange {
+  private findRuleBodyRange(source: string, _selectorText: string, ruleIndex: number): SourceRange {
     const lines = source.split('\n');
     let braceCount = 0;
     let rulesSeen = 0;

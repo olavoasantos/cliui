@@ -120,7 +120,11 @@ export class RuntimeDomainHandler {
           text: 'Possible side-effect in debug-evaluate',
           lineNumber: 0,
           columnNumber: 0,
-          exception: {type: 'object', subtype: 'error', description: 'EvalError: Possible side-effect in debug-evaluate'},
+          exception: {
+            type: 'object',
+            subtype: 'error',
+            description: 'EvalError: Possible side-effect in debug-evaluate',
+          },
         },
       };
     }

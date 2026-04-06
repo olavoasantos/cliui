@@ -331,8 +331,28 @@ export class CDPTransport {
       return {
         profile: {
           nodes: [
-            {id: 1, callFrame: {functionName: '(root)', scriptId: '0', url: '', lineNumber: -1, columnNumber: -1}, children: [2]},
-            {id: 2, callFrame: {functionName: '(idle)', scriptId: '0', url: '', lineNumber: -1, columnNumber: -1}, children: []},
+            {
+              id: 1,
+              callFrame: {
+                functionName: '(root)',
+                scriptId: '0',
+                url: '',
+                lineNumber: -1,
+                columnNumber: -1,
+              },
+              children: [2],
+            },
+            {
+              id: 2,
+              callFrame: {
+                functionName: '(idle)',
+                scriptId: '0',
+                url: '',
+                lineNumber: -1,
+                columnNumber: -1,
+              },
+              children: [],
+            },
           ],
           startTime: now - 1000000,
           endTime: now,
@@ -366,13 +386,15 @@ export class CDPTransport {
     // Page domain — getNavigationHistory MUST return entries or DevTools crashes
     this.registerMethod('Page.getNavigationHistory', () => ({
       currentIndex: 0,
-      entries: [{
-        id: 0,
-        url: 'terminal://localhost',
-        userTypedURL: 'terminal://localhost',
-        title: 'Terminal DOM',
-        transitionType: 'typed',
-      }],
+      entries: [
+        {
+          id: 0,
+          url: 'terminal://localhost',
+          userTypedURL: 'terminal://localhost',
+          title: 'Terminal DOM',
+          transitionType: 'typed',
+        },
+      ],
     }));
     this.registerMethod('Page.setAdBlockingEnabled', noop);
     this.registerMethod('Page.addScriptToEvaluateOnNewDocument', () => ({identifier: '1'}));
@@ -405,6 +427,9 @@ export class CDPTransport {
     this.registerMethod('Autofill.setAddresses', noop);
 
     // Debugger extras (breakpoints always "fail" gracefully)
-    this.registerMethod('Debugger.setBreakpointByUrl', () => ({breakpointId: 'none', locations: []}));
+    this.registerMethod('Debugger.setBreakpointByUrl', () => ({
+      breakpointId: 'none',
+      locations: [],
+    }));
   }
 }

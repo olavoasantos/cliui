@@ -189,8 +189,24 @@ export class PerformanceDomainHandler {
 
     // Metadata events that DevTools requires
     traceEvents.push(
-      {cat: '__metadata', name: 'process_name', ph: 'M', ts: 0, pid: 1, tid: 1, args: {name: 'Terminal DOM'}},
-      {cat: '__metadata', name: 'thread_name', ph: 'M', ts: 0, pid: 1, tid: 1, args: {name: 'Main'}},
+      {
+        cat: '__metadata',
+        name: 'process_name',
+        ph: 'M',
+        ts: 0,
+        pid: 1,
+        tid: 1,
+        args: {name: 'Terminal DOM'},
+      },
+      {
+        cat: '__metadata',
+        name: 'thread_name',
+        ph: 'M',
+        ts: 0,
+        pid: 1,
+        tid: 1,
+        args: {name: 'Main'},
+      },
     );
 
     // Convert performance entries to trace events

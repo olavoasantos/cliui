@@ -66,12 +66,23 @@ export class DOMMutationBridge {
       this.handleRemoveChild(parent, node);
     };
 
-    hooks.setAttribute = (element: Element, name: string, value: string, ns?: string | null, oldValue?: string | null) => {
+    hooks.setAttribute = (
+      element: Element,
+      name: string,
+      value: string,
+      ns?: string | null,
+      oldValue?: string | null,
+    ) => {
       prevSetAttribute?.(element, name, value, ns, oldValue);
       this.handleSetAttribute(element, name, value);
     };
 
-    hooks.removeAttribute = (element: Element, name: string, ns?: string | null, oldValue?: string | null) => {
+    hooks.removeAttribute = (
+      element: Element,
+      name: string,
+      ns?: string | null,
+      oldValue?: string | null,
+    ) => {
       prevRemoveAttribute?.(element, name, ns, oldValue);
       this.handleRemoveAttribute(element, name);
     };

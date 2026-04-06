@@ -33,7 +33,16 @@ export class DOMDomainHandler {
    * Set by the DevToolsBridge after the layout engine is available.
    */
   layoutLookup:
-    | ((element: Element) => {x: number; y: number; width: number; height: number; contentX: number; contentY: number; contentWidth: number; contentHeight: number} | null)
+    | ((element: Element) => {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        contentX: number;
+        contentY: number;
+        contentWidth: number;
+        contentHeight: number;
+      } | null)
     | null = null;
 
   /**
@@ -355,28 +364,40 @@ export class DOMDomainHandler {
     if (!node || node.nodeType !== 1 || !this.layoutLookup) {
       // Return a zero-size box rather than failing — DevTools handles this gracefully
       const zero = [0, 0, 0, 0, 0, 0, 0, 0];
-      return {model: {content: zero, padding: zero, border: zero, margin: zero, width: 0, height: 0}};
+      return {
+        model: {content: zero, padding: zero, border: zero, margin: zero, width: 0, height: 0},
+      };
     }
 
     const box = this.layoutLookup(node);
     if (!box) {
       const zero = [0, 0, 0, 0, 0, 0, 0, 0];
-      return {model: {content: zero, padding: zero, border: zero, margin: zero, width: 0, height: 0}};
+      return {
+        model: {content: zero, padding: zero, border: zero, margin: zero, width: 0, height: 0},
+      };
     }
 
     // CDP box model uses four x,y corner pairs (8 numbers): top-left, top-right, bottom-right, bottom-left
     const content = [
-      box.contentX, box.contentY,
-      box.contentX + box.contentWidth, box.contentY,
-      box.contentX + box.contentWidth, box.contentY + box.contentHeight,
-      box.contentX, box.contentY + box.contentHeight,
+      box.contentX,
+      box.contentY,
+      box.contentX + box.contentWidth,
+      box.contentY,
+      box.contentX + box.contentWidth,
+      box.contentY + box.contentHeight,
+      box.contentX,
+      box.contentY + box.contentHeight,
     ];
     const padding = content; // simplified: padding edge = content edge for now
     const border = [
-      box.x, box.y,
-      box.x + box.width, box.y,
-      box.x + box.width, box.y + box.height,
-      box.x, box.y + box.height,
+      box.x,
+      box.y,
+      box.x + box.width,
+      box.y,
+      box.x + box.width,
+      box.y + box.height,
+      box.x,
+      box.y + box.height,
     ];
     const margin = border; // simplified: margin edge = border edge for now
 

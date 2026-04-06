@@ -303,7 +303,6 @@ export class DevToolsBridge {
     return this.overlayHandler;
   }
 
-
   // ── Lifecycle ──────────────────────────────────────────────────────
 
   /**

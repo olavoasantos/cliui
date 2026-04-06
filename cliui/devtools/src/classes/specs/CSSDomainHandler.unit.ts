@@ -248,11 +248,13 @@ describe('CSSDomainHandler', () => {
       expect(ruleStyle.range).toBeDefined();
 
       const editResult = await transport.call('CSS.setStyleTexts', {
-        edits: [{
-          styleSheetId: ruleStyle.styleSheetId,
-          range: ruleStyle.range,
-          text: 'color: blue;',
-        }],
+        edits: [
+          {
+            styleSheetId: ruleStyle.styleSheetId,
+            range: ruleStyle.range,
+            text: 'color: blue;',
+          },
+        ],
       });
 
       // 3. The edit should succeed and return a styles array
@@ -271,8 +273,12 @@ describe('CSSDomainHandler', () => {
       window.document.body.appendChild(div);
       registry.register(div);
 
-      const matched = await transport.call('CSS.getMatchedStylesForNode', {nodeId: registry.getId(div)!});
-      const aRule = (matched['matchedCSSRules'] as any[]).find((r: any) => r.rule.selectorList.text.includes('.a'));
+      const matched = await transport.call('CSS.getMatchedStylesForNode', {
+        nodeId: registry.getId(div)!,
+      });
+      const aRule = (matched['matchedCSSRules'] as any[]).find((r: any) =>
+        r.rule.selectorList.text.includes('.a'),
+      );
       const ruleStyle = aRule.rule.style;
 
       // First edit
@@ -288,7 +294,10 @@ describe('CSSDomainHandler', () => {
       // Response range should point to where the body is NOW in the updated source
       const newSrc = style.textContent!;
       expect(newSrc).toBe('.a{color:blue}.b{padding:1}');
-      const bodyFromRange = newSrc.slice(resultStyle.range.startColumn, resultStyle.range.endColumn);
+      const bodyFromRange = newSrc.slice(
+        resultStyle.range.startColumn,
+        resultStyle.range.endColumn,
+      );
       expect(bodyFromRange).toBe('color:blue');
 
       // Response properties should be only from this rule, not the whole sheet
@@ -297,7 +306,9 @@ describe('CSSDomainHandler', () => {
 
       // Second edit using the response range should also work
       const editResult2 = await transport.call('CSS.setStyleTexts', {
-        edits: [{styleSheetId: ruleStyle.styleSheetId, range: resultStyle.range, text: 'color:green'}],
+        edits: [
+          {styleSheetId: ruleStyle.styleSheetId, range: resultStyle.range, text: 'color:green'},
+        ],
       });
       expect(style.textContent).toBe('.a{color:green}.b{padding:1}');
       expect((editResult2 as any)['styles'][0].cssText).toBe('color:green');
@@ -375,7 +386,14 @@ describe('CSS range accuracy with minified CSS', () => {
     transport2 = createMockTransport();
     const se = new StyleEngine();
     se.attach(window2.document);
-    handler2 = new CSSDomainHandler(transport2 as any, registry2, window2.document, se, new SelectorMatcher(), new CSSParser());
+    handler2 = new CSSDomainHandler(
+      transport2 as any,
+      registry2,
+      window2.document,
+      se,
+      new SelectorMatcher(),
+      new CSSParser(),
+    );
     handler2.register();
   });
 
@@ -390,7 +408,9 @@ describe('CSS range accuracy with minified CSS', () => {
     window2.document.body.appendChild(div);
     registry2.register(div);
 
-    const result = await transport2.call('CSS.getMatchedStylesForNode', {nodeId: registry2.getId(div)!});
+    const result = await transport2.call('CSS.getMatchedStylesForNode', {
+      nodeId: registry2.getId(div)!,
+    });
     const rules = result['matchedCSSRules'] as any[];
     const boxRule = rules.find((r: any) => r.rule.selectorList.text.includes('box'));
     expect(boxRule).toBeDefined();
@@ -421,8 +441,12 @@ describe('CSS range accuracy with minified CSS', () => {
     window2.document.body.appendChild(div);
     registry2.register(div);
 
-    const result = await transport2.call('CSS.getMatchedStylesForNode', {nodeId: registry2.getId(div)!});
-    const aRule = (result['matchedCSSRules'] as any[]).find((r: any) => r.rule.selectorList.text.includes('.a'));
+    const result = await transport2.call('CSS.getMatchedStylesForNode', {
+      nodeId: registry2.getId(div)!,
+    });
+    const aRule = (result['matchedCSSRules'] as any[]).find((r: any) =>
+      r.rule.selectorList.text.includes('.a'),
+    );
     const ruleStyle = aRule.rule.style;
 
     // Edit: replace the rule body with new text
