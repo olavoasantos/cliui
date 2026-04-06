@@ -199,7 +199,22 @@ export class DevToolsBridge {
       // Recreate transport with new port — but since transport is created
       // in constructor, we just start listening
     }
-    await this.transport.listen();
+
+    try {
+      await this.transport.listen();
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === 'EADDRINUSE') {
+        const p = port ?? DEFAULT_CDP_PORT;
+        console.error(
+          `DevTools: port ${p} is already in use. ` +
+            `A previous process may still be running. ` +
+            `Kill it or use a different port.`,
+        );
+      }
+      throw err;
+    }
+
     this.listening = true;
 
     const addr = this.transport.server.server.address();
@@ -208,7 +223,7 @@ export class DevToolsBridge {
 
     console.log(`DevTools listening on ws://${host}:${actualPort}`);
     console.log(
-      `  Open: devtools://devtools/bundled/inspector.html?ws=${host}:${actualPort}/devtools/page`,
+      `  Open: devtools://devtools/bundled/inspector.html?ws=${host}:${actualPort}/devtools/terminal-dom`,
     );
   }
 

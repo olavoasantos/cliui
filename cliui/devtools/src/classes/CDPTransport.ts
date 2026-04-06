@@ -1,4 +1,3 @@
-import {randomUUID} from 'node:crypto';
 import {DEFAULT_CDP_PORT} from '../constants';
 import {WebSocketServer} from './WebSocketServer';
 
@@ -35,10 +34,10 @@ export class CDPTransport {
    *
    * @param options - Transport configuration.
    */
-  constructor(options: {port?: number; host?: string} = {}) {
+  constructor(options: {port?: number; host?: string; targetId?: string} = {}) {
     this.port = options.port ?? DEFAULT_CDP_PORT;
     this.host = options.host ?? '127.0.0.1';
-    this.targetId = randomUUID();
+    this.targetId = options.targetId ?? 'terminal-dom';
 
     this.wsServer = new WebSocketServer({port: this.port, host: this.host});
 
