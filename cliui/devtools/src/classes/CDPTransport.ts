@@ -322,7 +322,7 @@ export class CDPTransport {
 
     // Page domain stubs
     this.registerMethod('Page.enable', noop);
-    this.registerMethod('Page.canScreencast', () => ({result: false}));
+    this.registerMethod('Page.canScreencast', () => ({result: true}));
     this.registerMethod('Page.getResourceTree', () => ({
       frameTree: {
         frame: {

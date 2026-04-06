@@ -86,6 +86,8 @@ export class DevToolsBridge {
   private readonly window: Window;
   private readonly document: Document;
   private listening = false;
+  private screencastInterval: ReturnType<typeof setInterval> | null = null;
+  private screencastSessionId = 0;
   private injectedScriptId = 1;
 
   /**
@@ -227,6 +229,47 @@ export class DevToolsBridge {
           return {data: ''};
         }
       });
+
+      // Page.startScreencast streams frames to the content preview panel
+      this.transport.registerMethod('Page.startScreencast', () => {
+        this.stopScreencast();
+        const sessionId = ++this.screencastSessionId;
+        const fps = 2; // low fps to avoid flooding
+        this.screencastInterval = setInterval(() => {
+          if (this.screencastSessionId !== sessionId) return;
+          const buffer = getCellBuffer();
+          if (!buffer) return;
+          try {
+            const data = renderCellBufferToImage(buffer as any);
+            this.transport.broadcastEvent({
+              method: 'Page.screencastFrame',
+              params: {
+                data,
+                metadata: {
+                  offsetTop: 0,
+                  pageScaleFactor: 1,
+                  deviceWidth: (buffer as any).cols * 8,
+                  deviceHeight: (buffer as any).rows * 16,
+                  scrollOffsetX: 0,
+                  scrollOffsetY: 0,
+                  timestamp: Date.now() / 1000,
+                },
+                sessionId,
+              },
+            });
+          } catch {
+            // rendering failed, skip frame
+          }
+        }, 1000 / fps);
+        return {};
+      });
+
+      this.transport.registerMethod('Page.stopScreencast', () => {
+        this.stopScreencast();
+        return {};
+      });
+
+      this.transport.registerMethod('Page.screencastFrameAck', () => ({}));
     }
 
     // Runtime.addBinding creates a function on the window that, when called,
@@ -295,6 +338,7 @@ export class DevToolsBridge {
    * @returns A promise that resolves once shutdown is complete.
    */
   async close(): Promise<void> {
+    this.stopScreencast();
     this.v8Proxy.close();
     this.networkHandler.restore();
     this.logHandler.restore();
@@ -340,6 +384,14 @@ export class DevToolsBridge {
    *
    * Initializes all domains with the terminal's current state.
    */
+  private stopScreencast(): void {
+    if (this.screencastInterval) {
+      clearInterval(this.screencastInterval);
+      this.screencastInterval = null;
+    }
+    this.screencastSessionId++;
+  }
+
   private onClientConnect(): void {
     this.mutationBridge.enable();
   }
