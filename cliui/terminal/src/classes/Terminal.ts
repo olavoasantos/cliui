@@ -1138,6 +1138,9 @@ export class Terminal {
         if (!root) return null;
         return this.findLayoutBox(root, element);
       },
+      getCellBuffer: () => {
+        return this.renderer.getCellBuffer();
+      },
     };
 
     for (const plugin of plugins) {

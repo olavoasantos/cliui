@@ -6,5 +6,5 @@ export default createViteConfig({
     index: 'src/index.ts',
   },
   pkg,
-  external: [/^ws$/],
+  external: [/^ws$/, /^@napi-rs\/canvas$/],
 });

@@ -32,6 +32,11 @@ export class Renderer {
     return this.currentBuffer.rows;
   }
 
+  /** Returns the last rendered cell buffer (the frame currently visible). */
+  getCellBuffer(): CellBuffer {
+    return this.previousBuffer;
+  }
+
   private currentBuffer: CellBuffer;
   private previousBuffer: CellBuffer;
   private painter: Painter;

@@ -7,7 +7,7 @@ export default defineConfig({
     ssr: true,
     rollupOptions: {
       input: 'src/main.ts',
-      external: [/^ws$/, /^@cliui\/devtools/],
+      external: [/^ws$/, /^@cliui\/devtools/, /^@napi-rs\/canvas$/],
     },
   },
 });

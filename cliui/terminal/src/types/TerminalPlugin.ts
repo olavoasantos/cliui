@@ -1,3 +1,4 @@
+import type {CellBuffer} from '../renderer/classes/CellBuffer';
 import type {GraphicsProtocol} from '../renderer/types/GraphicsProtocol';
 import type {StyleEngine} from '../css/classes/StyleEngine';
 import type {LayoutBox} from '../layout/types';
@@ -46,6 +47,14 @@ export interface TerminalPluginContext {
    * or not yet laid out).
    */
   getLayoutBox(element: Element): LayoutBox | null;
+
+  /**
+   * Returns the current cell buffer after the last render.
+   *
+   * Each cell contains the character, foreground/background colors,
+   * and text attributes (bold, italic, underline, etc.).
+   */
+  getCellBuffer(): CellBuffer | null;
 }
 
 /**

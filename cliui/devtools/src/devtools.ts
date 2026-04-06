@@ -46,6 +46,7 @@ export function devtools(options: DevToolsBridgeOptions = {}): TerminalPlugin {
             contentHeight: box.contentHeight,
           };
         },
+        getCellBuffer: () => context.getCellBuffer(),
         options,
       });
 

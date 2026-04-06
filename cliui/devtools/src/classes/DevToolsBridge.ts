@@ -10,6 +10,7 @@ import {OverlayDomainHandler} from './OverlayDomainHandler';
 import {PerformanceDomainHandler} from './PerformanceDomainHandler';
 import {V8InspectorProxy} from './V8InspectorProxy';
 import {NetworkDomainHandler} from './NetworkDomainHandler';
+import {renderCellBufferToImage} from '../utilities/renderCellBufferToImage';
 import {DEFAULT_CDP_PORT} from '../constants';
 
 import type {WebSocket} from 'ws';
@@ -116,6 +117,7 @@ export class DevToolsBridge {
       h: number,
       color: {r: number; g: number; b: number; a: number},
     ) => void;
+    getCellBuffer?: () => {cols: number; rows: number; get(x: number, y: number): unknown} | null;
     options?: DevToolsBridgeOptions;
   }) {
     const port = config.options?.port ?? DEFAULT_CDP_PORT;
@@ -211,6 +213,21 @@ export class DevToolsBridge {
     this.transport.registerMethod('Page.addScriptToEvaluateOnNewDocument', () => {
       return {identifier: String(this.injectedScriptId++)};
     });
+
+    // Page.captureScreenshot renders the cell buffer to a PNG image
+    const getCellBuffer = config.getCellBuffer;
+    if (getCellBuffer) {
+      this.transport.registerMethod('Page.captureScreenshot', () => {
+        const buffer = getCellBuffer();
+        if (!buffer) return {data: ''};
+        try {
+          const data = renderCellBufferToImage(buffer as any);
+          return {data};
+        } catch {
+          return {data: ''};
+        }
+      });
+    }
 
     // Runtime.addBinding creates a function on the window that, when called,
     // emits a Runtime.bindingCalled event.  DevTools' web-vitals script

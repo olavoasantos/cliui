@@ -12,6 +12,7 @@
     "@cliui/devtools": "workspace:*",
     "@cliui/elements": "workspace:*",
     "@cliui/terminal": "workspace:*",
+    "@napi-rs/canvas": "^0.1.97",
     "ws": "^8.20.0"
   },
   "devDependencies": {

@@ -46,6 +46,7 @@
     "check": "run-p type:check lint:check format:check test:check"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.97",
     "ws": "^8.20.0"
   },
   "devDependencies": {
