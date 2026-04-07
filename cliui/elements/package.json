@@ -52,6 +52,7 @@
     "check": "run-p type:check lint:check format:check test:check"
   },
   "dependencies": {
+    "@cliui/dom": "workspace:*",
     "@cliui/terminal": "workspace:*",
     "shiki": "^4.0.2"
   },

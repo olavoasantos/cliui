@@ -150,6 +150,9 @@ importers:
 
   cliui/elements:
     dependencies:
+      '@cliui/dom':
+        specifier: workspace:*
+        version: link:../dom
       '@cliui/terminal':
         specifier: workspace:*
         version: link:../terminal

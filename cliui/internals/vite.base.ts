@@ -65,7 +65,6 @@ export function createViteConfig(options: {
     plugins: [
       dts({
         entryRoot: 'src',
-        tsconfigPath: 'tsconfig.json',
         beforeWriteFile: (filePath, content) => {
           return {
             filePath: filePath.replace('/dist/src/', '/dist/'),
@@ -85,7 +84,6 @@ export function createViteConfig(options: {
           '**/*.integration.tsx',
           '**/*.e2e.ts',
           '**/*.e2e.tsx',
-          './*.*',
           '.ignore/**',
         ],
       }),
