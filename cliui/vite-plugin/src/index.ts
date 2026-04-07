@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {createRequire} from 'node:module';
 
-import type {Plugin, ViteDevServer, ResolvedConfig} from 'vite';
+import type {Plugin, ResolvedConfig} from 'vite';
 import type {TerminalDomPluginOptions} from './types';
 
 export type {TerminalDomPluginOptions};
@@ -50,25 +50,31 @@ export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
   };
 
   let config: ResolvedConfig;
-  let server: ViteDevServer | null = null;
   let terminal: TerminalHandle | null = null;
 
   return {
     name: 'terminal-dom',
     enforce: 'pre' as const,
 
+    /**
+     * Silence Vite's default console output.  The "VITE ready" banner,
+     * local URL, and "press h" hint are written by Vite's logger and
+     * would bleed over the terminal UI.
+     */
+    config() {
+      return {
+        logLevel: 'silent' as const,
+      };
+    },
+
     configResolved(resolvedConfig) {
       config = resolvedConfig;
     },
 
     configureServer(devServer) {
-      server = devServer;
-
-      // Post-hook: runs after all other middleware is installed.
-      // Start the terminal once the server is fully ready.
       return () => {
         devServer.httpServer?.on('listening', () => {
-          void launchTerminal(devServer, pluginOptions, config).then((t) => {
+          void launchTerminal(pluginOptions, config).then((t) => {
             terminal = t;
           });
         });
@@ -79,23 +85,14 @@ export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
       if (!terminal) return;
 
       const {file} = ctx;
-      const name = file.split('/').pop();
 
       if (file.endsWith('.css')) {
-        console.log(`[terminal-dom] ${name} updated — hot-reloading styles`);
         reloadCss(terminal, config);
-        return []; // prevent default HMR
-      }
-
-      if (file.endsWith('.html')) {
-        console.log(`[terminal-dom] ${name} changed — full reload`);
-        void fullReload(terminal, server!, config);
         return [];
       }
 
-      // JS / TS changes → full reload
-      console.log(`[terminal-dom] ${name} changed — full reload`);
-      void fullReload(terminal, server!, config);
+      // HTML / JS / TS changes → full reload
+      void fullReload(terminal, config);
       return [];
     },
 
@@ -111,7 +108,6 @@ export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
         return;
       }
 
-      // Collect CSS from the bundle and inline it
       const cssChunks: string[] = [];
 
       for (const [, chunk] of Object.entries(bundle)) {
@@ -130,13 +126,11 @@ export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
         htmlContent = htmlContent.replace('</head>', `<style>${inlinedCss}</style>\n</head>`);
       }
 
-      // Remove external script tags (bundled)
       htmlContent = htmlContent.replace(
         /<script\s+[^>]*src=["'][^"']*["'][^>]*>\s*<\/script>/gi,
         '',
       );
 
-      // Find the JS entry chunk
       let entryChunkName = '';
 
       for (const [name, chunk] of Object.entries(bundle)) {
@@ -173,15 +167,25 @@ await terminal.run();
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Read the raw `index.html` from disk.  We intentionally skip Vite's
+ * `transformIndexHtml` because that injects a `<script>` tag for the
+ * browser HMR client (`/@vite/client`) which has no meaning in a
+ * terminal context and would render as visible text.
+ */
+function readHtml(config: ResolvedConfig): string | null {
+  try {
+    return readFileSync(resolve(config.root, 'index.html'), 'utf-8');
+  } catch {
+    return null;
+  }
+}
+
 async function launchTerminal(
-  server: ViteDevServer,
   options: {fps: number; altScreen: boolean},
   config: ResolvedConfig,
 ): Promise<TerminalHandle | null> {
   try {
-    // Resolve @cliui/terminal from the project root, not from the
-    // plugin's dist/ directory.  createRequire anchored at the project's
-    // package.json follows pnpm workspace symlinks correctly.
     const require = createRequire(resolve(config.root, 'package.json'));
     const mod = require('@cliui/terminal') as Record<string, unknown>;
     const Ctor = mod.Terminal as new (o: Record<string, unknown>) => TerminalHandle;
@@ -191,7 +195,7 @@ async function launchTerminal(
       altScreen: options.altScreen,
     });
 
-    const html = await readAndTransformHtml(server, config);
+    const html = readHtml(config);
 
     if (!html) return null;
 
@@ -201,22 +205,6 @@ async function launchTerminal(
     return t;
   } catch (error) {
     console.error('[terminal-dom] Failed to start terminal:', error);
-    return null;
-  }
-}
-
-async function readAndTransformHtml(
-  server: ViteDevServer,
-  config: ResolvedConfig,
-): Promise<string | null> {
-  const htmlPath = resolve(config.root, 'index.html');
-
-  try {
-    let html = readFileSync(htmlPath, 'utf-8');
-    html = await server.transformIndexHtml('/', html);
-    return html;
-  } catch {
-    console.error('[terminal-dom] Could not read index.html');
     return null;
   }
 }
@@ -250,15 +238,11 @@ function reloadCss(terminal: TerminalHandle, config: ResolvedConfig): void {
 }
 
 /**
- * Clears the document tree, re-reads + transforms `index.html`,
- * and reloads everything from scratch.
+ * Clears the document tree, re-reads `index.html`, and reloads
+ * everything from scratch.
  */
-async function fullReload(
-  terminal: TerminalHandle,
-  server: ViteDevServer,
-  config: ResolvedConfig,
-): Promise<void> {
-  const html = await readAndTransformHtml(server, config);
+async function fullReload(terminal: TerminalHandle, config: ResolvedConfig): Promise<void> {
+  const html = readHtml(config);
 
   if (!html) return;
 

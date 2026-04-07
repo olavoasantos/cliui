@@ -1084,10 +1084,23 @@ export class Terminal {
   /**
    * Removes all non-structural children from `<head>` and `<body>`,
    * resetting the document to an empty state for a full reload.
+   *
+   * The user-agent stylesheet injected by the style engine is preserved
+   * so that default rules (e.g. `script { display: none }`) remain
+   * active after the reload.
    */
   clearDocument(): void {
+    // Preserve the UA stylesheet element
+    const uaMarker = 'data-ua-stylesheet';
+    const uaStyle = this.document.head.querySelector(`[${uaMarker}]`);
+
     while (this.document.head.firstChild) {
       this.document.head.removeChild(this.document.head.firstChild);
+    }
+
+    // Re-insert the UA stylesheet at the top of <head>
+    if (uaStyle) {
+      this.document.head.appendChild(uaStyle);
     }
 
     while (this.document.body.firstChild) {
