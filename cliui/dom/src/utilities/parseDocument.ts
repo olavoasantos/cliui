@@ -147,10 +147,14 @@ export function parseDocument(html: string, document: Document): void {
       // Comment
       parent.append(document.createComment(token[6]));
     } else if (token[7] != null) {
-      // Text node - skip whitespace-only text between structural tags
+      // Text node — skip whitespace-only text nodes.
+      // In HTML, whitespace between block elements is insignificant.
+      // Since terminal-dom uses flex layout (all children are blocks),
+      // whitespace-only text nodes between elements would each occupy
+      // a row, producing large gaps.
       const text = token[7];
 
-      if (context === 'html' && text.trim() === '') {
+      if (text.trim() === '') {
         continue;
       }
 

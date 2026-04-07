@@ -365,6 +365,52 @@ describe('parseDocument', () => {
     });
   });
 
+  describe('whitespace handling', () => {
+    it('strips whitespace-only text nodes between elements', () => {
+      parseDocument(
+        `<html>
+          <head></head>
+          <body>
+            <div>
+              <div>A</div>
+              <div>B</div>
+            </div>
+          </body>
+        </html>`,
+        document,
+      );
+
+      const wrapper = document.body.querySelector('div')!;
+      // Should have exactly 2 element children, no whitespace text nodes
+      expect(wrapper.childNodes).toHaveLength(2);
+      expect(wrapper.childNodes[0]!.textContent).toBe('A');
+      expect(wrapper.childNodes[1]!.textContent).toBe('B');
+    });
+
+    it('preserves non-whitespace text content', () => {
+      parseDocument(
+        `<html>
+          <head></head>
+          <body>
+            <div>Hello World</div>
+          </body>
+        </html>`,
+        document,
+      );
+
+      expect(document.body.querySelector('div')!.textContent).toBe('Hello World');
+    });
+
+    it('preserves text with internal whitespace', () => {
+      parseDocument(
+        '<html><head></head><body><div>Multiple   spaces   here</div></body></html>',
+        document,
+      );
+
+      expect(document.body.querySelector('div')!.textContent).toBe('Multiple   spaces   here');
+    });
+  });
+
   describe('void elements', () => {
     it('handles self-closing link elements correctly', () => {
       parseDocument(
