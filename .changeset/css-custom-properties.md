@@ -1,5 +1,7 @@
 ---
-'@micra/terminal-dom': minor
+"@cliui/terminal": minor
 ---
 
-Implement CSS custom properties (`--var` declaration and `var()` resolution). Custom properties can be declared in inline styles and `<style>` blocks, inherit down the tree, and resolve with optional fallback values.
+Add CSS custom properties with var() resolution
+
+CSS custom properties (`--*`) with `var()` function resolution, including fallback values. `:root` pseudo-selector support for global custom property inheritance. `var()` works inside CSS functions like `linear-gradient()`, `rgb()`, etc.

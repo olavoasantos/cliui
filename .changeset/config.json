@@ -7,5 +7,5 @@
   "access": "restricted",
   "baseBranch": "latest",
   "updateInternalDependencies": "patch",
-  "ignore": ["@cliui/monorepo", "@cliui/internals"]
+  "ignore": ["@cliui/internals", "@examples/*"]
 }
