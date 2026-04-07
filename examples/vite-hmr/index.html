@@ -11,6 +11,7 @@
         <div class="label">Try editing:</div>
         <div class="value">• styles.css — changes hot-reload without restart</div>
         <div class="value">• index.html — changes trigger a full reload</div>
+        <div class="value">• app.js — changes trigger a full reload</div>
       </div>
       <div class="card" id="clock">
         <div class="label">Clock</div>
@@ -18,18 +19,6 @@
       </div>
       <div class="footer">Press 'q' to exit</div>
     </div>
-    <script>
-      document.querySelector('#status').textContent = 'Ready!';
-
-      function updateClock() {
-        document.querySelector('#time').textContent = new Date().toLocaleTimeString();
-      }
-      updateClock();
-      setInterval(updateClock, 1000);
-
-      document.body.addEventListener('keydown', function(e) {
-        if (e.key === 'q') terminal.exit();
-      });
-    </script>
+    <script src="./app.js"></script>
   </body>
 </html>
