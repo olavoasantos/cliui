@@ -293,4 +293,64 @@ describe('Document', () => {
       ]);
     });
   });
+
+  describe('title', () => {
+    it('returns empty string when no <title> exists', () => {
+      const {document} = createEnv();
+      expect(document.title).toBe('');
+    });
+
+    it('returns the text content of the first <title> in <head>', () => {
+      const {document} = createEnv();
+      const title = document.createElement('title');
+      title.textContent = 'Hello World';
+      document.head.appendChild(title);
+      expect(document.title).toBe('Hello World');
+    });
+
+    it('setter creates a <title> element when none exists', () => {
+      const {document} = createEnv();
+      document.title = 'New Title';
+      expect(document.title).toBe('New Title');
+
+      const titleEl = document.head.querySelector('title');
+      expect(titleEl).not.toBeNull();
+      expect(titleEl!.textContent).toBe('New Title');
+    });
+
+    it('setter updates existing <title> element', () => {
+      const {document} = createEnv();
+      document.title = 'First';
+      document.title = 'Second';
+      expect(document.title).toBe('Second');
+
+      // Should still be only one <title>
+      const titles = document.head.querySelectorAll('title');
+      expect(titles.length).toBe(1);
+    });
+
+    it('setter updates textContent of existing <title>', () => {
+      const {document} = createEnv();
+      const title = document.createElement('title');
+      title.textContent = 'Old';
+      document.head.appendChild(title);
+
+      document.title = 'New';
+      expect(title.textContent).toBe('New');
+    });
+  });
+
+  describe('hasFocus', () => {
+    it('returns true when visibilityState is visible', () => {
+      const {document} = createEnv();
+      document.visibilityState = 'visible';
+      expect(document.hasFocus()).toBe(true);
+    });
+
+    it('returns false when visibilityState is hidden', () => {
+      const {document} = createEnv();
+      document.visibilityState = 'hidden';
+      expect(document.hasFocus()).toBe(false);
+    });
+  });
 });

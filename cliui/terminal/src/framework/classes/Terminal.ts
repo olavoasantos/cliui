@@ -9,14 +9,19 @@ import {StyleEngine} from '../../css';
 import {
   Event,
   InputEvent,
+  Clipboard,
+  Notification,
   Window,
   CHILD,
+  HOOKS,
   NEXT,
+  NodeType,
   PARENT,
   PerformanceEventTiming,
   type ClipboardEvent,
   type Document,
   type Element,
+  type Hooks,
   type KeyboardEvent,
   type MouseEvent,
   type Node as DomNode,
@@ -118,7 +123,7 @@ export class Terminal {
     this.styleEngine.setMediaValues({
       width: this.getColumns(),
       height: this.getRows(),
-      'prefers-color-scheme': 'dark', // Default; M13T6 would provide real detection
+      'prefers-color-scheme': this.window.getColorScheme(),
       'prefers-reduced-motion': this.detectReducedMotion(),
     });
     this.styleEngine.markAllDirty();
@@ -811,6 +816,233 @@ export class Terminal {
   }
 
   /**
+   * Emits OSC 2 to set the terminal window/tab title.
+   *
+   * @param title - The title string to display.
+   */
+  private setWindowTitle(title: string): void {
+    this.output.write(`\u001B]2;${title}\u0007`);
+  }
+
+  /**
+   * Pushes the current terminal title to the title stack (xterm extension).
+   * Allows the original title to be restored on exit.
+   */
+  private pushWindowTitle(): void {
+    this.output.write('\u001B[22;2t');
+  }
+
+  /**
+   * Pops the previous terminal title from the title stack (xterm extension).
+   * Restores the title that was active before the application started.
+   */
+  private popWindowTitle(): void {
+    this.output.write('\u001B[23;2t');
+  }
+
+  /**
+   * Wires hooks to detect `<title>` text changes and emit OSC 2.
+   *
+   * When the text content of a `<title>` element in `<head>` changes
+   * (via `document.title` setter, direct textContent mutation, or DOM
+   * parsing), the terminal window title is updated to match.
+   */
+  private wireTitleBridge(): void {
+    const hooks = this.window[HOOKS] as Partial<Hooks>;
+    const prevSetText = hooks.setText;
+    const prevInsertChild = hooks.insertChild;
+    const prevRemoveChild = hooks.removeChild;
+
+    hooks.setText = (text, data, oldValue) => {
+      prevSetText?.(text, data, oldValue);
+
+      const parent = text.parentElement;
+
+      if (parent !== null && parent.localName === 'title') {
+        this.setWindowTitle(data);
+      }
+    };
+
+    hooks.insertChild = (parent, node, index) => {
+      prevInsertChild?.(parent, node, index);
+
+      // When a <title> element is inserted into <head>, emit its text
+      if (
+        node.nodeType === NodeType.ELEMENT_NODE &&
+        (node as unknown as Element).localName === 'title'
+      ) {
+        const title = (node as unknown as Element).textContent ?? '';
+
+        if (title) {
+          this.setWindowTitle(title);
+        }
+      }
+
+      // When a text node is inserted into a <title> element
+      if (parent.localName === 'title' && node.nodeType === NodeType.TEXT_NODE) {
+        this.setWindowTitle(this.document.title);
+      }
+    };
+
+    hooks.removeChild = (parent, node, index) => {
+      prevRemoveChild?.(parent, node, index);
+
+      // When a <title> element is removed, clear the window title
+      if (
+        node.nodeType === NodeType.ELEMENT_NODE &&
+        (node as unknown as Element).localName === 'title'
+      ) {
+        this.setWindowTitle('');
+      }
+    };
+  }
+
+  /**
+   * Wires the `Notification` class to emit terminal notification escape
+   * sequences when a notification is created.
+   *
+   * Uses OSC 9 (iTerm2/Konsole), OSC 777 (rxvt-unicode), or BEL as
+   * fallback based on detected terminal capabilities.
+   */
+  private wireNotificationHandler(): void {
+    Notification.handler = (title: string, body: string) => {
+      const capabilities = this.terminalManager.getCapabilities();
+      const message = body ? `${title}: ${body}` : title;
+
+      switch (capabilities.notificationProtocol) {
+        case 'osc9':
+          this.output.write(`\u001B]9;${message}\u0007`);
+          break;
+        case 'osc777':
+          this.output.write(`\u001B]777;notify;${title};${body}\u0007`);
+          break;
+        default:
+          // BEL fallback — audible alert
+          this.output.write('\x07');
+          break;
+      }
+    };
+  }
+
+  /**
+   * Wires the `Clipboard` class handlers to use OSC 52 for clipboard
+   * read/write. Write delegates to the existing `writeToClipboard`
+   * method. Read returns the in-memory clipboard buffer.
+   */
+  private wireClipboardHandlers(): void {
+    Clipboard.writeHandler = (text: string) => {
+      this.clipboardBuffer = text;
+      this.writeToClipboard(text);
+    };
+
+    Clipboard.readHandler = () => {
+      return this.clipboardBuffer;
+    };
+  }
+
+  /**
+   * Maps a CSS `cursor` value to a terminal cursor escape sequence
+   * and emits it.
+   *
+   * | CSS value   | Terminal cursor       | CSI sequence |
+   * |-------------|-----------------------|--------------|
+   * | `default`   | block cursor          | CSI 2 SP q   |
+   * | `text`      | bar/beam cursor       | CSI 6 SP q   |
+   * | `pointer`   | block cursor          | CSI 2 SP q   |
+   * | `wait`      | blinking block cursor | CSI 1 SP q   |
+   * | `none`      | hidden cursor         | CSI ? 25 l   |
+   *
+   * When no cursor property is set, the cursor remains hidden.
+   */
+  private applyCursorStyle(cursorValue: string): void {
+    switch (cursorValue) {
+      case 'default':
+      case 'pointer':
+        // Steady block cursor
+        this.output.write('\u001B[?25h\u001B[2 q');
+        break;
+      case 'text':
+        // Steady bar/beam cursor
+        this.output.write('\u001B[?25h\u001B[6 q');
+        break;
+      case 'wait':
+        // Blinking block cursor
+        this.output.write('\u001B[?25h\u001B[1 q');
+        break;
+      case 'none':
+        // Hidden cursor
+        this.output.write('\u001B[?25l');
+        break;
+      default:
+        // No cursor property or unrecognized value — keep cursor hidden
+        this.output.write('\u001B[?25l');
+        break;
+    }
+  }
+
+  /**
+   * Wires focus change events to update the terminal cursor style
+   * based on the focused element's computed `cursor` property.
+   */
+  private wireCursorStyleBridge(): void {
+    const hooks = this.window[HOOKS] as Partial<Hooks>;
+    const prevFocusChange = hooks.focusChange;
+
+    hooks.focusChange = (previous, next) => {
+      prevFocusChange?.(previous, next);
+
+      const computedStyle = this.styleEngine.getComputedStyle(next);
+      const cursorValue = computedStyle?.get('cursor') ?? '';
+      this.applyCursorStyle(cursorValue);
+    };
+  }
+
+  /**
+   * Initializes CWD reporting via OSC 7.
+   *
+   * Sets `window.location.href` to `file://{hostname}/{cwd}`, emits an
+   * initial OSC 7 sequence, and wires the `Location.onPathnameChange`
+   * callback to emit OSC 7 when the pathname is updated.
+   */
+  private wireCwdReporting(): void {
+    let hostname: string;
+
+    try {
+      hostname = require('node:os').hostname();
+    } catch {
+      hostname = 'localhost';
+    }
+
+    let cwd: string;
+
+    try {
+      cwd = process.cwd();
+    } catch {
+      cwd = '/';
+    }
+
+    this.window.location.href = `file://${hostname}${cwd}`;
+
+    // Emit initial OSC 7
+    this.emitOsc7(hostname, cwd);
+
+    // Wire subsequent pathname changes
+    this.window.location.onPathnameChange = (pathname: string) => {
+      this.emitOsc7(hostname, pathname);
+    };
+  }
+
+  /**
+   * Emits an OSC 7 escape sequence to report the current working directory.
+   *
+   * @param hostname - The hostname for the file:// URL.
+   * @param path - The directory path.
+   */
+  private emitOsc7(hostname: string, path: string): void {
+    this.output.write(`\u001B]7;file://${hostname}${path}\u0007`);
+  }
+
+  /**
    * Initializes terminal I/O, performs an initial render, and starts the
    * background frame loop.
    */
@@ -821,6 +1053,18 @@ export class Terminal {
 
     this.running = true;
     this.document.readyState = 'complete';
+    this.pushWindowTitle();
+    this.wireTitleBridge();
+    this.wireNotificationHandler();
+    this.wireClipboardHandlers();
+    this.wireCwdReporting();
+    this.wireCursorStyleBridge();
+
+    // Emit the initial title if one is already set
+    if (this.document.title) {
+      this.setWindowTitle(this.document.title);
+    }
+
     this.terminalManager.start();
     void this.terminalManager.detectCapabilities().then(() => {
       if (!this.running) {
@@ -863,6 +1107,13 @@ export class Terminal {
 
     this.inputReader.stop();
     process.off('SIGWINCH', this.boundResizeListener);
+    this.popWindowTitle();
+    Notification.handler = null;
+    Clipboard.writeHandler = null;
+    Clipboard.readHandler = null;
+    this.window.location.onPathnameChange = null;
+    // Reset cursor shape to default before restoring terminal
+    this.output.write('\u001B[0 q');
     this.terminalManager.stop();
     this.running = false;
   }

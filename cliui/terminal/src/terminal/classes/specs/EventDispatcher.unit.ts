@@ -1112,4 +1112,47 @@ describe('EventDispatcher', () => {
 
     expect(document.activeElement).toBe(document.body);
   });
+
+  describe('visibility state', () => {
+    it('updates document.visibilityState on focus in/out', () => {
+      const {document} = createEnv();
+      const dispatcher = new EventDispatcher(document);
+
+      dispatcher.dispatch({type: 'focus', focus: 'out'});
+      expect(document.visibilityState).toBe('hidden');
+
+      dispatcher.dispatch({type: 'focus', focus: 'in'});
+      expect(document.visibilityState).toBe('visible');
+    });
+
+    it('dispatches visibilitychange event on document when state changes', () => {
+      const {document} = createEnv();
+      const dispatcher = new EventDispatcher(document);
+      const events: string[] = [];
+
+      document.addEventListener('visibilitychange', () => {
+        events.push(document.visibilityState);
+      });
+
+      dispatcher.dispatch({type: 'focus', focus: 'out'});
+      dispatcher.dispatch({type: 'focus', focus: 'in'});
+
+      expect(events).toEqual(['hidden', 'visible']);
+    });
+
+    it('does not dispatch visibilitychange when state does not change', () => {
+      const {document} = createEnv();
+      const dispatcher = new EventDispatcher(document);
+      const events: string[] = [];
+
+      document.addEventListener('visibilitychange', () => {
+        events.push(document.visibilityState);
+      });
+
+      // Default state is 'visible', so focus-in should not dispatch
+      dispatcher.dispatch({type: 'focus', focus: 'in'});
+
+      expect(events).toEqual([]);
+    });
+  });
 });

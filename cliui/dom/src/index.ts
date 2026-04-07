@@ -74,6 +74,11 @@ export {
 
 export {Location} from './classes/Location';
 export {Navigator} from './classes/Navigator';
+export {Clipboard} from './classes/Clipboard';
+export type {ClipboardWriteHandler, ClipboardReadHandler} from './classes/Clipboard';
+export {MediaQueryList, MediaQueryListEvent} from './classes/MediaQueryList';
+export {Notification} from './classes/Notification';
+export type {NotificationHandler} from './classes/Notification';
 
 export type {
   InputEventInit,

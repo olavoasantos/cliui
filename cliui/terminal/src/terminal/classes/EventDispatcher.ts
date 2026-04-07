@@ -1,4 +1,4 @@
-import {ClipboardEvent, FocusEvent, KeyboardEvent, MouseEvent, WheelEvent} from '@cliui/dom';
+import {ClipboardEvent, Event, FocusEvent, KeyboardEvent, MouseEvent, WheelEvent} from '@cliui/dom';
 
 import type {Document, Element, Performance} from '@cliui/dom';
 import type {LayoutBox} from '../../layout/types';
@@ -313,7 +313,17 @@ export class EventDispatcher {
   }
 
   private dispatchWindowFocusEvent(focus: 'in' | 'out'): void {
-    this.document.defaultView.dispatchEvent(new FocusEvent(focus === 'in' ? 'focus' : 'blur'));
+    const window = this.document.defaultView;
+    const isFocused = focus === 'in';
+    const newVisibility = isFocused ? 'visible' : 'hidden';
+    const oldVisibility = this.document.visibilityState;
+
+    window.dispatchEvent(new FocusEvent(isFocused ? 'focus' : 'blur'));
+
+    if (newVisibility !== oldVisibility) {
+      this.document.visibilityState = newVisibility as 'visible' | 'hidden';
+      this.document.dispatchEvent(new Event('visibilitychange'));
+    }
   }
 
   private hitTestLayoutBox(column: number, row: number): LayoutBox | null {

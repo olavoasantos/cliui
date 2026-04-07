@@ -36,6 +36,39 @@ export class Document extends ParentNode {
   /** Returns the document's loading state. Starts as `'loading'`, set to `'complete'` after run(). */
   readyState: 'loading' | 'interactive' | 'complete' = 'loading';
 
+  /**
+   * Gets or sets the document's title.
+   *
+   * The getter returns the text content of the first `<title>` element in
+   * `<head>`, or an empty string if none exists. The setter updates that
+   * element's text content, creating a `<title>` element if one doesn't exist.
+   */
+  get title(): string {
+    const titleElement = this.head.querySelector('title');
+    return titleElement ? (titleElement.textContent ?? '') : '';
+  }
+
+  set title(value: string) {
+    let titleElement = this.head.querySelector('title');
+
+    if (!titleElement) {
+      titleElement = this.createElement('title');
+      this.head.appendChild(titleElement);
+    }
+
+    titleElement.textContent = value;
+  }
+
+  /**
+   * Returns whether the document has focus.
+   *
+   * Reflects the terminal focus state — `true` when the terminal window
+   * has focus, `false` when it does not.
+   */
+  hasFocus(): boolean {
+    return this.visibilityState === 'visible';
+  }
+
   [IS_CONNECTED] = true;
 
   constructor(defaultView: Window) {

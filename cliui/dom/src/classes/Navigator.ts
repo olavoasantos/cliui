@@ -1,4 +1,5 @@
 import {TERMINAL_DOM_USER_AGENT} from '../constants/environment';
+import {Clipboard} from './Clipboard';
 
 /**
  * Minimal `Navigator` implementation for the terminal DOM environment.
@@ -96,10 +97,8 @@ export class Navigator {
     return 'unspecified';
   }
 
-  /** Clipboard API. Not available in terminal context. */
-  get clipboard(): null {
-    return null;
-  }
+  /** Clipboard API backed by OSC 52 terminal escape sequences. */
+  readonly clipboard = new Clipboard();
 
   /** Permissions API. Not available in terminal context. */
   get permissions(): null {

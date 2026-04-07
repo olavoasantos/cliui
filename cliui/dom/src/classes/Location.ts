@@ -9,6 +9,12 @@
 export class Location {
   #url: URL;
 
+  /**
+   * Callback invoked when the pathname changes.
+   * Set by the terminal layer to emit OSC 7.
+   */
+  onPathnameChange: ((pathname: string) => void) | null = null;
+
   constructor(url = 'about:blank') {
     this.#url = new URL(url);
   }
@@ -19,7 +25,12 @@ export class Location {
   }
 
   set href(value: string) {
+    const oldPathname = this.#url.pathname;
     this.#url = new URL(value);
+
+    if (this.#url.pathname !== oldPathname) {
+      this.onPathnameChange?.(this.#url.pathname);
+    }
   }
 
   /** URL protocol scheme (e.g. `"https:"`). */
@@ -75,6 +86,7 @@ export class Location {
     const url = new URL(this.#url.href);
     url.pathname = value;
     this.#url = url;
+    this.onPathnameChange?.(value);
   }
 
   /** Query string including the leading `?`. */

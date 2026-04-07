@@ -1,4 +1,4 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {Location} from '../Location';
 
 describe('Location', () => {
@@ -73,5 +73,46 @@ describe('Location', () => {
     const location = new Location('https://example.com/path');
     expect(location.toString()).toBe('https://example.com/path');
     expect(`${location}`).toBe('https://example.com/path');
+  });
+
+  describe('onPathnameChange callback', () => {
+    it('is called when pathname is set', () => {
+      const location = new Location('https://example.com/');
+      const handler = vi.fn();
+      location.onPathnameChange = handler;
+
+      location.pathname = '/new-path';
+
+      expect(handler).toHaveBeenCalledWith('/new-path');
+    });
+
+    it('is called when href changes the pathname', () => {
+      const location = new Location('https://example.com/old');
+      const handler = vi.fn();
+      location.onPathnameChange = handler;
+
+      location.href = 'https://example.com/new';
+
+      expect(handler).toHaveBeenCalledWith('/new');
+    });
+
+    it('is not called when href does not change the pathname', () => {
+      const location = new Location('https://example.com/path');
+      const handler = vi.fn();
+      location.onPathnameChange = handler;
+
+      location.href = 'https://example.com/path?q=1';
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('does not throw when callback is null', () => {
+      const location = new Location('https://example.com/');
+      location.onPathnameChange = null;
+
+      expect(() => {
+        location.pathname = '/test';
+      }).not.toThrow();
+    });
   });
 });

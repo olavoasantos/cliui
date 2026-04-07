@@ -7,7 +7,11 @@ import {Terminal} from '../Terminal';
 import type {TerminalReadableInput} from '../../../terminal/types';
 
 type TerminalInternals = {
-  output: NodeJS.WriteStream;
+  output: {
+    write(chunk: string): boolean;
+    columns?: number;
+    rows?: number;
+  };
   input: TerminalReadableInput;
   fps: number;
   renderer: {
@@ -31,6 +35,11 @@ type TerminalInternals = {
     stop(): void;
   };
   renderFrame(): void;
+  styleEngine: {
+    markAllDirty(): void;
+    recomputeDirty(): void;
+    getComputedStyle(element: unknown): Map<string, string> | undefined;
+  };
 };
 
 function createOutput(overrides: Partial<NodeJS.WriteStream> = {}) {
@@ -245,5 +254,215 @@ describe('Terminal', () => {
     internals.renderFrame();
 
     expect(renderSpy).toHaveBeenCalledOnce();
+  });
+
+  describe('title bridge', () => {
+    it('emits OSC 2 when document.title is set after run()', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      await terminal.run();
+      output.read(); // clear initial output
+      const outputRef = createOutput();
+      (terminal as unknown as TerminalInternals).output = outputRef.stream;
+
+      terminal.document.title = 'My App';
+      expect(outputRef.read()).toContain('\u001B]2;My App\u0007');
+
+      terminal.exit();
+    });
+
+    it('emits push title (xterm) on run()', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      await terminal.run();
+      // Push title sequence: ESC[22;2t
+      expect(output.read()).toContain('\u001B[22;2t');
+
+      terminal.exit();
+    });
+
+    it('emits pop title (xterm) on exit()', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      await terminal.run();
+      output.read(); // clear
+      const outputRef = createOutput();
+      // Swap output to capture exit sequences
+      (terminal as unknown as TerminalInternals).output = outputRef.stream;
+
+      terminal.exit();
+      // Pop title sequence: ESC[23;2t
+      expect(outputRef.read()).toContain('\u001B[23;2t');
+    });
+
+    it('emits initial title on run() when <title> already exists', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      terminal.document.title = 'Pre-existing Title';
+      await terminal.run();
+
+      expect(output.read()).toContain('\u001B]2;Pre-existing Title\u0007');
+
+      terminal.exit();
+    });
+
+    it('updates terminal title when <title> textContent is changed directly', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      await terminal.run();
+
+      const titleEl = terminal.document.createElement('title');
+      titleEl.textContent = 'Direct Title';
+      terminal.document.head.appendChild(titleEl);
+
+      expect(output.read()).toContain('\u001B]2;Direct Title\u0007');
+
+      terminal.exit();
+    });
+  });
+
+  describe('CWD reporting', () => {
+    it('emits OSC 7 on startup with process.cwd()', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      await terminal.run();
+
+      // OSC 7 format: ESC]7;file://hostname/path BEL
+      expect(output.read()).toContain('\u001B]7;file://');
+
+      terminal.exit();
+    });
+
+    it('initializes window.location.href to file:// URL', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      await terminal.run();
+
+      expect(terminal.window.location.href).toMatch(/^file:\/\//);
+      expect(terminal.window.location.protocol).toBe('file:');
+
+      terminal.exit();
+    });
+
+    it('emits OSC 7 when window.location.pathname changes', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      await terminal.run();
+      // Capture fresh output
+      const freshOutput = createOutput();
+      (terminal as unknown as TerminalInternals).output = freshOutput.stream;
+
+      terminal.window.location.pathname = '/new/directory';
+
+      expect(freshOutput.read()).toContain('\u001B]7;');
+      expect(freshOutput.read()).toContain('/new/directory');
+
+      terminal.exit();
+    });
+  });
+
+  describe('cursor style bridge', () => {
+    it('emits bar cursor sequence when focusing element with cursor: text', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      const el = terminal.document.createElement('div');
+      el.setAttribute('tabindex', '0');
+      el.style.cursor = 'text';
+      terminal.document.body.appendChild(el);
+
+      await terminal.run();
+      // Ensure styles are computed
+      const internals = terminal as unknown as TerminalInternals;
+      internals.styleEngine.markAllDirty();
+      internals.styleEngine.recomputeDirty();
+
+      // Now trigger focus change
+      terminal.document.setActiveElement(el);
+
+      // The full output should contain the bar cursor sequence
+      const fullOutput = output.read();
+      // CSI 6 SP q = bar cursor
+      expect(fullOutput).toContain('\u001B[6 q');
+
+      terminal.exit();
+    });
+
+    it('emits block cursor sequence for cursor: default', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      const el = terminal.document.createElement('div');
+      el.setAttribute('tabindex', '0');
+      el.style.cursor = 'default';
+      terminal.document.body.appendChild(el);
+
+      await terminal.run();
+      (terminal as unknown as TerminalInternals).styleEngine.markAllDirty();
+      (terminal as unknown as TerminalInternals).styleEngine.recomputeDirty();
+
+      terminal.document.setActiveElement(el);
+
+      expect(output.read()).toContain('\u001B[2 q');
+
+      terminal.exit();
+    });
+
+    it('hides cursor for cursor: none', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      const el = terminal.document.createElement('div');
+      el.setAttribute('tabindex', '0');
+      el.style.cursor = 'none';
+      terminal.document.body.appendChild(el);
+
+      await terminal.run();
+      (terminal as unknown as TerminalInternals).renderFrame();
+
+      const freshOutput = createOutput();
+      (terminal as unknown as TerminalInternals).output = freshOutput.stream;
+
+      terminal.document.setActiveElement(el);
+
+      expect(freshOutput.read()).toContain('\u001B[?25l');
+
+      terminal.exit();
+    });
+
+    it('resets cursor shape on exit', async () => {
+      const output = createOutput();
+      const input = createInput();
+      const terminal = new Terminal({output: output.stream, input, altScreen: false});
+
+      await terminal.run();
+
+      const freshOutput = createOutput();
+      (terminal as unknown as TerminalInternals).output = freshOutput.stream;
+
+      terminal.exit();
+
+      // CSI 0 SP q = reset cursor to default
+      expect(freshOutput.read()).toContain('\u001B[0 q');
+    });
   });
 });

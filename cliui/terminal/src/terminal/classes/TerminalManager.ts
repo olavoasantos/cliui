@@ -42,6 +42,7 @@ export class TerminalManager {
     synchronizedOutput: false,
     unicodeWidth: false,
     graphicsProtocol: 'none',
+    notificationProtocol: 'none',
   };
 
   /**
@@ -95,12 +96,14 @@ export class TerminalManager {
       this.queryModeSupport(2027, timeoutMs),
     ]);
     const graphicsProtocol = await this.detectGraphicsProtocol(timeoutMs);
+    const notificationProtocol = this.detectNotificationProtocol();
 
     this.capabilities = {
       colorProfile,
       synchronizedOutput,
       unicodeWidth,
       graphicsProtocol,
+      notificationProtocol,
     };
 
     return this.getCapabilities();
@@ -288,6 +291,31 @@ export class TerminalManager {
       return process.env['TERM_PROGRAM'] === 'iTerm.app';
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * Detects which notification protocol the terminal supports.
+   *
+   * iTerm2 and Konsole support OSC 9, rxvt-unicode supports OSC 777.
+   * Falls back to `'none'` (BEL fallback) for unknown terminals.
+   */
+  private detectNotificationProtocol(): 'osc9' | 'osc777' | 'none' {
+    try {
+      const termProgram = process.env['TERM_PROGRAM'] ?? '';
+      const term = process.env['TERM'] ?? '';
+
+      if (termProgram === 'iTerm.app' || termProgram === 'konsole') {
+        return 'osc9';
+      }
+
+      if (term.startsWith('rxvt') || termProgram === 'rxvt-unicode') {
+        return 'osc777';
+      }
+
+      return 'none';
+    } catch {
+      return 'none';
     }
   }
 }

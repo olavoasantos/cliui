@@ -678,4 +678,52 @@ describe('Painter', () => {
       expect(buffer.get(0, 0)?.bg).toBeNull();
     });
   });
+
+  describe('anchor hyperlinks', () => {
+    it('sets hyperlink field on cells for <a> elements with href', () => {
+      const {document} = createEnv();
+      const anchor = document.createElement('a');
+      anchor.setAttribute('href', 'https://example.com');
+
+      const buffer = new CellBuffer(20, 5);
+      const painter = new Painter();
+
+      const box = createBox({
+        element: anchor,
+        width: 20,
+        height: 1,
+        contentWidth: 20,
+        contentHeight: 1,
+        computedStyle: style({}),
+        textLines: ['Click here'],
+      });
+
+      painter.paint(box, buffer);
+
+      expect(buffer.get(0, 0)?.hyperlink).toBe('https://example.com');
+      expect(buffer.get(5, 0)?.hyperlink).toBe('https://example.com');
+    });
+
+    it('does not set hyperlink on cells for elements without href', () => {
+      const {document} = createEnv();
+      const div = document.createElement('div');
+
+      const buffer = new CellBuffer(20, 5);
+      const painter = new Painter();
+
+      const box = createBox({
+        element: div,
+        width: 20,
+        height: 1,
+        contentWidth: 20,
+        contentHeight: 1,
+        computedStyle: style({}),
+        textLines: ['No link'],
+      });
+
+      painter.paint(box, buffer);
+
+      expect(buffer.get(0, 0)?.hyperlink).toBeNull();
+    });
+  });
 });

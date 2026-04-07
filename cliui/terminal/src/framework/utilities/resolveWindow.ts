@@ -16,8 +16,8 @@ export function resolveWindow(options: TerminalOptions): Window {
 
   const globalWindow = (globalThis as Record<string, unknown>).window;
 
-  if (globalWindow != null && typeof globalWindow === 'object' && 'document' in globalWindow) {
-    return globalWindow as Window;
+  if (globalWindow instanceof Window) {
+    return globalWindow;
   }
 
   return new Window();

@@ -1,5 +1,6 @@
 export const INITIAL_VALUES: Record<string, string> = {
   color: '',
+  cursor: '',
   'font-weight': 'normal',
   'font-style': 'normal',
   'text-decoration': 'none',

@@ -92,6 +92,7 @@ describe('TerminalManager integration', () => {
       synchronizedOutput: true,
       unicodeWidth: false,
       graphicsProtocol: 'none',
+      notificationProtocol: 'none',
     });
     expect(output.read()).toBe(
       '\u001B[?1049h\u001B[?25l\u001B[?1003h\u001B[?1006h\u001B[?1004h\u001B[?2004h' +

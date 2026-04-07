@@ -2,6 +2,7 @@
 export const LONGHAND_PROPERTIES = new Set([
   'color',
   'background-color',
+  'cursor',
   'font-weight',
   'font-style',
   'text-decoration',

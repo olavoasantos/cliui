@@ -207,6 +207,15 @@ export interface TerminalCapabilities {
 
   /** The best available terminal graphics protocol for inline images. */
   graphicsProtocol: TerminalGraphicsProtocol;
+
+  /**
+   * Notification protocol supported by this terminal.
+   *
+   * - `'osc9'` — iTerm2/Konsole style (OSC 9)
+   * - `'osc777'` — rxvt-unicode style (OSC 777)
+   * - `'none'` — no notification support; falls back to BEL
+   */
+  notificationProtocol: 'osc9' | 'osc777' | 'none';
 }
 
 /**

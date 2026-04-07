@@ -172,6 +172,7 @@ describe('TerminalManager', () => {
       synchronizedOutput: false,
       unicodeWidth: false,
       graphicsProtocol: 'none',
+      notificationProtocol: 'none',
     });
   });
 
@@ -202,6 +203,7 @@ describe('TerminalManager', () => {
       synchronizedOutput: true,
       unicodeWidth: true,
       graphicsProtocol: 'none',
+      notificationProtocol: 'none',
     });
   });
 
@@ -224,6 +226,7 @@ describe('TerminalManager', () => {
       synchronizedOutput: false,
       unicodeWidth: false,
       graphicsProtocol: 'none',
+      notificationProtocol: 'none',
     });
   });
 
@@ -256,6 +259,7 @@ describe('TerminalManager', () => {
         synchronizedOutput: false,
         unicodeWidth: false,
         graphicsProtocol: 'none',
+        notificationProtocol: 'none',
       });
     } finally {
       vi.useRealTimers();
@@ -288,6 +292,7 @@ describe('TerminalManager', () => {
       synchronizedOutput: false,
       unicodeWidth: false,
       graphicsProtocol: 'none',
+      notificationProtocol: 'none',
     });
     expect(input.stream.off).toHaveBeenCalledTimes(3);
   });

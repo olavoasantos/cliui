@@ -55,9 +55,14 @@ describe('Navigator', () => {
 
   it('returns null for browser-only subsystems', () => {
     const navigator = new Navigator();
-    expect(navigator.clipboard).toBeNull();
     expect(navigator.permissions).toBeNull();
     expect(navigator.geolocation).toBeNull();
+  });
+
+  it('provides a Clipboard instance', () => {
+    const navigator = new Navigator();
+    expect(navigator.clipboard).toBeDefined();
+    expect(navigator.clipboard).not.toBeNull();
   });
 
   it('serializes to [object Navigator]', () => {
