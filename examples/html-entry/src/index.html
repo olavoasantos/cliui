@@ -19,29 +19,19 @@
         <div class="info-box">
           <div class="info-label">How it works</div>
           <div class="info-value">
-            This app is loaded from an <span class="highlight">index.html</span> file,
-            just like a web application. External stylesheets, inline styles, and
-            scripts all work as expected.
+            This app is loaded from an index.html file, just like a web
+            application. External stylesheets, inline styles, and scripts
+            all work as expected.
           </div>
         </div>
 
         <div class="info-box">
           <div class="info-label">Features demonstrated</div>
-          <div class="info-value">
-            ✓ Full HTML document parsing (DOCTYPE, html, head, body)
-          </div>
-          <div class="info-value">
-            ✓ External stylesheet loading via &lt;link rel="stylesheet"&gt;
-          </div>
-          <div class="info-value">
-            ✓ Inline &lt;style&gt; blocks in &lt;head&gt;
-          </div>
-          <div class="info-value">
-            ✓ Script execution with DOM access
-          </div>
-          <div class="info-value">
-            ✓ DOMContentLoaded and load lifecycle events
-          </div>
+          <div class="info-value">✓ Full HTML document parsing (DOCTYPE, html, head, body)</div>
+          <div class="info-value">✓ External stylesheet loading via &lt;link rel="stylesheet"&gt;</div>
+          <div class="info-value">✓ Inline &lt;style&gt; blocks in &lt;head&gt;</div>
+          <div class="info-value">✓ Script execution with DOM access</div>
+          <div class="info-value">✓ DOMContentLoaded and load lifecycle events</div>
         </div>
 
         <div class="info-box" id="event-log">
@@ -53,11 +43,9 @@
     </div>
 
     <script>
-      // This script runs in the terminal's window scope — same as a browser!
       var status = document.querySelector('#status');
       status.textContent = 'Ready!';
 
-      // Log lifecycle events
       var eventLog = document.querySelector('#event-log');
 
       function addLogEntry(text) {
@@ -77,7 +65,6 @@
         addLogEntry('load event fired');
       });
 
-      // Handle keyboard input
       document.body.addEventListener('keydown', function(e) {
         if (e.key === 'q') {
           terminal.exit();

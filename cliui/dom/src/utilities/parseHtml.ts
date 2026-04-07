@@ -1,8 +1,10 @@
+import {decodeEntities} from './decodeEntities';
+
 import type {Node} from '../classes/Node';
 import type {ParentNode} from '../classes/ParentNode';
 
 const elementTokenizer =
-  /(?:<([a-z][a-z0-9-:]*)((?:[\s]+[^<>'"=\s]+(?:=(['"])[^]*?\3|=[^>'"\s]*|))*)[\s]*(\/?)\s*>|<\/([a-z][a-z0-9-:]*)>|<!--(.*?)-->|([^&<>]+))/gi;
+  /(?:<([a-z][a-z0-9-:]*)((?:[\s]+[^<>'"=\s]+(?:=(['"])[^]*?\3|=[^>'"\s]*|))*)[\s]*(\/?)\s*>|<\/([a-z][a-z0-9-:]*)>|<!--(.*?)-->|([^<>]+))/gi;
 
 const attributeTokenizer = /\s([^<>'"=\n\s]+)(?:=(["'])([\s\S]*?)\2|=([^>'"\n\s]*)|)/g;
 
@@ -33,7 +35,7 @@ export function parseHtml(html: string, contextNode: Node) {
     } else if (token[6] != null) {
       parent.append(document.createComment(token[6]));
     } else {
-      parent.append(token[7]!);
+      parent.append(decodeEntities(token[7]!));
     }
   }
 

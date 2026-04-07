@@ -15,7 +15,7 @@ describe('serializeNode integration', () => {
     const article = fragment.firstChild!;
 
     expect(serializeNode(article)).toBe(
-      '<article data-id="42"><!--note--><h1>Title amp; More</h1><template><span>Hidden</span></template></article>',
+      '<article data-id="42"><!--note--><h1>Title &amp; More</h1><template><span>Hidden</span></template></article>',
     );
   });
 });

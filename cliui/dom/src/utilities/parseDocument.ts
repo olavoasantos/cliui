@@ -1,5 +1,6 @@
 import type {Document} from '../classes/Document';
 import type {ParentNode} from '../classes/ParentNode';
+import {decodeEntities} from './decodeEntities';
 
 /** Set of tag names representing the document skeleton. */
 const STRUCTURAL_TAGS = new Set(['html', 'head', 'body']);
@@ -33,7 +34,7 @@ const VOID_ELEMENTS = new Set([
 const DOCTYPE_PATTERN = /<!doctype[^>]*>/gi;
 
 const elementTokenizer =
-  /(?:<([a-z][a-z0-9-:]*)((?:[\s]+[^<>'"=\s]+(?:=(['"])[^]*?\3|=[^>'"\s]*|))*)[\s]*(\/?)\s*>|<\/([a-z][a-z0-9-:]*)>|<!--(.*?)-->|([^&<>]+))/gi;
+  /(?:<([a-z][a-z0-9-:]*)((?:[\s]+[^<>'"=\s]+(?:=(['"])[^]*?\3|=[^>'"\s]*|))*)[\s]*(\/?)\s*>|<\/([a-z][a-z0-9-:]*)>|<!--(.*?)-->|([^<>]+))/gi;
 
 const attributeTokenizer = /\s([^<>'"=\n\s]+)(?:=(["'])([\s\S]*?)\2|=([^>'"\n\s]*)|)/g;
 
@@ -153,7 +154,7 @@ export function parseDocument(html: string, document: Document): void {
         continue;
       }
 
-      parent.append(text);
+      parent.append(decodeEntities(text));
     }
   }
 }

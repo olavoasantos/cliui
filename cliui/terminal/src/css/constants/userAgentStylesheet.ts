@@ -15,6 +15,12 @@
  * - Border-width is always 1 cell, so `hr` uses `border-style` for its line.
  */
 export const USER_AGENT_STYLESHEET = `
+/* ── Hidden elements ──────────────────────────────────── */
+
+script, link, title, meta {
+  display: none;
+}
+
 /* ── Block-level elements ─────────────────────────────── */
 
 h1, h2, h3, h4, h5, h6 {
