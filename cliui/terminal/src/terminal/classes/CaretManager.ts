@@ -6,10 +6,10 @@ import {Caret} from './Caret';
 
 import type {Element} from '@cliui/dom';
 import type {LayoutBox} from '../../layout/types';
-import type {CaretOverlay} from '../types/CaretOverlay';
-import type {EditableConfiguration} from '../types/EditableConfiguration';
-import type {Editable} from '../types/Editable';
-import type {VisualLine} from '../types/VisualLine';
+import type {CaretOverlay} from '../types';
+import type {EditableConfiguration} from '../types';
+import type {Editable} from '../types';
+import type {VisualLine} from '../types';
 
 /**
  * Manages all active carets in the terminal.

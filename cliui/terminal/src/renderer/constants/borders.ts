@@ -1,4 +1,4 @@
-import type {BorderCharacters} from '../types/BorderCharacters';
+import type {BorderCharacters} from '../types';
 
 /**
  * Built-in border character mappings derived from Lip Gloss border sets.

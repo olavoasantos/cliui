@@ -1,4 +1,4 @@
-import type {BorderCharacters} from '../types/BorderCharacters';
+import type {BorderCharacters} from '../types';
 
 /** Property names allowed inside a `@border-style` at-rule. */
 export const DECLARATION_TO_KEY: Record<string, keyof BorderCharacters> = {

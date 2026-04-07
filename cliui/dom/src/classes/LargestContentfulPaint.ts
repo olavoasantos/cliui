@@ -1,7 +1,7 @@
 import {PerformanceEntry} from './PerformanceEntry';
 
 import type {Element} from './Element';
-import type {LargestContentfulPaintOptions} from '../types/LargestContentfulPaintOptions';
+import type {LargestContentfulPaintOptions} from '../types';
 
 /**
  * Entry tracking the largest element by cell area that renders non-empty content.

@@ -1,5 +1,5 @@
-import type {ImageRenderRequest} from '../types/ImageRenderRequest';
-import type {GraphicsProtocol} from '../types/GraphicsProtocol';
+import type {ImageRenderRequest} from '../types';
+import type {GraphicsProtocol} from '../types';
 
 const ESC = '\u001B';
 const OSC = `${ESC}]`;

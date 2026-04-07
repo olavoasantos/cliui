@@ -8,8 +8,7 @@ import {
   SELECT_OBSERVED_ATTRIBUTES,
   SELECT_TAG_NAME,
 } from './constants';
-import {Event, HTMLElement, InputEvent} from '@cliui/dom';
-import type {Document, Element, KeyboardEvent} from '@cliui/dom';
+import {Event, HTMLElement, InputEvent, type Document, type Element, type KeyboardEvent} from '@cliui/dom';
 
 import type {Option} from '../Option/component';
 

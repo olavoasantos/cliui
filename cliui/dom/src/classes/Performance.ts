@@ -3,15 +3,7 @@ import {PerformanceMark} from './PerformanceMark';
 import {PerformanceMeasure} from './PerformanceMeasure';
 import {performance as nodePerformance} from 'node:perf_hooks';
 
-import type {PerformanceMarkOptions} from '../types/PerformanceMarkOptions';
-import type {PerformanceMeasureOptions} from '../types/PerformanceMeasureOptions';
-
-/**
- * Callback invoked when a new entry is recorded.
- *
- * Used internally to notify {@link PerformanceObserver} instances.
- */
-export type PerformanceEntryListener = (entry: PerformanceEntry) => void;
+import type {PerformanceEntryListener, PerformanceMarkOptions, PerformanceMeasureOptions} from '../types';
 
 /**
  * Standard browser-compatible Performance API for the terminal DOM polyfill.

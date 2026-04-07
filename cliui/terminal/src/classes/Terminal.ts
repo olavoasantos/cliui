@@ -6,13 +6,9 @@ import {
 } from '../constants/terminal';
 import {EDITABLE_STATE} from '../constants/editableState';
 import {StyleEngine} from '../css';
-import {Event, InputEvent, Window} from '@cliui/dom';
-import {CHILD, NEXT, PARENT} from '@cliui/dom';
-import {PerformanceEventTiming} from '@cliui/dom';
+import {Event, InputEvent, Window, CHILD, NEXT, PARENT, PerformanceEventTiming, type ClipboardEvent, type Document, type Element, type KeyboardEvent, type MouseEvent, type Node as DomNode} from '@cliui/dom';
 import {FrameInstrumentation} from './FrameInstrumentation';
 
-import type {ClipboardEvent} from '@cliui/dom';
-import type {MouseEvent} from '@cliui/dom';
 import {LayoutEngine} from '../layout';
 import {graphemeWidth} from '../layout/utilities/graphemeWidth';
 
@@ -27,28 +23,17 @@ const NBSP = '\u00A0';
 import {Renderer} from '../renderer';
 import {CaretManager} from '../terminal/classes/CaretManager';
 import {EDITABLE} from '../terminal/constants/editable';
-import {
-  cachedComputeVisualLines,
-  createVisualLineCache,
-} from '../terminal/utilities/cachedComputeVisualLines';
+import {cachedComputeVisualLines} from '../terminal/utilities/cachedComputeVisualLines';
+import {createVisualLineCache} from '../terminal/utilities/createVisualLineCache';
 import {findLineForCursor} from '../terminal/utilities/findLineForCursor';
 import {handleCaretKeyDown} from '../terminal/utilities/handleCaretKeyDown';
 import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
 import {resolveWindow} from '../utilities/resolveWindow';
 import {segmentGraphemes} from '../utilities/segmentGraphemes';
 
-import type {Document, Element} from '@cliui/dom';
-import type {KeyboardEvent} from '@cliui/dom';
-import type {Node as DomNode} from '@cliui/dom';
 import type {LayoutBox} from '../layout/types';
-import type {TerminalFrameAware} from '../types/TerminalFrameAware';
-import type {EditableStateElement} from '../types/EditableStateElement';
-import type {TerminalOptions} from '../types';
-import type {TerminalPlugin, TerminalPluginContext} from '../types/TerminalPlugin';
-import type {Editable} from '../terminal/types/Editable';
-import type {EditableConfiguration} from '../terminal/types/EditableConfiguration';
-import type {EditableState} from '../terminal/types/EditableState';
-import type {TerminalOutput, TerminalReadableInput} from '../terminal/types';
+import type {EditableStateElement, TerminalFrameAware, TerminalOptions, TerminalPlugin, TerminalPluginContext} from '../types';
+import type {Editable, EditableConfiguration, EditableState, TerminalOutput, TerminalReadableInput} from '../terminal/types';
 
 type FrameAwareLinkedNode = DomNode & {
   [CHILD]?: DomNode;

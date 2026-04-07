@@ -9,9 +9,7 @@ import {
   TEXTAREA_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '@cliui/dom';
-import {EDITABLE} from '@cliui/terminal';
-
-import type {EditableConfiguration} from '@cliui/terminal';
+import {EDITABLE, type EditableConfiguration} from '@cliui/terminal';
 
 /**
  * Built-in multi-line text editing custom element.

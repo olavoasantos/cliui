@@ -7,7 +7,7 @@ import {
 } from '../constants/controlSequences';
 
 import type {Cell, ChangedRegion, RGBColor, UnderlineStyle} from '../types';
-import type {StyleState} from '../types/StyleState';
+import type {StyleState} from '../types';
 import type {TerminalColorProfile} from '../../terminal/types';
 
 /** ANSI 16 palette colors (shared across all instances, never mutated). */

@@ -1,8 +1,7 @@
 import {CHILD, OWNER_ELEMENT, NS, NEXT, HOOKS} from '../constants';
 import {updateElementAttribute} from '../utilities/updateElementAttribute';
 
-import type {NamespaceURI} from '../types';
-import type {Hooks} from '../types';
+import type {Hooks, NamespaceURI} from '../types';
 import type {Attr} from './Attr';
 import type {Element} from './Element';
 

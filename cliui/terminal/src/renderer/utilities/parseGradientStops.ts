@@ -2,8 +2,8 @@ import {parseCSSFunction} from '../../css/utilities/parseCSSFunction';
 import {parseColor} from './parseColor';
 
 import type {RGBColor} from '../types';
-import type {ColorStop} from '../types/ColorStop';
-import type {ParsedGradient} from '../types/ParsedGradient';
+import type {ColorStop} from '../types';
+import type {ParsedGradient} from '../types';
 
 /**
  * Parses a `linear-gradient(...)` CSS value into an angle and color stops.

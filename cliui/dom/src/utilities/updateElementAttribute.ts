@@ -1,4 +1,4 @@
-import type {CustomElementWithAttributeChangedCallback} from '../types/CustomElementWithAttributeChangedCallback';
+import type {CustomElementWithAttributeChangedCallback} from '../types';
 import type {Element} from '../classes/Element';
 
 type ElementConstructor = {observedAttributes?: readonly string[]};

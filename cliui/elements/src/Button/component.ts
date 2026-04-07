@@ -7,8 +7,7 @@ import {
   BUTTON_OBSERVED_ATTRIBUTES,
   BUTTON_TAG_NAME,
 } from './constants';
-import {Event, HTMLElement, MouseEvent} from '@cliui/dom';
-import type {Element, KeyboardEvent} from '@cliui/dom';
+import {Event, HTMLElement, MouseEvent, type Element, type KeyboardEvent} from '@cliui/dom';
 
 import type {TerminalFrameAware} from '@cliui/terminal';
 import type {ButtonTone, ButtonVariant} from './types';

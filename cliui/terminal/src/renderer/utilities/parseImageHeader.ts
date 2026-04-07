@@ -1,13 +1,4 @@
-/**
- * Parsed image dimensions from a file header.
- */
-export interface ImageDimensions {
-  /** Image width in pixels. */
-  width: number;
-
-  /** Image height in pixels. */
-  height: number;
-}
+import type {ImageDimensions} from '../types';
 
 /**
  * Parses image dimensions from a PNG, JPEG, or GIF file header.

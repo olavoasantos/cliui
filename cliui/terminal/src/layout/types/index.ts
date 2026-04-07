@@ -40,9 +40,6 @@ export interface TextLayoutOptions {
  *
  * Each layout box corresponds to a DOM element and contains the computed
  * position, dimensions, content area, styling information, and child boxes.
- * The outer dimensions (x, y, width, height) include margin, border, and
- * padding. The content area (contentX, contentY, contentWidth, contentHeight)
- * is the inner region where children and text are placed.
  */
 export interface LayoutBox {
   /** The DOM element this layout box corresponds to. */
@@ -91,7 +88,153 @@ export interface LayoutBox {
   zIndex: number;
 }
 
-export type {FlexChildBasis} from './FlexChildBasis';
-export type {FlexContext} from './FlexContext';
-export type {FlexResolvedChild} from './FlexResolvedChild';
-export type {FlexSizingResult} from './FlexSizingResult';
+/**
+ * Parsed box-model values extracted from a computed style map.
+ * @internal
+ */
+export interface BoxModel {
+  paddingTop: number;
+  paddingRight: number;
+  paddingBottom: number;
+  paddingLeft: number;
+  marginTop: number;
+  marginRight: number;
+  marginBottom: number;
+  marginLeft: number;
+  borderTop: number;
+  borderRight: number;
+  borderBottom: number;
+  borderLeft: number;
+}
+
+/**
+ * A child's intrinsic measurements used as input to flex sizing.
+ * @internal
+ */
+export interface FlexChildBasis {
+  /** Intrinsic main-axis total size (including the child's margin). */
+  intrinsicMainSize: number;
+
+  /** Intrinsic cross-axis total size (including the child's margin). */
+  intrinsicCrossSize: number;
+
+  /** The child's computed style (flex-grow, flex-shrink, flex-basis, align-self, min/max, etc.). */
+  computedStyle: ComputedStyle;
+}
+
+/**
+ * Precomputed layout context shared between {@link FlexLayout.computeSizes}
+ * and {@link FlexLayout.position}.
+ * @internal
+ */
+export interface FlexContext {
+  /** Container outer width (border-box + content). */
+  outerWidth: number;
+  /** Container outer height (border-box + content). */
+  outerHeight: number;
+  /** Container content area width. */
+  contentWidth: number;
+  /** Container content area height. */
+  contentHeight: number;
+  /** Parsed box model insets. */
+  boxModel: BoxModel;
+  /** Total horizontal margin. */
+  horizontalMargin: number;
+  /** Total horizontal border + padding. */
+  horizontalBorderPadding: number;
+  /** Total vertical border + padding. */
+  verticalBorderPadding: number;
+  /** Resolved flex-direction value. */
+  flexDirection: string;
+  /** Whether the main axis is horizontal. */
+  isRowDirection: boolean;
+  /** Whether flex wrapping is enabled. */
+  isWrapEnabled: boolean;
+  /** Whether wrap direction is reversed. */
+  isWrapReverse: boolean;
+  /** Main-axis gap between items. */
+  mainGap: number;
+  /** Cross-axis gap between lines. */
+  lineGap: number;
+  /** Resolved z-index. */
+  zIndex: number;
+  /** Flex line structure — each entry is an array of child indices. */
+  lineChildIndices: number[][];
+  /** Cross size per flex line. */
+  lineCrossSizes: number[];
+}
+
+/**
+ * A wrapped flex line produced during layout.
+ * @internal
+ */
+export interface FlexLine {
+  children: LayoutBox[];
+  crossSize: number;
+}
+
+/**
+ * Resolved dimensions for a single flex child after grow/shrink distribution.
+ * @internal
+ */
+export interface FlexResolvedChild {
+  /** Final main-axis total size after flex grow/shrink and min/max clamping. */
+  mainSize: number;
+  /** Final cross-axis total size (may be stretched to the flex line's cross size). */
+  crossSize: number;
+  /** Whether the cross-axis was stretched beyond the intrinsic size. */
+  stretched: boolean;
+}
+
+/**
+ * Result of {@link FlexLayout.computeSizes}: resolved child dimensions and
+ * the precomputed context needed by {@link FlexLayout.position}.
+ * @internal
+ */
+export interface FlexSizingResult {
+  /** Resolved dimensions per child, in input order. */
+  resolvedChildren: FlexResolvedChild[];
+  /** Opaque context for the positioning phase. */
+  context: FlexContext;
+}
+
+/**
+ * Pre-computed text measurement data for fast relayout.
+ * @internal
+ */
+export interface PreparedText {
+  /** Word strings after whitespace collapsing and splitting. */
+  readonly words: string[];
+  /** Pre-measured cell widths per word (parallel to {@link words}). */
+  readonly widths: number[];
+  /**
+   * Per-grapheme cell widths for words that may need to be broken at
+   * grapheme boundaries when they exceed the available line width.
+   * `null` entries indicate the word has only one grapheme or is narrow
+   * enough that sub-word breaking metadata is not needed.
+   */
+  readonly graphemeWidths: (number[] | null)[];
+  /**
+   * Per-grapheme text strings for breakable words (parallel to
+   * {@link graphemeWidths}). `null` when the word is not breakable.
+   */
+  readonly graphemes: (string[] | null)[];
+  /**
+   * Whether the words array contains explicit `' '` space segments.
+   * When `false`, spaces between words are implicit and the layout
+   * walk joins consecutive words with spaces at break opportunities.
+   */
+  readonly hasExplicitSpaces: boolean;
+}
+
+/**
+ * Classifies how a segment break character behaves during line layout.
+ * @internal
+ */
+export type SegmentBreakKind =
+  | 'text'
+  | 'space'
+  | 'glue'
+  | 'zero-width-break'
+  | 'soft-hyphen'
+  | 'hard-break';

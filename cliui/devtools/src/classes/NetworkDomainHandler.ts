@@ -172,6 +172,7 @@ export class NetworkDomainHandler {
     this.originalHttpRequest = http.request;
     this.originalHttpsRequest = https.request;
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- inner function rebinds `this` for http.request proxy
     const self = this;
     const wrapRequest = (
       original: typeof http.request,

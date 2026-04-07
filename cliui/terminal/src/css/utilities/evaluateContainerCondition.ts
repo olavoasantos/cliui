@@ -1,5 +1,5 @@
-import type {MediaCondition} from '../types/MediaCondition';
-import type {ContainerValues} from '../types/ContainerValues';
+import type {MediaCondition} from '../types';
+import type {ContainerValues} from '../types';
 
 /**
  * Evaluates a parsed container condition against a container element's

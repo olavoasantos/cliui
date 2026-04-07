@@ -1,6 +1,6 @@
 import {Event} from './Event';
 
-import type {AnimationEventInit} from '../types/AnimationEventInit';
+import type {AnimationEventInit} from '../types';
 
 /**
  * DOM event dispatched during CSS animation lifecycle.

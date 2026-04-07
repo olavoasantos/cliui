@@ -1,8 +1,7 @@
 import styles from './styles.css?inline';
 
 import {TR_TAG_NAME} from './constants';
-import {HTMLElement} from '@cliui/dom';
-import type {Element} from '@cliui/dom';
+import {HTMLElement, type Element} from '@cliui/dom';
 
 import type {Td} from '../Td/component';
 import type {Th} from '../Th/component';

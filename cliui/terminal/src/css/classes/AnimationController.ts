@@ -3,8 +3,8 @@ import {parseEasingValue} from '../utilities/parseEasingValue';
 
 import type {Element} from '@cliui/dom';
 import type {ComputedStyle} from '../types';
-import type {KeyframeBlock} from '../types/KeyframeRule';
-import type {ActiveAnimation} from '../types/ActiveAnimation';
+import type {KeyframeBlock} from '../types';
+import type {ActiveAnimation} from '../types';
 
 /**
  * Manages active `@keyframes` animations per element.

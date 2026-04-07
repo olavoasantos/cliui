@@ -1,6 +1,7 @@
 import {computeVisualLines} from './computeVisualLines';
 
-import type {VisualLine} from '../types/VisualLine';
+import type {VisualLine} from '../types';
+import type {VisualLineCache} from '../types';
 
 /**
  * Cached wrapper around {@link computeVisualLines} that avoids redundant
@@ -39,24 +40,4 @@ export function cachedComputeVisualLines(
   cache.lines = lines;
 
   return lines;
-}
-
-/** Mutable cache state for {@link cachedComputeVisualLines}. */
-export interface VisualLineCache {
-  graphemes: string[] | null;
-  graphemeCount: number;
-  viewportWidth: number;
-  wordWrap: boolean;
-  lines: VisualLine[] | null;
-}
-
-/** Creates a fresh empty cache. */
-export function createVisualLineCache(): VisualLineCache {
-  return {
-    graphemes: null,
-    graphemeCount: 0,
-    viewportWidth: 0,
-    wordWrap: false,
-    lines: null,
-  };
 }

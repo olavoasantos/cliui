@@ -1,5 +1,5 @@
-import type {MediaCondition} from '../types/MediaCondition';
-import type {MediaValues} from '../types/MediaValues';
+import type {MediaCondition} from '../types';
+import type {MediaValues} from '../types';
 
 /**
  * Evaluates a parsed media condition against the current media values.

@@ -6,7 +6,7 @@ import {ANIMATABLE_PROPERTIES} from '../constants/animatableProperties';
 
 import type {Element} from '@cliui/dom';
 import type {ComputedStyle} from '../types';
-import type {ActiveTransition} from '../types/ActiveTransition';
+import type {ActiveTransition} from '../types';
 
 /**
  * Manages active CSS transitions per element.

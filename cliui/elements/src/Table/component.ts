@@ -1,8 +1,7 @@
 import styles from './styles.css?inline';
 
 import {DEFAULT_TABLE_COLUMN_GAP, TABLE_OBSERVED_ATTRIBUTES, TABLE_TAG_NAME} from './constants';
-import {HTMLElement} from '@cliui/dom';
-import type {Element} from '@cliui/dom';
+import {HTMLElement, type Element} from '@cliui/dom';
 import {cellWidth} from '@cliui/terminal';
 
 import type {Tbody} from '../Tbody/component';

@@ -36,7 +36,7 @@
     "docs:generate": "echo 'noop'",
     "format:check": "oxfmt check . --config .prettierrc.mjs --no-error-on-unmatched-pattern",
     "format:fix": "oxfmt . --config .prettierrc.mjs --no-error-on-unmatched-pattern",
-    "lint:check": "oxlint -c oxlint.json --silent",
+    "lint:check": "oxlint -c oxlint.json",
     "lint:fix": "oxlint -c oxlint.json --fix",
     "test:check": "run-p test:unit test:integration",
     "test:check:all": "run-p test:unit test:integration test:performance",

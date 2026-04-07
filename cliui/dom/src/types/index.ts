@@ -1,6 +1,10 @@
 import type {EventTarget} from '../classes/EventTarget';
 import type {Element} from '../classes/Element';
+import type {MutationObserver} from '../classes/MutationObserver';
 import type {Node} from '../classes/Node';
+import type {PerformanceEntry} from '../classes/PerformanceEntry';
+import type {PerformanceObserver} from '../classes/PerformanceObserver';
+import type {PerformanceObserverEntryList} from '../classes/PerformanceObserverEntryList';
 import type {Text} from '../classes/Text';
 import type {HTMLElement} from '../classes/HTMLElement';
 
@@ -164,5 +168,148 @@ export interface CustomElementConstructor {
   new (): HTMLElement;
 }
 
-export type {PerformanceMarkOptions} from './PerformanceMarkOptions';
-export type {PerformanceMeasureOptions} from './PerformanceMeasureOptions';
+/** Options accepted by {@link Performance.mark}. */
+export interface PerformanceMarkOptions {
+  /** Optional metadata to attach to the mark. */
+  detail?: unknown;
+  /** Explicit start time (high-resolution timestamp). Defaults to `performance.now()`. */
+  startTime?: number;
+}
+
+/** Options accepted by {@link Performance.measure}. */
+export interface PerformanceMeasureOptions {
+  /** Optional metadata to attach to the measure. */
+  detail?: unknown;
+  /** Start mark name or timestamp. */
+  start?: string | number;
+  /** End mark name or timestamp. */
+  end?: string | number;
+  /** Explicit duration override. */
+  duration?: number;
+}
+
+/** Options for constructing a {@link PerformanceEventTiming} entry. */
+export interface PerformanceEventTimingOptions {
+  /** The event type name (e.g. `'keydown'`, `'click'`). */
+  name: string;
+  /** High-resolution timestamp when input bytes were received. */
+  startTime: number;
+  /** High-resolution timestamp when event handler execution began. */
+  processingStart: number;
+  /** High-resolution timestamp when event handler execution ended. */
+  processingEnd: number;
+  /**
+   * Total duration from input received to next frame written.
+   * Set to `0` initially; finalized after the next render frame completes.
+   */
+  duration: number;
+  /** Unique identifier grouping related events in a single logical interaction. */
+  interactionId: number;
+  /**
+   * Entry type: `'event'` for general interactions, `'first-input'` for the
+   * first interaction.
+   */
+  entryType: 'event' | 'first-input';
+}
+
+/** Options accepted by {@link PerformanceObserver.observe}. */
+export interface PerformanceObserverObserveOptions {
+  /** Subscribe to multiple entry types at once. */
+  entryTypes?: string[];
+  /** Subscribe to a single entry type. */
+  type?: string;
+}
+
+/** Options for constructing a {@link LargestContentfulPaint} entry. */
+export interface LargestContentfulPaintOptions {
+  /** High-resolution timestamp when the element was painted. */
+  renderTime: number;
+  /** The cell area of the element (`contentWidth × contentHeight`). */
+  size: number;
+  /** The DOM element that triggered the LCP. */
+  element: Element;
+}
+
+/**
+ * Init options for {@link AnimationEvent}.
+ * @internal
+ */
+export interface AnimationEventInit {
+  bubbles?: boolean;
+  cancelable?: boolean;
+  animationName?: string;
+  elapsedTime?: number;
+  pseudoElement?: string;
+}
+
+/**
+ * Internal state store for CSSStyleDeclaration instances.
+ * @internal
+ */
+export interface CSSStyleDeclarationState {
+  properties: Map<string, string>;
+  element: Element | null;
+}
+
+/**
+ * Element shape supporting custom-element attribute change callbacks.
+ * @internal
+ */
+export interface CustomElementWithAttributeChangedCallback extends Element {
+  attributeChangedCallback?(name: string, oldValue: string | null, newValue: string | null): void;
+}
+
+/**
+ * Per-window store tracking installed mutation observer hooks.
+ * @internal
+ */
+export interface MutationObserverStore {
+  installed: boolean;
+  observers: Set<MutationObserver>;
+}
+
+/**
+ * Internal state for a MutationObserver's single observation target.
+ * @internal
+ */
+export interface Observation {
+  target: Node;
+  options: MutationObserverInit;
+}
+
+/**
+ * Window.onerror-compatible callback type.
+ * @internal
+ */
+export type OnErrorHandler =
+  | ((message: string, filename?: string, lineno?: number, colno?: number, error?: unknown) => void)
+  | null;
+
+/**
+ * Callback invoked when a new entry is recorded.
+ *
+ * Used internally to notify {@link PerformanceObserver} instances.
+ * @internal
+ */
+export type PerformanceEntryListener = (entry: PerformanceEntry) => void;
+
+/**
+ * Callback signature for {@link PerformanceObserver}.
+ * @internal
+ */
+export type PerformanceObserverCallback = (
+  list: PerformanceObserverEntryList,
+  observer: PerformanceObserver,
+) => void;
+
+/**
+ * Init options for {@link TransitionEvent}.
+ * @internal
+ */
+export interface TransitionEventInit {
+  bubbles?: boolean;
+  cancelable?: boolean;
+  propertyName?: string;
+  elapsedTime?: number;
+  pseudoElement?: string;
+}

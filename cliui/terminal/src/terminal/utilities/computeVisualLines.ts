@@ -1,6 +1,6 @@
 import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
 
-import type {VisualLine} from '../types/VisualLine';
+import type {VisualLine} from '../types';
 
 /**
  * Maps a flat grapheme array into visual lines, accounting for explicit

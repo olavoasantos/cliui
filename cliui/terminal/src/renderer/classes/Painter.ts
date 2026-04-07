@@ -9,8 +9,8 @@ import {CellBuffer} from './CellBuffer';
 
 import type {LayoutBox} from '../../layout/types';
 import type {ComputedStyle} from '../../css/types';
-import type {BoxMetrics} from '../types/BoxMetrics';
-import type {ClipRect} from '../types/ClipRect';
+import type {BoxMetrics} from '../types';
+import type {ClipRect} from '../types';
 
 type CachedTextLine = {
   width: number;

@@ -4,7 +4,7 @@ import {TextLayout} from './TextLayout';
 import {layoutPreparedText} from '../utilities/layoutPreparedText';
 import {prepareText} from '../utilities/prepareText';
 
-import type {PreparedText} from '../types/PreparedText';
+import type {PreparedText} from '../types';
 
 import type {Node} from '@cliui/dom';
 import type {Element} from '@cliui/dom';
@@ -12,7 +12,7 @@ import type {CharacterData} from '@cliui/dom';
 import type {StyleEngine} from '../../css/classes/StyleEngine';
 import type {ComputedStyle} from '../../css/types';
 import type {LayoutBox, TextLayoutOptions} from '../types';
-import type {FlexChildBasis} from '../types/FlexChildBasis';
+import type {FlexChildBasis} from '../types';
 
 /**
  * Top-level layout engine that takes a DOM tree and computed styles, runs
@@ -229,7 +229,7 @@ export class LayoutEngine {
     const inFlowElements: Element[] = [];
     const absoluteElements: Element[] = [];
 
-    const intrinsicBoxes: Array<LayoutBox | null> = new Array(childElements.length);
+    const intrinsicBoxes: Array<LayoutBox | null> = new Array(childElements.length); // eslint-disable-line unicorn/no-new-array -- pre-allocated for performance
     const childBases: FlexChildBasis[] = [];
     const inFlowIndices: number[] = [];
     const absoluteIndices: number[] = [];
@@ -282,7 +282,7 @@ export class LayoutEngine {
 
     // Phase 2: Layout each in-flow child at its resolved dimensions.
     // Skip re-layout when the resolved dimensions match the intrinsic ones.
-    const inFlowChildren: LayoutBox[] = new Array(inFlowElements.length);
+    const inFlowChildren: LayoutBox[] = new Array(inFlowElements.length); // eslint-disable-line unicorn/no-new-array -- pre-allocated for performance
 
     for (let i = 0; i < inFlowElements.length; i += 1) {
       const resolved = sizing.resolvedChildren[i]!;

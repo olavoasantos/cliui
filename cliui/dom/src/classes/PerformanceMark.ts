@@ -1,6 +1,6 @@
 import {PerformanceEntry} from './PerformanceEntry';
 
-import type {PerformanceMarkOptions} from '../types/PerformanceMarkOptions';
+import type {PerformanceMarkOptions} from '../types';
 
 /**
  * A performance mark — a named timestamp in the performance timeline.

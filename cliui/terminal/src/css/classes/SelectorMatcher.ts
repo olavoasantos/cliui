@@ -3,7 +3,7 @@ import {computeSpecificity} from '../utilities/computeSpecificity';
 import {matchesSelectorParts} from '../utilities/matchesSelectorParts';
 
 import type {Element} from '@cliui/dom';
-import type {MatchedDeclaration} from '../types/MatchedDeclaration';
+import type {MatchedDeclaration} from '../types';
 import type {CSSRule} from '../types';
 
 /** Matches CSS rules against DOM elements and returns declarations sorted by specificity. */

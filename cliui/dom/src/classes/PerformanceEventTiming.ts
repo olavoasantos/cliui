@@ -1,6 +1,6 @@
 import {PerformanceEntry} from './PerformanceEntry';
 
-import type {PerformanceEventTimingOptions} from '../types/PerformanceEventTimingOptions';
+import type {PerformanceEventTimingOptions} from '../types';
 
 /**
  * Extended performance entry for input responsiveness metrics (FID and INP).

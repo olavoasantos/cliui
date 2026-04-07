@@ -5,7 +5,7 @@ import {resolveVar} from '../utilities/resolveVar';
 
 import type {CSSStyleDeclaration} from '@cliui/dom';
 import type {ComputedStyle} from '../types';
-import type {MatchedDeclaration} from '../types/MatchedDeclaration';
+import type {MatchedDeclaration} from '../types';
 
 /** Resolves the CSS cascade for an element into a computed style map. */
 export class StyleResolver {

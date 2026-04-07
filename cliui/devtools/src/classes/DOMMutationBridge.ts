@@ -2,8 +2,7 @@ import {serializeCDPNode} from '../utilities/serializeCDPNode';
 
 import type {CDPTransport} from './CDPTransport';
 import type {NodeRegistry} from './NodeRegistry';
-import type {Element, Node as DomNode, Text, Window} from '@cliui/dom';
-import type {Hooks} from '@cliui/dom';
+import type {Element, Hooks, Node as DomNode, Text, Window} from '@cliui/dom';
 
 /**
  * Finds the hooks object on a Window by looking for the Symbol with

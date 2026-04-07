@@ -27,8 +27,7 @@ import {Performance} from './Performance';
 import {PerformanceObserver} from './PerformanceObserver';
 import {HOOKS} from '../constants';
 
-import type {Hooks} from '../types';
-import type {OnErrorHandler} from '../types/OnErrorHandler';
+import type {Hooks, OnErrorHandler} from '../types';
 
 export class Window extends EventTarget {
   [HOOKS]: Partial<Hooks> = {};

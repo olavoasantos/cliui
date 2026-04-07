@@ -1,8 +1,7 @@
 import styles from './styles.css?inline';
 
 import {FIELDSET_OBSERVED_ATTRIBUTES, FIELDSET_TAG_NAME} from './constants';
-import {HTMLElement} from '@cliui/dom';
-import type {Element, Node} from '@cliui/dom';
+import {HTMLElement, type Element, type Node} from '@cliui/dom';
 
 /**
  * Built-in terminal fieldset custom element for grouping related form

@@ -1,9 +1,7 @@
-import {createServer} from 'node:http';
-import {WebSocketServer as WSServer} from 'ws';
+import {createServer, type Server} from 'node:http';
+import {WebSocketServer as WSServer, type WebSocket} from 'ws';
 import {DEFAULT_CDP_PORT, WS_CLOSE_GOING_AWAY} from '../constants';
 
-import type {Server} from 'node:http';
-import type {WebSocket} from 'ws';
 import type {
   ConnectionCallback,
   MessageCallback,

@@ -6,8 +6,7 @@ import {
   UI_TOAST_OBSERVED_ATTRIBUTES,
   UI_TOAST_TAG_NAME,
 } from './constants';
-import {HTMLElement} from '@cliui/dom';
-import type {Node} from '@cliui/dom';
+import {HTMLElement, type Node} from '@cliui/dom';
 
 import type {TerminalFrameAware} from '@cliui/terminal';
 import type {UiToastTone} from './types';

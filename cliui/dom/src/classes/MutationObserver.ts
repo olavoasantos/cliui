@@ -6,8 +6,7 @@ import type {Element} from './Element';
 import type {Node} from './Node';
 import type {Text} from './Text';
 import type {Window} from './Window';
-import type {Hooks, MutationObserverInit, MutationRecord} from '../types';
-import type {Observation} from '../types/Observation';
+import type {Hooks, MutationObserverInit, MutationRecord, Observation} from '../types';
 
 /**
  * Observes DOM mutations and delivers batched mutation records in a microtask.

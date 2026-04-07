@@ -1,4 +1,4 @@
-import type {SegmentBreakKind} from '../types/SegmentBreakKind';
+import type {SegmentBreakKind} from '../types';
 
 /**
  * Classifies a character into a segment break kind for line-breaking.

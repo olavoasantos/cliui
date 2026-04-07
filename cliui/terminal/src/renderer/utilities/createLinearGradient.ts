@@ -1,7 +1,7 @@
 import {lerpColor} from './lerpColor';
 
 import type {RGBColor} from '../types';
-import type {ColorStop} from '../types/ColorStop';
+import type {ColorStop} from '../types';
 
 /**
  * Creates a function that samples a CSS `linear-gradient` at any `(x, y)`

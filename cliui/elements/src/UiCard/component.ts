@@ -1,8 +1,7 @@
 import styles from './styles.css?inline';
 
 import {UI_CARD_OBSERVED_ATTRIBUTES, UI_CARD_TAG_NAME} from './constants';
-import {HTMLElement} from '@cliui/dom';
-import type {Element, Node} from '@cliui/dom';
+import {HTMLElement, type Element, type Node} from '@cliui/dom';
 
 /**
  * Built-in terminal card custom element for bordered content panels.

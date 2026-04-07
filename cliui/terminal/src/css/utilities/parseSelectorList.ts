@@ -1,6 +1,6 @@
 import {parseSelector} from '@cliui/dom';
 
-import type {SelectorList} from '../types/SelectorList';
+import type {SelectorList} from '../types';
 
 /** Parses a comma-separated selector list into selector parts. */
 export function parseSelectorList(selectorText: string): SelectorList {

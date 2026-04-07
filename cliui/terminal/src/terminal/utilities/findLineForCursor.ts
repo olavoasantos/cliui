@@ -1,4 +1,4 @@
-import type {VisualLine} from '../types/VisualLine';
+import type {VisualLine} from '../types';
 
 /**
  * Finds the visual line index containing a given cursor position.

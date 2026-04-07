@@ -1,8 +1,5 @@
-import {PerformanceObserver} from '@cliui/dom';
-
-import type {Performance, PerformanceEntry} from '@cliui/dom';
-import type {FrameDetail} from './FrameInstrumentation';
-import type {TerminalVitalsCallback, TerminalVitalsMetricName} from '../types/TerminalVitalsMetric';
+import {PerformanceObserver, type Performance, type PerformanceEntry} from '@cliui/dom';
+import type {FrameDetail, TerminalVitalsCallback, TerminalVitalsMetricName} from '../types';
 
 /**
  * Higher-level utility that consumes raw `PerformanceObserver` entries and

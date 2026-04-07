@@ -7,11 +7,7 @@ import {
   INPUT_TAG_NAME,
 } from './constants';
 import {HTMLElement} from '@cliui/dom';
-import {GRAPHEME_SEGMENTER} from '@cliui/terminal';
-import {graphemeWidth} from '@cliui/terminal';
-import {EDITABLE} from '@cliui/terminal';
-
-import type {EditableConfiguration} from '@cliui/terminal';
+import {EDITABLE, GRAPHEME_SEGMENTER, graphemeWidth, type EditableConfiguration} from '@cliui/terminal';
 
 /**
  * Built-in single-line text input custom element.

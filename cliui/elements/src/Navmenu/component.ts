@@ -1,8 +1,7 @@
 import styles from './styles.css?inline';
 
 import {NAVMENU_OBSERVED_ATTRIBUTES, NAVMENU_TAG_NAME} from './constants';
-import {Event, HTMLElement} from '@cliui/dom';
-import type {Document, Element, KeyboardEvent} from '@cliui/dom';
+import {Event, HTMLElement, type Document, type Element, type KeyboardEvent} from '@cliui/dom';
 
 import type {NavmenuItem} from '../NavmenuItem/component';
 

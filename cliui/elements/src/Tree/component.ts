@@ -8,8 +8,7 @@ import {
   TREE_OBSERVED_ATTRIBUTES,
   TREE_TAG_NAME,
 } from './constants';
-import {Event, HTMLElement} from '@cliui/dom';
-import type {Document, Element, KeyboardEvent, Node} from '@cliui/dom';
+import {Event, HTMLElement, type Document, type Element, type KeyboardEvent, type Node} from '@cliui/dom';
 
 import type {TreeItem} from '../TreeItem/component';
 

@@ -1,6 +1,6 @@
-import {resolveEasingKeyword} from './evaluateEasing';
+import {resolveEasingKeyword} from './resolveEasingKeyword';
 
-import type {EasingDescriptor, StepPosition} from '../types/EasingDescriptor';
+import type {EasingDescriptor, StepPosition} from '../types';
 
 /**
  * Parses a CSS easing function value into a structured descriptor.

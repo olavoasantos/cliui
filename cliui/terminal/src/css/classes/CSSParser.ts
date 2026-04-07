@@ -6,8 +6,8 @@ import {skipBlock} from '../utilities/skipBlock';
 import {skipWhitespaceAndComments} from '../utilities/skipWhitespaceAndComments';
 
 import type {CSSParseResult} from '../types';
-import type {CSSConditionalRule} from '../types/CSSConditionalRule';
-import type {KeyframeRule} from '../types/KeyframeRule';
+import type {CSSConditionalRule} from '../types';
+import type {KeyframeRule} from '../types';
 
 /** Set of at-rule identifiers that contain nested CSS rules. */
 const CONDITIONAL_AT_RULES = new Set(['media', 'container']);

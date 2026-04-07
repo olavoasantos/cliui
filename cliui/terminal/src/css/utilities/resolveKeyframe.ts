@@ -1,8 +1,8 @@
 import {evaluateEasing} from './evaluateEasing';
 import {interpolateValue} from './interpolateValue';
 
-import type {EasingDescriptor} from '../types/EasingDescriptor';
-import type {KeyframeBlock} from '../types/KeyframeRule';
+import type {EasingDescriptor} from '../types';
+import type {KeyframeBlock} from '../types';
 import type {ComputedStyle} from '../types';
 
 /** A resolved keyframe stop used internally by the resolver. */

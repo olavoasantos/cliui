@@ -2,13 +2,7 @@ import {PerformanceObserverEntryList} from './PerformanceObserverEntryList';
 
 import type {PerformanceEntry} from './PerformanceEntry';
 import type {Performance} from './Performance';
-import type {PerformanceObserverObserveOptions} from '../types/PerformanceObserverObserveOptions';
-
-/** Callback signature for {@link PerformanceObserver}. */
-export type PerformanceObserverCallback = (
-  list: PerformanceObserverEntryList,
-  observer: PerformanceObserver,
-) => void;
+import type {PerformanceObserverCallback, PerformanceObserverObserveOptions} from '../types';
 
 /**
  * Observes performance entries as they are recorded and delivers them via

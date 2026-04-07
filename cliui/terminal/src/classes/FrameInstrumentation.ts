@@ -1,16 +1,6 @@
-import {PerformancePaintTiming, LargestContentfulPaint} from '@cliui/dom';
-
-import type {Performance} from '@cliui/dom';
-import type {Element} from '@cliui/dom';
+import {PerformancePaintTiming, LargestContentfulPaint, type Element, type Performance} from '@cliui/dom';
 import type {LayoutBox} from '../layout/types';
-
-/** Non-timing metadata attached to each `terminal.frame` measure. */
-export interface FrameDetail {
-  dirtyElements: number;
-  totalElements: number;
-  outputBytes: number;
-  idle: boolean;
-}
+import type {FrameDetail} from '../types';
 
 /**
  * Encapsulates all render-frame performance instrumentation.

@@ -2,7 +2,7 @@ import {findClosingBrace} from './findClosingBrace';
 import {parseDeclarations} from './parseDeclarations';
 import {skipWhitespaceAndComments} from './skipWhitespaceAndComments';
 
-import type {KeyframeBlock} from '../types/KeyframeRule';
+import type {KeyframeBlock} from '../types';
 
 /**
  * Parses the body of a `@keyframes` rule into a list of keyframe blocks.

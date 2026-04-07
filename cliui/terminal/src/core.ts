@@ -22,7 +22,7 @@ export {
 export {polyfillEnvironment} from '@cliui/dom';
 
 export type {TerminalOptions} from './types';
-export type {TerminalFrameAware} from './types/TerminalFrameAware';
+export type {TerminalFrameAware} from './types';
 export type {
   TerminalInput,
   TerminalInputEvent,
@@ -31,7 +31,7 @@ export type {
   TerminalPasteEvent,
   TerminalReadableInput,
 } from './terminal';
-export type {EditableConfiguration} from './terminal/types/EditableConfiguration';
+export type {EditableConfiguration} from './terminal/types';
 
 /* Engine internals re-exported for @cliui/elements */
 export {CellBuffer} from './renderer/classes/CellBuffer';
@@ -45,6 +45,6 @@ export {graphemeWidth} from './layout/utilities/graphemeWidth';
 export {GRAPHEME_SEGMENTER} from './layout/constants/cellWidth';
 export {EDITABLE} from './terminal/constants/editable';
 
-export type {TerminalPlugin, TerminalPluginContext} from './types/TerminalPlugin';
-export type {GraphicsProtocol, GraphicsProtocolName} from './renderer/types/GraphicsProtocol';
-export type {ImageRenderRequest} from './renderer/types/ImageRenderRequest';
+export type {TerminalPlugin, TerminalPluginContext} from './types';
+export type {GraphicsProtocol, GraphicsProtocolName} from './renderer/types';
+export type {ImageRenderRequest} from './renderer/types';

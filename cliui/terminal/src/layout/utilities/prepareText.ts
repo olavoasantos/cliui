@@ -10,7 +10,7 @@ import {mergeNumericRuns} from './mergeNumericRuns';
 import {mergeUrlRuns} from './mergeUrlRuns';
 import {normalizeWhitespaceNormal} from './normalizeWhitespaceNormal';
 
-import type {PreparedText} from '../types/PreparedText';
+import type {PreparedText} from '../types';
 
 /**
  * Prepares text for layout by collapsing whitespace, splitting into words,

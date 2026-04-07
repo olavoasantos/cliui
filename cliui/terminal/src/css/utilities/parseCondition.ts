@@ -1,4 +1,4 @@
-import type {MediaCondition} from '../types/MediaCondition';
+import type {MediaCondition} from '../types';
 
 /**
  * Parses a CSS media or container condition string into a structured AST.

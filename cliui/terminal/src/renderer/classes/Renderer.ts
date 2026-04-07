@@ -1,7 +1,7 @@
 import type {LayoutBox} from '../../layout/types';
 import type {TerminalColorProfile, TerminalGraphicsProtocol} from '../../terminal/types';
-import type {CaretOverlay} from '../../terminal/types/CaretOverlay';
-import type {GraphicsProtocol} from '../types/GraphicsProtocol';
+import type {CaretOverlay} from '../../terminal/types';
+import type {GraphicsProtocol} from '../types';
 import {kittyGraphicsProtocol} from '../utilities/writeKittyGraphics';
 import {itermGraphicsProtocol} from '../utilities/writeItermGraphics';
 import {fallbackGraphicsProtocol} from '../utilities/writeImageFallback';

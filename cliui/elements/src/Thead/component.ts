@@ -1,8 +1,7 @@
 import styles from './styles.css?inline';
 
 import {THEAD_TAG_NAME} from './constants';
-import {HTMLElement} from '@cliui/dom';
-import type {Element} from '@cliui/dom';
+import {HTMLElement, type Element} from '@cliui/dom';
 
 import type {Tr} from '../Tr/component';
 

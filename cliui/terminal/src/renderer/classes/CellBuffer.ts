@@ -259,7 +259,7 @@ export class CellBuffer {
   }
 
   private createCells(count: number): Cell[] {
-    const cells = new Array<Cell>(count);
+    const cells = new Array<Cell>(count); // eslint-disable-line unicorn/no-new-array -- pre-allocated for performance
 
     for (let i = 0; i < count; i += 1) {
       cells[i] = {

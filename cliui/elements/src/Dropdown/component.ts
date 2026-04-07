@@ -1,8 +1,7 @@
 import styles from './styles.css?inline';
 
 import {DROPDOWN_OBSERVED_ATTRIBUTES, DROPDOWN_TAG_NAME} from './constants';
-import {Event, HTMLElement} from '@cliui/dom';
-import type {Element, KeyboardEvent} from '@cliui/dom';
+import {Event, HTMLElement, type Element, type KeyboardEvent} from '@cliui/dom';
 
 import type {Navmenu} from '../Navmenu/component';
 

@@ -1,7 +1,7 @@
 import {MUTATION_OBSERVER_STORES} from '../constants/mutationObserverStores';
 
 import type {Window} from '../classes/Window';
-import type {MutationObserverStore} from '../types/MutationObserverStore';
+import type {MutationObserverStore} from '../types';
 
 /**
  * Retrieves or creates the per-window mutation observer store.

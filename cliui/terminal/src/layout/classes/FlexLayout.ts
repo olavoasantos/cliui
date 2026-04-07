@@ -2,12 +2,12 @@ import {cellWidth} from '../utilities/cellWidth';
 import type {Element} from '@cliui/dom';
 import type {ComputedStyle} from '../../css/types';
 import type {LayoutBox} from '../types';
-import type {BoxModel} from '../types/BoxModel';
-import type {FlexChildBasis} from '../types/FlexChildBasis';
-import type {FlexContext} from '../types/FlexContext';
-import type {FlexLine} from '../types/FlexLine';
-import type {FlexResolvedChild} from '../types/FlexResolvedChild';
-import type {FlexSizingResult} from '../types/FlexSizingResult';
+import type {BoxModel} from '../types';
+import type {FlexChildBasis} from '../types';
+import type {FlexContext} from '../types';
+import type {FlexLine} from '../types';
+import type {FlexResolvedChild} from '../types';
+import type {FlexSizingResult} from '../types';
 
 /**
  * Computes flexbox layout for terminal UI elements.
@@ -51,7 +51,7 @@ export class FlexLayout {
     const flexDirection = computedStyle.get('flex-direction') ?? 'column';
     const isRow = flexDirection === 'row' || flexDirection === 'row-reverse';
 
-    const childBases: FlexChildBasis[] = new Array(children.length);
+    const childBases: FlexChildBasis[] = new Array(children.length); // eslint-disable-line unicorn/no-new-array -- pre-allocated for performance
 
     for (let i = 0; i < children.length; i += 1) {
       const child = children[i]!;
@@ -193,7 +193,7 @@ export class FlexLayout {
 
     // --- Compute flex basis per child ---
 
-    const baseSizes = new Array<number>(childBases.length);
+    const baseSizes = new Array<number>(childBases.length); // eslint-disable-line unicorn/no-new-array -- pre-allocated for performance
 
     for (let i = 0; i < childBases.length; i += 1) {
       baseSizes[i] = this.resolveFlexBasisFromBasis(childBases[i]!, isRowDirection);
@@ -257,7 +257,7 @@ export class FlexLayout {
         lineCrossSizes.push(maxCross);
       }
     } else {
-      const allIndices: number[] = new Array(childBases.length);
+      const allIndices: number[] = new Array(childBases.length); // eslint-disable-line unicorn/no-new-array -- pre-allocated for performance
 
       for (let i = 0; i < childBases.length; i += 1) {
         allIndices[i] = i;
@@ -324,7 +324,7 @@ export class FlexLayout {
     // --- Resolve cross-axis sizes (stretch detection) ---
 
     const alignItems = computedStyle.get('align-items') ?? 'stretch';
-    const resolvedChildren: FlexResolvedChild[] = new Array(childBases.length);
+    const resolvedChildren: FlexResolvedChild[] = new Array(childBases.length); // eslint-disable-line unicorn/no-new-array -- pre-allocated for performance
 
     for (let i = 0; i < childBases.length; i += 1) {
       const basis = childBases[i]!;
@@ -1486,7 +1486,7 @@ export class FlexLayout {
       max: number | null;
       targetSize: number;
       frozen: boolean;
-    }> = new Array(indices.length);
+    }> = new Array(indices.length); // eslint-disable-line unicorn/no-new-array -- pre-allocated for performance
 
     for (let i = 0; i < indices.length; i += 1) {
       const idx = indices[i]!;

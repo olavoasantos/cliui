@@ -226,7 +226,152 @@ export interface TerminalManagerOptions {
   mouse?: boolean;
 }
 
-export type {CaretOverlay, CaretSelectionRange} from './CaretOverlay';
-export type {EditableConfiguration} from './EditableConfiguration';
-export type {EditableState} from './EditableState';
-export type {VisualLine} from './VisualLine';
+import type {Element} from '@cliui/dom';
+import type {PerformanceEventTimingOptions} from '@cliui/dom';
+import type {EDITABLE} from '../constants/editable';
+import type {Caret} from '../classes/Caret';
+
+/**
+ * Screen-space caret and selection data produced by the `CaretManager`
+ * for the renderer to overlay onto the cell buffer.
+ */
+export interface CaretOverlay {
+  /** Screen x coordinate of the cursor cell. */
+  cursorX: number;
+  /** Screen y coordinate of the cursor cell. */
+  cursorY: number;
+  /** Whether the cursor is in the visible blink phase. */
+  cursorVisible: boolean;
+  /** Selected cell ranges to highlight (inverted bg/fg). */
+  selection: CaretSelectionRange[];
+}
+
+/** A contiguous horizontal range of selected cells on a single row. */
+export interface CaretSelectionRange {
+  /** Screen x coordinate of the first selected cell. */
+  x: number;
+  /** Screen y coordinate of the row. */
+  y: number;
+  /** Number of cells in this range. */
+  width: number;
+}
+
+/**
+ * Declarative configuration for an editable text surface.
+ *
+ * Components set `[EDITABLE]` to this interface and the terminal
+ * editing system manages all state, event handling, cursor rendering,
+ * scrolling, and content synchronization automatically.
+ */
+export interface EditableConfiguration {
+  /** Returns the intrinsic width of the editing surface in terminal cells. */
+  intrinsicWidth(): number;
+  /** Returns the intrinsic height of the editing surface in rows. */
+  intrinsicHeight(): number;
+  /** Whether to wrap text at the viewport width boundary. */
+  wordWrap: boolean;
+  /** Whether Enter inserts newlines and ArrowUp/Down navigate lines. */
+  multiLine: boolean;
+  /** Attribute name to sync the grapheme value to. */
+  valueAttribute?: string;
+  /** Returns the maximum grapheme count, or 0 for unlimited. */
+  maxLength?(): number;
+  /** Returns the placeholder text to display when the field is empty and unfocused. */
+  placeholder?(): string;
+}
+
+/**
+ * Represents a single visual line computed from a flat grapheme array.
+ */
+export interface VisualLine {
+  /** Grapheme index where this visual line starts (inclusive). */
+  start: number;
+  /** Grapheme index where this visual line ends (exclusive). */
+  end: number;
+  /** Total terminal cell width of the graphemes on this line. */
+  width: number;
+}
+
+/**
+ * Mutable cache state for {@link cachedComputeVisualLines}.
+ * @internal
+ */
+export interface VisualLineCache {
+  graphemes: string[] | null;
+  graphemeCount: number;
+  viewportWidth: number;
+  wordWrap: boolean;
+  lines: VisualLine[] | null;
+}
+
+/**
+ * Options for {@link handleCaretKeyDown}.
+ * @internal
+ */
+export interface CaretKeyDownOptions {
+  /** Callback invoked when the user triggers a clipboard copy or cut. */
+  onClipboardWrite?: (text: string) => void;
+  /** Callback invoked when the user triggers a clipboard paste. */
+  onClipboardRead?: () => string;
+  /** Declarative editable configuration for 2D navigation support. */
+  config?: EditableConfiguration;
+  /** Resolved viewport width in terminal cells from the element's layout. */
+  viewportWidth?: number;
+  /** Resolved viewport height in rows from the element's layout. */
+  viewportHeight?: number;
+}
+
+/**
+ * Internal contract used by the caret system to interact with editable text content.
+ * @internal
+ */
+export interface Editable {
+  getGraphemes(): string[];
+  getCursorPosition(): number;
+  setCursorPosition(position: number): void;
+  insertText(text: string): void;
+  deleteRange(start: number, end: number): void;
+  getEditableWidth(): number;
+  getScrollOffset(): number;
+  getScrollY(): number;
+  updateScroll(): void;
+  isReadonly(): boolean;
+  isDisabled(): boolean;
+  getElement(): Element;
+  getVisualLineCache(): VisualLineCache;
+}
+
+/**
+ * Type helper for elements that carry the editable symbol.
+ * @internal
+ */
+export type EditableElement = {
+  [key in typeof EDITABLE]: EditableConfiguration;
+};
+
+/**
+ * System-managed editing state for an element with `[EDITABLE]`.
+ * @internal
+ */
+export interface EditableState {
+  graphemes: string[];
+  cursorPosition: number;
+  scrollX: number;
+  scrollY: number;
+  isFocused: boolean;
+  valueAtFocus: string;
+  caret: Caret | null;
+  resolvedWidth: number;
+  resolvedHeight: number;
+  visualLineCache: VisualLineCache;
+}
+
+/**
+ * Tracks in-progress input event timings that are waiting for the next
+ * render frame to finalize their `duration`.
+ * @internal
+ */
+export interface PendingEventTiming {
+  options: PerformanceEventTimingOptions;
+  isFirstInput: boolean;
+}

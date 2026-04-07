@@ -1,8 +1,7 @@
 import styles from './styles.css?inline';
 
 import {PAGINATOR_OBSERVED_ATTRIBUTES, PAGINATOR_TAG_NAME} from './constants';
-import {Event, HTMLElement} from '@cliui/dom';
-import type {KeyboardEvent} from '@cliui/dom';
+import {Event, HTMLElement, type KeyboardEvent} from '@cliui/dom';
 
 /**
  * Built-in terminal paginator custom element.

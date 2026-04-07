@@ -2,7 +2,7 @@ import {ClipboardEvent, FocusEvent, KeyboardEvent, MouseEvent, WheelEvent} from 
 
 import type {Document, Element, Performance} from '@cliui/dom';
 import type {LayoutBox} from '../../layout/types';
-import type {PendingEventTiming} from '../types/PendingEventTiming';
+import type {PendingEventTiming} from '../types';
 import type {
   TerminalInputEvent,
   TerminalKeyEvent,

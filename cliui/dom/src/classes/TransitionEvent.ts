@@ -1,6 +1,6 @@
 import {Event} from './Event';
 
-import type {TransitionEventInit} from '../types/TransitionEventInit';
+import type {TransitionEventInit} from '../types';
 
 /**
  * DOM event dispatched during CSS transition lifecycle.

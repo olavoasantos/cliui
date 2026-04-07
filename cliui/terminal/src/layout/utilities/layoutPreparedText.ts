@@ -1,4 +1,4 @@
-import type {PreparedText} from '../types/PreparedText';
+import type {PreparedText} from '../types';
 import type {TextLine} from '../types';
 
 /**

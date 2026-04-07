@@ -1,20 +1,6 @@
 import type {Node as DomNode} from '@cliui/dom';
 import type {NodeRegistry} from '../classes/NodeRegistry';
-
-/**
- * CDP serialized DOM.Node format.
- */
-export interface CDPNode {
-  nodeId: number;
-  backendNodeId: number;
-  nodeType: number;
-  nodeName: string;
-  localName: string;
-  nodeValue: string;
-  childNodeCount: number;
-  attributes?: string[];
-  children?: CDPNode[];
-}
+import type {CDPNode} from '../types';
 
 /**
  * Serializes a DOM node into the CDP `DOM.Node` format.

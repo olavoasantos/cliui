@@ -53,6 +53,7 @@ export class Node extends EventTarget {
   }
 
   getRootNode(): Node {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- walking up the tree requires reassignment
     let root: Node = this;
 
     while (root[PARENT] != null) {

@@ -21,11 +21,11 @@ import {evaluateMediaCondition} from '../utilities/evaluateMediaCondition';
 import {parseCondition} from '../utilities/parseCondition';
 
 import type {CSSAtRule, CSSConditionalRule, CSSRule, ComputedStyle} from '../types';
-import type {ContainerValues} from '../types/ContainerValues';
-import type {MediaCondition} from '../types/MediaCondition';
-import type {MediaValues} from '../types/MediaValues';
-import type {MatchedDeclaration} from '../types/MatchedDeclaration';
-import type {KeyframeRule} from '../types/KeyframeRule';
+import type {ContainerValues} from '../types';
+import type {MediaCondition} from '../types';
+import type {MediaValues} from '../types';
+import type {MatchedDeclaration} from '../types';
+import type {KeyframeRule} from '../types';
 
 /**
  * Orchestrates the full style computation pipeline:

@@ -1,4 +1,4 @@
-import type {CSSFunctionCall} from '../types/CSSFunctionCall';
+import type {CSSFunctionCall} from '../types';
 
 /**
  * Finds the first CSS function call in a value string.

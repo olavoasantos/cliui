@@ -33,4 +33,4 @@ export type {
   WebSocketServerOptions,
 } from './types';
 
-export type {CDPNode} from './utilities/serializeCDPNode';
+export type {CDPNode} from './types';

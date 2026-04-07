@@ -1,6 +1,5 @@
 import {NS, NEXT, VALUE, OWNER_ELEMENT, NAME, NodeType, HOOKS} from '../constants';
-import type {NamespaceURI} from '../types';
-import type {Hooks} from '../types';
+import type {Hooks, NamespaceURI} from '../types';
 import type {Element} from './Element';
 import {Node} from './Node';
 

@@ -49,7 +49,8 @@ export {HTMLTemplateElement} from './classes/HTMLTemplateElement';
 export {HTMLStyleElement} from './classes/HTMLStyleElement';
 export {SVGElement} from './classes/SVGElement';
 
-export {matches, matchesParts} from './utilities/matches';
+export {matches} from './utilities/matches';
+export {matchesParts} from './utilities/matchesParts';
 export {parseHtml} from './utilities/parseHtml';
 export {parseSelector} from './utilities/parseSelector';
 export {querySelector} from './utilities/querySelector';
@@ -100,8 +101,8 @@ export type {
 } from './types';
 
 export type {CustomElementConstructor} from './types';
-export type {PerformanceMarkOptions} from './types/PerformanceMarkOptions';
-export type {PerformanceMeasureOptions} from './types/PerformanceMeasureOptions';
-export type {PerformanceEventTimingOptions} from './types/PerformanceEventTimingOptions';
-export type {PerformanceObserverObserveOptions} from './types/PerformanceObserverObserveOptions';
-export type {LargestContentfulPaintOptions} from './types/LargestContentfulPaintOptions';
+export type {PerformanceMarkOptions} from './types';
+export type {PerformanceMeasureOptions} from './types';
+export type {PerformanceEventTimingOptions} from './types';
+export type {PerformanceObserverObserveOptions} from './types';
+export type {LargestContentfulPaintOptions} from './types';

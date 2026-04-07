@@ -4,10 +4,10 @@ import {findLineForCursor} from './findLineForCursor';
 import {Caret} from '../classes/Caret';
 
 import type {KeyboardEvent} from '@cliui/dom';
-import type {EditableConfiguration} from '../types/EditableConfiguration';
-import type {CaretKeyDownOptions} from '../types/CaretKeyDownOptions';
-import type {Editable} from '../types/Editable';
-import type {VisualLine} from '../types/VisualLine';
+import type {EditableConfiguration} from '../types';
+import type {CaretKeyDownOptions} from '../types';
+import type {Editable} from '../types';
+import type {VisualLine} from '../types';
 
 /**
  * Handles standard editing keyboard shortcuts for a caret.
@@ -50,7 +50,7 @@ export function handleCaretKeyDown(
     if (nextLineIndex < 0 || nextLineIndex >= lines.length) return true;
 
     const pos = mapCellOffsetToGraphemeIndex(lines[nextLineIndex]!, columnCells, target);
-    shift ? caret.selectTo(pos) : caret.moveTo(pos);
+    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
     return true;
   }
 
@@ -61,7 +61,7 @@ export function handleCaretKeyDown(
       key === 'ArrowUp'
         ? findParagraphBoundaryUp(graphemes, caret.position)
         : findParagraphBoundaryDown(graphemes, caret.position);
-    shift ? caret.selectTo(pos) : caret.moveTo(pos);
+    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
     return true;
   }
 
@@ -77,18 +77,18 @@ export function handleCaretKeyDown(
   /* ── Navigation (works in readonly too) ───────────────── */
 
   if (key === 'ArrowLeft' && !alt && !ctrl && !meta) {
-    shift ? caret.selectTo(caret.position - 1) : caret.moveTo(caret.position - 1);
+    if (shift) { caret.selectTo(caret.position - 1); } else { caret.moveTo(caret.position - 1); }
     return true;
   }
 
   if (key === 'ArrowRight' && !alt && !ctrl && !meta) {
-    shift ? caret.selectTo(caret.position + 1) : caret.moveTo(caret.position + 1);
+    if (shift) { caret.selectTo(caret.position + 1); } else { caret.moveTo(caret.position + 1); }
     return true;
   }
 
   if (key === 'Home' || (key === 'a' && ctrl)) {
     const pos = config ? getLineStart(target, config, caret.position, resolvedWidth) : 0;
-    shift ? caret.selectTo(pos) : caret.moveTo(pos);
+    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
     return true;
   }
 
@@ -96,31 +96,31 @@ export function handleCaretKeyDown(
     const pos = config
       ? getLineEnd(target, config, caret.position, resolvedWidth)
       : target.getGraphemes().length;
-    shift ? caret.selectTo(pos) : caret.moveTo(pos);
+    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
     return true;
   }
 
   /* Word navigation */
   if ((key === 'ArrowLeft' && alt) || (key === 'b' && alt)) {
     const pos = findWordBoundaryLeft(target, caret.position);
-    shift ? caret.selectTo(pos) : caret.moveTo(pos);
+    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
     return true;
   }
 
   if ((key === 'ArrowRight' && alt) || (key === 'f' && alt)) {
     const pos = findWordBoundaryRight(target, caret.position);
-    shift ? caret.selectTo(pos) : caret.moveTo(pos);
+    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
     return true;
   }
 
   /* Char forward/backward: Ctrl+F / Ctrl+B */
   if (key === 'f' && ctrl) {
-    shift ? caret.selectTo(caret.position + 1) : caret.moveTo(caret.position + 1);
+    if (shift) { caret.selectTo(caret.position + 1); } else { caret.moveTo(caret.position + 1); }
     return true;
   }
 
   if (key === 'b' && ctrl) {
-    shift ? caret.selectTo(caret.position - 1) : caret.moveTo(caret.position - 1);
+    if (shift) { caret.selectTo(caret.position - 1); } else { caret.moveTo(caret.position - 1); }
     return true;
   }
 

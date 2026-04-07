@@ -167,3 +167,19 @@ export interface DevToolsBridgeOptions {
    */
   debug?: boolean;
 }
+
+/**
+ * CDP serialized DOM.Node format.
+ * @internal
+ */
+export interface CDPNode {
+  nodeId: number;
+  backendNodeId: number;
+  nodeType: number;
+  nodeName: string;
+  localName: string;
+  nodeValue: string;
+  childNodeCount: number;
+  attributes?: string[];
+  children?: CDPNode[];
+}

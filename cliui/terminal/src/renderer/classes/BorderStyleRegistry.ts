@@ -2,7 +2,7 @@ import {BORDER_CHARACTERS} from '../constants/borders';
 import {DECLARATION_TO_KEY} from '../constants/borderDeclarations';
 import {unquote} from '../utilities/unquote';
 
-import type {BorderCharacters} from '../types/BorderCharacters';
+import type {BorderCharacters} from '../types';
 import type {CSSAtRule} from '../../css/types';
 
 /**
