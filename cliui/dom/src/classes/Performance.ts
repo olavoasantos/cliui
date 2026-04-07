@@ -122,7 +122,9 @@ export class Performance {
           domainLookupStart: 0,
           connectStart: 0,
           connectEnd: 0,
-          toJSON() { return this; },
+          toJSON() {
+            return this;
+          },
         } as unknown as PerformanceEntry,
       ];
     }
