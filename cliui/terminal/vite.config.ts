@@ -8,6 +8,7 @@ export default createViteConfig({
     'css/index': 'src/css/index.ts',
     'layout/index': 'src/layout/index.ts',
     'renderer/index': 'src/renderer/index.ts',
+    'bin/cli': 'src/bin/cli.ts',
   },
   pkg,
 });

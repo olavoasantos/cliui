@@ -74,7 +74,7 @@ export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
     configureServer(devServer) {
       return () => {
         devServer.httpServer?.on('listening', () => {
-          void launchTerminal(pluginOptions, config).then((t) => {
+          void launchTerminal(pluginOptions, config, devServer).then((t) => {
             terminal = t;
           });
         });
@@ -184,6 +184,7 @@ function readHtml(config: ResolvedConfig): string | null {
 async function launchTerminal(
   options: {fps: number; altScreen: boolean},
   config: ResolvedConfig,
+  devServer: {close(): Promise<void>},
 ): Promise<TerminalHandle | null> {
   try {
     const require = createRequire(resolve(config.root, 'package.json'));
@@ -194,6 +195,14 @@ async function launchTerminal(
       fps: options.fps,
       altScreen: options.altScreen,
     });
+
+    // Wrap exit() so that closing the terminal also shuts down the
+    // Vite dev server and lets the Node process terminate.
+    const originalExit = t.exit.bind(t);
+    t.exit = () => {
+      originalExit();
+      void devServer.close().then(() => process.exit(0));
+    };
 
     const html = readHtml(config);
 
