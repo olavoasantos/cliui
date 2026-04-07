@@ -6,21 +6,21 @@ user-invocable: true
 
 # Implement Milestone
 
-Orchestrate the implementation of all issues in a milestone from `docs/issues/`. This skill handles dependency resolution, task sequencing, progress tracking, and optional parallel execution for issues explicitly tagged as parallelizable.
+Orchestrate the implementation of all issues in a milestone from `.planning/issues/`. This skill handles dependency resolution, task sequencing, progress tracking, and optional parallel execution for issues explicitly tagged as parallelizable.
 
 ## Input
 
-The user provides a milestone number (e.g., `1`, `3`). The milestone file is `docs/issues/milestone-{n}.md`.
+The user provides a milestone number (e.g., `1`, `3`). The milestone file is `.planning/issues/milestone-{n}.md`.
 
 ## Phase 1: Analyze
 
 ### Read all inputs
 
-1. The milestone file (`docs/issues/milestone-{n}.md`) — read every issue
+1. The milestone file (`.planning/issues/milestone-{n}.md`) — read every issue
 2. `docs/learn/architecture.md` — the design document
 3. `CLAUDE.md` — project conventions
-4. `docs/ROADMAP.md` — broader context
-5. Existing milestone plan (`.ignore/plans/milestone-{n}-plan.md`) — if resuming
+4. `.planning/ROADMAP.md` — broader context
+5. Existing milestone plan (`.planning/plans/milestone-{n}-plan.md`) — if resuming
 
 ### Build the dependency graph
 
@@ -67,7 +67,7 @@ Present to the human:
 
 ## Phase 2: Persist the Milestone Plan
 
-Write the approved milestone plan to `.ignore/plans/milestone-{n}-plan.md` **before starting any implementation**. This is an orchestration document that tracks sequencing and progress — it does not contain per-issue implementation plans. Each issue gets its own plan file via the `implement-issue` workflow.
+Write the approved milestone plan to `.planning/plans/milestone-{n}-plan.md` **before starting any implementation**. This is an orchestration document that tracks sequencing and progress — it does not contain per-issue implementation plans. Each issue gets its own plan file via the `implement-issue` workflow.
 
 ```markdown
 # Milestone Plan: Milestone {n} — {Title}
@@ -115,7 +115,7 @@ Ask the human how they want to work:
 
 ### Sequential issues (default)
 
-For each issue, follow the `implement-issue` skill workflow. Each issue produces its own plan file (`.ignore/plans/issue-{id}-plan.md`) **before** implementation begins:
+For each issue, follow the `implement-issue` skill workflow. Each issue produces its own plan file (`.planning/plans/issue-{id}-plan.md`) **before** implementation begins:
 
 1. Understand the issue (read inputs, explore, ask questions if needed)
 2. Plan the implementation and persist the plan file
@@ -199,7 +199,7 @@ After all issues are complete:
 
 ## Resuming an Interrupted Session
 
-1. Read the milestone plan from `.ignore/plans/milestone-{n}-plan.md`
+1. Read the milestone plan from `.planning/plans/milestone-{n}-plan.md`
 2. Check the Progress Log and git history
 3. Run `pnpm check` to verify current state
 4. Identify which issue to resume from

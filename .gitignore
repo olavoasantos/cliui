@@ -236,3 +236,4 @@ out/
 # Turbo (if ever added)
 .turbo/
 .ignore
+.planning

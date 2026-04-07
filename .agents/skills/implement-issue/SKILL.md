@@ -6,11 +6,11 @@ user-invocable: true
 
 # Implement Issue
 
-Implement a milestone issue from `docs/issues/`. This skill defines the phased workflow for taking an issue from specification to tested, committed code.
+Implement a milestone issue from `.planning/issues/`. This skill defines the phased workflow for taking an issue from specification to tested, committed code.
 
 ## Input
 
-The user provides an issue ID (e.g., `M1T17`, `M2T3`). Determine the milestone file from the prefix (e.g., `M1` = `docs/issues/milestone-1.md`).
+The user provides an issue ID (e.g., `M1T17`, `M2T3`). Determine the milestone file from the prefix (e.g., `M1` = `.planning/issues/milestone-1.md`).
 
 ## Phase 1: Understand
 
@@ -18,12 +18,12 @@ The user provides an issue ID (e.g., `M1T17`, `M2T3`). Determine the milestone f
 
 Read in this order:
 
-1. The issue from its milestone file in `docs/issues/`
+1. The issue from its milestone file in `.planning/issues/`
 2. `docs/learn/architecture.md` — the design document
 3. `CLAUDE.md` — project conventions
-4. `docs/ROADMAP.md` — broader context
+4. `.planning/ROADMAP.md` — broader context
 5. Dependency issues referenced in the current issue
-6. Existing plan (`.ignore/plans/issue-{id}-plan.md`) — if resuming
+6. Existing plan (`.planning/plans/issue-{id}-plan.md`) — if resuming
 
 ### Explore the repository
 
@@ -65,7 +65,7 @@ Present the plan. Incorporate feedback.
 
 **Gate: Do not proceed until the human approves the plan.**
 
-Once approved, persist the plan to `.ignore/plans/issue-{id}-plan.md` **before starting implementation**. The plan file must exist on disk before any code is written — it serves as the contract for the work and is updated as steps are completed.
+Once approved, persist the plan to `.planning/plans/issue-{id}-plan.md` **before starting implementation**. The plan file must exist on disk before any code is written — it serves as the contract for the work and is updated as steps are completed.
 
 ### Cadence
 
@@ -83,7 +83,7 @@ Ask how the human wants to work:
 2. **Pattern match.** Find the closest codebase analog. Follow conventions over analogs if they conflict.
 3. **Execute.** Follow the type-first TDD progression adapted to the task.
 4. **Verify.** After each meaningful change, run relevant tests, type checker, and linter. Fix issues immediately.
-5. **Update the plan.** Mark steps complete in `.ignore/plans/issue-{id}-plan.md`.
+5. **Update the plan.** Mark steps complete in `.planning/plans/issue-{id}-plan.md`.
 6. **Audit structure.** Before moving on, confirm you did not:
    - place helpers/constants/types in a class file
    - place multiple utilities in one file
@@ -138,7 +138,7 @@ After the human approves the implementation:
 
 ## Resuming an Interrupted Session
 
-1. Read the plan from `.ignore/plans/issue-{id}-plan.md`
+1. Read the plan from `.planning/plans/issue-{id}-plan.md`
 2. Check the Progress Log and git history
 3. Run `pnpm check` to verify current state
 4. Confirm with the human where to pick up
