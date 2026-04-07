@@ -47,7 +47,14 @@ export class DOMDomainHandler {
 
   /** Returns the current layout root for hit-testing. */
   getLayoutRoot:
-    | (() => {element: unknown; x: number; y: number; width: number; height: number; children: any[]} | null)
+    | (() => {
+        element: unknown;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        children: any[];
+      } | null)
     | null = null;
 
   /**
@@ -415,7 +422,8 @@ export class DOMDomainHandler {
     // Pass 2: if we only got a container (no leaf element), retry with tolerance
     if (best) {
       const bestChildren = (best as any).childNodes;
-      const hasElementChildren = bestChildren && Array.from(bestChildren).some((c: any) => c.nodeType === 1);
+      const hasElementChildren =
+        bestChildren && Array.from(bestChildren).some((c: any) => c.nodeType === 1);
       if (hasElementChildren) {
         // We hit a container — try again with tolerance to catch nearby children
         const containerBest = best;

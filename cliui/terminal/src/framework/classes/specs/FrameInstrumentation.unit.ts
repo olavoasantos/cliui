@@ -2,9 +2,9 @@ import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {Performance, PerformanceObserver} from '@cliui/dom';
 import {FrameInstrumentation} from '../FrameInstrumentation';
 
-import type {LayoutBox} from '../../layout/types';
+import type {LayoutBox} from '../../../layout/types';
 import type {Element} from '@cliui/dom';
-import type {FrameDetail} from '../FrameInstrumentation';
+import type {FrameDetail} from '../../types';
 
 function createLayoutBox(overrides: Partial<LayoutBox> = {}): LayoutBox {
   return {

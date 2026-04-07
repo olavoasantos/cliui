@@ -5,12 +5,26 @@ import {
   MAX_FPS_WITHOUT_SYNC_OUTPUT,
 } from '../constants/terminal';
 import {EDITABLE_STATE} from '../constants/editableState';
-import {StyleEngine} from '../css';
-import {Event, InputEvent, Window, CHILD, NEXT, PARENT, PerformanceEventTiming, type ClipboardEvent, type Document, type Element, type KeyboardEvent, type MouseEvent, type Node as DomNode} from '@cliui/dom';
+import {StyleEngine} from '../../css';
+import {
+  Event,
+  InputEvent,
+  Window,
+  CHILD,
+  NEXT,
+  PARENT,
+  PerformanceEventTiming,
+  type ClipboardEvent,
+  type Document,
+  type Element,
+  type KeyboardEvent,
+  type MouseEvent,
+  type Node as DomNode,
+} from '@cliui/dom';
 import {FrameInstrumentation} from './FrameInstrumentation';
 
-import {LayoutEngine} from '../layout';
-import {graphemeWidth} from '../layout/utilities/graphemeWidth';
+import {LayoutEngine} from '../../layout';
+import {graphemeWidth} from '../../layout/utilities/graphemeWidth';
 
 /**
  * Non-breaking space used for editable content padding.
@@ -20,20 +34,32 @@ import {graphemeWidth} from '../layout/utilities/graphemeWidth';
  * intended width regardless of the active white-space mode.
  */
 const NBSP = '\u00A0';
-import {Renderer} from '../renderer';
-import {CaretManager} from '../terminal/classes/CaretManager';
-import {EDITABLE} from '../terminal/constants/editable';
-import {cachedComputeVisualLines} from '../terminal/utilities/cachedComputeVisualLines';
-import {createVisualLineCache} from '../terminal/utilities/createVisualLineCache';
-import {findLineForCursor} from '../terminal/utilities/findLineForCursor';
-import {handleCaretKeyDown} from '../terminal/utilities/handleCaretKeyDown';
-import {EventDispatcher, InputReader, TerminalManager} from '../terminal';
+import {Renderer} from '../../renderer';
+import {CaretManager} from '../../terminal/classes/CaretManager';
+import {EDITABLE} from '../../terminal/constants/editable';
+import {cachedComputeVisualLines} from '../../terminal/utilities/cachedComputeVisualLines';
+import {createVisualLineCache} from '../../terminal/utilities/createVisualLineCache';
+import {findLineForCursor} from '../../terminal/utilities/findLineForCursor';
+import {handleCaretKeyDown} from '../../terminal/utilities/handleCaretKeyDown';
+import {EventDispatcher, InputReader, TerminalManager} from '../../terminal';
 import {resolveWindow} from '../utilities/resolveWindow';
 import {segmentGraphemes} from '../utilities/segmentGraphemes';
 
-import type {LayoutBox} from '../layout/types';
-import type {EditableStateElement, TerminalFrameAware, TerminalOptions, TerminalPlugin, TerminalPluginContext} from '../types';
-import type {Editable, EditableConfiguration, EditableState, TerminalOutput, TerminalReadableInput} from '../terminal/types';
+import type {LayoutBox} from '../../layout/types';
+import type {
+  EditableStateElement,
+  TerminalFrameAware,
+  TerminalOptions,
+  TerminalPlugin,
+  TerminalPluginContext,
+} from '../types';
+import type {
+  Editable,
+  EditableConfiguration,
+  EditableState,
+  TerminalOutput,
+  TerminalReadableInput,
+} from '../../terminal/types';
 
 type FrameAwareLinkedNode = DomNode & {
   [CHILD]?: DomNode;

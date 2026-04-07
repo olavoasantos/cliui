@@ -7,7 +7,7 @@
  * for passing a `Window` instance to `Terminal` via its options.
  */
 
-export {Terminal} from './classes/Terminal';
+export {Terminal} from './framework/classes/Terminal';
 
 export {
   ClipboardEvent,
@@ -21,8 +21,8 @@ export {
 
 export {polyfillEnvironment} from '@cliui/dom';
 
-export type {TerminalOptions} from './types';
-export type {TerminalFrameAware} from './types';
+export type {TerminalOptions} from './framework/types';
+export type {TerminalFrameAware} from './framework/types';
 export type {
   TerminalInput,
   TerminalInputEvent,
@@ -45,6 +45,6 @@ export {graphemeWidth} from './layout/utilities/graphemeWidth';
 export {GRAPHEME_SEGMENTER} from './layout/constants/cellWidth';
 export {EDITABLE} from './terminal/constants/editable';
 
-export type {TerminalPlugin, TerminalPluginContext} from './types';
+export type {TerminalPlugin, TerminalPluginContext} from './framework/types';
 export type {GraphicsProtocol, GraphicsProtocolName} from './renderer/types';
 export type {ImageRenderRequest} from './renderer/types';

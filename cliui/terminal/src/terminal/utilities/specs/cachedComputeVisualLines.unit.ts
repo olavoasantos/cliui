@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 
-import {cachedComputeVisualLines, createVisualLineCache} from '../cachedComputeVisualLines';
+import {cachedComputeVisualLines} from '../cachedComputeVisualLines';
+import {createVisualLineCache} from '../createVisualLineCache';
 
 function g(text: string): string[] {
   return [...new Intl.Segmenter('en', {granularity: 'grapheme'}).segment(text)].map(

@@ -4,7 +4,7 @@ import {DEFAULT_COLUMNS, DEFAULT_FPS, DEFAULT_ROWS} from '../../constants/termin
 import {KeyboardEvent, Window} from '@cliui/dom';
 import {Terminal} from '../Terminal';
 
-import type {TerminalReadableInput} from '../../terminal/types';
+import type {TerminalReadableInput} from '../../../terminal/types';
 
 type TerminalInternals = {
   output: NodeJS.WriteStream;

@@ -1,8 +1,8 @@
 import {describe, it, expect} from 'vitest';
 import {resolveKeyframe} from '../resolveKeyframe';
 
-import type {KeyframeBlock} from '../../types/KeyframeRule';
-import type {EasingDescriptor} from '../../types/EasingDescriptor';
+import type {KeyframeBlock} from '../../types';
+import type {EasingDescriptor} from '../../types';
 
 const linear: EasingDescriptor = {type: 'linear'};
 

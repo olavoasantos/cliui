@@ -1,9 +1,9 @@
 import {describe, expect, it} from 'vitest';
 
 import {Window} from '@cliui/dom';
-import {StyleEngine} from '../../css/classes/StyleEngine';
-import {LayoutEngine} from '../../layout/classes/LayoutEngine';
-import {Renderer} from '../../renderer/classes/Renderer';
+import {StyleEngine} from '../../../css/classes/StyleEngine';
+import {LayoutEngine} from '../../../layout/classes/LayoutEngine';
+import {Renderer} from '../../../renderer/classes/Renderer';
 
 import type {HTMLDialogElement} from '@cliui/dom';
 

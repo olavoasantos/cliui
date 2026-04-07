@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 
 import {kittyGraphicsProtocol} from '../writeKittyGraphics';
 
-import type {ImageRenderRequest} from '../../types/ImageRenderRequest';
+import type {ImageRenderRequest} from '../../types';
 
 const ESC = '\u001B';
 

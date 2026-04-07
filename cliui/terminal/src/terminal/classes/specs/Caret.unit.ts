@@ -1,8 +1,8 @@
 import {describe, expect, it} from 'vitest';
 import {Caret} from '../Caret';
 
-import type {Editable} from '../../types/Editable';
-import {createVisualLineCache} from '../../utilities/cachedComputeVisualLines';
+import type {Editable} from '../../types';
+import {createVisualLineCache} from '../../utilities/createVisualLineCache';
 
 function createEditable(graphemes: string[] = []): Editable & {cursorPos: number} {
   const state = {

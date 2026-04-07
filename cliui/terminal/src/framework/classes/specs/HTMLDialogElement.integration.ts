@@ -3,7 +3,7 @@ import {describe, expect, it} from 'vitest';
 import {Event} from '@cliui/dom';
 import {HTMLDialogElement} from '@cliui/dom';
 import {KeyboardEvent} from '@cliui/dom';
-import {StyleEngine} from '../../css/classes/StyleEngine';
+import {StyleEngine} from '../../../css/classes/StyleEngine';
 import {Window} from '@cliui/dom';
 
 function createEnv() {

@@ -3,7 +3,11 @@ import {PerformanceMark} from './PerformanceMark';
 import {PerformanceMeasure} from './PerformanceMeasure';
 import {performance as nodePerformance} from 'node:perf_hooks';
 
-import type {PerformanceEntryListener, PerformanceMarkOptions, PerformanceMeasureOptions} from '../types';
+import type {
+  PerformanceEntryListener,
+  PerformanceMarkOptions,
+  PerformanceMeasureOptions,
+} from '../types';
 
 /**
  * Standard browser-compatible Performance API for the terminal DOM polyfill.

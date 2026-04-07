@@ -40,9 +40,7 @@ describe('HeapProfilerWorker', () => {
     expect(result).toBeDefined();
 
     // Should have received chunk events
-    const chunks = transport.events.filter(
-      (e) => e.method === 'HeapProfiler.addHeapSnapshotChunk',
-    );
+    const chunks = transport.events.filter((e) => e.method === 'HeapProfiler.addHeapSnapshotChunk');
     expect(chunks.length).toBeGreaterThan(0);
   }, 15000);
 

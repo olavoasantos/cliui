@@ -174,10 +174,7 @@ export class NetworkDomainHandler {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias -- inner function rebinds `this` for http.request proxy
     const self = this;
-    const wrapRequest = (
-      original: typeof http.request,
-      protocol: string,
-    ): typeof http.request => {
+    const wrapRequest = (original: typeof http.request, protocol: string): typeof http.request => {
       return function interceptedRequest(
         this: unknown,
         ...args: Parameters<typeof http.request>

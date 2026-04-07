@@ -89,7 +89,16 @@ export class DevToolsBridge {
   private screencastInterval: ReturnType<typeof setInterval> | null = null;
   private screencastSessionId = 0;
   private injectedScriptId = 1;
-  private readonly getLayoutRoot: (() => {element: unknown; x: number; y: number; width: number; height: number; children: any[]} | null) | null;
+  private readonly getLayoutRoot:
+    | (() => {
+        element: unknown;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        children: any[];
+      } | null)
+    | null;
 
   /**
    * Creates a new DevTools bridge.
@@ -121,7 +130,14 @@ export class DevToolsBridge {
       color: {r: number; g: number; b: number; a: number},
     ) => void;
     getCellBuffer?: () => {cols: number; rows: number; get(x: number, y: number): unknown} | null;
-    getLayoutRoot?: () => {element: unknown; x: number; y: number; width: number; height: number; children: any[]} | null;
+    getLayoutRoot?: () => {
+      element: unknown;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      children: any[];
+    } | null;
     options?: DevToolsBridgeOptions;
   }) {
     const port = config.options?.port ?? DEFAULT_CDP_PORT;

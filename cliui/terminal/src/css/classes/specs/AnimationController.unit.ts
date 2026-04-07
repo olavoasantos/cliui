@@ -2,7 +2,7 @@ import {describe, it, expect, beforeEach} from 'vitest';
 import {Window} from '@cliui/dom';
 import {AnimationController} from '../AnimationController';
 
-import type {KeyframeBlock} from '../../types/KeyframeRule';
+import type {KeyframeBlock} from '../../types';
 import type {Element} from '@cliui/dom';
 
 function blocks(

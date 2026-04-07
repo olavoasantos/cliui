@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 
 import {itermGraphicsProtocol} from '../writeItermGraphics';
 
-import type {ImageRenderRequest} from '../../types/ImageRenderRequest';
+import type {ImageRenderRequest} from '../../types';
 
 const ESC = '\u001B';
 

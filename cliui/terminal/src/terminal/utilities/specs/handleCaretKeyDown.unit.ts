@@ -4,8 +4,8 @@ import {KeyboardEvent} from '@cliui/dom';
 import {Caret} from '../../classes/Caret';
 import {handleCaretKeyDown} from '../handleCaretKeyDown';
 
-import type {Editable} from '../../types/Editable';
-import {createVisualLineCache} from '../cachedComputeVisualLines';
+import type {Editable} from '../../types';
+import {createVisualLineCache} from '../createVisualLineCache';
 
 function createEditable(graphemes: string[] = []): Editable & {cursorPos: number} {
   const state = {

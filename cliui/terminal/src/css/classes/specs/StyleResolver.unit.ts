@@ -3,7 +3,7 @@ import {describe, it, expect} from 'vitest';
 import {StyleResolver} from '../StyleResolver';
 import {CSSStyleDeclaration} from '@cliui/dom';
 
-import type {MatchedDeclaration} from '../../types/MatchedDeclaration';
+import type {MatchedDeclaration} from '../../types';
 import type {ComputedStyle} from '../../types';
 
 function makeMatched(

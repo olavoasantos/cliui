@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 
 import {fallbackGraphicsProtocol} from '../writeImageFallback';
 
-import type {ImageRenderRequest} from '../../types/ImageRenderRequest';
+import type {ImageRenderRequest} from '../../types';
 
 const ESC = '\u001B';
 

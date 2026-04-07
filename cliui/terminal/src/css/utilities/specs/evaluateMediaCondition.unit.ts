@@ -2,8 +2,8 @@ import {describe, it, expect} from 'vitest';
 
 import {evaluateMediaCondition} from '../evaluateMediaCondition';
 
-import type {MediaCondition} from '../../types/MediaCondition';
-import type {MediaValues} from '../../types/MediaValues';
+import type {MediaCondition} from '../../types';
+import type {MediaValues} from '../../types';
 
 describe('evaluateMediaCondition', () => {
   const defaultValues: MediaValues = {

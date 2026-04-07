@@ -8,7 +8,7 @@ import {
 } from '@cliui/dom';
 import {TerminalVitals} from '../TerminalVitals';
 
-import type {TerminalVitalsMetric} from '../../types/TerminalVitalsMetric';
+import type {TerminalVitalsMetric} from '../../types';
 
 describe('TerminalVitals', () => {
   let perf: Performance;

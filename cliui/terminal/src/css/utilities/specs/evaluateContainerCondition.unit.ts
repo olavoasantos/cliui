@@ -2,8 +2,8 @@ import {describe, it, expect} from 'vitest';
 
 import {evaluateContainerCondition} from '../evaluateContainerCondition';
 
-import type {MediaCondition} from '../../types/MediaCondition';
-import type {ContainerValues} from '../../types/ContainerValues';
+import type {MediaCondition} from '../../types';
+import type {ContainerValues} from '../../types';
 
 describe('evaluateContainerCondition', () => {
   const defaultValues: ContainerValues = {

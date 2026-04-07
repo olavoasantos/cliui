@@ -2,7 +2,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {Terminal} from '../Terminal';
 
-import type {TerminalColorProfile, TerminalReadableInput} from '../../terminal/types';
+import type {TerminalColorProfile, TerminalReadableInput} from '../../../terminal/types';
 
 type RendererInternals = {
   cols: number;

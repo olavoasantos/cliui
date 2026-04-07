@@ -5,9 +5,9 @@ import {CaretManager} from '../CaretManager';
 
 import type {Element} from '@cliui/dom';
 import type {LayoutBox} from '../../../layout/types';
-import type {EditableConfiguration} from '../../types/EditableConfiguration';
-import type {Editable} from '../../types/Editable';
-import {createVisualLineCache} from '../../utilities/cachedComputeVisualLines';
+import type {EditableConfiguration} from '../../types';
+import type {Editable} from '../../types';
+import {createVisualLineCache} from '../../utilities/createVisualLineCache';
 
 function createEditable(
   element: Element,

@@ -3,7 +3,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 import {Window} from '@cliui/dom';
 import {Terminal} from '../Terminal';
 
-import type {TerminalReadableInput} from '../../terminal/types';
+import type {TerminalReadableInput} from '../../../terminal/types';
 
 type TerminalInternals = {
   renderFrame(): void;

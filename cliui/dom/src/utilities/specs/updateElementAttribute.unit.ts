@@ -3,7 +3,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {updateElementAttribute} from '../updateElementAttribute';
 import {Window} from '../../classes/Window';
 
-import type {CustomElementWithAttributeChangedCallback} from '../../types/CustomElementWithAttributeChangedCallback';
+import type {CustomElementWithAttributeChangedCallback} from '../../types';
 
 interface TestElement extends CustomElementWithAttributeChangedCallback {
   constructor: {observedAttributes: string[]};

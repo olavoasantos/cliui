@@ -119,34 +119,44 @@ export class HeapProfilerWorker {
         return;
       }
 
-      this.worker.on('message', (msg: {t: string; method?: string; params?: Record<string, unknown>; id?: number; error?: string; result?: Record<string, unknown>}) => {
-        if (msg.t === 'ready') {
-          this.ready = true;
-          resolve();
-          return;
-        }
+      this.worker.on(
+        'message',
+        (msg: {
+          t: string;
+          method?: string;
+          params?: Record<string, unknown>;
+          id?: number;
+          error?: string;
+          result?: Record<string, unknown>;
+        }) => {
+          if (msg.t === 'ready') {
+            this.ready = true;
+            resolve();
+            return;
+          }
 
-        if (msg.t === 'evt') {
-          // Forward V8 event to DevTools
-          this.transport.broadcastEvent({
-            method: msg.method!,
-            params: msg.params ?? {},
-          });
-          return;
-        }
+          if (msg.t === 'evt') {
+            // Forward V8 event to DevTools
+            this.transport.broadcastEvent({
+              method: msg.method!,
+              params: msg.params ?? {},
+            });
+            return;
+          }
 
-        if (msg.t === 'res') {
-          const p = this.pending.get(msg.id!);
-          if (p) {
-            this.pending.delete(msg.id!);
-            if (msg.error) {
-              p.reject(new Error(msg.error));
-            } else {
-              p.resolve(msg.result ?? {});
+          if (msg.t === 'res') {
+            const p = this.pending.get(msg.id!);
+            if (p) {
+              this.pending.delete(msg.id!);
+              if (msg.error) {
+                p.reject(new Error(msg.error));
+              } else {
+                p.resolve(msg.result ?? {});
+              }
             }
           }
-        }
-      });
+        },
+      );
 
       this.worker.on('error', (err) => {
         reject(err);

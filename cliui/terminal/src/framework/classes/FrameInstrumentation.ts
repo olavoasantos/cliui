@@ -1,5 +1,10 @@
-import {PerformancePaintTiming, LargestContentfulPaint, type Element, type Performance} from '@cliui/dom';
-import type {LayoutBox} from '../layout/types';
+import {
+  PerformancePaintTiming,
+  LargestContentfulPaint,
+  type Element,
+  type Performance,
+} from '@cliui/dom';
+import type {LayoutBox} from '../../layout/types';
 import type {FrameDetail} from '../types';
 
 /**

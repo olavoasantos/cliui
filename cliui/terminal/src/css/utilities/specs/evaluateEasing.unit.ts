@@ -1,7 +1,8 @@
 import {describe, it, expect} from 'vitest';
-import {evaluateEasing, resolveEasingKeyword} from '../evaluateEasing';
+import {evaluateEasing} from '../evaluateEasing';
+import {resolveEasingKeyword} from '../resolveEasingKeyword';
 
-import type {EasingDescriptor} from '../../types/EasingDescriptor';
+import type {EasingDescriptor} from '../../types';
 
 describe('evaluateEasing', () => {
   describe('linear', () => {

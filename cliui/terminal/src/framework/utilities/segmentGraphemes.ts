@@ -1,4 +1,4 @@
-import {GRAPHEME_SEGMENTER} from '../layout/constants/cellWidth';
+import {GRAPHEME_SEGMENTER} from '../../layout/constants/cellWidth';
 
 /**
  * Segments a string into an array of grapheme clusters.

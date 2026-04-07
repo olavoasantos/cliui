@@ -1,10 +1,10 @@
-import type {CellBuffer} from '../renderer/classes/CellBuffer';
-import type {GraphicsProtocol} from '../renderer/types';
-import type {StyleEngine} from '../css/classes/StyleEngine';
-import type {LayoutBox} from '../layout/types';
+import type {CellBuffer} from '../../renderer/classes/CellBuffer';
+import type {GraphicsProtocol} from '../../renderer/types';
+import type {StyleEngine} from '../../css/classes/StyleEngine';
+import type {LayoutBox} from '../../layout/types';
 import type {Window, Document, Element} from '@cliui/dom';
 import type {EDITABLE_STATE} from '../constants/editableState';
-import type {EditableState, TerminalOutput, TerminalReadableInput} from '../terminal/types';
+import type {EditableState, TerminalOutput, TerminalReadableInput} from '../../terminal/types';
 
 /**
  * Public configuration options for the `Terminal` class.

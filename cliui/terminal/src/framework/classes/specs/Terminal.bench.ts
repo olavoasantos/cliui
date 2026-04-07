@@ -3,7 +3,7 @@ import {bench, describe} from 'vitest';
 import {Terminal} from '../Terminal';
 
 import type {Element} from '@cliui/dom';
-import type {TerminalReadableInput} from '../../terminal/types';
+import type {TerminalReadableInput} from '../../../terminal/types';
 
 type TerminalBenchInternals = {
   renderFrame(): void;

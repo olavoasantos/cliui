@@ -50,7 +50,11 @@ export function handleCaretKeyDown(
     if (nextLineIndex < 0 || nextLineIndex >= lines.length) return true;
 
     const pos = mapCellOffsetToGraphemeIndex(lines[nextLineIndex]!, columnCells, target);
-    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
+    if (shift) {
+      caret.selectTo(pos);
+    } else {
+      caret.moveTo(pos);
+    }
     return true;
   }
 
@@ -61,7 +65,11 @@ export function handleCaretKeyDown(
       key === 'ArrowUp'
         ? findParagraphBoundaryUp(graphemes, caret.position)
         : findParagraphBoundaryDown(graphemes, caret.position);
-    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
+    if (shift) {
+      caret.selectTo(pos);
+    } else {
+      caret.moveTo(pos);
+    }
     return true;
   }
 
@@ -77,18 +85,30 @@ export function handleCaretKeyDown(
   /* ── Navigation (works in readonly too) ───────────────── */
 
   if (key === 'ArrowLeft' && !alt && !ctrl && !meta) {
-    if (shift) { caret.selectTo(caret.position - 1); } else { caret.moveTo(caret.position - 1); }
+    if (shift) {
+      caret.selectTo(caret.position - 1);
+    } else {
+      caret.moveTo(caret.position - 1);
+    }
     return true;
   }
 
   if (key === 'ArrowRight' && !alt && !ctrl && !meta) {
-    if (shift) { caret.selectTo(caret.position + 1); } else { caret.moveTo(caret.position + 1); }
+    if (shift) {
+      caret.selectTo(caret.position + 1);
+    } else {
+      caret.moveTo(caret.position + 1);
+    }
     return true;
   }
 
   if (key === 'Home' || (key === 'a' && ctrl)) {
     const pos = config ? getLineStart(target, config, caret.position, resolvedWidth) : 0;
-    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
+    if (shift) {
+      caret.selectTo(pos);
+    } else {
+      caret.moveTo(pos);
+    }
     return true;
   }
 
@@ -96,31 +116,51 @@ export function handleCaretKeyDown(
     const pos = config
       ? getLineEnd(target, config, caret.position, resolvedWidth)
       : target.getGraphemes().length;
-    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
+    if (shift) {
+      caret.selectTo(pos);
+    } else {
+      caret.moveTo(pos);
+    }
     return true;
   }
 
   /* Word navigation */
   if ((key === 'ArrowLeft' && alt) || (key === 'b' && alt)) {
     const pos = findWordBoundaryLeft(target, caret.position);
-    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
+    if (shift) {
+      caret.selectTo(pos);
+    } else {
+      caret.moveTo(pos);
+    }
     return true;
   }
 
   if ((key === 'ArrowRight' && alt) || (key === 'f' && alt)) {
     const pos = findWordBoundaryRight(target, caret.position);
-    if (shift) { caret.selectTo(pos); } else { caret.moveTo(pos); }
+    if (shift) {
+      caret.selectTo(pos);
+    } else {
+      caret.moveTo(pos);
+    }
     return true;
   }
 
   /* Char forward/backward: Ctrl+F / Ctrl+B */
   if (key === 'f' && ctrl) {
-    if (shift) { caret.selectTo(caret.position + 1); } else { caret.moveTo(caret.position + 1); }
+    if (shift) {
+      caret.selectTo(caret.position + 1);
+    } else {
+      caret.moveTo(caret.position + 1);
+    }
     return true;
   }
 
   if (key === 'b' && ctrl) {
-    if (shift) { caret.selectTo(caret.position - 1); } else { caret.moveTo(caret.position - 1); }
+    if (shift) {
+      caret.selectTo(caret.position - 1);
+    } else {
+      caret.moveTo(caret.position - 1);
+    }
     return true;
   }
 

@@ -6,7 +6,14 @@ import {
   DETAILS_OBSERVED_ATTRIBUTES,
   DETAILS_TAG_NAME,
 } from './constants';
-import {Event, HTMLElement, ToggleEvent, type Element, type KeyboardEvent, type Node} from '@cliui/dom';
+import {
+  Event,
+  HTMLElement,
+  ToggleEvent,
+  type Element,
+  type KeyboardEvent,
+  type Node,
+} from '@cliui/dom';
 
 /**
  * Built-in terminal details custom element for expandable/collapsible

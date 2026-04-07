@@ -12,8 +12,8 @@ import {polyfillEnvironment} from '@cliui/dom';
 
 polyfillEnvironment(new Window());
 
-export {Terminal} from './classes/Terminal';
-export {TerminalVitals} from './classes/TerminalVitals';
+export {Terminal} from './framework/classes/Terminal';
+export {TerminalVitals} from './framework/classes/TerminalVitals';
 
 export {
   AnimationEvent,
@@ -38,13 +38,13 @@ export {
 
 export {polyfillEnvironment} from '@cliui/dom';
 
-export type {TerminalOptions} from './types';
-export type {TerminalFrameAware} from './types';
+export type {TerminalOptions} from './framework/types';
+export type {TerminalFrameAware} from './framework/types';
 export type {
   TerminalVitalsCallback,
   TerminalVitalsMetric,
   TerminalVitalsMetricName,
-} from './types';
+} from './framework/types';
 export type {
   TerminalInput,
   TerminalInputEvent,
@@ -67,7 +67,7 @@ export {graphemeWidth} from './layout/utilities/graphemeWidth';
 export {GRAPHEME_SEGMENTER} from './layout/constants/cellWidth';
 export {EDITABLE} from './terminal/constants/editable';
 
-export type {FrameDetail} from './types';
-export type {TerminalPlugin, TerminalPluginContext} from './types';
+export type {FrameDetail} from './framework/types';
+export type {TerminalPlugin, TerminalPluginContext} from './framework/types';
 export type {GraphicsProtocol, GraphicsProtocolName} from './renderer/types';
 export type {ImageRenderRequest} from './renderer/types';
