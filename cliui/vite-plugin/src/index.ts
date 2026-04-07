@@ -7,6 +7,25 @@ import type {TerminalDomPluginOptions} from './types';
 export type {TerminalDomPluginOptions};
 
 /**
+ * Minimal interface for the parts of Terminal the plugin needs at runtime.
+ * Avoids a compile-time dependency on `@cliui/terminal`.
+ */
+interface TerminalHandle {
+  loadDocument(html: string, options?: {baseDir?: string}): Promise<void>;
+  run(): Promise<void>;
+  exit(): void;
+  clearDocument(): void;
+  reloadStyles(): void;
+  document: {
+    head: {
+      querySelectorAll(
+        sel: string,
+      ): ArrayLike<{sheet: string | null; getAttribute(n: string): string | null}>;
+    };
+  };
+}
+
+/**
  * Vite plugin for terminal-dom applications.
  *
  * Makes `vite dev` run terminal applications from an `index.html` entry
@@ -25,13 +44,13 @@ export type {TerminalDomPluginOptions};
  */
 export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
   const pluginOptions = {
-    fps: options?.fps ?? 60,
+    fps: options?.fps ?? 30,
     altScreen: options?.altScreen ?? true,
   };
 
   let config: ResolvedConfig;
   let server: ViteDevServer | null = null;
-  let terminalInstance: unknown = null;
+  let terminal: TerminalHandle | null = null;
 
   return {
     name: 'terminal-dom',
@@ -44,77 +63,44 @@ export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
     configureServer(devServer) {
       server = devServer;
 
-      // Return a post-hook that runs after Vite's internal middleware
+      // Post-hook: runs after all other middleware is installed.
+      // Start the terminal once the server is fully ready.
       return () => {
-        // Start the terminal after the server is ready
         devServer.httpServer?.on('listening', () => {
-          void startTerminal(devServer, pluginOptions, config).then((terminal) => {
-            terminalInstance = terminal;
+          void launchTerminal(devServer, pluginOptions, config).then((t) => {
+            terminal = t;
           });
         });
       };
     },
 
-    /**
-     * Transform CSS files to inject them into the terminal's style engine
-     * during development.
-     */
-    transform(code, id) {
-      if (!server) return;
-
-      // For CSS files in dev mode, we handle loading through the terminal's
-      // stylesheet loader — no browser-side injection needed
-      if (id.endsWith('.css') && config.command === 'serve') {
-        return {
-          code: `/* terminal-dom: CSS processed by style engine */\nexport default ${JSON.stringify(code)};`,
-          map: null,
-        };
-      }
-
-      return undefined;
-    },
-
-    /**
-     * Handle HMR updates for CSS files.
-     */
     handleHotUpdate(ctx) {
-      if (!terminalInstance) return;
+      if (!terminal) return;
 
-      const {file, modules} = ctx;
+      const {file} = ctx;
+      const name = file.split('/').pop();
 
       if (file.endsWith('.css')) {
-        console.log(`[terminal-dom] ${file.split('/').pop()} updated`);
-        // Signal the terminal to reload stylesheets
-        reloadStylesheets(terminalInstance);
-        return []; // Prevent default HMR handling
+        console.log(`[terminal-dom] ${name} updated — hot-reloading styles`);
+        reloadCss(terminal, config);
+        return []; // prevent default HMR
       }
 
       if (file.endsWith('.html')) {
-        console.log('[terminal-dom] HTML changed, reloading...');
-        void reloadDocument(terminalInstance, config);
+        console.log(`[terminal-dom] ${name} changed — full reload`);
+        void fullReload(terminal, server!, config);
         return [];
       }
 
-      // Script changes — let Vite handle module invalidation,
-      // then trigger a full terminal reload
-      if (modules.length > 0) {
-        console.log(`[terminal-dom] ${file.split('/').pop()} changed, reloading...`);
-        void reloadDocument(terminalInstance, config);
-      }
-
-      return undefined;
+      // JS / TS changes → full reload
+      console.log(`[terminal-dom] ${name} changed — full reload`);
+      void fullReload(terminal, server!, config);
+      return [];
     },
 
-    /**
-     * Generate the build output for production.
-     *
-     * Transforms the HTML entry point into a standalone Node.js script
-     * that creates a Terminal, loads the inlined HTML, and runs.
-     */
     generateBundle(_outputOptions, bundle) {
       if (config.command !== 'build') return;
 
-      // Find the HTML entry
       const htmlEntry = resolve(config.root, 'index.html');
       let htmlContent: string;
 
@@ -124,7 +110,7 @@ export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
         return;
       }
 
-      // Collect CSS from the bundle
+      // Collect CSS from the bundle and inline it
       const cssChunks: string[] = [];
 
       for (const [, chunk] of Object.entries(bundle)) {
@@ -137,14 +123,13 @@ export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
         }
       }
 
-      // Inline CSS into the HTML
       if (cssChunks.length > 0) {
         const inlinedCss = cssChunks.join('\n');
         htmlContent = htmlContent.replace(/<link\s+rel=["']stylesheet["'][^>]*\/?>/gi, '');
         htmlContent = htmlContent.replace('</head>', `<style>${inlinedCss}</style>\n</head>`);
       }
 
-      // Remove external script tags (they're bundled)
+      // Remove external script tags (bundled)
       htmlContent = htmlContent.replace(
         /<script\s+[^>]*src=["'][^"']*["'][^>]*>\s*<\/script>/gi,
         '',
@@ -160,7 +145,6 @@ export function terminalDom(options?: TerminalDomPluginOptions): Plugin {
         }
       }
 
-      // Generate the runner script
       const escapedHtml = JSON.stringify(htmlContent);
       const runnerCode = `
 import { Terminal } from '@cliui/terminal';
@@ -175,7 +159,6 @@ ${entryChunkName ? `await import('./${entryChunkName}');` : ''}
 await terminal.run();
 `.trim();
 
-      // Emit the runner as an additional asset
       this.emitFile({
         type: 'asset',
         fileName: 'terminal-runner.js',
@@ -185,79 +168,96 @@ await terminal.run();
   };
 }
 
-/**
- * Starts the terminal in dev mode.
- */
-async function startTerminal(
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                           */
+/* ------------------------------------------------------------------ */
+
+async function launchTerminal(
   server: ViteDevServer,
   options: {fps: number; altScreen: boolean},
   config: ResolvedConfig,
-): Promise<unknown> {
+): Promise<TerminalHandle | null> {
   try {
-    // @cliui/terminal is a peer dependency imported at runtime
     const modulePath = '@cliui/terminal';
-    const terminalModule = (await import(modulePath)) as Record<string, unknown>;
-    const TerminalClass = terminalModule.Terminal as new (
-      opts: Record<string, unknown>,
-    ) => Record<string, unknown>;
-    const terminal = new TerminalClass({
+    const mod = (await import(modulePath)) as Record<string, unknown>;
+    const Ctor = mod.Terminal as new (o: Record<string, unknown>) => TerminalHandle;
+
+    const t = new Ctor({
       fps: options.fps,
       altScreen: options.altScreen,
     });
 
-    const htmlPath = resolve(config.root, 'index.html');
-    let html: string;
+    const html = await readAndTransformHtml(server, config);
 
-    try {
-      html = readFileSync(htmlPath, 'utf-8');
-    } catch {
-      console.error('[terminal-dom] index.html not found in project root');
-      return null;
-    }
+    if (!html) return null;
 
-    // Let Vite transform the HTML
-    html = await server.transformIndexHtml('/', html);
+    await t.loadDocument(html, {baseDir: config.root});
+    await t.run();
 
-    await (terminal.loadDocument as Function)(html, {baseDir: config.root});
-    await (terminal.run as Function)();
-
-    return terminal;
+    return t;
   } catch (error) {
     console.error('[terminal-dom] Failed to start terminal:', error);
     return null;
   }
 }
 
-/**
- * Reloads stylesheets in the terminal.
- */
-function reloadStylesheets(terminal: unknown): void {
-  // The terminal's style engine re-collects stylesheets on next frame
-  // when invalidated. Trigger by marking all styles dirty.
-  const t = terminal as {styleEngine?: {invalidateStylesheets(): void; markAllDirty(): void}};
+async function readAndTransformHtml(
+  server: ViteDevServer,
+  config: ResolvedConfig,
+): Promise<string | null> {
+  const htmlPath = resolve(config.root, 'index.html');
 
-  if (t.styleEngine) {
-    t.styleEngine.invalidateStylesheets();
-    t.styleEngine.markAllDirty();
+  try {
+    let html = readFileSync(htmlPath, 'utf-8');
+    html = await server.transformIndexHtml('/', html);
+    return html;
+  } catch {
+    console.error('[terminal-dom] Could not read index.html');
+    return null;
   }
 }
 
 /**
- * Reloads the entire document in the terminal.
+ * Re-reads every `<link rel="stylesheet">` href from disk, updates the
+ * element's `.sheet`, then tells the terminal to re-collect styles.
  */
-async function reloadDocument(terminal: unknown, config: ResolvedConfig): Promise<void> {
-  const htmlPath = resolve(config.root, 'index.html');
-  let html: string;
+function reloadCss(terminal: TerminalHandle, config: ResolvedConfig): void {
+  const links = terminal.document.head.querySelectorAll('link');
 
-  try {
-    html = readFileSync(htmlPath, 'utf-8');
-  } catch {
-    return;
+  for (let i = 0; i < links.length; i++) {
+    const link = links[i]!;
+
+    if (link.getAttribute('rel') !== 'stylesheet') continue;
+
+    const href = link.getAttribute('href');
+
+    if (!href) continue;
+
+    const filePath = resolve(config.root, href.replace(/^\.\//, ''));
+
+    try {
+      link.sheet = readFileSync(filePath, 'utf-8');
+    } catch {
+      /* file may have been deleted */
+    }
   }
 
-  const t = terminal as {loadDocument?(html: string, options?: {baseDir?: string}): Promise<void>};
+  terminal.reloadStyles();
+}
 
-  if (t.loadDocument) {
-    await t.loadDocument(html, {baseDir: config.root});
-  }
+/**
+ * Clears the document tree, re-reads + transforms `index.html`,
+ * and reloads everything from scratch.
+ */
+async function fullReload(
+  terminal: TerminalHandle,
+  server: ViteDevServer,
+  config: ResolvedConfig,
+): Promise<void> {
+  const html = await readAndTransformHtml(server, config);
+
+  if (!html) return;
+
+  terminal.clearDocument();
+  await terminal.loadDocument(html, {baseDir: config.root});
 }

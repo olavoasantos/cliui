@@ -1082,6 +1082,33 @@ export class Terminal {
   }
 
   /**
+   * Removes all non-structural children from `<head>` and `<body>`,
+   * resetting the document to an empty state for a full reload.
+   */
+  clearDocument(): void {
+    while (this.document.head.firstChild) {
+      this.document.head.removeChild(this.document.head.firstChild);
+    }
+
+    while (this.document.body.firstChild) {
+      this.document.body.removeChild(this.document.body.firstChild);
+    }
+
+    this.styleEngine.invalidateStylesheets();
+    this.styleEngine.markAllDirty();
+  }
+
+  /**
+   * Forces the style engine to re-collect all stylesheets and recompute
+   * every element. Use after externally modifying a `<link>` element's
+   * `sheet` property or a `<style>` element's text content.
+   */
+  reloadStyles(): void {
+    this.styleEngine.invalidateStylesheets();
+    this.styleEngine.markAllDirty();
+  }
+
+  /**
    * Initializes terminal I/O, performs an initial render, and starts the
    * background frame loop.
    */

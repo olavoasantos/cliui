@@ -522,6 +522,22 @@ importers:
         specifier: ^6.0.0
         version: 6.4.1(@types/node@22.19.15)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
+  examples/vite-hmr:
+    dependencies:
+      '@cliui/terminal':
+        specifier: workspace:*
+        version: link:../../cliui/terminal
+      '@cliui/vite-plugin':
+        specifier: workspace:*
+        version: link:../../cliui/vite-plugin
+    devDependencies:
+      '@types/node':
+        specifier: ^25.5.0
+        version: 25.5.0
+      vite:
+        specifier: ^6.3.5
+        version: 6.4.1(@types/node@25.5.0)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
   examples/vue:
     dependencies:
       '@cliui/elements':
@@ -6933,6 +6949,22 @@ snapshots:
       tinyglobby: 0.2.15
     optionalDependencies:
       '@types/node': 22.19.15
+      fsevents: 2.3.3
+      lightningcss: 1.32.0
+      terser: 5.46.1
+      tsx: 4.21.0
+      yaml: 2.8.3
+
+  vite@6.4.1(@types/node@25.5.0)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
+    dependencies:
+      esbuild: 0.25.12
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
+      postcss: 8.5.8
+      rollup: 4.60.0
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      '@types/node': 25.5.0
       fsevents: 2.3.3
       lightningcss: 1.32.0
       terser: 5.46.1
