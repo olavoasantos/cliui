@@ -3,6 +3,8 @@ import {setupElement} from './setupElement';
 import {Element} from '../classes/Element';
 import {HTMLAnchorElement} from '../classes/HTMLAnchorElement';
 import {HTMLDialogElement} from '../classes/HTMLDialogElement';
+import {HTMLLinkElement} from '../classes/HTMLLinkElement';
+import {HTMLScriptElement} from '../classes/HTMLScriptElement';
 import {HTMLStyleElement} from '../classes/HTMLStyleElement';
 import {HTMLTemplateElement} from '../classes/HTMLTemplateElement';
 import {SVGElement} from '../classes/SVGElement';
@@ -25,6 +27,10 @@ export function createElement(ownerDocument: Document, name: string, namespace?:
     element = new HTMLStyleElement();
   } else if (lowerName === 'dialog') {
     element = new HTMLDialogElement();
+  } else if (lowerName === 'link') {
+    element = new HTMLLinkElement();
+  } else if (lowerName === 'script') {
+    element = new HTMLScriptElement();
   } else {
     const CustomElement = ownerDocument.defaultView.customElements.get(name);
     element = CustomElement ? (new CustomElement() as unknown as Element) : new Element();

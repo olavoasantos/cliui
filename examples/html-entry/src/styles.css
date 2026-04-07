@@ -1,0 +1,44 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  padding: 1;
+  gap: 1;
+}
+
+.header {
+  border-style: rounded;
+  border-color: #7c3aed;
+  padding: 1;
+  font-weight: bold;
+  color: #c4b5fd;
+}
+
+.status {
+  color: #93c5fd;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1;
+}
+
+.info-box {
+  border-style: single;
+  border-color: #475569;
+  padding: 1;
+}
+
+.info-label {
+  font-weight: bold;
+  color: #94a3b8;
+}
+
+.info-value {
+  color: #e2e8f0;
+}
+
+.footer {
+  color: #64748b;
+  font-style: italic;
+}

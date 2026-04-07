@@ -9,6 +9,9 @@
     "url": "https://github.com/olavoasantos/cliui.git",
     "directory": "cliui/terminal"
   },
+  "bin": {
+    "terminal-dom": "./dist/bin/cli.js"
+  },
   "files": [
     "dist",
     "register.d.ts"

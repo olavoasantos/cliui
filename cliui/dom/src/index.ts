@@ -45,12 +45,15 @@ export {HTMLBodyElement} from './classes/HTMLBodyElement';
 export {HTMLDialogElement} from './classes/HTMLDialogElement';
 export {HTMLHeadElement} from './classes/HTMLHeadElement';
 export {HTMLHtmlElement} from './classes/HTMLHtmlElement';
-export {HTMLTemplateElement} from './classes/HTMLTemplateElement';
+export {HTMLLinkElement} from './classes/HTMLLinkElement';
+export {HTMLScriptElement} from './classes/HTMLScriptElement';
 export {HTMLStyleElement} from './classes/HTMLStyleElement';
+export {HTMLTemplateElement} from './classes/HTMLTemplateElement';
 export {SVGElement} from './classes/SVGElement';
 
 export {matches} from './utilities/matches';
 export {matchesParts} from './utilities/matchesParts';
+export {parseDocument} from './utilities/parseDocument';
 export {parseHtml} from './utilities/parseHtml';
 export {parseSelector} from './utilities/parseSelector';
 export {querySelector} from './utilities/querySelector';

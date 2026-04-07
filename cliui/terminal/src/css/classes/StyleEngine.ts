@@ -14,7 +14,6 @@ import type {Node} from '@cliui/dom';
 import type {Element} from '@cliui/dom';
 import type {Document} from '@cliui/dom';
 import type {Window} from '@cliui/dom';
-import type {HTMLStyleElement} from '@cliui/dom';
 import type {Hooks} from '@cliui/dom';
 import {evaluateContainerCondition} from '../utilities/evaluateContainerCondition';
 import {evaluateMediaCondition} from '../utilities/evaluateMediaCondition';
@@ -563,7 +562,7 @@ export class StyleEngine {
 
     const styleElements = collectStyleElements(this.document);
     for (const styleEl of styleElements) {
-      const cssText = (styleEl as HTMLStyleElement).sheet;
+      const cssText = (styleEl as unknown as {sheet: string | null}).sheet;
       if (cssText) {
         const result = this.parser.parse(cssText);
         this.parsedRules.push(...result.rules);

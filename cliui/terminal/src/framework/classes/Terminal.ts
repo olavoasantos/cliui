@@ -46,11 +46,13 @@ import {cachedComputeVisualLines} from '../../terminal/utilities/cachedComputeVi
 import {createVisualLineCache} from '../../terminal/utilities/createVisualLineCache';
 import {findLineForCursor} from '../../terminal/utilities/findLineForCursor';
 import {handleCaretKeyDown} from '../../terminal/utilities/handleCaretKeyDown';
+import {DocumentLoader} from './DocumentLoader';
 import {EventDispatcher, InputReader, TerminalManager} from '../../terminal';
 import {resolveWindow} from '../utilities/resolveWindow';
 import {segmentGraphemes} from '../utilities/segmentGraphemes';
 
 import type {LayoutBox} from '../../layout/types';
+import type {DocumentLoadOptions} from './DocumentLoader';
 import type {
   EditableStateElement,
   TerminalFrameAware,
@@ -1040,6 +1042,43 @@ export class Terminal {
    */
   private emitOsc7(hostname: string, path: string): void {
     this.output.write(`\u001B]7;file://${hostname}${path}\u0007`);
+  }
+
+  /**
+   * Loads an HTML string into the terminal's document.
+   *
+   * Parses the HTML, loads external stylesheets, executes scripts in the
+   * correct order, and fires lifecycle events (`DOMContentLoaded`, `load`).
+   *
+   * Can be called before or after `run()`. If called before, the document
+   * is populated before the first frame renders. If called after, a
+   * re-render is triggered.
+   *
+   * Script errors and missing resources are surfaced via events on the
+   * relevant elements and on `window`, not by rejecting the promise.
+   *
+   * @param html - The HTML document string.
+   * @param options - Loading options (e.g. `baseDir` for path resolution).
+   * @returns A promise that resolves after `DOMContentLoaded` fires.
+   */
+  async loadDocument(html: string, options?: DocumentLoadOptions): Promise<void> {
+    const loader = new DocumentLoader(this.window, this.styleEngine, this);
+    await loader.loadDocument(html, options);
+  }
+
+  /**
+   * Loads an HTML file from the filesystem into the terminal's document.
+   *
+   * Reads the file, parses the HTML, loads resources, executes scripts,
+   * and fires lifecycle events. The file's directory is used as the base
+   * for resolving relative paths in `<link>` and `<script>` elements.
+   *
+   * @param path - Path to the HTML file.
+   * @returns A promise that resolves after loading completes.
+   */
+  async loadFile(path: string): Promise<void> {
+    const loader = new DocumentLoader(this.window, this.styleEngine, this);
+    await loader.loadFile(path);
   }
 
   /**

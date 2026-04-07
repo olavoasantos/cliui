@@ -5,7 +5,7 @@ import type {Node} from '@cliui/dom';
 import type {Element} from '@cliui/dom';
 import type {Document} from '@cliui/dom';
 
-/** Collects all `<style>` elements from a document. */
+/** Collects all `<style>` and `<link rel="stylesheet">` elements from a document. */
 export function collectStyleElements(document: Document): Element[] {
   const elements: Element[] = [];
   const head = document.head;
@@ -21,6 +21,8 @@ export function collectStyleElements(document: Document): Element[] {
       const element = child as unknown as Element;
 
       if (element.localName === 'style') {
+        elements.push(element);
+      } else if (element.localName === 'link' && element.getAttribute('rel') === 'stylesheet') {
         elements.push(element);
       }
     }
