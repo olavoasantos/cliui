@@ -1,5 +1,6 @@
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {createRequire} from 'node:module';
 
 import type {Plugin, ViteDevServer, ResolvedConfig} from 'vite';
 import type {TerminalDomPluginOptions} from './types';
@@ -178,8 +179,11 @@ async function launchTerminal(
   config: ResolvedConfig,
 ): Promise<TerminalHandle | null> {
   try {
-    const modulePath = '@cliui/terminal';
-    const mod = (await import(modulePath)) as Record<string, unknown>;
+    // Resolve @cliui/terminal from the project root, not from the
+    // plugin's dist/ directory.  createRequire anchored at the project's
+    // package.json follows pnpm workspace symlinks correctly.
+    const require = createRequire(resolve(config.root, 'package.json'));
+    const mod = require('@cliui/terminal') as Record<string, unknown>;
     const Ctor = mod.Terminal as new (o: Record<string, unknown>) => TerminalHandle;
 
     const t = new Ctor({
