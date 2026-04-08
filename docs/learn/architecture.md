@@ -134,104 +134,111 @@ declaration → property ':' value ';'
 
 #### Text Styling
 
-| CSS Property            | Terminal Mapping         | Values                                                      |
-| ----------------------- | ------------------------ | ----------------------------------------------------------- |
-| `color`                 | ANSI foreground          | hex, rgb(), named colors, `inherit`                         |
-| `background-color`      | ANSI background          | hex, rgb(), named colors, `linear-gradient()`, `inherit`    |
-| `font-weight`           | Bold                     | `bold` / `normal`                                           |
-| `font-style`            | Italic                   | `italic` / `normal`                                         |
-| `text-decoration`       | Underline / line-through | `underline`, `line-through`, `none`                         |
-| `text-decoration-style` | Underline style          | `solid`, `double`, `dotted`, `dashed`, `wavy`               |
-| `text-decoration-color` | Underline color          | hex, rgb(), named colors                                    |
-| `text-align`            | Horizontal alignment     | `left`, `center`, `right`                                   |
-| `vertical-align`        | Vertical alignment       | `top`, `middle`, `bottom`                                   |
-| `text-overflow`         | Truncation               | `clip`, `ellipsis`                                          |
-| `white-space`           | Wrapping                 | `normal`, `nowrap`, `pre`, `pre-wrap`                       |
-| `overflow`              | Content clipping         | `visible`, `hidden`, `scroll`                               |
-| `overflow-wrap`         | Break behavior           | `normal`, `break-word`                                      |
-| `word-break`            | Word break rules         | `normal`, `break-all`                                       |
-| `tab-size`              | Tab width                | number                                                      |
-| `opacity`               | Dim/faint                | `0`–`1` (below threshold → ANSI faint)                      |
-| `cursor`                | Terminal cursor shape    | `default`, `text`, `pointer`, `wait`, `none`                |
+| CSS Property            | Terminal Mapping         | Values                                                   |
+| ----------------------- | ------------------------ | -------------------------------------------------------- |
+| `color`                 | ANSI foreground          | hex, rgb(), named colors, `inherit`                      |
+| `background-color`      | ANSI background          | hex, rgb(), named colors, `linear-gradient()`, `inherit` |
+| `font-weight`           | Bold                     | `bold` / `normal`                                        |
+| `font-style`            | Italic                   | `italic` / `normal`                                      |
+| `text-decoration`       | Underline / line-through | `underline`, `line-through`, `none`                      |
+| `text-decoration-style` | Underline style          | `solid`, `double`, `dotted`, `dashed`, `wavy`            |
+| `text-decoration-color` | Underline color          | hex, rgb(), named colors                                 |
+| `text-align`            | Horizontal alignment     | `left`, `center`, `right`                                |
+| `vertical-align`        | Vertical alignment       | `top`, `middle`, `bottom`                                |
+| `text-overflow`         | Truncation               | `clip`, `ellipsis`                                       |
+| `white-space`           | Wrapping                 | `normal`, `nowrap`, `pre`, `pre-wrap`                    |
+| `overflow`              | Content clipping         | `visible`, `hidden`, `scroll`                            |
+| `overflow-wrap`         | Break behavior           | `normal`, `break-word`                                   |
+| `word-break`            | Word break rules         | `normal`, `break-all`                                    |
+| `tab-size`              | Tab width                | number                                                   |
+| `opacity`               | Dim/faint                | `0`–`1` (below threshold → ANSI faint)                   |
+| `cursor`                | Terminal cursor shape    | `default`, `text`, `pointer`, `wait`, `none`             |
 
 #### Box Model
 
-| CSS Property                  | Terminal Mapping        | Values                                                                                             |
-| ----------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------- |
-| `width` / `height`            | Cell dimensions         | number (cells), `auto`, percentage                                                                 |
-| `min-width` / `min-height`    | Minimum cell dimensions | number, percentage                                                                                 |
-| `max-width` / `max-height`    | Maximum cell dimensions | number, percentage                                                                                 |
-| `padding` (shorthand + sides) | Cell padding            | number (cells)                                                                                     |
-| `margin` (shorthand + sides)  | Cell margin             | number (cells), `auto`                                                                             |
-| `border-style`                | Box-drawing characters  | `none`, `single`, `rounded`, `double`, `thick`, `block`, `half-block`, `hidden`, `ascii`, custom   |
-| `border-color`                | Border foreground color | hex, rgb(), named colors, `linear-gradient()`                                                      |
-| `border-width`                | Always 1 cell per side  | Ignored (always 1 when border-style is set)                                                        |
-| `box-sizing`                  | Box model mode          | `border-box` (default), `content-box`                                                              |
+| CSS Property                  | Terminal Mapping        | Values                                                                                           |
+| ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------ |
+| `width` / `height`            | Cell dimensions         | number (cells), `auto`, percentage                                                               |
+| `min-width` / `min-height`    | Minimum cell dimensions | number, percentage                                                                               |
+| `max-width` / `max-height`    | Maximum cell dimensions | number, percentage                                                                               |
+| `padding` (shorthand + sides) | Cell padding            | number (cells)                                                                                   |
+| `margin` (shorthand + sides)  | Cell margin             | number (cells), `auto`                                                                           |
+| `border-style`                | Box-drawing characters  | `none`, `single`, `rounded`, `double`, `thick`, `block`, `half-block`, `hidden`, `ascii`, custom |
+| `border-color`                | Border foreground color | hex, rgb(), named colors, `linear-gradient()`                                                    |
+| `border-width`                | Always 1 cell per side  | Ignored (always 1 when border-style is set)                                                      |
+| `box-sizing`                  | Box model mode          | `border-box` (default), `content-box`                                                            |
 
 #### Layout
 
-| CSS Property                      | Terminal Mapping         | Values                                                                              |
-| --------------------------------- | ------------------------ | ----------------------------------------------------------------------------------- |
-| `display`                         | Layout mode              | `flex`, `block` (= flex column), `inline`, `none`                                   |
-| `flex-direction`                  | Axis                     | `row`, `column`, `row-reverse`, `column-reverse`                                    |
-| `flex-wrap`                       | Wrapping                 | `nowrap`, `wrap`                                                                    |
-| `flex-grow` / `flex-shrink`       | Flex sizing              | number                                                                              |
-| `flex-basis`                      | Initial size             | number, `auto`, percentage                                                          |
-| `flex` (shorthand)                | Flex shorthand           | e.g. `1`, `1 0 auto`, `none`                                                       |
-| `gap` / `row-gap` / `column-gap`  | Spacing between children | number (cells)                                                                      |
-| `justify-content`                 | Main axis alignment      | `flex-start`, `flex-end`, `center`, `space-between`, `space-around`, `space-evenly` |
-| `align-items`                     | Cross axis alignment     | `flex-start`, `flex-end`, `center`, `stretch`                                       |
-| `align-self`                      | Per-item cross axis      | `auto`, `flex-start`, `flex-end`, `center`, `stretch`                               |
-| `position`                        | Positioning              | `relative` (default), `absolute`                                                    |
-| `top` / `left`                    | Offset for absolute      | number (cells)                                                                      |
-| `z-index`                         | Layer ordering           | number                                                                              |
+| CSS Property                     | Terminal Mapping         | Values                                                                              |
+| -------------------------------- | ------------------------ | ----------------------------------------------------------------------------------- |
+| `display`                        | Layout mode              | `flex`, `block` (= flex column), `inline`, `none`                                   |
+| `flex-direction`                 | Axis                     | `row`, `column`, `row-reverse`, `column-reverse`                                    |
+| `flex-wrap`                      | Wrapping                 | `nowrap`, `wrap`                                                                    |
+| `flex-grow` / `flex-shrink`      | Flex sizing              | number                                                                              |
+| `flex-basis`                     | Initial size             | number, `auto`, percentage                                                          |
+| `flex` (shorthand)               | Flex shorthand           | e.g. `1`, `1 0 auto`, `none`                                                        |
+| `gap` / `row-gap` / `column-gap` | Spacing between children | number (cells)                                                                      |
+| `justify-content`                | Main axis alignment      | `flex-start`, `flex-end`, `center`, `space-between`, `space-around`, `space-evenly` |
+| `align-items`                    | Cross axis alignment     | `flex-start`, `flex-end`, `center`, `stretch`                                       |
+| `align-self`                     | Per-item cross axis      | `auto`, `flex-start`, `flex-end`, `center`, `stretch`                               |
+| `position`                       | Positioning              | `relative` (default), `absolute`                                                    |
+| `top` / `left`                   | Offset for absolute      | number (cells)                                                                      |
+| `z-index`                        | Layer ordering           | number                                                                              |
 
 #### Animations & Transitions
 
-| CSS Property                    | Values                                                         |
-| ------------------------------- | -------------------------------------------------------------- |
-| `transition` (shorthand)        | property duration timing-function delay                        |
-| `animation` (shorthand)         | name duration timing-function delay iteration-count direction  |
-| `animation-name`                | keyframe name                                                  |
-| `animation-duration`            | time value (e.g. `0.3s`, `300ms`)                              |
-| `animation-timing-function`     | `linear`, `ease`, `ease-in`, `ease-out`, `cubic-bezier()`, `steps()` |
-| `animation-delay`               | time value                                                     |
-| `animation-iteration-count`     | number, `infinite`                                             |
-| `animation-direction`           | `normal`, `reverse`, `alternate`, `alternate-reverse`          |
-| `animation-fill-mode`           | `none`, `forwards`, `backwards`, `both`                        |
+| CSS Property                | Values                                                               |
+| --------------------------- | -------------------------------------------------------------------- |
+| `transition` (shorthand)    | property duration timing-function delay                              |
+| `animation` (shorthand)     | name duration timing-function delay iteration-count direction        |
+| `animation-name`            | keyframe name                                                        |
+| `animation-duration`        | time value (e.g. `0.3s`, `300ms`)                                    |
+| `animation-timing-function` | `linear`, `ease`, `ease-in`, `ease-out`, `cubic-bezier()`, `steps()` |
+| `animation-delay`           | time value                                                           |
+| `animation-iteration-count` | number, `infinite`                                                   |
+| `animation-direction`       | `normal`, `reverse`, `alternate`, `alternate-reverse`                |
+| `animation-fill-mode`       | `none`, `forwards`, `backwards`, `both`                              |
 
 #### Container & Media Queries
 
-| CSS Feature                | Description                                                    |
-| -------------------------- | -------------------------------------------------------------- |
-| `@media (min-width: N)`    | Terminal width in columns                                      |
-| `@media (max-width: N)`    | Terminal width in columns                                      |
-| `@media (min-height: N)`   | Terminal height in rows                                        |
-| `prefers-color-scheme`     | Evaluates against terminal color scheme                        |
-| `prefers-reduced-motion`   | Checks REDUCE_MOTION/NO_MOTION environment variables           |
-| `container-type`           | `normal`, `inline-size`, `size`                                |
-| `container-name`           | Identifier for container query targeting                       |
-| `@container (min-width: N)` | Container width in columns                                    |
+| CSS Feature                 | Description                                          |
+| --------------------------- | ---------------------------------------------------- |
+| `@media (min-width: N)`     | Terminal width in columns                            |
+| `@media (max-width: N)`     | Terminal width in columns                            |
+| `@media (min-height: N)`    | Terminal height in rows                              |
+| `prefers-color-scheme`      | Evaluates against terminal color scheme              |
+| `prefers-reduced-motion`    | Checks REDUCE_MOTION/NO_MOTION environment variables |
+| `container-type`            | `normal`, `inline-size`, `size`                      |
+| `container-name`            | Identifier for container query targeting             |
+| `@container (min-width: N)` | Container width in columns                           |
 
 #### Custom Properties
 
-| CSS Feature              | Description                                             |
-| ------------------------ | ------------------------------------------------------- |
-| `--*` custom properties  | Declared on any element, inherited by descendants       |
-| `var(--name)`            | Resolve custom property value                           |
-| `var(--name, fallback)`  | Resolve with fallback                                   |
-| `:root` pseudo-selector  | Target the document root for global custom properties   |
+| CSS Feature             | Description                                           |
+| ----------------------- | ----------------------------------------------------- |
+| `--*` custom properties | Declared on any element, inherited by descendants     |
+| `var(--name)`           | Resolve custom property value                         |
+| `var(--name, fallback)` | Resolve with fallback                                 |
+| `:root` pseudo-selector | Target the document root for global custom properties |
 
 #### Custom Border Styles
 
 ```css
 @border-style my-custom {
-  top-left: ╔; top: ═; top-right: ╗;
-  left: ║;                right: ║;
-  bottom-left: ╚; bottom: ═; bottom-right: ╝;
+  top-left: ╔;
+  top: ═;
+  top-right: ╗;
+  left: ║;
+  right: ║;
+  bottom-left: ╚;
+  bottom: ═;
+  bottom-right: ╝;
 }
 
-.box { border-style: my-custom; }
+.box {
+  border-style: my-custom;
+}
 ```
 
 ### Style Resolution Pipeline
@@ -275,14 +282,14 @@ declaration → property ':' value ';'
 
 ### Pseudo-class Support
 
-| Pseudo-class  | Description                                |
-| ------------- | ------------------------------------------ |
-| `:hover`      | Mouse is over the element                  |
-| `:focus`      | Element has keyboard focus                 |
-| `:active`     | Element is being activated (mousedown)     |
-| `:disabled`   | Element has disabled attribute             |
-| `:checked`    | Element has checked attribute              |
-| `:root`       | Matches the document root element          |
+| Pseudo-class | Description                            |
+| ------------ | -------------------------------------- |
+| `:hover`     | Mouse is over the element              |
+| `:focus`     | Element has keyboard focus             |
+| `:active`    | Element is being activated (mousedown) |
+| `:disabled`  | Element has disabled attribute         |
+| `:checked`   | Element has checked attribute          |
+| `:root`      | Matches the document root element      |
 
 ### Invalidation
 
@@ -343,12 +350,14 @@ Since `display: block` is `flex-direction: column`, there is one layout algorith
 Text measurement uses a two-phase prepare/layout architecture:
 
 **Prepare phase** (runs once per text change):
+
 - Segment text into grapheme clusters using `Intl.Segmenter`
 - Compute cell width per grapheme
 - Apply whitespace normalization per CSS spec
 - ASCII fast-path skips `Intl.Segmenter` and cellWidth entirely for pure-ASCII text
 
 **Layout phase** (runs on each layout pass):
+
 - Wrap prepared text to fit parent width
 - `white-space: normal` — wrap at word boundaries, collapse whitespace
 - `white-space: nowrap` — no wrapping, may overflow
@@ -370,6 +379,7 @@ Elements with `position: absolute` are removed from flex flow. They are position
 ### Overflow Scrolling
 
 Elements with `overflow: scroll`:
+
 - Clip children to the scroll viewport
 - Compute scroll height from total content height
 - Support mouse wheel-driven vertical scrolling
@@ -383,19 +393,19 @@ A tree of **layout boxes**:
 ```ts
 interface LayoutBox {
   element: Element;
-  x: number;               // margin edge position
+  x: number; // margin edge position
   y: number;
-  width: number;            // total width (margin + border + padding + content)
+  width: number; // total width (margin + border + padding + content)
   height: number;
-  contentX: number;         // content area position
+  contentX: number; // content area position
   contentY: number;
   contentWidth: number;
   contentHeight: number;
   computedStyle: ComputedStyle;
   textLines?: string[];
   children: LayoutBox[];
-  scrollOffsetY?: number;   // active scroll offset
-  scrollHeight?: number;    // total scrollable content height
+  scrollOffsetY?: number; // active scroll offset
+  scrollHeight?: number; // total scrollable content height
   zIndex: number;
 }
 ```
@@ -494,7 +504,7 @@ Wrap the entire frame update in synchronized output mode (`CSI ? 2026 h` / `CSI 
 | Mouse move        | `MouseEvent` (`mousemove`)           | Hit-tested element                          |
 | Mouse wheel       | `WheelEvent` (`wheel`)               | Hit-tested element                          |
 | Mouse enter/leave | `MouseEvent`                         | Hit-tested element (for `:hover`)           |
-| Resize (SIGWINCH) | `Event` (`resize`)                   | `window` → triggers relayout               |
+| Resize (SIGWINCH) | `Event` (`resize`)                   | `window` → triggers relayout                |
 | Focus/blur        | `FocusEvent`                         | `window`                                    |
 | Paste             | `ClipboardEvent` (`paste`)           | `document.activeElement`                    |
 
@@ -536,16 +546,16 @@ Elements marked with `[contenteditable]` receive:
 
 Standard Web APIs mapped to terminal escape sequences:
 
-| Web API                           | Terminal Mapping                                    |
-| --------------------------------- | --------------------------------------------------- |
-| `document.title` / `<title>`     | OSC 2 window/tab title                              |
-| `<a href>`                       | OSC 8 clickable hyperlinks                          |
-| `window.alert/confirm/prompt()`  | Async modal `<dialog>` elements                     |
-| `Notification` API               | OSC 9 / OSC 777 / BEL desktop notifications         |
-| `navigator.clipboard`            | OSC 52 with in-memory fallback                      |
-| `window.matchMedia()`            | MediaQueryList with prefers-color-scheme             |
-| `window.location.pathname`       | OSC 7 CWD reporting                                 |
-| CSS `cursor` property            | Terminal cursor shape changes on focus               |
+| Web API                         | Terminal Mapping                            |
+| ------------------------------- | ------------------------------------------- |
+| `document.title` / `<title>`    | OSC 2 window/tab title                      |
+| `<a href>`                      | OSC 8 clickable hyperlinks                  |
+| `window.alert/confirm/prompt()` | Async modal `<dialog>` elements             |
+| `Notification` API              | OSC 9 / OSC 777 / BEL desktop notifications |
+| `navigator.clipboard`           | OSC 52 with in-memory fallback              |
+| `window.matchMedia()`           | MediaQueryList with prefers-color-scheme    |
+| `window.location.pathname`      | OSC 7 CWD reporting                         |
+| CSS `cursor` property           | Terminal cursor shape changes on focus      |
 
 ### Document Loading
 
@@ -639,23 +649,23 @@ doc.body.appendChild(container);
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .container {
-      display: flex;
-      flex-direction: column;
-      padding: 1;
-      border-style: rounded;
-      border-color: #7c3aed;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <span style="font-weight: bold; color: #7c3aed">Hello, Terminal!</span>
-  </div>
-  <script src="./app.js"></script>
-</body>
+  <head>
+    <style>
+      .container {
+        display: flex;
+        flex-direction: column;
+        padding: 1;
+        border-style: rounded;
+        border-color: #7c3aed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <span style="font-weight: bold; color: #7c3aed">Hello, Terminal!</span>
+    </div>
+    <script src="./app.js"></script>
+  </body>
 </html>
 ```
 
