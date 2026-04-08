@@ -134,3 +134,7 @@ This project draws heavily from the work of others. In particular:
 ## Contributors
 
 - [Olavo Amorim Santos](https://github.com/olavoasantos)
+
+### AI Disclosure
+
+Significant portions of this codebase were written with AI coding agents via [pi](https://github.com/badlogic/pi-mono), using Claude Opus 4.6, GPT-5.4, and Gemini 3.1 Pro Preview. All AI-generated code was reviewed and approved by a human contributor.
