@@ -128,7 +128,7 @@ export class ScriptContext {
   /**
    * Returns the underlying vm context object.
    *
-   * Used by module script support (M10T7) for `vm.SourceTextModule`.
+   * Used by module script support for `vm.SourceTextModule`.
    */
   getContext(): object {
     return this.context;

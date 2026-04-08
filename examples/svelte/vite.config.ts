@@ -18,7 +18,7 @@ export default defineConfig({
       fileName: 'app',
     },
     rollupOptions: {
-      external: [/^node:/, /^@micra\//],
+      external: [/^node:/, /^@cliui\//],
     },
   },
 });

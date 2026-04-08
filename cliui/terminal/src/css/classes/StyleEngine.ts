@@ -591,7 +591,7 @@ export class StyleEngine {
    * Processes conditional at-rules, evaluating @media conditions and
    * including matching nested rules in parsedRules.
    * @container rules are stored but not evaluated here — they need
-   * container dimensions from layout (handled in M14T7).
+   * container dimensions from layout.
    */
   private processConditionalRules(conditionalRules: CSSConditionalRule[]): void {
     for (const rule of conditionalRules) {

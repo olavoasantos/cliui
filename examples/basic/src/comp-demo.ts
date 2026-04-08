@@ -158,9 +158,9 @@ function section(titleText: string): {container: typeof app; titleEl: typeof tit
   return {container, titleEl};
 }
 
-/* ── COMP-1: UA Stylesheet ─────────────────────────────── */
+/* ── UA Stylesheet ────────────────────────────────────── */
 
-const s1 = section('COMP-1: User-Agent Stylesheet');
+const s1 = section('User-Agent Stylesheet');
 const headings = document.createElement('div');
 const h2 = document.createElement('h2');
 h2.textContent = 'Heading 2 (bold block)';
@@ -195,9 +195,9 @@ for (const text of ['List item 1 (indented)', 'List item 2']) {
 }
 s1.container.appendChild(elUl);
 
-/* ── COMP-2: Anchor ────────────────────────────────────── */
+/* ── Anchor ───────────────────────────────────────────── */
 
-const s2 = section('COMP-2: <a> Hyperlink (OSC 8)');
+const s2 = section('<a> Hyperlink (OSC 8)');
 for (const [href, text] of [
   ['https://github.com', 'GitHub — https://github.com'],
   ['https://example.com', 'Example.com — https://example.com'],
@@ -208,9 +208,9 @@ for (const [href, text] of [
   s2.container.appendChild(link);
 }
 
-/* ── COMP-3: br ────────────────────────────────────────── */
+/* ── br ───────────────────────────────────────────────── */
 
-const s3 = section('COMP-3: <br>');
+const s3 = section('<br>');
 const brDemo = document.createElement('p');
 brDemo.appendChild(document.createTextNode('First line'));
 brDemo.appendChild(document.createElement('br'));
@@ -220,9 +220,9 @@ brDemo.appendChild(document.createElement('br'));
 brDemo.appendChild(document.createTextNode('Fourth line (two <br>)'));
 s3.container.appendChild(brDemo);
 
-/* ── COMP-4: hr ────────────────────────────────────────── */
+/* ── hr ───────────────────────────────────────────────── */
 
-const s4 = section('COMP-4: <hr>');
+const s4 = section('<hr>');
 const aboveHr = document.createElement('p');
 aboveHr.textContent = 'Content above the rule';
 s4.container.appendChild(aboveHr);
@@ -231,9 +231,9 @@ const belowHr = document.createElement('p');
 belowHr.textContent = 'Content below the rule';
 s4.container.appendChild(belowHr);
 
-/* ── COMP-5: Label ─────────────────────────────────────── */
+/* ── Label ────────────────────────────────────────────── */
 
-const s5 = section('COMP-5: <label>');
+const s5 = section('<label>');
 const s5Hint = document.createElement('div');
 s5Hint.className = 'hint';
 s5Hint.textContent = 'Click the label to focus the input.';
@@ -258,9 +258,9 @@ s5.container.appendChild(label);
 s5.container.appendChild(labelTarget);
 s5.container.appendChild(labelStatus);
 
-/* ── COMP-6: Fieldset & Form ───────────────────────────── */
+/* ── Fieldset & Form ──────────────────────────────────── */
 
-const s6 = section('COMP-6: <fieldset> + <form>');
+const s6 = section('<fieldset> + <form>');
 const s6Hint = document.createElement('div');
 s6Hint.className = 'hint';
 s6Hint.textContent = 'Enter in input or click Submit to dispatch submit. Reset clears values.';
@@ -328,9 +328,9 @@ s6.container.appendChild(s6Hint);
 s6.container.appendChild(form);
 s6.container.appendChild(formStatus);
 
-/* ── COMP-7: Optgroup ──────────────────────────────────── */
+/* ── Optgroup ─────────────────────────────────────────── */
 
-const s7 = section('COMP-7: <optgroup>');
+const s7 = section('<optgroup>');
 const s7Hint = document.createElement('div');
 s7Hint.className = 'hint';
 s7Hint.textContent = 'Select with grouped options. Group headers are not selectable.';
@@ -371,9 +371,9 @@ s7.container.appendChild(s7Hint);
 s7.container.appendChild(groupedSelect);
 s7.container.appendChild(optgroupStatus);
 
-/* ── COMP-10: Message ──────────────────────────────────── */
+/* ── Message ──────────────────────────────────────────── */
 
-const s10 = section('COMP-10: <ui-message>');
+const s10 = section('<ui-message>');
 for (const [tone, text] of [
   ['info', 'Info: This is an informational message.'],
   ['success', 'Success: Operation completed.'],
@@ -386,9 +386,9 @@ for (const [tone, text] of [
   s10.container.appendChild(msg);
 }
 
-/* ── COMP-11: Badge ────────────────────────────────────── */
+/* ── Badge ────────────────────────────────────────────── */
 
-const s11 = section('COMP-11: <ui-badge>');
+const s11 = section('<ui-badge>');
 const badgeRow = document.createElement('div');
 badgeRow.className = 'row';
 for (const [tone, text] of [
@@ -422,9 +422,9 @@ badgeInline.appendChild(alertLabel);
 badgeInline.appendChild(alertBadge);
 s11.container.appendChild(badgeInline);
 
-/* ── COMP-12: Toast ────────────────────────────────────── */
+/* ── Toast ────────────────────────────────────────────── */
 
-const s12 = section('COMP-12: <ui-toast>');
+const s12 = section('<ui-toast>');
 const s12Hint = document.createElement('div');
 s12Hint.className = 'hint';
 s12Hint.textContent = 'Click a button to spawn a toast. It auto-removes after its duration.';
@@ -463,9 +463,9 @@ s12.container.appendChild(s12Hint);
 s12.container.appendChild(toastBtnRow);
 s12.container.appendChild(toastContainer);
 
-/* ── COMP-22: Tabs ─────────────────────────────────────── */
+/* ── Tabs ─────────────────────────────────────────────── */
 
-const s22 = section('COMP-22: <tabs>');
+const s22 = section('<tabs>');
 const s22Hint = document.createElement('div');
 s22Hint.className = 'hint';
 s22Hint.textContent = 'Focus tabs → Arrow Left/Right to switch.';
@@ -492,9 +492,9 @@ s22.container.appendChild(s22Hint);
 s22.container.appendChild(tabs);
 s22.container.appendChild(tabStatus);
 
-/* ── COMP-17: List ─────────────────────────────────────── */
+/* ── List ─────────────────────────────────────────────── */
 
-const s17 = section('COMP-17: <listbox>');
+const s17 = section('<listbox>');
 const s17Hint = document.createElement('div');
 s17Hint.className = 'hint';
 s17Hint.textContent = 'Arrow Up/Down to highlight. Enter or click to select.';
@@ -516,9 +516,9 @@ s17.container.appendChild(s17Hint);
 s17.container.appendChild(list);
 s17.container.appendChild(listStatus);
 
-/* ── COMP-24: Menu / Dropdown ──────────────────────────── */
+/* ── Menu / Dropdown ──────────────────────────────────── */
 
-const s24 = section('COMP-24: <dropdown> + <navmenu>');
+const s24 = section('<dropdown> + <navmenu>');
 const s24Hint = document.createElement('div');
 s24Hint.className = 'hint';
 s24Hint.textContent = 'Enter/click to open. Arrows navigate. Enter selects. Escape closes.';
@@ -548,9 +548,9 @@ s24.container.appendChild(s24Hint);
 s24.container.appendChild(dropdown);
 s24.container.appendChild(menuStatus);
 
-/* ── COMP-9: Dialog ────────────────────────────────────── */
+/* ── Dialog ───────────────────────────────────────────── */
 
-const s9 = section('COMP-9: <dialog>');
+const s9 = section('<dialog>');
 const s9Hint = document.createElement('div');
 s9Hint.className = 'hint';
 s9Hint.textContent = 'Buttons open dialogs. Escape closes modals.';

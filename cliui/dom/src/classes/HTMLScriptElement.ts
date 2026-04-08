@@ -5,7 +5,7 @@ import {HTMLElement} from './HTMLElement';
  *
  * Provides property accessors for script-related attributes (`src`, `type`,
  * `defer`, `async`) and exposes the inline script body via `textContent`.
- * The resource loader (M10T3/T6) consumes insertion hooks to trigger
+ * The resource loader consumes insertion hooks to trigger
  * loading and execution of external or inline scripts.
  */
 export class HTMLScriptElement extends HTMLElement {

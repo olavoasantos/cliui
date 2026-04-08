@@ -16,8 +16,7 @@ const CLASSIC_TYPES = new Set(['', 'text/javascript', 'application/javascript'])
  * execution. Script errors are caught and dispatched as `error` events
  * on the `<script>` element and on `window`.
  *
- * Module scripts (`type="module"`) are deferred to `ModuleScriptExecutor`
- * (M10T7).
+ * Module scripts (`type="module"`) are deferred to `ModuleScriptExecutor`.
  */
 export class ScriptExecutor {
   private readonly context: ScriptContext;

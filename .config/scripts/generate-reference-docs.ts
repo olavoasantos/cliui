@@ -103,7 +103,7 @@ export interface ImportReference {
   name: string;
   /** The original exported name from the source module (differs for renames: `import { Foo as Bar }`) */
   originalName: string;
-  /** The module specifier (e.g. '../application', '@micra/core') */
+  /** The module specifier (e.g. '../application', '@cliui/dom') */
   source: string;
   /** Whether this is a type-only import (`import type { ... }`) */
   typeOnly: boolean;
@@ -1347,7 +1347,7 @@ export function findTsFiles(dir: string): string[] {
 
 /**
  * Determines if a specifier is a relative path (./foo, ../bar)
- * as opposed to a bare/package specifier (@micra/core, lodash).
+ * as opposed to a bare/package specifier (@cliui/dom, lodash).
  */
 export function isRelativeImport(specifier: string): boolean {
   return specifier.startsWith('./') || specifier.startsWith('../');
@@ -2260,7 +2260,7 @@ function main() {
     const absoluteOutDir = resolve(mdOutDir);
 
     const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf-8'));
-    const packageName = pkg.name ?? '@micra/terminal-dom';
+    const packageName = pkg.name ?? '@cliui/terminal';
 
     writeMarkdownPages({
       outDir: absoluteOutDir,
