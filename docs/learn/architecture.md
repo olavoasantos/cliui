@@ -77,7 +77,7 @@ There is no good framework-agnostic terminal UI library in the JS/TS ecosystem. 
 
 ### Source
 
-Fork `@remote-dom/polyfill` into `src/dom/`, restructured to match the project's conventions (`classes/`, `utilities/`, `constants/`, `types/`). The polyfill is ~1500 lines across ~30 files. We own and modify directly. For any DOM APIs we need that the polyfill doesn't implement (e.g., `MutationObserver`, `CSSStyleDeclaration`, `classList`), use happy-dom's source (`.ignore/references/happy-dom/`) as reference.
+Fork `@remote-dom/polyfill` into `src/dom/`, restructured to match the project's conventions (`classes/`, `utilities/`, `constants/`, `types/`). The polyfill is ~1500 lines across ~30 files. We own and modify directly. For any DOM APIs we need that the polyfill doesn't implement (e.g., `MutationObserver`, `CSSStyleDeclaration`, `classList`), use [Happy DOM](https://github.com/nicedoc/happy-dom)'s source as reference.
 
 ### What to add
 

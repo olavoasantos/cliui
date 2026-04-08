@@ -81,6 +81,8 @@ const terminal = new Terminal({window});
 
 - **[Bubbletea](https://github.com/charmbracelet/bubbletea)** — Terminal mode management, render loop lifecycle, keyboard/mouse escape sequence parsing, and cell buffer architecture with differential rendering.
 - **[Lipgloss](https://github.com/charmbracelet/lipgloss)** — Border character sets, ANSI 16/256/truecolor color handling, color downsampling, and z-order compositing.
+- **[Yoga](https://github.com/nicedoc/yoga-layout)** — Facebook's flexbox layout engine. The two-pass flex distribution, min/max constraint freezing, FitContent zeroing, and stretch re-layout were aligned against Yoga's algorithm.
+- **[Pretext](https://github.com/nicedoc/pretext)** — Two-phase prepare/layout text measurement architecture, ASCII fast-path gating, and deferred `Intl.Segmenter` usage for non-ASCII text.
 - **[string-width](https://github.com/sindresorhus/string-width)** and **[get-east-asian-width](https://github.com/sindresorhus/get-east-asian-width)** — Grapheme-aware terminal cell width measurement (reimplemented with `Intl.Segmenter` for zero dependencies).
 
 ## Contributors

@@ -127,6 +127,8 @@ This project draws heavily from the work of others. In particular:
 - **[@remote-dom/polyfill](https://github.com/Shopify/remote-dom)** — The DOM polyfill that serves as the foundation of `@cliui/dom`. Forked and extended with MutationObserver, CSSStyleDeclaration, classList, and more.
 - **[Happy DOM](https://github.com/nicedoc/happy-dom)** — Reference implementation for DOM APIs the original polyfill didn't cover (MutationObserver, CSSStyleDeclaration, DOMTokenList).
 - **[string-width](https://github.com/sindresorhus/string-width)** and **[get-east-asian-width](https://github.com/sindresorhus/get-east-asian-width)** — Reference for grapheme-aware terminal cell width measurement. The approach was reimplemented using `Intl.Segmenter` to avoid runtime dependencies.
+- **[Yoga](https://github.com/nicedoc/yoga-layout)** — Facebook's flexbox layout engine. The two-pass flex distribution, min/max constraint freezing, FitContent zeroing, and stretch re-layout in `FlexLayout` were aligned against Yoga's algorithm for correctness.
+- **[Pretext](https://github.com/nicedoc/pretext)** — Chenglou's text measurement library. The two-phase prepare/layout architecture, ASCII fast-path gating, and deferred `Intl.Segmenter` usage for non-ASCII text in `TextLayout` follow Pretext's approach.
 - **[Ink](https://github.com/vadimdemedes/ink)** — Showed that React-in-the-terminal is viable. cliui takes a different path by making the DOM itself the abstraction layer rather than coupling to one framework.
 
 ## Contributors
