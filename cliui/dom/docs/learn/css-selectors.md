@@ -43,21 +43,21 @@ The parse result is cached. The match is a tree walk. Everything in between is c
 
 ## What the engine understands
 
-| Category            | Syntax            | How it matches                                                                    |
-| ------------------- | ----------------- | --------------------------------------------------------------------------------- |
-| Element             | `div`, `span`     | `element.localName === name`                                                      |
-| ID                  | `#myid`           | `getAttribute('id') === 'myid'`                                                   |
-| Class               | `.active`         | Word-boundary match in `class` attribute (whitespace-delimited, no array split)   |
-| Universal           | `*`               | Always matches — `*.active` is equivalent to `.active`                            |
-| Attribute presence  | `[disabled]`      | `hasAttribute('disabled')`                                                        |
-| Attribute exact     | `[role="button"]` | `getAttribute('role') === 'button'`                                               |
-| Pseudo `:root`      | `:root`           | `ownerDocument.documentElement === element`                                       |
-| Pseudo `:focus`     | `:focus`          | `ownerDocument.activeElement === element`                                         |
-| Pseudo `:active`    | `:active`         | `element.hasAttribute('pressed')`                                                 |
-| Pseudo `:hover`     | `:hover`          | Walks `ownerDocument.hoveredElement` up the parent chain                          |
-| Pseudo `:disabled`  | `:disabled`       | `element.hasAttribute('disabled')`                                                |
-| Pseudo `:enabled`   | `:enabled`        | `!element.hasAttribute('disabled')`                                               |
-| Functional `:not()` | `:not(.hidden)`   | Recursive — negates `matches(element, innerSelector)`                             |
+| Category            | Syntax            | How it matches                                                                                                             |
+| ------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Element             | `div`, `span`     | `element.localName === name`                                                                                               |
+| ID                  | `#myid`           | `getAttribute('id') === 'myid'`                                                                                            |
+| Class               | `.active`         | Word-boundary match in `class` attribute (whitespace-delimited, no array split)                                            |
+| Universal           | `*`               | Always matches — `*.active` is equivalent to `.active`                                                                     |
+| Attribute presence  | `[disabled]`      | `hasAttribute('disabled')`                                                                                                 |
+| Attribute exact     | `[role="button"]` | `getAttribute('role') === 'button'`                                                                                        |
+| Pseudo `:root`      | `:root`           | `ownerDocument.documentElement === element`                                                                                |
+| Pseudo `:focus`     | `:focus`          | `ownerDocument.activeElement === element`                                                                                  |
+| Pseudo `:active`    | `:active`         | `element.hasAttribute('pressed')`                                                                                          |
+| Pseudo `:hover`     | `:hover`          | Walks `ownerDocument.hoveredElement` up the parent chain                                                                   |
+| Pseudo `:disabled`  | `:disabled`       | `element.hasAttribute('disabled')`                                                                                         |
+| Pseudo `:enabled`   | `:enabled`        | `!element.hasAttribute('disabled')`                                                                                        |
+| Functional `:not()` | `:not(.hidden)`   | Recursive — negates `matches(element, innerSelector)`                                                                      |
 | Functional `:has()` | `:has(.active)`   | Tests whether **the element itself** matches the inner selector — [see below](#has-is-not-the-w3c-relational-pseudo-class) |
 
 Compound selectors work by combining these. `div.active[role="button"]:hover` matches an element that satisfies all four conditions — element name, class, attribute, and pseudo-class are ANDed within the same selector part.
@@ -66,12 +66,12 @@ Compound selectors work by combining these. `div.active[role="button"]:hover` ma
 
 Combinators connect selector parts by describing how matched elements relate to each other in the tree. Each combinator translates to a specific DOM traversal direction:
 
-| Combinator       | Syntax        | Traversal direction                                      |
-| ---------------- | ------------- | -------------------------------------------------------- |
-| Descendant       | `div .item`   | Walks the `PARENT` chain upward — any ancestor           |
-| Child            | `div > .item` | Checks the immediate `PARENT` — direct parent only       |
-| General sibling  | `h1 ~ p`      | Walks the `PREV` chain leftward — any preceding sibling  |
-| Adjacent sibling | `h1 + p`      | Checks the immediate `PREV` sibling (skips text nodes)   |
+| Combinator       | Syntax        | Traversal direction                                     |
+| ---------------- | ------------- | ------------------------------------------------------- |
+| Descendant       | `div .item`   | Walks the `PARENT` chain upward — any ancestor          |
+| Child            | `div > .item` | Checks the immediate `PARENT` — direct parent only      |
+| General sibling  | `h1 ~ p`      | Walks the `PREV` chain leftward — any preceding sibling |
+| Adjacent sibling | `h1 + p`      | Checks the immediate `PREV` sibling (skips text nodes)  |
 
 The adjacent sibling combinator skips non-element nodes. Text nodes between element siblings don't prevent a match:
 
@@ -208,13 +208,13 @@ The types were introduced in the [pipeline walkthrough](#how-a-selector-becomes-
 ```ts
 interface SelectorMatcher {
   type: SelectorMatcherType; // Element=1, Id=2, Class=3, Attribute=4, Pseudo=5, Function=6
-  name: string;              // the token value: tag name, class name, attribute name, pseudo name
-  value?: string;            // attribute value, function argument, or element name echo
+  name: string; // the token value: tag name, class name, attribute name, pseudo name
+  value?: string; // attribute value, function argument, or element name echo
 }
 
 interface SelectorPart {
   combinator: SelectorCombinator; // Descendant=0, Child=1, Sibling=2, Adjacent=3, Inner=4
-  matchers: SelectorMatcher[];    // conditions ANDed together within this part
+  matchers: SelectorMatcher[]; // conditions ANDed together within this part
 }
 ```
 
