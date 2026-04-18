@@ -2,7 +2,9 @@
 
 ## The problem
 
-@cliui/dom exports a lot of classes: `EventTarget`, `Node`, `ChildNode`, `ParentNode`, `Element`, `HTMLElement`, `Text`, `Comment`, `Document`, `DocumentFragment`, plus a handful of specialized element classes like `HTMLDialogElement` and `SVGElement`. If you've used the browser DOM, these names are familiar — but the relationships between them determine what you can _do_ with any given node.
+Web frameworks operate on DOM mutations — `createElement`, `setAttribute`, `appendChild`, `addEventListener`. Give them a faithful DOM implementation, and the entire web component ecosystem works in any rendering context: a terminal, a canvas, a remote display. @cliui/dom is that implementation.
+
+It exports a lot of classes: `EventTarget`, `Node`, `ChildNode`, `ParentNode`, `Element`, `HTMLElement`, `Text`, `Comment`, `Document`, `DocumentFragment`, plus a handful of specialized element classes like `HTMLDialogElement` and `SVGElement`. If you've used the browser DOM, these names are familiar — but the relationships between them determine what you can _do_ with any given node.
 
 The class hierarchy is a **capability stack**. Each class in the chain adds one responsibility. Where a node sits in the hierarchy determines which methods it has, which properties it exposes, and what role it plays in the tree. Understanding the stack means you can look at any node and know its capabilities without checking the docs.
 
@@ -53,6 +55,27 @@ classDiagram
         «empty – extension point»
     }
 
+    class Attr {
+        nodeType = 2
+        name / value
+    }
+
+    class HTMLDialogElement {
+        show() / showModal() / close()
+    }
+    class HTMLAnchorElement {
+        auto tabindex on href
+    }
+    class HTMLTemplateElement {
+        content (DocumentFragment)
+    }
+    class HTMLStyleElement {
+        sheet
+    }
+    class SVGElement {
+        ownerSVGElement
+    }
+
     class CharacterData {
         data
     }
@@ -85,14 +108,45 @@ classDiagram
     EventTarget <|-- Node
     EventTarget <|-- Window
     Node <|-- ChildNode
+    Node <|-- Attr
     ChildNode <|-- ParentNode
     ChildNode <|-- CharacterData
     ParentNode <|-- Element
     ParentNode <|-- Document
     ParentNode <|-- DocumentFragment
     Element <|-- HTMLElement
+    Element <|-- HTMLTemplateElement
+    Element <|-- SVGElement
+    HTMLElement <|-- HTMLDialogElement
+    HTMLElement <|-- HTMLAnchorElement
+    HTMLElement <|-- HTMLStyleElement
+    HTMLElement <|-- HTMLLinkElement
+    HTMLElement <|-- HTMLScriptElement
+    HTMLElement <|-- HTMLIFrameElement
+    Element <|-- HTMLHtmlElement
+    Element <|-- HTMLHeadElement
+    Element <|-- HTMLBodyElement
     CharacterData <|-- Text
     CharacterData <|-- Comment
+
+    class HTMLLinkElement {
+        rel / href / type / sheet
+    }
+    class HTMLScriptElement {
+        src / type / defer / async
+    }
+    class HTMLIFrameElement {
+        «empty – React 19 stub»
+    }
+    class HTMLHtmlElement {
+        «empty – skeleton identity»
+    }
+    class HTMLHeadElement {
+        «empty – skeleton identity»
+    }
+    class HTMLBodyElement {
+        «empty – skeleton identity»
+    }
 ```
 
 The rest of this document walks through each layer, explains the fork, and covers the practical questions: what does `createElement` give you back? Why is `HTMLElement` empty? What's the Document skeleton? Why are Symbols everywhere?
@@ -109,17 +163,17 @@ The base of the stack. `addEventListener`, `removeEventListener`, `dispatchEvent
 
 `Node` adds identity, ownership, and position.
 
-**Identity:** `nodeType` is a numeric code that tells you what kind of node this is. Elements are `1`, text nodes are `3`, comments are `8`, documents are `9`. `nodeName` is the uppercase tag name for elements (`'DIV'`, `'SPAN'`) or a fixed string for other types (`'#text'`, `'#comment'`, `'#document'`). `localName` is the lowercase version of the tag name.
+**Identity:** `nodeType` is a numeric code that tells you what kind of node this is. Elements are `1`, text nodes are `3`, comments are `8`, documents are `9`. `nodeName` returns `[NAME].toUpperCase()` — for elements that's the tag name (`'DIV'`, `'SPAN'`), for other types a fixed string (`'#text'`, `'#comment'`, `'#document'`). `localName` stores the tag name exactly as passed to `createElement` — lowercase by convention, but not normalized on storage. The `createElement` dispatch itself is case-insensitive (it lowercases for matching), so `createElement('A')` returns an `HTMLAnchorElement` whose `localName` is `'A'`.
 
 **Ownership:** `ownerDocument` points to the `Document` this node belongs to. Every node gets this when it's created — it's how the node finds its way back to the document's factory methods and the hooks bridge.
 
 **Connectivity:** `isConnected` is `true` when the node is part of a document-rooted tree (attached to the skeleton via `appendChild` or similar), `false` when it's detached. This flag propagates — appending a parent to the document connects all its descendants. Removing it disconnects them all.
 
-**Traversal:** `parentNode`, `nextSibling`, `previousSibling`, `firstChild`, `lastChild` let you walk the tree in any direction. `nextElementSibling` and `previousElementSibling` skip over non-element nodes (text, comments) to find the next element.
+**Traversal:** `parentNode`, `nextSibling`, `previousSibling`, `firstChild`, `lastChild` let you walk the tree in any direction. `parentElement` returns the parent only when it's an element (returns `null` when the parent is a `Document`). `nextElementSibling` and `previousElementSibling` skip over non-element nodes (text, comments) to find the next element.
 
-**Content:** `textContent` reads by concatenating all descendant text nodes. Writing to `textContent` replaces all children with a single text node — except when the node already has exactly one text child, in which case it updates that child in place (avoiding unnecessary tree mutations).
+**Content:** `textContent` reads by concatenating all descendant text nodes. Writing to `textContent` replaces all children with a single text node — except when the new value is non-empty and the node already has exactly one text child, in which case it updates that child in place (avoiding unnecessary tree mutations). Setting `textContent = ''` always removes all children.
 
-Node is read-only with respect to the tree structure. You can _traverse_ the tree from a Node, but you can't _modify_ it — there's no `appendChild` or `removeChild` here. Those come later.
+Node provides tree traversal but no tree mutation methods — there's no `appendChild` or `removeChild` here. Those come from `ParentNode`. The one exception is the `textContent` setter: when called on a parent node, it delegates to `removeChild` and `append` (both from `ParentNode`) to replace children with a text node. The setter works because JavaScript's prototype chain resolves those methods at runtime, even though `Node` doesn't declare them.
 
 ### ChildNode — detaching yourself
 
@@ -130,6 +184,8 @@ This is the last shared class before the hierarchy forks. From `ChildNode`, two 
 ## The fork
 
 At `ChildNode`, the hierarchy splits into two branches. This split reflects a fundamental distinction in the DOM: some nodes **contain** other nodes, and some nodes **carry data**.
+
+In the W3C DOM specification, `ChildNode` and `ParentNode` aren't classes — they're _mixins_, interface fragments that get composed into concrete types like `Element` and `DocumentFragment`. JavaScript doesn't have first-class mixins in the inheritance chain, so @cliui/dom models them as classes, and the mixins become branches in the tree. The shape is the same; the modeling technique is different. This translation decision is one that anyone building a DOM in a class-based language has to make.
 
 ### The ParentNode branch — containers
 
@@ -173,7 +229,9 @@ Because `CharacterData` extends `ChildNode` and _not_ `ParentNode`, text and com
 
 They're leaf nodes by design. The fork in the hierarchy is what enforces this.
 
-One more node type sits outside the fork entirely: `Attr` extends `Node` directly — not `ChildNode`. Attribute nodes have `nodeType = 2` and live inside an element's `NamedNodeMap`, not in the main DOM tree. You rarely interact with `Attr` objects directly — `setAttribute`/`getAttribute` on `Element` are the standard interface.
+### Outside the fork: Attr
+
+`Attr` extends `Node` directly — not `ChildNode`, not `ParentNode`. Attribute nodes have `nodeType = 2` and live inside an element's `NamedNodeMap`, not in the main DOM tree. Because `Attr` doesn't extend `ChildNode`, it has no `remove()`, `before()`, or `after()` — it can't participate in tree mutations the way elements and text nodes can. You rarely interact with `Attr` objects directly — `setAttribute`/`getAttribute` on `Element` are the standard interface.
 
 ### Surprises the fork explains
 
@@ -205,33 +263,40 @@ window.customElements.define('my-widget', MyWidget);
 
 The custom element spec says custom elements extend `HTMLElement`. So the class must exist, even though it contributes nothing to the API surface. It's a type boundary, not a capability boundary.
 
-### Structural elements — the instanceof surprise
+This pattern — an empty class whose existence is a type contract, not a capability contract — recurs throughout the hierarchy. `HTMLIFrameElement` is another instance: an empty stub extending `HTMLElement` that exists solely so React 19's `element instanceof HTMLIFrameElement` check doesn't throw. The structural elements (`HTMLHtmlElement`, `HTMLHeadElement`, `HTMLBodyElement`) are the same pattern applied to `Element`. When you see an empty class in the hierarchy, the question isn't "what does it do?" — it's "whose `instanceof` check does it satisfy?"
 
-`HTMLHtmlElement`, `HTMLHeadElement`, and `HTMLBodyElement` all extend `Element` directly — **not** `HTMLElement`. They're empty classes that exist solely for `instanceof` identity:
+### Elements that extend Element directly — the instanceof surprise
+
+Several element classes extend `Element` directly — **not** `HTMLElement`. The structural elements (`HTMLHtmlElement`, `HTMLHeadElement`, `HTMLBodyElement`) are empty identity classes. But `HTMLTemplateElement` and `SVGElement` also extend `Element` directly, even though they add real behavior:
 
 ```ts
 document.body instanceof Element; // true
 document.body instanceof HTMLElement; // false  ← surprise
+document.createElement('template') instanceof HTMLElement; // false  ← also surprise
+document.createElementNS('http://www.w3.org/2000/svg', 'svg') instanceof HTMLElement; // false
 ```
 
-If you're coming from browser-land, this is unexpected. In browsers, `document.body` is an `HTMLBodyElement` which extends `HTMLElement`. Here, the structural elements were kept on the simpler `Element` branch because they predate the custom element convention and don't need anything HTMLElement would provide.
+If you're coming from browser-land, this is unexpected. In browsers, `document.body` is an `HTMLBodyElement` which extends `HTMLElement`. Here, these classes were kept on the simpler `Element` branch because they don't need anything `HTMLElement` would provide — and in the case of `SVGElement`, the browser spec itself places it outside the `HTMLElement` hierarchy.
 
-This matters when code does type checks. If a library checks `node instanceof HTMLElement` to determine whether something is "a real element," structural elements will fail that check. Use `node instanceof Element` or check `node.nodeType === 1` instead.
+One additional detail about the structural element classes: `HTMLHtmlElement`, `HTMLHeadElement`, and `HTMLBodyElement` are only instantiated by the `Document` constructor when building the initial skeleton. Calling `document.createElement('body')` returns a plain `Element`, not an `HTMLBodyElement`. These classes exist for the skeleton's `instanceof` identity, not for general use.
+
+This matters when code does type checks. If a library checks `node instanceof HTMLElement` to determine whether something is "a real element," structural elements, templates, and SVG elements will all fail that check. Use `node instanceof Element` or check `node.nodeType === 1` instead.
 
 ### Specialized subclasses that add behavior
 
-Not all element subclasses are empty. Six built-in tag names get classes with real functionality:
+Not all element subclasses are empty. Seven built-in tag names get classes with real functionality:
 
-| Class                 | Tag          | What it adds                                                                                         |
-| --------------------- | ------------ | ---------------------------------------------------------------------------------------------------- |
-| `HTMLDialogElement`   | `<dialog>`   | Modal/non-modal open/close, focus trapping, Escape-to-close, `returnValue`                           |
-| `HTMLAnchorElement`   | `<a>`        | Automatic `tabindex="0"` when `href` is set, removed when `href` is removed                          |
-| `HTMLStyleElement`    | `<style>`    | `sheet` property that returns the element's CSS text content                                         |
-| `HTMLTemplateElement` | `<template>` | `content` property (a `DocumentFragment`), separate `innerHTML` behavior that writes to the fragment |
-| `HTMLLinkElement`     | `<link>`     | `rel`, `href`, `type` property accessors, `sheet` for loaded stylesheet text                         |
-| `HTMLScriptElement`   | `<script>`   | `src`, `type`, `defer`, `async` property accessors                                                   |
+| Class                 | Tag          | Base class    | What it adds                                                                                         |
+| --------------------- | ------------ | ------------- | ---------------------------------------------------------------------------------------------------- |
+| `HTMLDialogElement`   | `<dialog>`   | `HTMLElement` | Modal/non-modal open/close, focus trapping, Escape-to-close, `returnValue`                           |
+| `HTMLAnchorElement`   | `<a>`        | `HTMLElement` | Automatic `tabindex="0"` when `href` is set, removed when `href` is removed                          |
+| `HTMLStyleElement`    | `<style>`    | `HTMLElement` | `sheet` property that returns the element's CSS text content                                         |
+| `HTMLLinkElement`     | `<link>`     | `HTMLElement` | `rel`, `href`, `type` property accessors, `sheet` for loaded stylesheet text                         |
+| `HTMLScriptElement`   | `<script>`   | `HTMLElement` | `src`, `type`, `defer`, `async` property accessors                                                   |
+| `HTMLTemplateElement` | `<template>` | `Element`     | `content` property (a `DocumentFragment`), separate `innerHTML` behavior that writes to the fragment |
+| `SVGElement`          | SVG elements | `Element`     | SVG namespace, `ownerSVGElement` property that walks up to the root `<svg>` ancestor                 |
 
-`SVGElement` extends `Element` with the SVG namespace and an `ownerSVGElement` property that walks up to the root `<svg>` ancestor.
+Note the **Base class** column: most specialized elements extend `HTMLElement`, but `HTMLTemplateElement` and `SVGElement` extend `Element` directly. This means they participate in the [instanceof surprise](#elements-that-extend-element-directly--the-instanceof-surprise) described above.
 
 `HTMLIFrameElement` is a special case — an empty stub extending `HTMLElement`. It exists because React 19 performs an `element instanceof HTMLIFrameElement` check internally. Without the class, that check throws a `TypeError`. No element in @cliui/dom will ever be an instance of it.
 
@@ -247,7 +312,7 @@ Window (extends EventTarget)
             └─ <body> (HTMLBodyElement)
 ```
 
-No assembly required. `document.body` is immediately usable — you can `appendChild`, set `innerHTML`, run `querySelector`, all before doing anything else.
+No assembly required. `document.body` is immediately usable — you can `appendChild`, set `innerHTML`, run `querySelector`, all before doing anything else. This pre-building is deliberate: frameworks assume `document.body` exists the moment they mount. Pre-building the skeleton removes boilerplate from every consumer.
 
 The skeleton is connected from birth. Every node in it has `isConnected = true` from the moment the `Window` constructor finishes. The `Document` itself is permanently connected — its `isConnected` is hardcoded to `true` and never changes.
 
@@ -260,6 +325,7 @@ The skeleton is connected from birth. Every node in it has `isConnected = true` 
 - **Hover tracking:** `document.hoveredElement` and `document.setHoveredElement(element)` for hover state, used by the rendering layer to evaluate `:hover` selectors.
 - **Focus cycling:** `document.focusNext()` cycles through elements with a `tabindex` attribute in document order. `document.focusNext(true)` cycles backward.
 - **Node transfer:** `document.adoptNode(node)` transfers a node from another document. `document.importNode(node, deep)` clones a node into this document.
+- **Document metadata:** `document.title` reads and writes the `<title>` element in `<head>`. `document.readyState` starts as `'loading'` and transitions to `'complete'` after the terminal starts. `document.visibilityState` is always `'visible'` in a terminal context — there's no concept of a background tab. `document.hasFocus()` derives from `visibilityState`.
 
 ### Window — outside the tree
 
@@ -269,10 +335,19 @@ What it does hold:
 
 - `document` — the Document instance
 - `customElements` — the `CustomElementRegistry`
-- `navigator`, `location`, `performance` — web API surfaces
+- `navigator` — a `Navigator` with `userAgent` identifying the terminal DOM runtime
+- `location` — a `Location` defaulting to `about:blank` (URL state works; navigation does not)
+- `performance` — a `Performance` implementation with `now()`, `mark()`, `measure()`, and `PerformanceObserver`
 - `[HOOKS]` — the hooks bridge (the integration point for renderers)
 - Self-references: `window.window`, `window.self`, `window.parent`, `window.top` all point back to the Window itself
 - DOM class references: `window.Event`, `window.Element`, `window.Node`, etc. — frameworks sometimes access constructors via the window object
+
+Window also provides browser-compatible APIs adapted for a terminal context:
+
+- `matchMedia(query)` — evaluates `prefers-color-scheme` queries against the terminal's detected color scheme
+- `requestAnimationFrame` / `cancelAnimationFrame` — implemented as `setTimeout(cb, 0)` since there's no vsync
+- `alert()`, `confirm()`, `prompt()` — return `Promise` instead of blocking (built on `HTMLDialogElement` internally)
+- `onerror` / `onunhandledrejection` — error and rejection handlers matching the browser interface
 
 ## The createElement dispatch
 
@@ -281,15 +356,15 @@ When you call `document.createElement(tagName)`, the tag name determines which c
 ```
 createElement(tagName)
   │
-  ├─ 'a'        → new HTMLAnchorElement()
-  ├─ 'dialog'   → new HTMLDialogElement()
-  ├─ 'template' → new HTMLTemplateElement()
-  ├─ 'style'    → new HTMLStyleElement()
-  ├─ 'link'     → new HTMLLinkElement()
-  ├─ 'script'   → new HTMLScriptElement()
-  │
   ├─ (SVG namespace via createElementNS)
   │              → new SVGElement()
+  │
+  ├─ 'a'        → new HTMLAnchorElement()
+  ├─ 'template' → new HTMLTemplateElement()
+  ├─ 'style'    → new HTMLStyleElement()
+  ├─ 'dialog'   → new HTMLDialogElement()
+  ├─ 'link'     → new HTMLLinkElement()
+  ├─ 'script'   → new HTMLScriptElement()
   │
   ├─ (registered in customElements?)
   │              → new CustomElementConstructor()
@@ -298,9 +373,11 @@ createElement(tagName)
                  → new Element()
 ```
 
+Notice that `'body'`, `'head'`, and `'html'` are not in the dispatch table. Calling `document.createElement('body')` returns a plain `Element`, not an `HTMLBodyElement`. The structural element classes are only used for the initial document skeleton.
+
 Most tag names — `'div'`, `'span'`, `'section'`, `'p'`, `'button'`, `'input'` — produce a plain `Element`. They share the same class. What distinguishes a `<div>` from a `<span>` is the tag name stored in the node, not the class. `createElement('div').constructor === createElement('span').constructor` is `true`.
 
-The specialized classes exist for tag names that need behavior beyond what Element provides. `<dialog>` needs modal open/close. `<a>` needs automatic focusability. `<template>` needs a separate content fragment. If a tag name doesn't need special behavior, it gets a generic Element.
+The specialized classes exist for tag names that need behavior beyond what Element provides. `<dialog>` needs modal open/close. `<a>` needs automatic focusability. `<template>` needs a separate content fragment. If you're asking "what class will `createElement` give me back?" — the answer is almost always `Element`. The specialized classes are the exception, not the rule.
 
 Custom elements are checked after the built-in names. If you've called `customElements.define('my-widget', MyWidget)`, then `createElement('my-widget')` returns an instance of `MyWidget`. If the tag name isn't registered, it falls back to plain `Element`. (If you register the element _after_ creating instances with that tag name, the existing instances get upgraded via `Object.setPrototypeOf` — but that's covered in the [Custom Elements](./custom-elements.md) doc.)
 
@@ -325,7 +402,19 @@ Most Symbols (`NAME`, `DATA`, `ATTRIBUTES`, `STYLE`, `IS_CONNECTED`, `LISTENERS`
 Four Symbols _are_ exported: `HOOKS`, `CHILD`, `NEXT`, and `PARENT`. These exist for consumers who need deeper access:
 
 - **`HOOKS`** is the primary integration surface — renderers install callbacks on `window[HOOKS]` to observe DOM mutations. This is the designed public API for renderer integration, documented fully in [The Hooks Bridge](./hooks-bridge.md).
-- **`CHILD`**, **`NEXT`**, and **`PARENT`** expose the linked-list structure. They're available for advanced consumers (like a rendering layer that needs to walk the tree directly), but the standard DOM traversal properties (`firstChild`, `nextSibling`, `parentNode`) are the intended public API.
+- **`CHILD`**, **`NEXT`**, and **`PARENT`** expose the linked-list structure. They're available for advanced consumers (like a rendering layer that needs to walk the tree directly), but the standard DOM traversal properties (`firstChild`, `nextSibling`, `parentNode`) are the intended public API. `PREV` is deliberately not exported — walk backward via `previousSibling` instead.
+
+```ts
+// Direct Symbol access (available but rarely needed):
+import {CHILD, NEXT} from '@cliui/dom';
+for (let node = parent[CHILD]; node; node = node[NEXT]) {
+  // walk children as a linked list
+}
+// The standard API does the same thing:
+for (let node = parent.firstChild; node; node = node.nextSibling) {
+  // identical traversal, no Symbol import needed
+}
+```
 
 The key takeaway: Symbols are how the DOM stores its internal state without interfering with user-land code. The hooks bridge is the integration surface. Direct Symbol access is possible but not the designed contract for most use cases.
 
@@ -333,15 +422,29 @@ The key takeaway: Symbols are how the DOM stores its internal state without inte
 
 Every parent node maintains two parallel representations of its children:
 
-**The linked list** uses Symbol-keyed pointers: `[CHILD]` points to the first child, each child has `[NEXT]` and `[PREV]` pointing to its siblings. Insertion and removal are O(1) — just rewrite a few pointers. The DOM's traversal properties (`firstChild`, `lastChild`, `nextSibling`, `previousSibling`) read directly from these pointers.
+**The linked list** uses Symbol-keyed pointers: `[CHILD]` points to the first child, each child has `[NEXT]` and `[PREV]` pointing to its siblings. `firstChild`, `nextSibling`, and `previousSibling` are O(1) reads of these pointers. `lastChild` is the exception — it walks from `[CHILD]` via `[NEXT]` to the end of the list, so it's proportional to the number of children. Pointer rewrites during insertion and removal are local — no sibling shifting is required. However, appending to the end (`appendChild` with no reference node) also walks the list to find the last child.
 
-**The arrays** are `childNodes` (a `NodeList` containing all child nodes regardless of type) and `children` (a `NodeList` containing only element children, `nodeType === 1`). These provide indexed access: `parent.childNodes[2]`, `parent.children.length`.
+```ts
+// Two structures, always in sync:
+parent.firstChild === parent.childNodes[0]; // true
+parent.children[0] === parent.firstElementChild; // true
+```
 
-Both structures are kept in sync. Every `appendChild`, `insertBefore`, and `removeChild` updates the linked list _and_ both arrays. The linked list is updated first (pointer manipulation), then the arrays are spliced to match.
+**The arrays** are `childNodes` and `children`, both `NodeList` instances (which extend `Array<Node>` — a deliberate divergence from browsers, where `NodeList` is not an array). `childNodes` contains all child nodes regardless of type. `children` contains only element children (`nodeType === 1`). These provide indexed access: `parent.childNodes[2]`, `parent.children.length`.
+
+Both structures are kept in sync. Every `appendChild`, `insertBefore`, and `removeChild` updates the linked list _and_ both arrays. The linked list pointers are rewritten first, then the arrays are spliced to match. The array operations use `indexOf` and `splice`, so the total cost of a mutation depends on the number of children.
 
 Why both? The linked list is the natural structure for DOM tree-walking — `firstChild` → `nextSibling` → `nextSibling` is just pointer chasing. The arrays are what frameworks expect — React indexes into `childNodes`, and the hooks bridge reports insertion/removal indices so renderers can maintain parallel data structures. Neither alone covers both needs efficiently.
 
+```ts
+// NodeList extends Array — methods browsers don't give you:
+parent.childNodes.map((child) => child.nodeName); // works here, TypeError in browsers
+parent.childNodes.filter((child) => child.nodeType === 1); // array methods on a NodeList
+```
+
 **`childNodes` vs. `children`:** If a parent has three children — a text node, a `<span>`, and a comment — `childNodes` contains all three (length 3) and `children` contains only the `<span>` (length 1). `childNodes` is the complete picture. `children` is the element-only view.
+
+If you're choosing between `childNodes[i]` and walking `firstChild` → `nextSibling`, the indexed access is typically what you want. The linked list is there for the DOM's internal benefit and for rendering layers that need allocation-free traversal — not for everyday application code.
 
 ## Where to go next
 
