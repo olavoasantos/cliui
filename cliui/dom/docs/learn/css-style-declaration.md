@@ -12,14 +12,14 @@ In a browser, these three surfaces are synchronized — setting `element.style.c
 
 ```ts
 element.style.color = 'red';
-element.style.cssText;            // 'color: red'
-element.getAttribute('style');    // null — the attribute was never set
-element.outerHTML;                // '<div></div>' — no style attribute
+element.style.cssText; // 'color: red'
+element.getAttribute('style'); // null — the attribute was never set
+element.outerHTML; // '<div></div>' — no style attribute
 
 element.setAttribute('style', 'display: flex');
-element.getAttribute('style');    // 'display: flex'
-element.style.display;            // '' — the declaration store wasn't updated
-element.style.cssText;            // 'color: red' — still the old value
+element.getAttribute('style'); // 'display: flex'
+element.style.display; // '' — the declaration store wasn't updated
+element.style.cssText; // 'color: red' — still the old value
 ```
 
 This divergence reflects the current architecture of the hooks bridge: hook consumers receive a style-shaped attribute mutation, but that does not imply the DOM attribute map has been updated. A future version could synchronize these surfaces, but doing so would add complexity (bidirectional sync between the Map and the attribute store) for a benefit that renderers don't currently need — they read styles from hook notifications, not from `getAttribute`.
@@ -28,13 +28,13 @@ Understanding which surface you're interacting with matters when you're debuggin
 
 ### Browser vs. @cliui/dom
 
-| Operation | Browser | @cliui/dom |
-| --- | --- | --- |
-| `element.style.color = 'red'` | Updates declaration store, syncs to `style` attribute, triggers rendering | Updates declaration store, fires `hooks.setAttribute`, does **not** update DOM attribute |
-| `element.getAttribute('style')` | Returns serialized inline styles | Returns whatever was set via `setAttribute` (unrelated to declaration store) |
-| `element.outerHTML` | Includes `style` attribute with inline styles | Does **not** include declaration store contents |
-| `element.setAttribute('style', '...')` | Hydrates `element.style` declaration store | Updates DOM attribute only — does **not** hydrate declaration store |
-| Renderer notification | Implicit (rendering engine observes all state) | Explicit via `hooks.setAttribute(element, 'style', cssText)` |
+| Operation                              | Browser                                                                   | @cliui/dom                                                                               |
+| -------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `element.style.color = 'red'`          | Updates declaration store, syncs to `style` attribute, triggers rendering | Updates declaration store, fires `hooks.setAttribute`, does **not** update DOM attribute |
+| `element.getAttribute('style')`        | Returns serialized inline styles                                          | Returns whatever was set via `setAttribute` (unrelated to declaration store)             |
+| `element.outerHTML`                    | Includes `style` attribute with inline styles                             | Does **not** include declaration store contents                                          |
+| `element.setAttribute('style', '...')` | Hydrates `element.style` declaration store                                | Updates DOM attribute only — does **not** hydrate declaration store                      |
+| Renderer notification                  | Implicit (rendering engine observes all state)                            | Explicit via `hooks.setAttribute(element, 'style', cssText)`                             |
 
 ## Why a Proxy
 
@@ -280,14 +280,14 @@ This reads the existing `cssText`, concatenates the new declaration, then sets t
 
 ## Choosing the right API
 
-| You want to... | Use | Why |
-| --- | --- | --- |
-| Set one property | `element.style.color = 'red'` | Simplest syntax. Works for any property in the curated set. |
-| Set a property not in the curated set | `element.style.setProperty('transition', '...')` | `setProperty` calls `expandShorthand` directly, bypassing the Proxy's curated-set gate. |
-| Set many properties at once | `element.style.cssText = '...'` | One notification instead of N. Clears and re-parses. |
-| Read a property | `element.style.color` or `getPropertyValue('color')` | Both read from the Map. `getPropertyValue` works for kebab-case and properties outside the curated set that were stored via `setProperty`. |
-| Remove a property | `element.style.removeProperty('color')` | Also works: `element.style.color = ''` or `setProperty('color', '')`. |
-| Set the `style` attribute for serialization | `element.setAttribute('style', '...')` | Updates the DOM attribute map and `outerHTML` — **not** the declaration store. Does not trigger hook notification through the declaration-store path. |
+| You want to...                              | Use                                                  | Why                                                                                                                                                   |
+| ------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Set one property                            | `element.style.color = 'red'`                        | Simplest syntax. Works for any property in the curated set.                                                                                           |
+| Set a property not in the curated set       | `element.style.setProperty('transition', '...')`     | `setProperty` calls `expandShorthand` directly, bypassing the Proxy's curated-set gate.                                                               |
+| Set many properties at once                 | `element.style.cssText = '...'`                      | One notification instead of N. Clears and re-parses.                                                                                                  |
+| Read a property                             | `element.style.color` or `getPropertyValue('color')` | Both read from the Map. `getPropertyValue` works for kebab-case and properties outside the curated set that were stored via `setProperty`.            |
+| Remove a property                           | `element.style.removeProperty('color')`              | Also works: `element.style.color = ''` or `setProperty('color', '')`.                                                                                 |
+| Set the `style` attribute for serialization | `element.setAttribute('style', '...')`               | Updates the DOM attribute map and `outerHTML` — **not** the declaration store. Does not trigger hook notification through the declaration-store path. |
 
 Avoid using `setAttribute('style', ...)` to drive renderer updates — it writes to the DOM attribute map, but the renderer listens to hook notifications from the declaration store. The two paths don't converge.
 
