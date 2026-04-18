@@ -124,12 +124,12 @@ While void elements represent the most visible parsing split, whitespace handlin
 
 The self-closing slash (`<tag />`) is another place where the two parsers diverge — and where `parseDocument`'s pragmatism introduces a subtle footgun.
 
-`parseDocument` checks for the trailing `/` in `<tag />` and treats any such element as self-closing — not just void elements or custom elements, but *any* tag. `<div />` would fail to wrap its intended children just as `<my-widget />` would. This differs from browser behavior, where self-closing syntax is ignored on non-void elements. The custom element case is the most common footgun, but the rule is broader:
+`parseDocument` checks for the trailing `/` in `<tag />` and treats any such element as self-closing — not just void elements or custom elements, but _any_ tag. `<div />` would fail to wrap its intended children just as `<my-widget />` would. This differs from browser behavior, where self-closing syntax is ignored on non-void elements. The custom element case is the most common footgun, but the rule is broader:
 
 ```html
 <!-- In parseDocument, the slash makes this self-closing -->
 <my-layout />
-  <p>This is NOT a child of my-layout — it's a sibling</p>
+<p>This is NOT a child of my-layout — it's a sibling</p>
 
 <!-- Use an explicit closing tag instead -->
 <my-layout>
@@ -254,15 +254,15 @@ Framework-generated HTML rarely triggers this: bundlers extract scripts into sep
 
 The most common parsing surprises, their causes, and how to fix them:
 
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| Text after `<br>` is nested inside it | `parseHtml` doesn't recognize void elements — `<br>` pushes onto the stack | Use explicit closing tags: `<br></br>` |
-| Attribute `data-x="Tom &amp; Jerry"` becomes `Tom &amp;amp; Jerry` after a round-trip | Attribute entities aren't decoded on parse, but `&` is escaped on serialize | Avoid entity-encoded `&` in attributes, or decode before re-serializing |
-| `<my-widget />` in a hydrated doc has no children | `parseDocument` treats `/>` as self-closing for any element | Use `<my-widget></my-widget>` with an explicit closing tag |
-| `template.innerHTML` returns `''` after parsing | `parseHtml` appends template children to the element, not `.content` | Access children via `template.childNodes` or `template.outerHTML` instead |
-| Whitespace gaps appear between elements in `parseHtml` output | `parseHtml` preserves whitespace-only text nodes between tags | Expected behavior — `parseDocument` strips them; `parseHtml` doesn't |
-| `<script>if (a < b) {}</script>` corrupts the parse tree | The regex tokenizer interprets `<` as a tag delimiter everywhere | Move scripts to external files, or escape as `&lt;` |
-| Custom element's `connectedCallback` doesn't fire during `parseHtml` | Elements are appended to a disconnected `DocumentFragment` | `connectedCallback` fires when the fragment is inserted into the live DOM |
+| Symptom                                                                               | Cause                                                                       | Fix                                                                       |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Text after `<br>` is nested inside it                                                 | `parseHtml` doesn't recognize void elements — `<br>` pushes onto the stack  | Use explicit closing tags: `<br></br>`                                    |
+| Attribute `data-x="Tom &amp; Jerry"` becomes `Tom &amp;amp; Jerry` after a round-trip | Attribute entities aren't decoded on parse, but `&` is escaped on serialize | Avoid entity-encoded `&` in attributes, or decode before re-serializing   |
+| `<my-widget />` in a hydrated doc has no children                                     | `parseDocument` treats `/>` as self-closing for any element                 | Use `<my-widget></my-widget>` with an explicit closing tag                |
+| `template.innerHTML` returns `''` after parsing                                       | `parseHtml` appends template children to the element, not `.content`        | Access children via `template.childNodes` or `template.outerHTML` instead |
+| Whitespace gaps appear between elements in `parseHtml` output                         | `parseHtml` preserves whitespace-only text nodes between tags               | Expected behavior — `parseDocument` strips them; `parseHtml` doesn't      |
+| `<script>if (a < b) {}</script>` corrupts the parse tree                              | The regex tokenizer interprets `<` as a tag delimiter everywhere            | Move scripts to external files, or escape as `&lt;`                       |
+| Custom element's `connectedCallback` doesn't fire during `parseHtml`                  | Elements are appended to a disconnected `DocumentFragment`                  | `connectedCallback` fires when the fragment is inserted into the live DOM |
 
 ## Where to go next
 
