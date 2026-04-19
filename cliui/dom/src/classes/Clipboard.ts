@@ -5,19 +5,21 @@ export type ClipboardWriteHandler = (text: string) => void;
 
 /**
  * Callback for reading text from the system clipboard.
- * Returns the clipboard content or `null` if unavailable.
+ * Returns the clipboard content as a string.
  */
 export type ClipboardReadHandler = () => string;
 
 /**
  * Web Clipboard API implementation for terminal environments.
  *
- * Backed by OSC 52 for clipboard read/write. The terminal layer wires
- * the actual escape sequence emission via the static handlers.
+ * The DOM-layer Clipboard is stateless — it has no internal buffer.
+ * Static handlers (`writeHandler`, `readHandler`) are set by the
+ * environment layer to provide platform-specific behavior. When no
+ * handler is wired, `writeText()` is a no-op and `readText()` returns
+ * an empty string.
  *
- * When OSC 52 read is not supported by the terminal, `readText()` falls
- * back to returning the last value written via `writeText()` in the
- * current session (in-memory buffer).
+ * If read-after-write behavior is needed (returning the last written
+ * value), the environment's `readHandler` closure owns that buffer.
  *
  * @example
  * ```ts
@@ -41,8 +43,7 @@ export class Clipboard {
   /**
    * Writes the given text to the system clipboard.
    *
-   * Emits an OSC 52 clipboard write sequence if a handler is wired,
-   * and updates the in-memory buffer as a read fallback.
+   * Calls `writeHandler` if wired; otherwise silently drops the text.
    *
    * @param text - The text to write to the clipboard.
    */
@@ -54,8 +55,7 @@ export class Clipboard {
   /**
    * Reads text from the system clipboard.
    *
-   * Calls the read handler if available (OSC 52 query), otherwise
-   * returns the last written value from the in-memory buffer.
+   * Calls `readHandler` if wired; otherwise returns an empty string.
    *
    * @returns The clipboard text content.
    */

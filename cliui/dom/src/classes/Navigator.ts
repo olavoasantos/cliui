@@ -5,8 +5,9 @@ import {Clipboard} from './Clipboard';
  * Minimal `Navigator` implementation for the terminal DOM environment.
  *
  * Provides the standard Web API shape with terminal-appropriate defaults.
- * Properties that reference browser-only subsystems (`clipboard`,
- * `permissions`, `geolocation`) return `null`.
+ * Browser-only subsystems (`permissions`, `geolocation`) return `null`.
+ * The `clipboard` property is a real `Clipboard` instance whose behavior
+ * is controlled by static handlers on the `Clipboard` class.
  */
 export class Navigator {
   /** User agent string identifying the terminal DOM runtime. */
