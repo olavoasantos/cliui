@@ -14,7 +14,7 @@ describe('Comment', () => {
     it('has nodeName #comment', () => {
       const comment = new Window().document.createComment('hello');
 
-      expect(comment.nodeName).toBe('#COMMENT');
+      expect(comment.nodeName).toBe('#comment');
     });
   });
 

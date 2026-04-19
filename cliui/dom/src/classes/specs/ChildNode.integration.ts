@@ -18,7 +18,7 @@ describe('ChildNode integration', () => {
 
     expect(parent.childNodes).toHaveLength(3);
     expect(parent.childNodes[0]).toBe(first);
-    expect(parent.childNodes[1]?.nodeType).toBe(3);
-    expect(parent.lastChild?.nodeType).toBe(1);
+    expect(parent.childNodes[1]?.nodeType).toBe(1);
+    expect(parent.lastChild?.nodeType).toBe(3);
   });
 });

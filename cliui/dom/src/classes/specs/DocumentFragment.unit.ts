@@ -16,7 +16,7 @@ describe('DocumentFragment', () => {
   it('has correct nodeName', () => {
     const {document} = createEnv();
     const frag = document.createDocumentFragment();
-    expect(frag.nodeName).toBe('#DOCUMENT-FRAGMENT');
+    expect(frag.nodeName).toBe('#document-fragment');
   });
 
   it('can hold children', () => {

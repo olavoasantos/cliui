@@ -14,7 +14,7 @@ describe('Text', () => {
     it('has nodeName #text', () => {
       const text = new Window().document.createTextNode('hello');
 
-      expect(text.nodeName).toBe('#TEXT');
+      expect(text.nodeName).toBe('#text');
     });
   });
 

@@ -21,5 +21,11 @@ export function updateElementAttribute(
     return;
   }
 
-  customElement.attributeChangedCallback.call(element, name, oldValue, newValue);
+  try {
+    customElement.attributeChangedCallback.call(element, name, oldValue, newValue);
+  } catch (error) {
+    setTimeout(() => {
+      throw error;
+    }, 0);
+  }
 }

@@ -1,4 +1,4 @@
-import {ATTRIBUTES, OWNER_DOCUMENT} from '../constants';
+import {ATTRIBUTES, NS, NamespaceURI, OWNER_DOCUMENT} from '../constants';
 import {CommentNodeGuard} from '../guards/CommentNodeGuard';
 import {DocumentFragmentNodeGuard} from '../guards/DocumentFragmentNodeGuard';
 import {ElementNodeGuard} from '../guards/ElementNodeGuard';
@@ -23,7 +23,11 @@ export function cloneNode(
   }
 
   if (ElementNodeGuard(node)) {
-    const cloned = document.createElement(node.localName);
+    const ns = node[NS];
+    const cloned =
+      ns && ns !== NamespaceURI.XHTML
+        ? document.createElementNS(ns, node.localName)
+        : document.createElement(node.localName);
 
     if (node[ATTRIBUTES]) {
       for (let index = 0; index < node[ATTRIBUTES].length; index++) {

@@ -6,6 +6,7 @@ import {
   NodeType,
   STYLE,
 } from '../constants';
+import {matches as matchesSelector} from '../utilities/matches';
 import {parseHtml} from '../utilities/parseHtml';
 import {serializeChildren} from '../utilities/serializeChildren';
 import {serializeNode} from '../utilities/serializeNode';
@@ -134,6 +135,20 @@ export class Element extends ParentNode {
 
   removeAttributeNS(namespace: NamespaceURI | null, name: string) {
     this.attributes.removeNamedItemNS(namespace, name);
+  }
+
+  matches(selector: string): boolean {
+    return matchesSelector(this, selector);
+  }
+
+  closest(selector: string): Element | null {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- walking up the tree requires reassignment
+    let current: Element | null = this;
+    while (current) {
+      if (matchesSelector(current, selector)) return current;
+      current = current.parentElement as Element | null;
+    }
+    return null;
   }
 
   get outerHTML() {

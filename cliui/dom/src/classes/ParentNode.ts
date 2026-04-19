@@ -9,6 +9,7 @@ import {
   PREV,
 } from '../constants';
 import {ensureCustomElementStyles} from '../utilities/ensureCustomElementStyles';
+import {descendants} from '../utilities/descendants';
 import {selfAndDescendants} from '../utilities/selfAndDescendants';
 import {querySelector} from '../utilities/querySelector';
 import {querySelectorAll} from '../utilities/querySelectorAll';
@@ -80,7 +81,13 @@ export class ParentNode extends ChildNode {
     if (this[IS_CONNECTED]) {
       for (const node of selfAndDescendants(child)) {
         node[IS_CONNECTED] = false;
-        (node as unknown as {disconnectedCallback?(): void}).disconnectedCallback?.();
+        try {
+          (node as unknown as {disconnectedCallback?(): void}).disconnectedCallback?.();
+        } catch (error) {
+          setTimeout(() => {
+            throw error;
+          }, 0);
+        }
       }
     }
 
@@ -117,17 +124,29 @@ export class ParentNode extends ChildNode {
       return;
     }
 
+    if (child === this) {
+      throw Error('a node cannot be inserted into itself');
+    }
+    if (child.contains(this)) {
+      throw Error('the new child is an ancestor of the parent');
+    }
+
+    if (before && before.parentNode !== this) {
+      throw Error('reference node is not a child of this parent');
+    }
+
     if (child.parentNode !== null) {
       child.parentNode.removeChild(child);
     }
 
     if (before) {
-      if (before.parentNode !== this) {
-        throw Error('reference node is not a child of this parent');
-      }
       child[NEXT] = before;
       child[PREV] = before[PREV];
-      if (before[PREV] === null) this[CHILD] = child;
+      if (before[PREV] === null) {
+        this[CHILD] = child;
+      } else {
+        before[PREV][NEXT] = child;
+      }
       before[PREV] = child;
     } else {
       child[NEXT] = null;
@@ -148,6 +167,9 @@ export class ParentNode extends ChildNode {
 
     child[PARENT] = this;
     child[OWNER_DOCUMENT] = ownerDocument;
+    for (const descendant of descendants(child)) {
+      descendant[OWNER_DOCUMENT] = ownerDocument;
+    }
 
     const childNodes = this.childNodes;
     let insertIndex: number;
@@ -180,7 +202,13 @@ export class ParentNode extends ChildNode {
           ensureCustomElementStyles(node as never);
         }
 
-        (node as unknown as {connectedCallback?(): void}).connectedCallback?.();
+        try {
+          (node as unknown as {connectedCallback?(): void}).connectedCallback?.();
+        } catch (error) {
+          setTimeout(() => {
+            throw error;
+          }, 0);
+        }
       }
     }
 

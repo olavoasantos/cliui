@@ -75,8 +75,9 @@ describe('Event', () => {
 
   it('supports returnValue as alias for defaultPrevented', () => {
     const event = new Event('test');
-    event.returnValue = true;
-    expect(event.defaultPrevented).toBe(true);
     expect(event.returnValue).toBe(true);
+    event.returnValue = false;
+    expect(event.defaultPrevented).toBe(true);
+    expect(event.returnValue).toBe(false);
   });
 });

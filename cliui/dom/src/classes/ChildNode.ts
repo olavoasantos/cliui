@@ -12,6 +12,10 @@ export class ChildNode extends Node {
   replaceWith(...nodes: (Node | string)[]) {
     const parent = this.parentNode;
     if (!parent) return;
+    if (nodes.length === 0) {
+      parent.removeChild(this);
+      return;
+    }
     const next = this[NEXT];
     const node = toNode(parent, nodes[0]);
     parent.replaceChild(node, this);

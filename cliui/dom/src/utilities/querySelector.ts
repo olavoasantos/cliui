@@ -1,28 +1,31 @@
 import {CHILD, NEXT} from '../constants';
 import {ElementNodeGuard} from '../guards/ElementNodeGuard';
-import {matches} from './matches';
+import {matchesParts} from './matchesParts';
+import {parseSelector} from './parseSelector';
 
 import type {Element} from '../classes/Element';
 import type {Node} from '../classes/Node';
 import type {ParentNode} from '../classes/ParentNode';
+import type {SelectorPart} from '../types';
 
 /** Returns the first element within a parent node that matches a selector. */
 export function querySelector(within: ParentNode, selector: string) {
   const child = within[CHILD];
   if (!child) return null;
-  return findMatchingElement(child, selector);
+  const parts = parseSelector(selector);
+  return findMatchingElement(child, parts);
 }
 
-function findMatchingElement(node: Node, selector: string): Element | null {
+function findMatchingElement(node: Node, parts: SelectorPart[]): Element | null {
   if (ElementNodeGuard(node)) {
-    if (matches(node, selector)) return node;
+    if (matchesParts(node, parts)) return node;
     const child = node[CHILD];
     if (child) {
-      const nestedMatch = findMatchingElement(child, selector);
+      const nestedMatch = findMatchingElement(child, parts);
       if (nestedMatch) return nestedMatch;
     }
   }
 
   const next = node[NEXT];
-  return next ? findMatchingElement(next, selector) : null;
+  return next ? findMatchingElement(next, parts) : null;
 }

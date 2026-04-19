@@ -22,6 +22,15 @@ import type {ParentNode} from './ParentNode';
 import type {Hooks, NodeType as NodeTypeValue} from '../types';
 
 export class Node extends EventTarget {
+  static readonly ELEMENT_NODE = NodeType.ELEMENT_NODE;
+  static readonly ATTRIBUTE_NODE = NodeType.ATTRIBUTE_NODE;
+  static readonly TEXT_NODE = NodeType.TEXT_NODE;
+  static readonly CDATA_SECTION_NODE = NodeType.CDATA_SECTION_NODE;
+  static readonly COMMENT_NODE = NodeType.COMMENT_NODE;
+  static readonly DOCUMENT_NODE = NodeType.DOCUMENT_NODE;
+  static readonly DOCUMENT_TYPE_NODE = NodeType.DOCUMENT_TYPE_NODE;
+  static readonly DOCUMENT_FRAGMENT_NODE = NodeType.DOCUMENT_FRAGMENT_NODE;
+
   nodeType: NodeTypeValue = NodeType.NODE;
 
   [OWNER_DOCUMENT]!: Document;
@@ -41,7 +50,10 @@ export class Node extends EventTarget {
   }
 
   get nodeName() {
-    return this[NAME].toUpperCase();
+    if (this.nodeType === NodeType.ELEMENT_NODE) {
+      return this[NAME].toUpperCase();
+    }
+    return this[NAME];
   }
 
   get ownerDocument() {
@@ -173,7 +185,9 @@ export class Node extends EventTarget {
       while ((child = this[CHILD])) {
         this.removeChild(child);
       }
-      this.append(normalizedData);
+      if (normalizedData.length > 0) {
+        this.append(normalizedData);
+      }
     }
   }
 

@@ -209,6 +209,10 @@ export class Document extends ParentNode {
     return cloneNode(node, deep, this);
   }
 
+  getElementById(id: string) {
+    return this.querySelector(`[id="${id}"]`);
+  }
+
   adoptNode(node: Node) {
     if (node[OWNER_DOCUMENT] === this) return node;
 

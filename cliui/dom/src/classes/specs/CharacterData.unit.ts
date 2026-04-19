@@ -17,7 +17,7 @@ describe('CharacterData', () => {
     it('has correct nodeName', () => {
       const {document} = createEnv();
       const text = document.createTextNode('hello');
-      expect(text.nodeName).toBe('#TEXT');
+      expect(text.nodeName).toBe('#text');
     });
 
     it('stores initial data', () => {
@@ -81,7 +81,7 @@ describe('CharacterData', () => {
     it('has correct nodeName', () => {
       const {document} = createEnv();
       const comment = document.createComment('test');
-      expect(comment.nodeName).toBe('#COMMENT');
+      expect(comment.nodeName).toBe('#comment');
     });
 
     it('stores initial data', () => {

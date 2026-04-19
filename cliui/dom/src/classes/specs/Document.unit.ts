@@ -17,7 +17,7 @@ describe('Document', () => {
 
     it('has correct nodeName', () => {
       const {document} = createEnv();
-      expect(document.nodeName).toBe('#DOCUMENT');
+      expect(document.nodeName).toBe('#document');
     });
 
     it('isConnected is true', () => {

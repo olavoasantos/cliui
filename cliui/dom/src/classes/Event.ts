@@ -59,11 +59,11 @@ export class Event {
   }
 
   set returnValue(value) {
-    this.defaultPrevented = value;
+    if (!value) this.defaultPrevented = true;
   }
 
   get returnValue() {
-    return this.defaultPrevented;
+    return !this.defaultPrevented;
   }
 
   /** @deprecated */
