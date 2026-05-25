@@ -200,13 +200,13 @@ describe('EventTarget', () => {
       expect(path).toContain(document.body);
     });
 
-    it('returns defaultPrevented state', () => {
+    it('returns false when default was prevented', () => {
       const {document} = createEnv();
       const el = document.createElement('div');
       el.addEventListener('click', (e) => (e as Event).preventDefault());
 
-      const result = el.dispatchEvent(new Event('click'));
-      expect(result).toBe(true);
+      const result = el.dispatchEvent(new Event('click', {cancelable: true}));
+      expect(result).toBe(false);
     });
   });
 });

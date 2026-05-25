@@ -211,7 +211,7 @@ describe('CSSStyleDeclaration', () => {
       d.body.appendChild(e);
 
       e.style.color = 'red';
-      expect(setAttr).toHaveBeenCalledWith(e, 'style', 'color: red');
+      expect(setAttr).toHaveBeenCalledWith(e, 'style', 'color: red', null, null);
     });
   });
 

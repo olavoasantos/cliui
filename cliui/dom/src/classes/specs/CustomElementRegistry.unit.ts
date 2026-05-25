@@ -55,13 +55,21 @@ describe('CustomElementRegistry', () => {
     expect(result2).toBe(MyElement);
   });
 
-  it('overwrites an existing definition when the same name is defined again', () => {
+  it('throws when defining the same name twice', () => {
     const registry = new CustomElementRegistryImplementation();
     class FirstElement {}
     class SecondElement {}
     registry.define('my-element', FirstElement as unknown as CustomElementConstructor);
-    registry.define('my-element', SecondElement as unknown as CustomElementConstructor);
-    expect(registry.get('my-element')).toBe(SecondElement);
+    expect(() => {
+      registry.define('my-element', SecondElement as unknown as CustomElementConstructor);
+    }).toThrow();
+  });
+
+  it('accepts names without a hyphen', () => {
+    const registry = new CustomElementRegistryImplementation();
+    class MyElement {}
+    registry.define('myelement', MyElement as unknown as CustomElementConstructor);
+    expect(registry.get('myelement')).toBe(MyElement);
   });
 
   it('stores non-class constructor values as provided', () => {

@@ -54,10 +54,16 @@ describe('Event', () => {
   });
 
   it('prevents default', () => {
-    const event = new Event('test');
+    const event = new Event('test', {cancelable: true});
     expect(event.defaultPrevented).toBe(false);
     event.preventDefault();
     expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('preventDefault is a no-op on non-cancelable events', () => {
+    const event = new Event('test');
+    event.preventDefault();
+    expect(event.defaultPrevented).toBe(false);
   });
 
   it('returns composed path', () => {

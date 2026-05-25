@@ -1,7 +1,5 @@
-import {HOOKS} from '../constants';
 import {getCSSStyleDeclarationStore} from './getCSSStyleDeclarationStore';
 
-import type {Hooks} from '../types';
 import type {CSSStyleDeclaration} from '../classes/CSSStyleDeclaration';
 
 /** Notifies DOM hooks when a CSSStyleDeclaration changes. */
@@ -12,6 +10,11 @@ export function notifyCSSStyleDeclaration(declaration: CSSStyleDeclaration): voi
     return;
   }
 
-  const hooks = (state.element as unknown as {[HOOKS]: Partial<Hooks>})[HOOKS];
-  hooks?.setAttribute?.(state.element, 'style', declaration.cssText);
+  const cssText = declaration.cssText;
+
+  if (cssText) {
+    state.element.setAttribute('style', cssText);
+  } else {
+    state.element.removeAttribute('style');
+  }
 }

@@ -14,6 +14,7 @@ describe('CSSStyleDeclaration integration', () => {
     expect(element.style.getPropertyValue('padding-left')).toBe('2');
     expect(element.style.backgroundColor).toBe('red');
     expect(element.style.getPropertyValue('font-weight')).toBe('bold');
-    expect(element.outerHTML).toContain('<div');
+    expect(element.getAttribute('style')).toContain('background-color: red');
+    expect(element.outerHTML).toContain('style=');
   });
 });

@@ -1,16 +1,13 @@
-import {describe, expect, it, vi} from 'vitest';
+import {describe, expect, it} from 'vitest';
 
-import {HOOKS} from '../../constants';
 import {CSSStyleDeclaration} from '../../classes/CSSStyleDeclaration';
 import {Window} from '../../classes/Window';
 import {setCSSStyleDeclarationStore} from '../setCSSStyleDeclarationStore';
 import {notifyCSSStyleDeclaration} from '../notifyCSSStyleDeclaration';
 
 describe('notifyCSSStyleDeclaration', () => {
-  it('forwards style changes to DOM hooks', () => {
+  it('forwards style changes to the element style attribute', () => {
     const window = new Window();
-    const setAttribute = vi.fn();
-    window[HOOKS] = {setAttribute};
     const element = window.document.createElement('div');
     const declaration = Object.create(CSSStyleDeclaration.prototype) as CSSStyleDeclaration;
 
@@ -21,6 +18,6 @@ describe('notifyCSSStyleDeclaration', () => {
 
     notifyCSSStyleDeclaration(declaration);
 
-    expect(setAttribute).toHaveBeenCalledWith(element, 'style', 'color: red');
+    expect(element.getAttribute('style')).toBe('color: red');
   });
 });
