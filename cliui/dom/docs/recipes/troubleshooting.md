@@ -2,22 +2,22 @@
 
 Quick-reference for diagnosing @cliui/dom problems. Find your symptom, read the cause, apply the fix.
 
-| #   | Category         | Symptom                                                                                                  | Cause                                                     | Fix                                                                           |
-| --- | ---------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 1   | Hooks            | [Hooks not firing after setup](#hooks-not-firing-after-setup)                                            | Hook overwritten without chaining                         | Save previous function, call it                                               |
-| 2   | Hooks            | [MutationObserver stops delivering records](#mutationobserver-stops-delivering-records)                  | Hooks replaced after `observe()` without chaining         | Chain hooks or call `observe()` last                                          |
-| 6   | Hooks            | [HOOKS Symbol mismatch across bundles](#hooks-symbol-mismatch-across-bundles)                            | Two copies of @cliui/dom in dependency tree               | Deduplicate to a single copy                                                  |
-| 4   | Custom elements  | [Custom element connectedCallback not firing](#custom-element-connectedcallback-not-firing)              | Element not registered or not connected                   | `define()` first, then connect to document                                    |
-| 5   | Custom elements  | [attributeChangedCallback not firing](#attributechangedcallback-not-firing)                              | Attribute not in `observedAttributes`                     | Add it to the static array                                                    |
-| 14  | Custom elements  | [Custom element missing ownerDocument / localName](#custom-element-missing-ownerdocument--localname)     | Direct `new MyElement()` bypasses `createElement()` setup | Always use `document.createElement('tag-name')`                               |
-| 7   | Framework        | [Framework not finding document/window](#framework-not-finding-documentwindow)                           | Globals not installed before framework import             | Call `polyfillEnvironment()` first, dynamic-import the framework              |
-| 13  | Framework        | [Window methods undefined after polyfill](#window-methods-undefined-after-polyfill)                      | Prototype methods not copied to `globalThis`              | Call methods on the `window` instance directly                                |
-| 3   | Behavior         | [Style changes don't trigger hooks](#style-changes-dont-trigger-hooks)                                   | CSSStyleDeclaration has no associated element             | Use `element.style` instead of standalone instances                           |
-| 9   | Behavior         | [querySelectorAll returns plain array, not NodeList](#queryselectorall-returns-plain-array-not-nodelist) | Deliberate — no live collections                          | Use standard array methods                                                    |
-| 10  | Behavior         | [focusNext() includes tabindex="-1" elements](#focusnext-includes-tabindex-1-elements)                   | All `tabindex` elements participate                       | Remove `tabindex` to exclude; use `setActiveElement()` for programmatic focus |
-| 11  | Behavior         | [alert/confirm/prompt don't block execution](#alertconfirmprompt-dont-block-execution)                   | Async by design — returns Promises                        | Use `await` or `.then()`                                                      |
-| 12  | Behavior         | [innerHTML doesn't show style attribute](#innerhtml-doesnt-show-style-attribute)                         | `element.style` and `style` attribute are separate stores | Sync with `setAttribute('style', element.style.cssText)`                      |
-| 8   | API scope        | [Missing DOM API throws "not a function"](#missing-dom-api-throws-not-a-function)                        | API outside @cliui/dom's scope                            | Check Scope and Boundaries                                                    |
+| #   | Category        | Symptom                                                                                                  | Cause                                                     | Fix                                                                           |
+| --- | --------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 1   | Hooks           | [Hooks not firing after setup](#hooks-not-firing-after-setup)                                            | Hook overwritten without chaining                         | Save previous function, call it                                               |
+| 2   | Hooks           | [MutationObserver stops delivering records](#mutationobserver-stops-delivering-records)                  | Hooks replaced after `observe()` without chaining         | Chain hooks or call `observe()` last                                          |
+| 6   | Hooks           | [HOOKS Symbol mismatch across bundles](#hooks-symbol-mismatch-across-bundles)                            | Two copies of @cliui/dom in dependency tree               | Deduplicate to a single copy                                                  |
+| 4   | Custom elements | [Custom element connectedCallback not firing](#custom-element-connectedcallback-not-firing)              | Element not registered or not connected                   | `define()` first, then connect to document                                    |
+| 5   | Custom elements | [attributeChangedCallback not firing](#attributechangedcallback-not-firing)                              | Attribute not in `observedAttributes`                     | Add it to the static array                                                    |
+| 14  | Custom elements | [Custom element missing ownerDocument / localName](#custom-element-missing-ownerdocument--localname)     | Direct `new MyElement()` bypasses `createElement()` setup | Always use `document.createElement('tag-name')`                               |
+| 7   | Framework       | [Framework not finding document/window](#framework-not-finding-documentwindow)                           | Globals not installed before framework import             | Call `polyfillEnvironment()` first, dynamic-import the framework              |
+| 13  | Framework       | [Window methods undefined after polyfill](#window-methods-undefined-after-polyfill)                      | Prototype methods not copied to `globalThis`              | Call methods on the `window` instance directly                                |
+| 3   | Behavior        | [Style changes don't trigger hooks](#style-changes-dont-trigger-hooks)                                   | CSSStyleDeclaration has no associated element             | Use `element.style` instead of standalone instances                           |
+| 9   | Behavior        | [querySelectorAll returns plain array, not NodeList](#queryselectorall-returns-plain-array-not-nodelist) | Deliberate — no live collections                          | Use standard array methods                                                    |
+| 10  | Behavior        | [focusNext() includes tabindex="-1" elements](#focusnext-includes-tabindex-1-elements)                   | All `tabindex` elements participate                       | Remove `tabindex` to exclude; use `setActiveElement()` for programmatic focus |
+| 11  | Behavior        | [alert/confirm/prompt don't block execution](#alertconfirmprompt-dont-block-execution)                   | Async by design — returns Promises                        | Use `await` or `.then()`                                                      |
+| 12  | Behavior        | [innerHTML doesn't show style attribute](#innerhtml-doesnt-show-style-attribute)                         | Standalone `CSSStyleDeclaration` without an element       | Use `element.style` instead of standalone instances                           |
+| 8   | API scope       | [Missing DOM API throws "not a function"](#missing-dom-api-throws-not-a-function)                        | API outside @cliui/dom's scope                            | Check Scope and Boundaries                                                    |
 
 ---
 
@@ -254,18 +254,16 @@ if (name !== null) {
 
 ## innerHTML doesn't show style attribute
 
-**Symptom.** You set `element.style.color = 'red'`, but `element.outerHTML` doesn't include `style="color: red"`.
+**Symptom.** You set properties on a `CSSStyleDeclaration`, but `outerHTML` doesn't include a `style` attribute.
 
-**Cause.** The `CSSStyleDeclaration` and the `style` attribute are separate stores. Setting `element.style.color` does not write to the attribute map.
+**Cause.** The `CSSStyleDeclaration` was created without an owning element (standalone instance). Only `element.style` syncs to the element's `style` attribute automatically.
 
-**Fix.** Sync the attribute manually:
+**Fix.** Use the element's own style object:
 
 ```ts
-el.style.color = 'red';
-el.style.fontWeight = 'bold';
-
-el.setAttribute('style', el.style.cssText);
-el.outerHTML; // → '<div style="color: red; font-weight: bold;"></div>'
+// ✓ Syncs to attribute and outerHTML
+element.style.color = 'red';
+element.outerHTML; // → '<div style="color: red"></div>'
 ```
 
 ## Window methods undefined after polyfill

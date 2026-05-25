@@ -49,13 +49,13 @@ const window = new Window();
 const document = window.document;
 ```
 
-| Node type        | Function             | Output                                    |
-| ---------------- | -------------------- | ----------------------------------------- |
-| Element          | `serializeNode`      | `<tag attrs>children</tag>`               |
-| Text             | `serializeNode`      | Entity-encoded text content               |
-| Comment          | `serializeNode`      | `<!--comment text-->`                     |
-| DocumentFragment | `serializeChildren`  | Concatenated serialization of all children |
-| Any parent       | `serializeChildren`  | Same result as `innerHTML`                |
+| Node type        | Function            | Output                                     |
+| ---------------- | ------------------- | ------------------------------------------ |
+| Element          | `serializeNode`     | `<tag attrs>children</tag>`                |
+| Text             | `serializeNode`     | Entity-encoded text content                |
+| Comment          | `serializeNode`     | `<!--comment text-->`                      |
+| DocumentFragment | `serializeChildren` | Concatenated serialization of all children |
+| Any parent       | `serializeChildren` | Same result as `innerHTML`                 |
 
 ```ts
 // Element
@@ -97,9 +97,9 @@ ul.innerHTML; // → '<li></li><li></li>'
 
 Serialization escapes special characters automatically. The rules differ by context:
 
-| Context          | Characters escaped | Example input → output                         |
-| ---------------- | ------------------ | ---------------------------------------------- |
-| Text nodes       | `&` `<` `>` `"`   | `<div>` → `&lt;div&gt;`                        |
+| Context          | Characters escaped | Example input → output                          |
+| ---------------- | ------------------ | ----------------------------------------------- |
+| Text nodes       | `&` `<` `>` `"`    | `<div>` → `&lt;div&gt;`                         |
 | Attribute values | `&` `"`            | `Tom & "Jerry"` → `Tom &amp; &quot;Jerry&quot;` |
 
 You never need to escape manually — `serializeNode`, `outerHTML`, and `innerHTML` all apply these rules.
