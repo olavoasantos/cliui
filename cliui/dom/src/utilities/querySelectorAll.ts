@@ -8,7 +8,16 @@ import type {Element} from '../classes/Element';
 import type {ParentNode} from '../classes/ParentNode';
 import type {SelectorPart} from '../types';
 
-/** Returns all elements within a parent node that match a selector. */
+/**
+ * Returns all elements within a parent node that match a selector.
+ *
+ * Performs a depth-first traversal of the subtree rooted at `within`
+ * and collects every matching element in document order.
+ *
+ * @param within - The root node whose descendants are searched.
+ * @param selector - A CSS selector string.
+ * @returns An array of matching elements. Empty when no matches are found.
+ */
 export function querySelectorAll(within: ParentNode, selector: string) {
   const results: Element[] = [];
   const child = within[CHILD];

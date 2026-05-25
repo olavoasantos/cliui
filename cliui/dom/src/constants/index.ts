@@ -23,9 +23,21 @@ export const IS_TRUSTED = Symbol('isTrusted');
 export const PATH = Symbol('path');
 export const STOP_IMMEDIATE_PROPAGATION = Symbol('stop_immediate_propagation');
 export const CONTENT = Symbol('content');
+/**
+ * Symbol key for the hooks bridge on a `Window` instance.
+ *
+ * Access via `window[HOOKS]` to install or chain lifecycle hooks.
+ *
+ * @see {@link Hooks} for the full hook interface.
+ */
 export const HOOKS = Symbol('hooks');
 export const IS_CONNECTED = Symbol('is_connected');
 
+/**
+ * Numeric constants identifying the type of a DOM node.
+ *
+ * Mirrors the browser's `Node.ELEMENT_NODE`, `Node.TEXT_NODE`, etc.
+ */
 export const NodeType: Readonly<{
   NODE: NodeTypeType;
   ELEMENT_NODE: NodeTypeType;
@@ -54,6 +66,12 @@ export const NodeType: Readonly<{
   DOCUMENT_FRAGMENT_NODE: 11,
 };
 
+/**
+ * XML namespace URIs for element creation.
+ *
+ * `XHTML` is the default for HTML elements. `SVG` is used by `createElementNS`
+ * for SVG elements.
+ */
 export const NamespaceURI: Readonly<{
   XHTML: NamespaceURIType;
   SVG: NamespaceURIType;
@@ -62,6 +80,11 @@ export const NamespaceURI: Readonly<{
   SVG: 'http://www.w3.org/2000/svg',
 };
 
+/**
+ * Numeric constants identifying the current phase of event dispatch.
+ *
+ * Mirrors the browser's `Event.NONE`, `Event.CAPTURING_PHASE`, etc.
+ */
 export const EventPhase: Readonly<{
   NONE: EventPhaseType;
   CAPTURING_PHASE: EventPhaseType;
@@ -74,6 +97,7 @@ export const EventPhase: Readonly<{
   BUBBLING_PHASE: 3,
 };
 
+/** Numeric constants identifying how selector parts relate to each other. */
 export const SelectorCombinator: Readonly<{
   Descendant: SelectorCombinatorType;
   Child: SelectorCombinatorType;
@@ -88,6 +112,7 @@ export const SelectorCombinator: Readonly<{
   Inner: 4,
 };
 
+/** Numeric constants identifying the kind of matcher within a selector part. */
 export const SelectorMatcherType: Readonly<{
   Unknown: SelectorMatcherTypeType;
   Element: SelectorMatcherTypeType;

@@ -9,7 +9,22 @@ const TOKENIZER =
 /** Parsed selector cache to prevent redundant RegExp execution */
 const PARSED_SELECTOR_CACHE = new Map<string, SelectorPart[]>();
 
-/** Parses a CSS selector string into a structured selector AST. */
+/**
+ * Parses a CSS selector string into a structured selector AST.
+ *
+ * Results are cached — repeated calls with the same selector string
+ * return the same array instance without re-parsing.
+ *
+ * @param selector - A CSS selector string (e.g. `'div.active > span'`).
+ * @returns An array of parsed selector parts, ordered from the innermost
+ *   (rightmost) part to the outermost (leftmost) combinator.
+ *
+ * @example
+ * ```ts
+ * parseSelector('div.foo');
+ * // [{ combinator: 0, matchers: [{ type: 1, name: 'div' }, { type: 3, name: 'foo' }] }]
+ * ```
+ */
 export function parseSelector(selector: string) {
   if (PARSED_SELECTOR_CACHE.has(selector)) {
     return PARSED_SELECTOR_CACHE.get(selector)!;

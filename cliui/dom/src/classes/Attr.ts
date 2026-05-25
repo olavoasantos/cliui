@@ -3,6 +3,11 @@ import type {Hooks, NamespaceURI} from '../types';
 import type {Element} from './Element';
 import {Node} from './Node';
 
+/**
+ * Represents a single attribute on an Element.
+ *
+ * Setting `value` triggers the hooks bridge `setAttribute` callback on the owner element.
+ */
 export class Attr extends Node {
   override nodeType = NodeType.ATTRIBUTE_NODE;
   [NS]: NamespaceURI | null = null;
@@ -10,6 +15,11 @@ export class Attr extends Node {
   [VALUE]: string;
   [OWNER_ELEMENT]: Element | null = null;
 
+  /**
+   * @param name - Attribute name.
+   * @param value - Attribute value.
+   * @param namespace - Optional namespace URI for the attribute.
+   */
   constructor(name: string, value: string, namespace?: NamespaceURI | null) {
     super();
     this[NAME] = name;
@@ -17,18 +27,21 @@ export class Attr extends Node {
     if (namespace) this[NS] = namespace;
   }
 
+  /** Attribute name. Alias for `name`. */
   get nodeName() {
     return this[NAME];
   }
 
   set nodeName(_readonly: string) {}
 
+  /** Attribute name. */
   get name() {
     return this[NAME];
   }
 
   set name(_readonly: string) {}
 
+  /** Attribute value. Setting triggers hooks on the owner element. */
   get value() {
     return this[VALUE];
   }
@@ -46,6 +59,7 @@ export class Attr extends Node {
     );
   }
 
+  /** Alias for `value`. */
   get nodeValue() {
     return this.value;
   }
@@ -54,14 +68,17 @@ export class Attr extends Node {
     this.value = value;
   }
 
+  /** Element that owns this attribute, or `null` if not attached. */
   get ownerElement() {
     return this[OWNER_ELEMENT];
   }
 
+  /** Namespace URI for this attribute, or `null` if no namespace. */
   get namespaceURI() {
     return this[NS];
   }
 
+  /** Always `true`. Present for DOM spec compatibility. */
   get specified() {
     return true;
   }

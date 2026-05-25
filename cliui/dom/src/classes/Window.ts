@@ -32,20 +32,44 @@ import {HOOKS} from '../constants';
 import type {Hooks, OnErrorHandler} from '../types';
 import type {HTMLDialogElement} from './HTMLDialogElement';
 
+/**
+ * Root object representing a browser-like environment.
+ * Owns a Document, event system, custom element registry, navigation, and rendering hooks.
+ */
 export class Window extends EventTarget {
   [HOOKS]: Partial<Hooks> = {};
+
+  /** The window name. Defaults to empty string. */
   name = '';
+
+  /** Self-reference for browser API compatibility. */
   window = this;
+
+  /** Self-reference for browser API compatibility. */
   parent = this;
+
+  /** Self-reference for browser API compatibility. */
   self = this;
+
+  /** Self-reference for browser API compatibility. */
   top = this;
+
+  /** The window's Document instance. */
   document = new Document(this);
+
+  /** Registry for defining and upgrading custom elements. */
   customElements = new CustomElementRegistryImplementation();
+
+  /** Navigator instance providing environment metadata. */
   navigator = new Navigator();
+
+  /** Location instance for URL state. */
   location = new Location();
 
   /** Legacy `window.event` property. Always `undefined` in terminal context. */
   event: Event | undefined = undefined;
+
+  // --- Browser-compatible constructor references ---
 
   Event = Event;
   ErrorEvent = ErrorEvent;
@@ -83,6 +107,7 @@ export class Window extends EventTarget {
   #mediaQueryLists: MediaQueryList[] = [];
   Location = Location;
 
+  /** Performance API for timing and measurement. */
   performance = new Performance();
 
   /**
@@ -181,6 +206,7 @@ export class Window extends EventTarget {
   #currentOriginalOnErrorHandler: OnErrorHandler = null;
   #currentOnUnhandledRejectionHandler: EventListener | null = null;
 
+  /** Handler for uncaught errors dispatched as `error` events. */
   get onerror() {
     return this.#currentOriginalOnErrorHandler;
   }
@@ -201,6 +227,7 @@ export class Window extends EventTarget {
     }
   }
 
+  /** Handler for unhandled promise rejections. */
   get onunhandledrejection() {
     return this.#currentOnUnhandledRejectionHandler;
   }

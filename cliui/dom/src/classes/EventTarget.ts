@@ -8,6 +8,9 @@ import type {ChildNode} from './ChildNode';
 import type {Document} from './Document';
 import type {Hooks} from '../types';
 
+/**
+ * Base class providing event listener registration and event dispatch.
+ */
 export class EventTarget {
   [LISTENERS]: Map<string, Set<EventListenerOrEventListenerObject>> | undefined = undefined;
 
@@ -20,6 +23,27 @@ export class EventTarget {
    */
   [OWNER_DOCUMENT]: Document | undefined = undefined;
 
+  /**
+   * Registers an event listener for the given event type.
+   *
+   * Duplicate listeners (same callback + capture flag) are silently ignored.
+   *
+   * @param type - Event type to listen for.
+   * @param listener - Callback or `EventListener` object to invoke. Ignored when `null`.
+   * @param options - Capture flag or options object. When an object: `capture` routes
+   *   the listener to the capture phase, `once` auto-removes it after the first
+   *   invocation, `passive` is accepted but has no behavioral effect, and `signal`
+   *   (`AbortSignal`) removes the listener when aborted.
+   *
+   * @example
+   * ```ts
+   * element.addEventListener('click', (event) => {
+   *   console.log('clicked', event.target);
+   * });
+   * ```
+   *
+   * @see {@link Hooks.addEventListener} for the hook notification fired after registration.
+   */
   addEventListener(
     type: string,
     listener: EventListenerOrEventListenerObject | null,
@@ -68,6 +92,12 @@ export class EventTarget {
       listeners.set(key, list);
     }
 
+    // Check if the original listener (or its once-wrapper) is already registered
+    if (list.has(listener)) return;
+    const existingOnceWrapper = this[ONCE_LISTENERS]?.get(listener);
+    if (existingOnceWrapper && list.has(existingOnceWrapper as EventListenerOrEventListenerObject))
+      return;
+
     if (list.has(normalizedListener)) return;
 
     signal?.addEventListener(
@@ -87,6 +117,16 @@ export class EventTarget {
     );
   }
 
+  /**
+   * Removes a previously registered event listener.
+   *
+   * The `capture` flag must match the value used during registration.
+   * No-ops if the listener is not found.
+   *
+   * @param type - Event type the listener was registered for.
+   * @param listener - Callback or `EventListener` object to remove.
+   * @param options - Capture flag or options object used during registration.
+   */
   removeEventListener(
     type: string,
     listener: EventListenerOrEventListenerObject | null,
@@ -95,6 +135,16 @@ export class EventTarget {
     removeEventTargetListener(this, type, listener, options);
   }
 
+  /**
+   * Dispatches an event through the capture and bubble phases.
+   *
+   * Builds the propagation path from `this` to the root, fires capture-phase
+   * listeners top-down, then bubble-phase listeners bottom-up (when
+   * `event.bubbles` is `true`).
+   *
+   * @param event - Event to dispatch.
+   * @returns `false` when `preventDefault()` was called on the event, `true` otherwise.
+   */
   dispatchEvent(event: Event) {
     const path: EventTarget[] = [];
     let target = this as unknown as ChildNode | null;
@@ -108,16 +158,16 @@ export class EventTarget {
 
     for (let index = path.length; index--; ) {
       fireEvent(event, path[index]!, EventPhase.CAPTURING_PHASE);
-      if (event.cancelBubble) return event.defaultPrevented;
+      if (event.cancelBubble) return !event.defaultPrevented;
     }
 
     const bubblePath = event.bubbles ? path : path.slice(0, 1);
 
     for (let index = 0; index < bubblePath.length; index++) {
       fireEvent(event, bubblePath[index]!, EventPhase.BUBBLING_PHASE);
-      if (event.cancelBubble) return event.defaultPrevented;
+      if (event.cancelBubble) return !event.defaultPrevented;
     }
 
-    return event.defaultPrevented;
+    return !event.defaultPrevented;
   }
 }

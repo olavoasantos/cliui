@@ -32,6 +32,14 @@ export class MutationObserver {
    *
    * @param target - The node to observe.
    * @param options - Mutation types and subtree behavior to observe.
+   *
+   * @example
+   * ```ts
+   * const observer = new MutationObserver((records) => {
+   *   console.log(records);
+   * });
+   * observer.observe(element, { childList: true, subtree: true });
+   * ```
    */
   observe(target: Node, options: MutationObserverInit): void {
     const normalized = this.normalizeOptions(options);
@@ -68,6 +76,13 @@ export class MutationObserver {
     return this.records.splice(0, this.records.length);
   }
 
+  /**
+   * Queues a mutation record for delivery.
+   * Called by the hooks bridge — not intended for direct use.
+   *
+   * @internal
+   * @param record - The mutation record to enqueue.
+   */
   enqueue(record: MutationRecord): void {
     for (const observation of this.observations) {
       if (!this.matchesObservation(record, observation)) {

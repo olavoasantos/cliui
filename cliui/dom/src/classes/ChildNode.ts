@@ -2,13 +2,25 @@ import {NEXT} from '../constants';
 import {toNode} from '../utilities/toNode';
 import {Node} from './Node';
 
+/**
+ * Mixin providing self-removal and sibling-insertion operations.
+ *
+ * All methods are no-ops when the node has no parent.
+ */
 export class ChildNode extends Node {
+  /** Removes this node from its parent. No-op if the node is detached. */
   remove() {
     const parent = this.parentNode;
     if (!parent) return;
     parent.removeChild(this);
   }
 
+  /**
+   * Replaces this node with one or more nodes or strings. Strings are converted to text nodes.
+   * If no arguments are provided, removes this node. No-op if detached.
+   *
+   * @param nodes - Replacement nodes or strings.
+   */
   replaceWith(...nodes: (Node | string)[]) {
     const parent = this.parentNode;
     if (!parent) return;
@@ -24,6 +36,11 @@ export class ChildNode extends Node {
     }
   }
 
+  /**
+   * Inserts one or more nodes or strings immediately before this node. No-op if detached.
+   *
+   * @param nodes - Nodes or strings to insert. Strings are converted to text nodes.
+   */
   before(...nodes: (Node | string)[]) {
     const parent = this.parentNode;
     if (!parent) return;
@@ -32,6 +49,11 @@ export class ChildNode extends Node {
     }
   }
 
+  /**
+   * Inserts one or more nodes or strings immediately after this node. No-op if detached.
+   *
+   * @param nodes - Nodes or strings to insert. Strings are converted to text nodes.
+   */
   after(...nodes: (Node | string)[]) {
     const parent = this.parentNode;
     if (!parent) return;

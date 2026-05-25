@@ -6,7 +6,15 @@ import type {Element} from '../classes/Element';
 import type {Node} from '../classes/Node';
 import type {Text} from '../classes/Text';
 
-/** Serializes a node to HTML. */
+/**
+ * Serializes a node to an HTML string.
+ *
+ * Handles element, text, and comment nodes. Element attributes are
+ * entity-encoded; text content is escaped for safe embedding in HTML.
+ *
+ * @param node - The node to serialize.
+ * @returns The HTML string representation of the node.
+ */
 export function serializeNode(node: Node) {
   switch (node.nodeType) {
     case NodeType.ELEMENT_NODE: {

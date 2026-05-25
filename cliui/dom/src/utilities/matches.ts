@@ -5,7 +5,22 @@ import {parseSelector} from './parseSelector';
 import type {Element} from '../classes/Element';
 import type {SelectorMatcher, SelectorPart} from '../types';
 
-/** Tests whether an element matches a CSS selector string. */
+/**
+ * Tests whether an element matches a CSS selector string.
+ *
+ * Supports compound selectors, combinators (`>`, `+`, `~`, ` `), pseudo-classes
+ * (`:root`, `:focus`, `:hover`, `:active`, `:disabled`, `:enabled`), and
+ * functional pseudo-classes (`:has()`, `:not()`).
+ *
+ * @param element - The element to test against the selector.
+ * @param selector - A CSS selector string.
+ * @returns `true` when the element satisfies the selector.
+ *
+ * @example
+ * ```ts
+ * matches(element, 'div.active > span#label');
+ * ```
+ */
 export function matches(element: Element, selector: string) {
   const parsed = parseSelector(selector);
   for (let i = parsed.length - 1; i >= 0; i--) {

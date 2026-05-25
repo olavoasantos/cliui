@@ -8,7 +8,18 @@ const elementTokenizer =
 
 const attributeTokenizer = /\s([^<>'"=\n\s]+)(?:=(["'])([\s\S]*?)\2|=([^>'"\n\s]*)|)/g;
 
-/** Parses an HTML string into a document fragment relative to a context node. */
+/**
+ * Parses an HTML string into a document fragment.
+ *
+ * Creates elements, text nodes, and comments from the HTML and attaches
+ * them to a new `DocumentFragment`. Whitespace-only text nodes are preserved.
+ * HTML entities in text content are decoded.
+ *
+ * @param html - The HTML string to parse.
+ * @param contextNode - A node used to resolve the owning `Document` for
+ *   creating new nodes.
+ * @returns A `DocumentFragment` containing the parsed nodes.
+ */
 export function parseHtml(html: string, contextNode: Node) {
   const document = contextNode.ownerDocument;
   const root = document.createDocumentFragment();

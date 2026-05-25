@@ -1,4 +1,20 @@
-/** Expands a shorthand CSS property into its longhand equivalents. */
+/**
+ * Expands a shorthand CSS property into its longhand equivalents.
+ *
+ * Supports `margin`, `padding`, `gap`, `flex`, `transition`, `animation`,
+ * and `container` shorthands.
+ *
+ * @param property - The shorthand property name (e.g. `'padding'`).
+ * @param value - The shorthand value string (e.g. `'4px 8px'`).
+ * @returns A record mapping longhand property names to their values,
+ *   or `null` when the property is not a recognised shorthand.
+ *
+ * @example
+ * ```ts
+ * expandShorthand('margin', '4px 8px');
+ * // { 'margin-top': '4px', 'margin-right': '8px', 'margin-bottom': '4px', 'margin-left': '8px' }
+ * ```
+ */
 export function expandShorthand(property: string, value: string): Record<string, string> | null {
   const parts = value.trim().split(/\s+/);
 

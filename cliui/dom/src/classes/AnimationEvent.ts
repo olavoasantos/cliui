@@ -11,10 +11,19 @@ import type {AnimationEventInit} from '../types';
  * @see https://developer.mozilla.org/en-US/docs/Web/API/AnimationEvent
  */
 export class AnimationEvent extends Event {
+  /** Name of the CSS animation. */
   readonly animationName: string;
+  /** Seconds elapsed since the animation started. */
   readonly elapsedTime: number;
+  /** Pseudo-element the animation runs on, or empty string. */
   readonly pseudoElement: string;
 
+  /**
+   * Creates an animation event.
+   *
+   * @param type - Event type string.
+   * @param options - Optional init dict with `animationName`, `elapsedTime`, and `pseudoElement`.
+   */
   constructor(type: string, options?: AnimationEventInit) {
     super(type, {bubbles: options?.bubbles ?? true, cancelable: options?.cancelable ?? false});
     this.animationName = options?.animationName ?? '';

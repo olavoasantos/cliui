@@ -11,10 +11,22 @@ import type {Element} from './Element';
 /**
  * A CSSStyleDeclaration-like object that stores CSS property values
  * and notifies the hooks bridge when properties change.
+ *
+ * Property changes are reflected in the owning element's `style` attribute,
+ * making them visible in `getAttribute('style')`, `innerHTML`, and `outerHTML`.
  */
 export class CSSStyleDeclaration {
   [property: string]: unknown;
 
+  /**
+   * Creates a new style declaration, optionally bound to an element.
+   *
+   * The returned object is a `Proxy` that maps camelCase property access
+   * (e.g. `style.backgroundColor`) to kebab-case storage (`background-color`).
+   *
+   * @param element - The owning element. When bound, property changes trigger
+   *   a `hooks.setAttribute(element, 'style', cssText)` notification.
+   */
   constructor(element?: Element) {
     setCSSStyleDeclarationStore(this, {properties: new Map(), element: element ?? null});
 
@@ -102,7 +114,15 @@ export class CSSStyleDeclaration {
     return getCSSStyleDeclarationStore(this).properties.get(kebabProperty) ?? '';
   }
 
-  /** Sets a CSS property value, expanding shorthands as needed. */
+  /**
+   * Sets a CSS property value, expanding shorthands as needed.
+   *
+   * @example
+   * ```ts
+   * element.style.setProperty('background-color', 'red');
+   * element.style.setProperty('--accent', '#7c3aed');
+   * ```
+   */
   setProperty(property: string, value: string, batch = false): void {
     const kebabProperty = camelToKebab(property);
     const state = getCSSStyleDeclarationStore(this);

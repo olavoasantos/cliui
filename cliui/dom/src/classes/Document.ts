@@ -20,20 +20,35 @@ import type {Node} from './Node';
 import type {Window} from './Window';
 import type {Hooks, NamespaceURI} from '../types';
 
+/**
+ * Represents the document node — the entry point for creating and querying DOM elements.
+ */
 export class Document extends ParentNode {
   override nodeType = NodeType.DOCUMENT_NODE;
   [NAME] = '#document';
+
+  /** The document's `<body>` element. */
   body: HTMLBodyElement;
+
+  /** The document's `<head>` element. */
   head: HTMLHeadElement;
+
+  /** The document's root `<html>` element. */
   documentElement: HTMLHtmlElement;
+
+  /** The Window that owns this document. */
   defaultView: Window;
+
+  /** The element that currently has focus. Defaults to `document.body`. */
   activeElement: HTMLBodyElement | Element;
+
+  /** The element currently under the pointer, or `null`. */
   hoveredElement: Element | null = null;
 
   /** Returns the document's visibility state. Always `'visible'` for terminal. */
   visibilityState: 'visible' | 'hidden' = 'visible';
 
-  /** Returns the document's loading state. Starts as `'loading'`, set to `'complete'` after run(). */
+  /** Returns the document's loading state. Starts as `'loading'`. Set to `'complete'` by the host environment. */
   readyState: 'loading' | 'interactive' | 'complete' = 'loading';
 
   /**
@@ -179,40 +194,110 @@ export class Document extends ParentNode {
     return nextElement;
   }
 
+  /**
+   * Creates a new Element with the given tag name.
+   *
+   * @param localName - The tag name for the new element.
+   * @returns The newly created Element.
+   *
+   * @example
+   * ```ts
+   * const div = document.createElement('div');
+   * ```
+   *
+   * @see {@link Hooks.createElement} for the hook notification fired after creation.
+   */
   createElement(localName: string) {
     return createElement(this, localName);
   }
 
+  /**
+   * Creates a new Element in the given namespace.
+   *
+   * @param namespaceURI - The namespace URI for the new element.
+   * @param localName - The tag name for the new element.
+   * @returns The newly created Element.
+   */
   createElementNS(namespaceURI: NamespaceURI, localName: string) {
     return createElement(this, localName, namespaceURI);
   }
 
+  /**
+   * Creates a new Text node.
+   *
+   * @param data - The text content for the node.
+   * @returns The newly created Text node.
+   *
+   * @example
+   * ```ts
+   * const text = document.createTextNode('hello');
+   * ```
+   */
   createTextNode(data: unknown) {
     const text = createNode(new Text(data), this);
     (this[HOOKS] as Partial<Hooks>).createText?.(text as never, String(data));
     return text;
   }
 
+  /**
+   * Creates a new Comment node.
+   *
+   * @param data - The comment text.
+   * @returns The newly created Comment node.
+   */
   createComment(data: unknown) {
     return createNode(new Comment(data), this);
   }
 
+  /**
+   * Creates a new empty DocumentFragment.
+   *
+   * @returns The newly created DocumentFragment.
+   */
   createDocumentFragment() {
     return createNode(new DocumentFragment(), this);
   }
 
+  /**
+   * Creates an uninitialized Event.
+   *
+   * @deprecated Use the `Event` constructor instead.
+   * @returns An empty Event instance.
+   */
   createEvent() {
     return new Event('');
   }
 
+  /**
+   * Clones a node into this document.
+   *
+   * @param node - The node to clone.
+   * @param deep - Whether to recursively clone child nodes.
+   * @returns The cloned node, owned by this document.
+   */
   importNode(node: Node, deep?: boolean) {
     return cloneNode(node, deep, this);
   }
 
+  /**
+   * Returns the element with the given `id` attribute, or `null`.
+   *
+   * @param id - The ID to search for.
+   * @returns The matching Element, or `null` if none exists.
+   */
   getElementById(id: string) {
     return this.querySelector(`[id="${id}"]`);
   }
 
+  /**
+   * Transfers a node from another document into this one.
+   *
+   * Removes the node from its previous parent and recursively updates
+   * `ownerDocument` for the node and its descendants.
+   *
+   * @param node - The node to adopt.
+   * @returns The adopted node.
+   */
   adoptNode(node: Node) {
     if (node[OWNER_DOCUMENT] === this) return node;
 
