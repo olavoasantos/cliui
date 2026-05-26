@@ -5,7 +5,7 @@
 <h1 align="center">@cliui/dom</h1>
 
 <p align="center">
-  <a href="https://github.com/olavoasantos/cliui/blob/latest/docs">Documentation</a> •
+  <a href="https://github.com/olavoasantos/cliui/blob/latest/cliui/dom/docs">Documentation</a> •
   <a href="https://github.com/olavoasantos/cliui/blob/latest/CONTRIBUTING.md">Contributing</a> •
   <a href="https://github.com/olavoasantos/cliui/blob/latest/CODE_OF_CONDUCT.md">Code of Conduct</a>
 </p>
